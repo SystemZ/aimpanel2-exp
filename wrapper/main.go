@@ -11,8 +11,9 @@ import (
 )
 
 var (
-	ch *amqp.Channel
-	q  amqp.Queue
+	channel  *amqp.Channel
+	queue    amqp.Queue
+	rpcQueue amqp.Queue
 
 	stdin  io.WriteCloser
 	stdout io.ReadCloser
@@ -23,12 +24,18 @@ func main() {
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
 
-	ch, err = conn.Channel()
+	channel, err = conn.Channel()
 	failOnError(err, "Failed to open channel")
-	defer ch.Close()
+	defer channel.Close()
 
-	q, err = ch.QueueDeclare("wrapper", false, false, false, false, nil)
+	queue, err = channel.QueueDeclare("wrapper", false, false, false, false, nil)
 	failOnError(err, "Failed to declare a queue")
+
+	rpcQueue, err = channel.QueueDeclare("wrapper_rpc", false, false, false, false, nil)
+	failOnError(err, "Failed to declare a rpc queue")
+
+	err = channel.Qos(1, 0, false)
+	failOnError(err, "Failed to set QoS")
 
 	startServer()
 }
@@ -43,7 +50,25 @@ func startServer() {
 		log.Fatalln(err)
 	}
 
+	msgs, err := channel.Consume(rpcQueue.Name, "", false, false, false, false, nil)
+	failOnError(err, "Failed to register a consumer")
+
 	go func() {
+		for d := range msgs {
+			if d.Type == "sendMessage" {
+				log.Println("sendMessage")
+				io.WriteString(stdin, string(d.Body)+"\r\n")
+
+				err = channel.Publish("", d.ReplyTo, false, false, amqp.Publishing{
+					ContentType:   "text/plain",
+					CorrelationId: d.CorrelationId,
+					Body:          []byte("OK"),
+				})
+				failOnError(err, "Failed to publish a message")
+
+				d.Ack(false)
+			}
+		}
 		for {
 			io.WriteString(stdin, "test\r\n")
 			time.Sleep(4 * time.Second)
@@ -61,8 +86,7 @@ func readStdout() {
 	scanner := bufio.NewScanner(stdout)
 	scanner.Split(bufio.ScanWords)
 	for scanner.Scan() {
-		log.Println(scanner.Text())
-		err := ch.Publish("", q.Name, false, false, amqp.Publishing{ContentType: "text/plain", Body: []byte(scanner.Text())})
+		err := channel.Publish("", queue.Name, false, false, amqp.Publishing{ContentType: "text/plain", Body: []byte(scanner.Text())})
 		failOnError(err, "Publish error")
 	}
 }
