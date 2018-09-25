@@ -1,13 +1,14 @@
 package main
 
 import (
+	"aimpanel2/lib"
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"github.com/streadway/amqp"
 	"io"
 	"log"
 	"os/exec"
-	"time"
 )
 
 var (
@@ -37,7 +38,39 @@ func main() {
 	err = channel.Qos(1, 0, false)
 	failOnError(err, "Failed to set QoS")
 
-	startServer()
+	//RPC
+	msgs, err := channel.Consume(rpcQueue.Name, "", false, false, false, false, nil)
+	failOnError(err, "Failed to register a consumer")
+
+	go func() {
+		for d := range msgs {
+			var wr lib.WrapperRPC
+			err := json.Unmarshal(d.Body, &wr)
+			if err != nil {
+				log.Println(err)
+			}
+
+			switch wr.Type {
+			case lib.START:
+				log.Println("startServer")
+				startServer()
+			case lib.COMMAND:
+				log.Println("sendMessage")
+				io.WriteString(stdin, string(d.Body)+"\r\n")
+
+				err = channel.Publish("", d.ReplyTo, false, false, amqp.Publishing{
+					ContentType:   "application/json",
+					CorrelationId: d.CorrelationId,
+					Body:          []byte(""),
+				})
+				failOnError(err, "Failed to publish a message")
+
+				d.Ack(false)
+			}
+		}
+	}()
+
+	select {}
 }
 
 func startServer() {
@@ -49,31 +82,6 @@ func startServer() {
 	if err := cmd.Start(); err != nil {
 		log.Fatalln(err)
 	}
-
-	msgs, err := channel.Consume(rpcQueue.Name, "", false, false, false, false, nil)
-	failOnError(err, "Failed to register a consumer")
-
-	go func() {
-		for d := range msgs {
-			if d.Type == "sendMessage" {
-				log.Println("sendMessage")
-				io.WriteString(stdin, string(d.Body)+"\r\n")
-
-				err = channel.Publish("", d.ReplyTo, false, false, amqp.Publishing{
-					ContentType:   "text/plain",
-					CorrelationId: d.CorrelationId,
-					Body:          []byte("OK"),
-				})
-				failOnError(err, "Failed to publish a message")
-
-				d.Ack(false)
-			}
-		}
-		for {
-			io.WriteString(stdin, "test\r\n")
-			time.Sleep(4 * time.Second)
-		}
-	}()
 
 	readStdout()
 

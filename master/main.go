@@ -1,6 +1,8 @@
 package main
 
 import (
+	"aimpanel2/lib"
+	"encoding/json"
 	"github.com/streadway/amqp"
 	"log"
 	"math/rand"
@@ -36,17 +38,22 @@ func main() {
 
 	corrId := randomString(32)
 
+	start := lib.WrapperRPC{
+		Type: lib.START,
+		Body: "",
+	}
+	jsonMarshal, _ := json.Marshal(start)
+
 	err = channel.Publish(
 		"",
 		"wrapper_rpc",
 		false,
 		false,
 		amqp.Publishing{
-			ContentType:   "text/plain",
+			ContentType:   "application/json",
 			CorrelationId: corrId,
 			ReplyTo:       queue.Name,
-			Type:          "sendMessage",
-			Body:          []byte("Hello!"),
+			Body:          jsonMarshal,
 		})
 
 	failOnError(err, "Failed to publish a message")
