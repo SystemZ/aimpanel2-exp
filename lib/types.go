@@ -1,13 +1,13 @@
 package lib
 
 const (
-	START   = 0
-	STOP    = 1
-	REBOOT  = 2
-	COMMAND = 3
+	START        = 0
+	COMMAND      = 1
+	STOP_SIGKILL = 2
+	STOP_SIGTERM = 3
 )
 
-type WrapperRPC struct {
+type RpcMessage struct {
 	Type int
 	Body string
 }
