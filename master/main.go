@@ -9,6 +9,7 @@ import (
 )
 
 func main() {
+	log.Println("start")
 	conn, err := amqp.Dial("amqp://admin:admin@46.105.209.74:5672/")
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
@@ -38,9 +39,9 @@ func main() {
 
 	corrId := randomString(32)
 
-	start := lib.WrapperRPC{
-		Type: lib.START,
-		Body: "",
+	start := lib.RpcMessage{
+		Type: lib.COMMAND,
+		Body: "alert hello",
 	}
 	jsonMarshal, _ := json.Marshal(start)
 
