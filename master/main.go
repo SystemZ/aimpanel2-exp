@@ -1,12 +1,15 @@
 package main
 
 import (
+	"encoding/json"
 	"github.com/streadway/amqp"
+	"gitlab.com/systemz/aimpanel2/lib"
 	"log"
 	"math/rand"
 )
 
 func main() {
+	log.Println("start")
 	conn, err := amqp.Dial("amqp://admin:admin@46.105.209.74:5672/")
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
@@ -36,17 +39,22 @@ func main() {
 
 	corrId := randomString(32)
 
+	start := lib.RpcMessage{
+		Type: lib.COMMAND,
+		Body: "alert hello",
+	}
+	jsonMarshal, _ := json.Marshal(start)
+
 	err = channel.Publish(
 		"",
 		"wrapper_rpc",
 		false,
 		false,
 		amqp.Publishing{
-			ContentType:   "text/plain",
+			ContentType:   "application/json",
 			CorrelationId: corrId,
 			ReplyTo:       queue.Name,
-			Type:          "sendMessage",
-			Body:          []byte("Hello!"),
+			Body:          jsonMarshal,
 		})
 
 	failOnError(err, "Failed to publish a message")
