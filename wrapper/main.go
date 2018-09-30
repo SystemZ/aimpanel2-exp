@@ -9,6 +9,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib"
 	"io"
 	"os/exec"
+	"sync"
 )
 
 var (
@@ -21,50 +22,60 @@ type Wrapper struct {
 	Command string
 	Args    string
 
-	Stdin io.WriteCloser
-
 	Output chan string
 	Input  chan string
 }
 
 func (w *Wrapper) Run() {
-	cmd := exec.Command("java", "-jar", "bungee/BungeeCord.jar")
+	cmd := exec.Command("java", "-Djline.terminal=jline.UnsupportedTerminal", "-jar", "bungee/BungeeCord.jar")
 
 	stdout, _ := cmd.StdoutPipe()
-	w.Stdin, _ = cmd.StdinPipe()
+	stderr, _ := cmd.StderrPipe()
+	stdin, _ := cmd.StdinPipe()
 
 	if err := cmd.Start(); err != nil {
 		log.Fatal("cmd.Start()", err)
 	}
-	scanner := bufio.NewScanner(stdout)
-	scanner.Split(bufio.ScanLines)
-	for scanner.Scan() {
-		w.Output <- scanner.Text()
+
+	var wg sync.WaitGroup
+	wg.Add(3)
+	go func() {
+		defer wg.Done()
+
+		for {
+			log.Info("Write")
+			msg := <-w.Input
+			io.WriteString(stdin, msg+"\n")
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+
+		in := bufio.NewScanner(stdout)
+
+		for in.Scan() {
+			w.Output <- in.Text()
+		}
+
+		if err := in.Err(); err != nil {
+			log.Printf("error: %s", err)
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+
+		in2 := bufio.NewScanner(stderr)
+		for in2.Scan() {
+			log.Info(in2.Text())
+		}
+	}()
+
+	wg.Wait()
+	if err := cmd.Wait(); err != nil {
+		log.Fatal("cmd.Wait()", err)
 	}
-
-	//go func() {
-	//	for {
-	//		log.Info("Got message to execute")
-	//		in := <-w.Input
-	//
-	//		log.Info("1")
-	//		log.Info(in)
-	//
-	//		io.WriteString(w.Stdin, in+"\r\n")
-	//
-	//		log.Info("2")
-	//	}
-	//}()
-
-	//if err := cmd.Wait(); err != nil {
-	//	log.Fatal("cmd.Wait()", err)
-	//}
-}
-
-func (w *Wrapper) Execute(text string) {
-	log.Info("1")
-	io.WriteString(w.Stdin, "alert test\n")
-	log.Info("2")
 }
 
 func (w *Wrapper) Log() {
@@ -108,7 +119,7 @@ func (w *Wrapper) Rpc() {
 		case lib.COMMAND:
 			log.Info("sendMessage message")
 
-			w.Execute(wr.Body)
+			w.Input <- string(wr.Body)
 
 			err = channel.Publish("", d.ReplyTo, false, false, amqp.Publishing{
 				ContentType:   "application/json",
