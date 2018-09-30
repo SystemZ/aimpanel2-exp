@@ -1,12 +1,12 @@
 package main
 
 import (
-	"aimpanel2/lib"
 	"bufio"
 	"encoding/json"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
+	"gitlab.com/systemz/aimpanel2/lib"
 	"io"
 	"os/exec"
 )
@@ -21,6 +21,8 @@ type Wrapper struct {
 	Command string
 	Args    string
 
+	Stdin io.WriteCloser
+
 	Output chan string
 	Input  chan string
 }
@@ -29,27 +31,40 @@ func (w *Wrapper) Run() {
 	cmd := exec.Command("java", "-jar", "bungee/BungeeCord.jar")
 
 	stdout, _ := cmd.StdoutPipe()
-	stdin, _ := cmd.StdinPipe()
+	w.Stdin, _ = cmd.StdinPipe()
 
 	if err := cmd.Start(); err != nil {
 		log.Fatal("cmd.Start()", err)
 	}
-
 	scanner := bufio.NewScanner(stdout)
 	scanner.Split(bufio.ScanLines)
 	for scanner.Scan() {
 		w.Output <- scanner.Text()
 	}
 
-	for {
-		log.Info("Got message to execute")
-		in := <-w.Input
-		io.WriteString(stdin, in+"\r\n")
-	}
+	//go func() {
+	//	for {
+	//		log.Info("Got message to execute")
+	//		in := <-w.Input
+	//
+	//		log.Info("1")
+	//		log.Info(in)
+	//
+	//		io.WriteString(w.Stdin, in+"\r\n")
+	//
+	//		log.Info("2")
+	//	}
+	//}()
 
-	if err := cmd.Wait(); err != nil {
-		log.Fatal("cmd.Wait()", err)
-	}
+	//if err := cmd.Wait(); err != nil {
+	//	log.Fatal("cmd.Wait()", err)
+	//}
+}
+
+func (w *Wrapper) Execute(text string) {
+	log.Info("1")
+	io.WriteString(w.Stdin, "alert test\n")
+	log.Info("2")
 }
 
 func (w *Wrapper) Log() {
@@ -60,8 +75,7 @@ func (w *Wrapper) Log() {
 		failOnError(err, "Publish error")
 
 		log.WithFields(log.Fields{
-			"method": "Collect",
-			"msg":    msg,
+			"msg": msg,
 		}).Info()
 	}
 }
@@ -94,7 +108,7 @@ func (w *Wrapper) Rpc() {
 		case lib.COMMAND:
 			log.Info("sendMessage message")
 
-			w.Input <- string(wr.Body)
+			w.Execute(wr.Body)
 
 			err = channel.Publish("", d.ReplyTo, false, false, amqp.Publishing{
 				ContentType:   "application/json",

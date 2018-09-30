@@ -1,9 +1,9 @@
 package main
 
 import (
-	"aimpanel2/lib"
 	"encoding/json"
 	"github.com/streadway/amqp"
+	"gitlab.com/systemz/aimpanel2/lib"
 	"log"
 	"math/rand"
 )
