@@ -7,6 +7,7 @@ import (
 	"github.com/streadway/amqp"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"io"
+	"os"
 	"os/exec"
 	"sync"
 	"syscall"
@@ -28,6 +29,7 @@ type Process struct {
 
 func (p *Process) Run() {
 	p.Cmd = exec.Command("java", "-Djline.terminal=jline.UnsupportedTerminal", "-jar", "BungeeCord.jar")
+	//p.Cmd = exec.Command("bash", "fake-server.sh")
 	p.Cmd.Dir = "bungee"
 
 	stdout, _ := p.Cmd.StdoutPipe()
@@ -82,12 +84,14 @@ func (p *Process) Run() {
 				if status, ok := exiterr.Sys().(syscall.WaitStatus); ok {
 					/*
 						Exit status: 143 == SIGTERM
-						Exit status: -1 == SIGKILL?
+						Exit status: -1  == SIGKILL?
 					*/
 					log.Printf("Exit status: %d", status.ExitStatus())
 				}
 			}
 			log.Errorf("cmd.Wait: %v", err)
+		} else {
+			os.Exit(0)
 		}
 	}()
 
@@ -98,7 +102,16 @@ func (p *Process) Log() {
 	for {
 		msg := <-p.Output
 
-		err := p.Channel.Publish("", p.Queue.Name, false, false, amqp.Publishing{ContentType: "text/plain", Body: []byte(msg)})
+		logMessage := lib.LogMessage{
+			Message: msg,
+		}
+
+		logMessageJson, _ := json.Marshal(logMessage)
+
+		err := p.Channel.Publish("", p.Queue.Name, false, false, amqp.Publishing{
+			ContentType: "application/json",
+			Body:        logMessageJson,
+		})
 		lib.FailOnError(err, "Publish error")
 
 		log.WithFields(log.Fields{

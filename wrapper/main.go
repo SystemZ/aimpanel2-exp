@@ -26,7 +26,7 @@ func init() {
 	channel, err = conn.Channel()
 	lib.FailOnError(err, "Failed to open channel")
 
-	queue, err = channel.QueueDeclare("wrapper", false, false, false, false, nil)
+	queue, err = channel.QueueDeclare("wrapper", true, false, false, false, nil)
 	lib.FailOnError(err, "Failed to declare a queue")
 
 	rpcQueue, err = channel.QueueDeclare("wrapper_rpc", false, false, false, false, nil)
