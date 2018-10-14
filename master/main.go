@@ -39,7 +39,7 @@ func main() {
 	corrId := lib.RandomString(32)
 
 	start := lib.RpcMessage{
-		Type: lib.STOP_SIGKILL,
+		Type: lib.START,
 		Body: "alert hello",
 	}
 	jsonMarshal, _ := json.Marshal(start)
