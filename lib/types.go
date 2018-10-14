@@ -11,3 +11,7 @@ type RpcMessage struct {
 	Type int
 	Body string
 }
+
+type LogMessage struct {
+	Message string
+}
