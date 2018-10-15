@@ -31,8 +31,8 @@ format:
       - go test -race $(go list ./... | grep -v /vendor/)
       - go test -v 2>&1 | go-junit-report > $CI_PROJECT_DIR/report.xml
     artifacts:
-    reports:
-      junit: report.xml
+      reports:
+        junit: report.xml
 
 compile-frontend:
     stage: build
