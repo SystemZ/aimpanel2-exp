@@ -23,11 +23,16 @@ stages:
 format:
     stage: test
     script:
+      - go get -u github.com/jstemmer/go-junit-report
       - cd master
       - go get
       - go fmt $(go list ./... | grep -v /vendor/)
       - go vet $(go list ./... | grep -v /vendor/)
       - go test -race $(go list ./... | grep -v /vendor/)
+      - go test -v 2>&1 | go-junit-report > $CI_PROJECT_DIR/report.xml
+    artifacts:
+    reports:
+      junit: report.xml
 
 compile-frontend:
     stage: build
@@ -36,7 +41,12 @@ compile-frontend:
       - cd master-frontend
       - npm install &>/dev/null
       - npm run build
-      - ls -alh
+      - ls -alh dist
+      - mv dist $CI_PROJECT_DIR/aimpanel-master-frontend
+    artifacts:
+      paths:
+        - aimpanel-master-frontend
+      expire_in: 1 month
 
 compile-backend:
     stage: build
