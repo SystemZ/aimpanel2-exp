@@ -14,13 +14,6 @@ before_script:
   - ln -svf $CI_PROJECT_DIR $GOPATH/src/$REPO_NAME
   - cd $GOPATH/src/$REPO_NAME
 
-cache:
-  #key: ${CI_JOB_NAME}
-  key: ${CI_COMMIT_REF_SLUG}
-  paths:
-  - master-frontend/node_modules
-  - $GOPATH/src/
-
 stages:
     - test
     - build
@@ -37,6 +30,8 @@ format:
       - go vet $(go list ./... | grep -v /vendor/)
       - go test -race $(go list ./... | grep -v /vendor/)
       - go test -v 2>&1 | go-junit-report > $CI_PROJECT_DIR/report.xml
+      - echo $GOPATH/src/
+      - echo $CI_PROJECT_DIR
     artifacts:
       reports:
         junit: report.xml
@@ -50,6 +45,10 @@ compile-frontend:
       - npm run build
       - ls -alh dist
       - mv dist $CI_PROJECT_DIR/aimpanel-master-frontend
+    cache:
+      key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
+      paths:
+        - master-frontend/node_modules
     artifacts:
       paths:
         - aimpanel-master-frontend
