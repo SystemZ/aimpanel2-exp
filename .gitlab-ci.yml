@@ -42,10 +42,10 @@ compile-backend:
     script:
       - cd ./master
       - go get
-      - go build -race -ldflags "-extldflags '-static'" -o $CI_PROJECT_DIR/aimpanel-master
+      - CGO_ENABLED=0 go build -race -ldflags "-extldflags '-static'" -o $CI_PROJECT_DIR/aimpanel-master
       - cd ../wrapper
       - go get
-      - go build -race -ldflags "-extldflags '-static'" -o $CI_PROJECT_DIR/aimpanel-wrapper
+      - CGO_ENABLED=0 go build -race -ldflags "-extldflags '-static'" -o $CI_PROJECT_DIR/aimpanel-wrapper
       #- cd ../agent
       #- go get
       #- go build -race -ldflags "-extldflags '-static'" -o $CI_PROJECT_DIR/aimpanel-agent
@@ -54,3 +54,4 @@ compile-backend:
         - aimpanel-master
         - aimpanel-wrapper
         #- aimpanel-agent
+      expire_in: 1 month
