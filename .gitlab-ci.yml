@@ -29,12 +29,28 @@ format:
       - go vet $(go list ./... | grep -v /vendor/)
       - go test -race $(go list ./... | grep -v /vendor/)
 
-compile:
+compile-frontend:
+    stage: build
+    image: node:10-alpine
+    script:
+      - cd master-frontend
+      - npm install &>/dev/null
+      - ls -alh
+
+compile-backend:
     stage: build
     script:
-      - cd master
+      - cd ./master
       - go get
       - go build -race -ldflags "-extldflags '-static'" -o $CI_PROJECT_DIR/aimpanel-master
+      - cd ../wrapper
+      - go get
+      - go build -race -ldflags "-extldflags '-static'" -o $CI_PROJECT_DIR/aimpanel-wrapper
+      #- cd ../agent
+      #- go get
+      #- go build -race -ldflags "-extldflags '-static'" -o $CI_PROJECT_DIR/aimpanel-agent
     artifacts:
       paths:
         - aimpanel-master
+        - aimpanel-wrapper
+        #- aimpanel-agent
