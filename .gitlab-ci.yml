@@ -35,6 +35,7 @@ compile-frontend:
     script:
       - cd master-frontend
       - npm install &>/dev/null
+      - npm run build
       - ls -alh
 
 compile-backend:
