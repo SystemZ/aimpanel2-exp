@@ -30,12 +30,6 @@ format:
       - go vet $(go list ./... | grep -v /vendor/)
       - go test -race $(go list ./... | grep -v /vendor/)
       - go test -v 2>&1 | go-junit-report > $CI_PROJECT_DIR/report.xml
-      - echo $GOPATH/src/
-      - echo $CI_PROJECT_DIR
-    cache:
-      key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
-      paths:
-        - /go/src
     artifacts:
       reports:
         junit: report.xml
