@@ -51,6 +51,14 @@ export default new Router({
       component: () => import(/* webpackChunkName: "help" */ './views/Help.vue')
     },
     {
+      path: '/host/:id',
+      name: 'host',
+      meta: {
+        title: 'Host'
+      },
+      component: () => import(/* webpackChunkName: "host" */ './views/Host.vue')
+    },
+    {
       path: '*',
       name: '404',
       meta: {
