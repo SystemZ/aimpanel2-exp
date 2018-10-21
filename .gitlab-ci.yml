@@ -55,21 +55,27 @@ compile-frontend:
 compile-backend:
     stage: build
     script:
+      - apt-get update
+      - apt-get install -y upx
+      - mkdir -p $CI_PROJECT_DIR/bin
       - cd ./master
       - go get
       # - go build -race -ldflags "-extldflags '-static'" -o $CI_PROJECT_DIR/aimpanel-master
       - CGO_ENABLED=0 go build -o $CI_PROJECT_DIR/aimpanel-master
+      - upx --brute -o $CI_PROJECT_DIR/bin/aimpanel-master $CI_PROJECT_DIR/aimpanel-master
       - cd ../wrapper
       - go get
       - CGO_ENABLED=0 go build -o $CI_PROJECT_DIR/aimpanel-wrapper
+      - upx --brute -o $CI_PROJECT_DIR/bin/aimpanel-wrapper $CI_PROJECT_DIR/aimpanel-wrapper
       #- cd ../agent
       #- go get
       #- CGO_ENABLED=0 go build -o $CI_PROJECT_DIR/aimpanel-agent
+      #- upx --brute -o $CI_PROJECT_DIR/bin/aimpanel-agent $CI_PROJECT_DIR/aimpanel-agent
     artifacts:
       paths:
-        - aimpanel-master
-        - aimpanel-wrapper
-        #- aimpanel-agent
+        - bin/aimpanel-master
+        - bin/aimpanel-wrapper
+        #- bin/aimpanel-agent
       expire_in: 1 month
 
 build-frontend:
