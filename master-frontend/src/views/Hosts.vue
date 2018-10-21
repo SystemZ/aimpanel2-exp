@@ -7,9 +7,9 @@
             class="elevation-1"
         >
             <template slot="items" slot-scope="props">
-                <td>{{ props.item.name }}</td>
-                <td class="text-xs-right">{{ props.item.ip }}</td>
-                <td class="text-xs-right">
+                <td @click="goToHost(props.item.id)" class="clickable">{{ props.item.name }}</td>
+                <td @click="goToHost(props.item.id)" class="text-xs-right clickable">{{ props.item.ip }}</td>
+                <td @click="goToHost(props.item.id)" class="text-xs-right clickable">
                     <span v-if="props.item.state === 1">
                         <v-icon class="green--text" small>fa-circle</v-icon> Active
                     </span>
@@ -46,16 +46,29 @@
       ],
       hosts: [
         {
+          id: 1,
           name: 'VPS #1',
           ip: '127.0.0.1',
           state: 1,
         },
         {
+          id: 2,
           name: 'VPS #2',
           ip: '127.0.0.2',
           state: 0,
         }
       ]
-    })
+    }),
+    methods: {
+      goToHost(id) {
+        this.$router.push('/host/' + id)
+      }
+    }
   }
 </script>
+
+<style>
+    .clickable {
+        cursor: pointer;
+    }
+</style>
