@@ -1,6 +1,7 @@
 package main
 
 import (
+	"gitlab.com/systemz/aimpanel2/master/middleware"
 	"gitlab.com/systemz/aimpanel2/master/router"
 	"log"
 	"net/http"
@@ -8,7 +9,7 @@ import (
 
 func main() {
 	r := router.NewRouter()
-	log.Fatal(http.ListenAndServe(":9000", r))
+	log.Fatal(http.ListenAndServe(":9000", middleware.Cors(r)))
 	//log.Println("start")
 	//conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	//lib.FailOnError(err, "Failed to connect to RabbitMQ")
