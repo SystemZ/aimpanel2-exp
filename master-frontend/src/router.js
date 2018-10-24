@@ -5,7 +5,6 @@ import Home from './views/Home.vue'
 Vue.use(Router)
 
 export default new Router({
-  mode: 'history',
   base: process.env.BASE_URL,
   routes: [
     {
@@ -50,6 +49,22 @@ export default new Router({
       // this generates a separate chunk (about.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
       component: () => import(/* webpackChunkName: "help" */ './views/Help.vue')
+    },
+    {
+      path: '/host/:id',
+      name: 'host',
+      meta: {
+        title: 'Host'
+      },
+      component: () => import(/* webpackChunkName: "host" */ './views/Host.vue')
+    },
+    {
+      path: '*',
+      name: '404',
+      meta: {
+        title: '404 - Page Not Found'
+      },
+      component: () => import(/* webpackChunkName: "404" */ './views/404.vue')
     }
   ]
 })
