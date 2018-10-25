@@ -5,9 +5,12 @@ import (
 	"gitlab.com/systemz/aimpanel2/master/router"
 	"log"
 	"net/http"
+	"gitlab.com/SystemZ/aimpanel2/master/db"
 )
 
 func main() {
+	db.SetupDatabase()
+
 	r := router.NewRouter()
 	log.Fatal(http.ListenAndServe(":9000", middleware.Cors(r)))
 	//log.Println("start")
