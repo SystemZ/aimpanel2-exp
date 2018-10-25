@@ -6,6 +6,7 @@ import (
 
 	"os"
 	"fmt"
+	"gitlab.com/SystemZ/aimpanel2/master/models"
 )
 
 var (
@@ -24,6 +25,8 @@ func SetupDatabase() *gorm.DB {
 
 	//https://github.com/go-sql-driver/mysql/issues/257
 	db.DB().SetMaxIdleConns(0)
+
+	db.AutoMigrate(&models.User{})
 
 	return db
 }
