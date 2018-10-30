@@ -29,5 +29,14 @@ func SetupDatabase() *gorm.DB {
 
 	db.AutoMigrate(&models.User{})
 
+	//Create test user
+	//user := models.User{Username: "test", Password: "test"}
+	//db.Create(&user)
+
+	//Find user
+	//var user models.User
+	//db.Where("ID = ?", "99a8f14e-1d5f-4de5-8812-2f23e5b1f446").First(&user)
+	//log.Println(user)
+
 	return db
 }
