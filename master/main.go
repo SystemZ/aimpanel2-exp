@@ -5,7 +5,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/master/router"
 	"log"
 	"net/http"
-	"gitlab.com/SystemZ/aimpanel2/master/db"
+	"gitlab.com/systemz/aimpanel2/master/db"
 )
 
 func main() {
