@@ -17,7 +17,7 @@
 package main
 
 import (
-	"gitlab.com/SystemZ/aimpanel2/master/db"
+	"gitlab.com/systemz/aimpanel2/master/db"
 	"gitlab.com/systemz/aimpanel2/master/middleware"
 	"gitlab.com/systemz/aimpanel2/master/router"
 	"log"
