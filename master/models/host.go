@@ -7,43 +7,41 @@ import (
 	"time"
 )
 
-// User represents the user for this application
+// Host represents the host for this application
 //
 // swagger:model
-type User struct {
-	// ID of the user
+type Host struct {
+	// ID of the host
 	//
 	// required: true
 	ID uuid.UUID `json:"id" gorm:"primary_key;type:varchar(36)"`
 
-	// Username of the user
+	// Name
 	//
 	// required: true
-	Username string `gorm:"column:username"`
+	Name string `gorm:"column:name"`
 
-	// Password of the user
+	// User ID
 	//
 	// required: true
-	PasswordHash string `gorm:"column:password_hash"`
+	UserId uuid.UUID `gorm:"column:user_id"`
 
-	// Email of the user
+	// Host IP address
 	//
 	// required: true
-	Email string `gorm:"column:email"`
+	Ip string `gorm:"column:ip"`
 
-	// Created at timestamp
+	//Created at timestamp
 	CreatedAt time.Time
 
-	// Updated at timestamp
+	//Updated at timestamp
 	UpdatedAt time.Time
 
-	// Deleted at timestamp
+	//Deleted at timestamp
 	DeletedAt *time.Time
-
-	//TODO: plan_id
 }
 
-func (u *User) BeforeCreate(scope *gorm.Scope) error {
+func (u *Host) BeforeCreate(scope *gorm.Scope) error {
 	uuidGen, err := uuid.NewV4()
 	if err != nil {
 		log.Println(err)
