@@ -1,0 +1,44 @@
+{
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "swagger": "2.0",
+  "info": {
+    "description": "Package classification Aimpanel Master API",
+    "version": "0.0.1"
+  },
+  "host": "localhost:9000",
+  "basePath": "/v1",
+  "paths": {
+    "/": {
+      "get": {
+        "description": "This will show nothing.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "http",
+          "https"
+        ],
+        "tags": [
+          "index"
+        ],
+        "summary": "Just index page.",
+        "operationId": "Index",
+        "responses": {
+          "200": {}
+        }
+      }
+    }
+  }
+}

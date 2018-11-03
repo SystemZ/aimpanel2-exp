@@ -6,10 +6,24 @@ import (
 	"log"
 )
 
+// User represents the user for this application
+//
+// swagger:model
 type User struct {
-	ID       uuid.UUID `json:"id" gorm:"primary_key;type:varchar(36)"`
-	Username string    `gorm:"column:username"`
-	Password string    `gorm:"column:password"`
+	// ID of the user
+	//
+	// required: true
+	ID uuid.UUID `json:"id" gorm:"primary_key;type:varchar(36)"`
+
+	// Username of the user
+	//
+	// required: true
+	Username string `gorm:"column:username"`
+
+	// Password of the user
+	//
+	// required: true
+	Password string `gorm:"column:password"`
 }
 
 func (u *User) BeforeCreate(scope *gorm.Scope) error {
