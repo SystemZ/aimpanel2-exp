@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
-	"gitlab.com/SystemZ/aimpanel2/master/models"
+	"gitlab.com/systemz/aimpanel2/master/models"
 	"os"
 )
 
