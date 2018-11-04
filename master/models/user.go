@@ -1,9 +1,12 @@
 package models
 
 import (
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gofrs/uuid"
 	"github.com/jinzhu/gorm"
+	"golang.org/x/crypto/bcrypt"
 	"log"
+	"os"
 	"time"
 )
 
@@ -50,4 +53,23 @@ func (u *User) BeforeCreate(scope *gorm.Scope) error {
 	}
 	scope.SetColumn("ID", uuidGen)
 	return nil
+}
+
+func (u *User) HashPassword(password string) string {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 4)
+	if err != nil {
+		log.Println(err)
+	}
+	return string(bytes)
+}
+
+func (u *User) GenerateJWT() (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"exp":      time.Now().Add(time.Hour * 24).Unix(),
+		"uid":      u.ID,
+		"username": u.Username,
+		"email":    u.Email,
+	})
+	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
+	return tokenString, err
 }
