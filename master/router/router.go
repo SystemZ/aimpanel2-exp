@@ -2,6 +2,8 @@ package router
 
 import (
 	"github.com/gorilla/mux"
+	"gitlab.com/systemz/aimpanel2/master/middleware"
+	"net/http"
 )
 
 func NewRouter() *mux.Router {
@@ -11,7 +13,14 @@ func NewRouter() *mux.Router {
 	v1 := router.PathPrefix("/v1").Subrouter()
 
 	for _, route := range routes {
-		v1.HandleFunc(route.Pattern, route.HandlerFunc).Name(route.Name).Methods(route.Method)
+		var handler http.Handler
+		handler = route.HandlerFunc
+
+		if route.AuthRequired {
+			handler = middleware.AuthMiddleware(route.HandlerFunc)
+		}
+
+		v1.Path(route.Pattern).Handler(handler).Name(route.Name).Methods(route.Method)
 	}
 
 	return router
