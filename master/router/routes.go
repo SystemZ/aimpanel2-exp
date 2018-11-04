@@ -27,4 +27,10 @@ var routes = Routes{
 		"/auth/register",
 		handlers.Register,
 	},
+	Route{
+		"Login",
+		"POST",
+		"/auth/login",
+		handlers.Login,
+	},
 }

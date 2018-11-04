@@ -63,6 +63,11 @@ func (u *User) HashPassword(password string) string {
 	return string(bytes)
 }
 
+func (u *User) CheckPassword(password string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(u.PasswordHash), []byte(password))
+	return err == nil
+}
+
 func (u *User) GenerateJWT() (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"exp":      time.Now().Add(time.Hour * 24).Unix(),

@@ -61,3 +61,33 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 	json.NewEncoder(w).Encode(responses.TokenResponse{Token: token})
 }
+
+func Login(w http.ResponseWriter, r *http.Request) {
+	decoder := json.NewDecoder(r.Body)
+	var loginRequest requests.LoginRequest
+	err := decoder.Decode(&loginRequest)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(responses.JsonError{ErrorCode: 7, Message: "Invalid body."})
+		return
+	}
+
+	var user models.User
+	db.DB.Where("username = ?", loginRequest.Username).Find(&user)
+
+	if user.CheckPassword(loginRequest.Password) {
+		token, err := user.GenerateJWT()
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(responses.JsonError{ErrorCode: 8, Message: "Something went wrong."})
+			return
+		}
+
+		w.WriteHeader(200)
+		json.NewEncoder(w).Encode(responses.TokenResponse{Token: token})
+	} else {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(responses.JsonError{ErrorCode: 9, Message: "Wrong password."})
+		return
+	}
+}
