@@ -1,18 +1,35 @@
+//go:generate swagger generate spec
+
+// Package classification Aimpanel Master API
+//
+// Schemes: http, https
+// Host: localhost:9000
+// BasePath: /v1
+// Version: 0.0.1
+//
+// Consumes:
+// 	- application/json
+//
+// Produces:
+// 	- application/json
+//
+// swagger:meta
 package main
 
 import (
+	"gitlab.com/systemz/aimpanel2/master/db"
 	"gitlab.com/systemz/aimpanel2/master/middleware"
 	"gitlab.com/systemz/aimpanel2/master/router"
 	"log"
 	"net/http"
-	"gitlab.com/systemz/aimpanel2/master/db"
 )
 
 func main() {
-	db.SetupDatabase()
+	db.DB = db.SetupDatabase()
 
+	log.Println("Starting API on port :8000")
 	r := router.NewRouter()
-	log.Fatal(http.ListenAndServe(":9000", middleware.Cors(r)))
+	log.Fatal(http.ListenAndServe(":8000", middleware.Cors(r)))
 	//log.Println("start")
 	//conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	//lib.FailOnError(err, "Failed to connect to RabbitMQ")

@@ -5,6 +5,7 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"gitlab.com/systemz/aimpanel2/master/models"
+	"log"
 	"os"
 )
 
@@ -28,6 +29,8 @@ func SetupDatabase() *gorm.DB {
 	db.LogMode(true)
 
 	db.AutoMigrate(&models.User{})
+
+	log.Println("Connected to the database")
 
 	//Create test user
 	//user := models.User{Username: "test", Password: "test"}
