@@ -14,7 +14,7 @@ type Host struct {
 	// ID of the host
 	//
 	// required: true
-	ID uuid.UUID `json:"id" gorm:"primary_key;type:varchar(36)"`
+	ID uuid.UUID `json:"id" gorm:"primary_key;type:varchar(36)" json:"id"`
 
 	// Name
 	//
@@ -32,13 +32,13 @@ type Host struct {
 	Ip string `gorm:"column:ip" json:"ip"`
 
 	//Created at timestamp
-	CreatedAt time.Time
+	CreatedAt time.Time `json:"created_at"`
 
 	//Updated at timestamp
-	UpdatedAt time.Time
+	UpdatedAt time.Time `json:"updated_at"`
 
 	//Deleted at timestamp
-	DeletedAt *time.Time
+	DeletedAt *time.Time `json:"deleted_at"`
 }
 
 func (u *Host) BeforeCreate(scope *gorm.Scope) error {

@@ -4,6 +4,13 @@ import './plugins/vuetify'
 import App from './App.vue'
 import router from './router'
 import './registerServiceWorker'
+import auth from './auth'
+import axios from 'axios';
+
+auth.checkAuth();
+
+axios.defaults.headers.common['Authorization'] = auth.getAuthorizationHeader();
+axios.defaults.baseURL = 'http://localhost:8000';
 
 Vue.config.productionTip = false
 

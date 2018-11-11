@@ -1,10 +1,10 @@
 <template>
     <v-container fluid>
         <v-data-table
-            :headers="headers"
-            :items="hosts"
-            hide-actions
-            class="elevation-1"
+                :headers="headers"
+                :items="hosts"
+                hide-actions
+                class="elevation-1"
         >
             <template slot="items" slot-scope="props">
                 <td @click="goToHost(props.item.id)" class="clickable">{{ props.item.name }}</td>
@@ -23,6 +23,8 @@
 </template>
 
 <script>
+  import axios from 'axios';
+
   export default {
     name: 'hosts',
     data: () => ({
@@ -62,7 +64,17 @@
     methods: {
       goToHost(id) {
         this.$router.push('/host/' + id)
+      },
+      getHosts() {
+        axios.get('/v1/hosts').then(res => {
+          this.hosts = res.data;
+        }).catch(e => {
+          console.log(e)
+        })
       }
+    },
+    mounted() {
+      this.getHosts();
     }
   }
 </script>

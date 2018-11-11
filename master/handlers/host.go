@@ -24,7 +24,7 @@ func GetHost(w http.ResponseWriter, r *http.Request) {
 
 	var host models.Host
 
-	db.DB.First(&host, params["id"])
+	db.DB.Where("id = ?", params["id"]).First(&host)
 
 	json.NewEncoder(w).Encode(host)
 }
