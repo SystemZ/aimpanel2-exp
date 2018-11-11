@@ -11,7 +11,7 @@ func Cors(handler http.Handler) http.Handler {
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:8080"},
 		AllowCredentials: true,
-		AllowedHeaders:   []string{"Authorization"},
+		AllowedHeaders:   []string{"Authorization", "Content-Type"},
 		Debug:            true,
 	})
 	return c.Handler(handler)

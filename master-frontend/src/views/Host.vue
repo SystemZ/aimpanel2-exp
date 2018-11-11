@@ -118,18 +118,16 @@
 </template>
 
 <script>
-  import axios from 'axios';
-
   export default {
     name: 'host',
     data: () => ({
       host: {}
     }),
     mounted() {
-      axios.get('/v1/hosts/' + this.$route.params.id).then(res => {
+      this.$http.get('/v1/hosts/' + this.$route.params.id).then(res => {
         this.host = res.data
       }).catch(e => {
-        console.log(e)
+        console.error(e)
       });
     }
   }

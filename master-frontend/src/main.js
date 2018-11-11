@@ -7,12 +7,14 @@ import './registerServiceWorker'
 import auth from './auth'
 import axios from 'axios';
 
-auth.checkAuth();
-
-axios.defaults.headers.common['Authorization'] = auth.getAuthorizationHeader();
 axios.defaults.baseURL = 'http://localhost:8000';
+Vue.prototype.$http = axios;
 
 Vue.config.productionTip = false
+
+Vue.prototype.$auth = auth;
+
+auth.checkAuthentication();
 
 new Vue({
   router,

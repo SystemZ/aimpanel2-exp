@@ -23,8 +23,6 @@
 </template>
 
 <script>
-  import axios from 'axios';
-
   export default {
     name: 'hosts',
     data: () => ({
@@ -46,30 +44,17 @@
           value: 'state'
         }
       ],
-      hosts: [
-        {
-          id: 1,
-          name: 'VPS #1',
-          ip: '127.0.0.1',
-          state: 1,
-        },
-        {
-          id: 2,
-          name: 'VPS #2',
-          ip: '127.0.0.2',
-          state: 0,
-        }
-      ]
+      hosts: []
     }),
     methods: {
       goToHost(id) {
         this.$router.push('/host/' + id)
       },
       getHosts() {
-        axios.get('/v1/hosts').then(res => {
+        this.$http.get('/v1/hosts').then(res => {
           this.hosts = res.data;
         }).catch(e => {
-          console.log(e)
+          console.error(e)
         })
       }
     },

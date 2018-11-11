@@ -17,14 +17,33 @@
             </v-toolbar>
             <v-list class="pt-0" dense>
                 <v-divider></v-divider>
-                <v-list-tile v-for="item in menu"
-                             :to="item.path"
-                             active-class="red--text red--darken-1">
+                <v-list-tile
+                        v-for="item in menu"
+                        :to="item.path"
+                        v-if="(item.authRequired && loggedIn) || (!item.authRequired && !loggedIn) || !item.authRequired"
+                        active-class="red--text red--darken-1">
                     <v-list-tile-action>
                         <v-icon>{{item.icon}}</v-icon>
                     </v-list-tile-action>
                     <v-list-tile-content>
                         <v-list-tile-title>{{item.title}}</v-list-tile-title>
+                    </v-list-tile-content>
+                </v-list-tile>
+
+                <v-list-tile v-if="loggedIn" @click="this.$auth.logout()">
+                    <v-list-tile-action>
+                        <v-icon>fa-sign-out</v-icon>
+                    </v-list-tile-action>
+                    <v-list-tile-content>
+                        <v-list-tile-title>Logout</v-list-tile-title>
+                    </v-list-tile-content>
+                </v-list-tile>
+                <v-list-tile v-else to="login" active-class="red--text red--darken-1">
+                    <v-list-tile-action>
+                        <v-icon>fa-sign-in</v-icon>
+                    </v-list-tile-action>
+                    <v-list-tile-content>
+                        <v-list-tile-title>Login</v-list-tile-title>
                     </v-list-tile-content>
                 </v-list-tile>
             </v-list>
@@ -42,38 +61,45 @@
 <script>
   export default {
     name: 'Aimpanel',
+    computed: {
+      loggedIn() {
+        return this.$auth.logged;
+      }
+    },
     data: () => ({
       drawer: null,
       menu: [
         {
           title: 'Home',
           icon: 'fa-home',
-          path: '/'
+          path: '/',
+          authRequired: false
         },
         {
           title: 'Hosts',
           icon: 'fa-server',
-          path: '/hosts'
+          path: '/hosts',
+          authRequired: true
         },
         {
           title: 'Game servers',
           icon: 'fa-gamepad',
-          path: '/game-servers'
+          path: '/game-servers',
+          authRequired: true
         },
         {
           title: 'License',
           icon: 'fa-certificate',
-          path: '/license'
+          path: '/license',
+          authRequired: false
         },
         {
           title: 'Help',
           icon: 'fa-question',
-          path: '/help'
+          path: '/help',
+          authRequired: false
         }
       ]
-    }),
-    mounted() {
-      console.log(this.$route)
-    }
+    })
   }
 </script>
