@@ -4,7 +4,7 @@ import Home from './views/Home.vue'
 
 Vue.use(Router)
 
-export default new Router({
+const router = new Router({
   base: process.env.BASE_URL,
   routes: [
     {
@@ -19,7 +19,8 @@ export default new Router({
       path: '/hosts',
       name: 'hosts',
       meta: {
-        title: 'Hosts'
+        title: 'Hosts',
+        authRequired: true
       },
       component: () => import(/* webpackChunkName: "hosts" */ './views/Hosts.vue')
     },
@@ -27,7 +28,8 @@ export default new Router({
       path: '/game-servers',
       name: 'game-servers',
       meta: {
-        title: 'Game Servers'
+        title: 'Game Servers',
+        authRequired: true
       },
       component: () => import(/* webpackChunkName: "game-servers" */ './views/GameServers.vue')
     },
@@ -59,6 +61,14 @@ export default new Router({
       component: () => import(/* webpackChunkName: "host" */ './views/Host.vue')
     },
     {
+      path: '/login',
+      name: 'login',
+      meta: {
+        title: 'Login'
+      },
+      component: () => import(/* webpackChunkName: "login" */ './views/Login.vue')
+    },
+    {
       path: '*',
       name: '404',
       meta: {
@@ -67,4 +77,19 @@ export default new Router({
       component: () => import(/* webpackChunkName: "404" */ './views/404.vue')
     }
   ]
-})
+});
+
+router.beforeEach((to, from, next) => {
+  if (to.meta.authRequired) {
+    let token = localStorage.getItem('token')
+    if (token) {
+      next();
+    } else {
+      next('/login');
+    }
+  }
+  next();
+});
+
+
+export default router;

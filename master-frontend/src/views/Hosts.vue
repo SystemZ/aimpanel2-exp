@@ -1,10 +1,10 @@
 <template>
     <v-container fluid>
         <v-data-table
-            :headers="headers"
-            :items="hosts"
-            hide-actions
-            class="elevation-1"
+                :headers="headers"
+                :items="hosts"
+                hide-actions
+                class="elevation-1"
         >
             <template slot="items" slot-scope="props">
                 <td @click="goToHost(props.item.id)" class="clickable">{{ props.item.name }}</td>
@@ -44,25 +44,22 @@
           value: 'state'
         }
       ],
-      hosts: [
-        {
-          id: 1,
-          name: 'VPS #1',
-          ip: '127.0.0.1',
-          state: 1,
-        },
-        {
-          id: 2,
-          name: 'VPS #2',
-          ip: '127.0.0.2',
-          state: 0,
-        }
-      ]
+      hosts: []
     }),
     methods: {
       goToHost(id) {
         this.$router.push('/host/' + id)
+      },
+      getHosts() {
+        this.$http.get('/v1/hosts').then(res => {
+          this.hosts = res.data;
+        }).catch(e => {
+          console.error(e)
+        })
       }
+    },
+    mounted() {
+      this.getHosts();
     }
   }
 </script>

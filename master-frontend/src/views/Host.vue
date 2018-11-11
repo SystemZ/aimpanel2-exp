@@ -103,7 +103,10 @@
                         <v-card>
                             <v-container>
                                 <v-layout row>
-                                    <v-btn color="red" dark large><v-icon>fa-fw fa-plug</v-icon> Remove Host</v-btn>
+                                    <v-btn color="red" dark large>
+                                        <v-icon>fa-fw fa-plug</v-icon>
+                                        Remove Host
+                                    </v-btn>
                                 </v-layout>
                             </v-container>
                         </v-card>
@@ -118,17 +121,14 @@
   export default {
     name: 'host',
     data: () => ({
-      host: [
-        {
-          id: 1,
-          name: 'VPS #1',
-          ip: '127.0.0.1',
-          state: 1,
-        },
-      ]
+      host: {}
     }),
     mounted() {
-
+      this.$http.get('/v1/hosts/' + this.$route.params.id).then(res => {
+        this.host = res.data
+      }).catch(e => {
+        console.error(e)
+      });
     }
   }
 </script>

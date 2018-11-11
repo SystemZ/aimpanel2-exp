@@ -37,4 +37,27 @@ var routes = Routes{
 		handlers.Login,
 		false,
 	},
+
+	//Hosts
+	Route{
+		"List hosts",
+		"GET",
+		"/hosts",
+		handlers.ListHosts,
+		true,
+	},
+	Route{
+		"Get host",
+		"GET",
+		"/hosts/{id}",
+		handlers.GetHost,
+		true,
+	},
+	Route{
+		"Create host",
+		"POST",
+		"/hosts",
+		handlers.CreateHost,
+		true,
+	},
 }
