@@ -44,20 +44,20 @@ var routes = Routes{
 		"GET",
 		"/hosts",
 		handlers.ListHosts,
-		false,
+		true,
 	},
 	Route{
 		"Get host",
 		"GET",
 		"/hosts/{id}",
 		handlers.GetHost,
-		false,
+		true,
 	},
 	Route{
 		"Create host",
 		"POST",
 		"/hosts",
 		handlers.CreateHost,
-		false,
+		true,
 	},
 }

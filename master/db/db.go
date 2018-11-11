@@ -29,6 +29,7 @@ func SetupDatabase() *gorm.DB {
 	db.LogMode(true)
 
 	db.AutoMigrate(&models.User{})
+	db.AutoMigrate(&models.Host{})
 
 	log.Println("Connected to the database")
 

@@ -19,17 +19,17 @@ type Host struct {
 	// Name
 	//
 	// required: true
-	Name string `gorm:"column:name"`
+	Name string `gorm:"column:name" json:"name"`
 
 	// User ID
 	//
 	// required: true
-	UserId uuid.UUID `gorm:"column:user_id"`
+	UserId uuid.UUID `gorm:"column:user_id" json:"user_id"`
 
 	// Host IP address
 	//
 	// required: true
-	Ip string `gorm:"column:ip"`
+	Ip string `gorm:"column:ip" json:"ip"`
 
 	//Created at timestamp
 	CreatedAt time.Time

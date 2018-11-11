@@ -2,10 +2,12 @@ package handlers
 
 import (
 	"encoding/json"
+	"github.com/gofrs/uuid"
 	"github.com/gorilla/mux"
 	"gitlab.com/systemz/aimpanel2/master/db"
 	"gitlab.com/systemz/aimpanel2/master/models"
 	"gitlab.com/systemz/aimpanel2/master/responses"
+	"log"
 	"net/http"
 )
 
@@ -35,6 +37,10 @@ func CreateHost(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(responses.JsonError{ErrorCode: 10, Message: "Invalid body."})
 		return
 	}
+
+	host.UserId = uuid.FromStringOrNil(r.Header.Get("uid"))
+
+	log.Println(r.Header.Get("uid"))
 
 	db.DB.Save(host)
 
