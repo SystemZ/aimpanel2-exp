@@ -19,6 +19,7 @@
                 <v-divider></v-divider>
                 <v-list-tile
                         v-for="item in menu"
+                        :key="item.title"
                         :to="item.path"
                         v-if="(item.authRequired && loggedIn) || (!item.authRequired && !loggedIn) || !item.authRequired"
                         active-class="red--text red--darken-1">
@@ -30,6 +31,8 @@
                     </v-list-tile-content>
                 </v-list-tile>
 
+
+                <!-- TODO: Add this to menu list -->
                 <v-list-tile v-if="loggedIn" @click="this.$auth.logout()">
                     <v-list-tile-action>
                         <v-icon>fa-sign-out</v-icon>
@@ -44,6 +47,14 @@
                     </v-list-tile-action>
                     <v-list-tile-content>
                         <v-list-tile-title>Login</v-list-tile-title>
+                    </v-list-tile-content>
+                </v-list-tile>
+                <v-list-tile v-if="!loggedIn" to="register" active-class="red--text red--darken-1">
+                    <v-list-tile-action>
+                        <v-icon>fa-user-plus</v-icon>
+                    </v-list-tile-action>
+                    <v-list-tile-content>
+                        <v-list-tile-title>Register</v-list-tile-title>
                     </v-list-tile-content>
                 </v-list-tile>
             </v-list>

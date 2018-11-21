@@ -24,6 +24,23 @@ export default new Vue({
         console.error(e);
       })
     },
+    register(context, data, redirect) {
+      this.$http.post('/v1/auth/register', data).then(res => {
+        if(res.data.token) {
+          localStorage.setItem('token', res.data.token);
+          this.logged = true;
+
+          axios.defaults.headers.common['Authorization'] = this.getAuthorizationHeader();
+
+          if(redirect) {
+            router.push(redirect);
+          }
+        }
+      }).catch(e => {
+        console.log(e.response)
+        context.registerError = e.response.data.message
+      });
+    },
     logout() {
       this.logged = false;
       localStorage.removeItem('token');
