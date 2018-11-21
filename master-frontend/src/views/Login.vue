@@ -18,20 +18,24 @@
 
                         <v-tab-item>
                             <v-card-text>
-                                <v-form>
-                                    <v-text-field prepend-icon="fa-user" label="Login"
-                                                  type="text" v-model="loginForm.username"
-                                                  @keyup.enter.native="login()"></v-text-field>
+                                <v-alert
+                                        :value="loginError"
+                                        type="error"
+                                >
+                                    {{loginError}}
+                                </v-alert>
+                                <v-form v-model="loginValid" @keyup.native.enter="loginValid && login()">
+                                    <v-text-field prepend-icon="fa-user" label="Login" :rules="rules.username"
+                                                  type="text" v-model="loginForm.username" required></v-text-field>
 
-                                    <v-text-field prepend-icon="fa-key" label="Password"
-                                                  type="password" v-model="loginForm.password"
-                                                  @keyup.enter.native="login()"></v-text-field>
+                                    <v-text-field prepend-icon="fa-key" label="Password" :rules="rules.password"
+                                                  type="password" v-model="loginForm.password" required></v-text-field>
                                 </v-form>
                             </v-card-text>
                             <v-card-actions>
                                 <v-btn color="primary" @click="active = 1">Create new account</v-btn>
                                 <v-spacer></v-spacer>
-                                <v-btn color="success" @click="login()">Login</v-btn>
+                                <v-btn color="success" :disabled="!loginValid" @click="login()">Login</v-btn>
                             </v-card-actions>
                         </v-tab-item>
                         <v-tab-item>
@@ -42,28 +46,28 @@
                                 >
                                     {{registerError}}
                                 </v-alert>
-                                <v-form v-model="registerValid">
+                                <v-form v-model="registerValid" @keyup.native.enter="registerValid && register()">
                                     <v-text-field prepend-icon="fa-user" label="Username"
                                                   :rules="rules.username" type="text"
-                                                  v-model="registerForm.username"></v-text-field>
+                                                  v-model="registerForm.username" required></v-text-field>
 
                                     <v-text-field prepend-icon="fa-key" label="Password"
                                                   :rules="rules.password" type="password"
-                                                  v-model="registerForm.password"></v-text-field>
+                                                  v-model="registerForm.password" required></v-text-field>
 
                                     <v-text-field prepend-icon="fa-key" label="Repeat password"
                                                   :rules="rules.password" type="password"
                                                   v-model="registerForm.password_repeat"
-                                                  :error-messages="confirmation.passwordConfirmation"></v-text-field>
+                                                  :error-messages="confirmation.passwordConfirmation" required></v-text-field>
 
                                     <v-text-field prepend-icon="fa-envelope" label="Email"
                                                   :rules="rules.email" type="email"
-                                                  v-model="registerForm.email"></v-text-field>
+                                                  v-model="registerForm.email" required></v-text-field>
 
                                     <v-text-field prepend-icon="fa-envelope" label="Repeat email"
                                                   :rules="rules.email" type="email"
                                                   v-model="registerForm.email_repeat"
-                                                  :error-messages="confirmation.emailConfirmation"></v-text-field>
+                                                  :error-messages="confirmation.emailConfirmation" required></v-text-field>
                                 </v-form>
                             </v-card-text>
                             <v-card-actions>
@@ -114,6 +118,7 @@
       },
 
       registerError: null,
+      loginError: null,
 
       registerValid: false,
       loginValid: false,
@@ -121,13 +126,11 @@
     }),
     methods: {
       login() {
-        this.$auth.login({
-          username: this.username,
-          password: this.password,
-        }, 'hosts')
+        this.loginError = null;
+        this.$auth.login(this, this.loginForm, 'hosts')
       },
       register() {
-        this.registerError = ''
+        this.registerError = null;
         this.$auth.register(this, this.registerForm, 'hosts')
       }
     },

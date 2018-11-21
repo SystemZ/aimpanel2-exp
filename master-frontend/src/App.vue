@@ -31,9 +31,8 @@
                     </v-list-tile-content>
                 </v-list-tile>
 
-
                 <!-- TODO: Add this to menu list -->
-                <v-list-tile v-if="loggedIn" @click="this.$auth.logout()">
+                <v-list-tile v-if="loggedIn" @click="$auth.logout()">
                     <v-list-tile-action>
                         <v-icon>fa-sign-out</v-icon>
                     </v-list-tile-action>

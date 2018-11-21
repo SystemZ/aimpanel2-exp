@@ -8,7 +8,7 @@ export default new Vue({
   },
 
   methods: {
-    login(data, redirect) {
+    login(context, data, redirect) {
       this.$http.post('/v1/auth/login', data).then(res => {
         if(res.data.token) {
           localStorage.setItem('token', res.data.token);
@@ -21,7 +21,7 @@ export default new Vue({
           }
         }
       }).catch(e => {
-        console.error(e);
+        context.loginError = e.response.data.message
       })
     },
     register(context, data, redirect) {
@@ -37,7 +37,6 @@ export default new Vue({
           }
         }
       }).catch(e => {
-        console.log(e.response)
         context.registerError = e.response.data.message
       });
     },
