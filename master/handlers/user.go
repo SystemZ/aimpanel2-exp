@@ -6,6 +6,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/master/models"
 	"gitlab.com/systemz/aimpanel2/master/requests"
 	"gitlab.com/systemz/aimpanel2/master/responses"
+	"log"
 	"net/http"
 )
 
@@ -55,6 +56,8 @@ func ChangeEmail(w http.ResponseWriter, r *http.Request) {
 	var user models.User
 	db.DB.Where("id = ?", userId).First(&user)
 
+	log.Println(user.Email)
+	log.Println(changeEmailReq.Email)
 	if user.Email == changeEmailReq.Email {
 		if changeEmailReq.NewEmail == changeEmailReq.NewEmailRepeat {
 			user.Email = changeEmailReq.NewEmail

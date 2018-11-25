@@ -1,22 +1,29 @@
 import Vue from 'vue'
 import axios from 'axios';
 import router from '../router';
+import jwt_decode from 'jwt-decode';
 
 export default new Vue({
   data: {
+    email: '',
+    username: '',
     logged: false,
   },
 
   methods: {
     login(context, data, redirect) {
       this.$http.post('/v1/auth/login', data).then(res => {
-        if(res.data.token) {
+        if (res.data.token) {
+          let decoded = jwt_decode(res.data.token);
+          this.username = decoded.username;
+          this.email = decoded.email;
+
           localStorage.setItem('token', res.data.token);
           this.logged = true;
 
           axios.defaults.headers.common['Authorization'] = this.getAuthorizationHeader();
 
-          if(redirect) {
+          if (redirect) {
             router.push(redirect);
           }
         }
@@ -26,13 +33,13 @@ export default new Vue({
     },
     register(context, data, redirect) {
       this.$http.post('/v1/auth/register', data).then(res => {
-        if(res.data.token) {
+        if (res.data.token) {
           localStorage.setItem('token', res.data.token);
           this.logged = true;
 
           axios.defaults.headers.common['Authorization'] = this.getAuthorizationHeader();
 
-          if(redirect) {
+          if (redirect) {
             router.push(redirect);
           }
         }
@@ -47,8 +54,11 @@ export default new Vue({
     },
     checkAuthentication() {
       let token = localStorage.getItem('token');
-      if(token) {
+      if (token) {
         this.logged = true;
+        let decoded = jwt_decode(token);
+        this.username = decoded.username;
+        this.email = decoded.email;
         axios.defaults.headers.common['Authorization'] = this.getAuthorizationHeader();
       } else {
         this.logged = false;

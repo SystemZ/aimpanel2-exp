@@ -16,6 +16,15 @@ const router = new Router({
       component: Home
     },
     {
+      path: '/profile',
+      name: 'profile',
+      meta: {
+        title: 'Profile',
+        authRequired: true
+      },
+      component: () => import(/* webpackChunkName: "hosts" */ './views/Profile.vue')
+    },
+    {
       path: '/hosts',
       name: 'hosts',
       meta: {
