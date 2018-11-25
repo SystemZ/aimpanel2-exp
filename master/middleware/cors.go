@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func Cors(handler http.Handler) http.Handler {
+func CorsMiddleware(handler http.Handler) http.Handler {
 	log.Println("CORS Middleware")
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:8080"},

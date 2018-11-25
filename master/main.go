@@ -29,7 +29,8 @@ func main() {
 
 	log.Println("Starting API on port :8000")
 	r := router.NewRouter()
-	log.Fatal(http.ListenAndServe(":8000", middleware.Cors(r)))
+	log.Fatal(http.ListenAndServe(":8000",
+		middleware.CommonMiddleware(middleware.CorsMiddleware(r))))
 	//log.Println("start")
 	//conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	//lib.FailOnError(err, "Failed to connect to RabbitMQ")
