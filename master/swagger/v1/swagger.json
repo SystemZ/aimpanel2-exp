@@ -39,6 +39,272 @@
           "200": {}
         }
       }
+    },
+    "/auth/login": {
+      "post": {
+        "description": "Authenticates the user",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "http",
+          "https"
+        ],
+        "tags": [
+          "Authentication"
+        ],
+        "operationId": "login",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "Username",
+            "name": "username",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Password",
+            "name": "password",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/tokenResponse"
+          },
+          "default": {
+            "$ref": "#/responses/jsonError"
+          }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "description": "Registers new account",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "http",
+          "https"
+        ],
+        "tags": [
+          "Authentication"
+        ],
+        "operationId": "register",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "Username",
+            "name": "username",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "x-go-name": "Password",
+            "name": "password",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "x-go-name": "PasswordRepeat",
+            "name": "password_repeat",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "x-go-name": "Email",
+            "name": "email",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "x-go-name": "EmailRepeat",
+            "name": "email_repeat",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/tokenResponse"
+          },
+          "default": {
+            "$ref": "#/responses/jsonError"
+          }
+        }
+      }
+    },
+    "/hosts": {
+      "post": {
+        "description": "Creates new host",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "http",
+          "https"
+        ],
+        "tags": [
+          "Host"
+        ],
+        "operationId": "create",
+        "responses": {
+          "200": {},
+          "default": {
+            "$ref": "#/responses/jsonError"
+          }
+        }
+      }
+    },
+    "/hosts/{id}": {
+      "post": {
+        "description": "Get a host",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "http",
+          "https"
+        ],
+        "tags": [
+          "Host"
+        ],
+        "operationId": "get",
+        "responses": {
+          "200": {},
+          "default": {
+            "$ref": "#/responses/jsonError"
+          }
+        }
+      }
+    },
+    "/user/change_email": {
+      "post": {
+        "description": "Changes authenticated user email",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "http",
+          "https"
+        ],
+        "tags": [
+          "User"
+        ],
+        "operationId": "changeEmail",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "Email",
+            "name": "email",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "NewEmail",
+            "name": "new_email",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "NewEmailRepeat",
+            "name": "new_email_repeat",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {},
+          "default": {
+            "$ref": "#/responses/jsonError"
+          }
+        }
+      }
+    },
+    "/user/change_password": {
+      "post": {
+        "description": "Changes authenticated user password",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "http",
+          "https"
+        ],
+        "tags": [
+          "User"
+        ],
+        "operationId": "changePassword",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "Password",
+            "name": "password",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "NewPassword",
+            "name": "new_password",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "NewPasswordRepeat",
+            "name": "new_password_repeat",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {},
+          "default": {
+            "$ref": "#/responses/jsonError"
+          }
+        }
+      }
+    }
+  },
+  "responses": {
+    "jsonError": {
+      "description": "A JsonError is the default error message that is generated.",
+      "headers": {
+        "error_code": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "tokenResponse": {
+      "headers": {
+        "token": {
+          "type": "string"
+        }
+      }
     }
   }
 }

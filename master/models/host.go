@@ -8,8 +8,7 @@ import (
 )
 
 // Host represents the host for this application
-//
-// swagger:model
+// swagger:model host
 type Host struct {
 	// ID of the host
 	//

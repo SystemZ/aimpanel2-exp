@@ -19,6 +19,7 @@
                 <v-divider></v-divider>
                 <v-list-tile
                         v-for="item in menu"
+                        :key="item.title"
                         :to="item.path"
                         v-if="(item.authRequired && loggedIn) || (!item.authRequired && !loggedIn) || !item.authRequired"
                         active-class="red--text red--darken-1">
@@ -30,15 +31,7 @@
                     </v-list-tile-content>
                 </v-list-tile>
 
-                <v-list-tile v-if="loggedIn" @click="this.$auth.logout()">
-                    <v-list-tile-action>
-                        <v-icon>fa-sign-out</v-icon>
-                    </v-list-tile-action>
-                    <v-list-tile-content>
-                        <v-list-tile-title>Logout</v-list-tile-title>
-                    </v-list-tile-content>
-                </v-list-tile>
-                <v-list-tile v-else to="login" active-class="red--text red--darken-1">
+                <v-list-tile v-if="!loggedIn" to="login" active-class="red--text red--darken-1">
                     <v-list-tile-action>
                         <v-icon>fa-sign-in</v-icon>
                     </v-list-tile-action>
@@ -51,6 +44,22 @@
         <v-toolbar color="red darken-1" dark fixed app>
             <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
             <v-toolbar-title>{{$route.meta.title}}</v-toolbar-title>
+            <v-spacer></v-spacer>
+            <span v-if="loggedIn">
+                <v-menu offset-y>
+                <v-btn slot="activator">
+                    {{$auth.username}}&nbsp; <v-icon size="12">fa-chevron-down fa-small</v-icon>
+                </v-btn>
+                <v-list>
+                    <v-list-tile to="profile">
+                        <v-list-tile-title>Profile</v-list-tile-title>
+                    </v-list-tile>
+                    <v-list-tile @click="$auth.logout()">
+                        <v-list-tile-title>Log out</v-list-tile-title>
+                    </v-list-tile>
+                </v-list>
+            </v-menu>
+            </span>
         </v-toolbar>
         <v-content>
             <router-view/>

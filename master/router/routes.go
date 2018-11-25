@@ -60,4 +60,27 @@ var routes = Routes{
 		handlers.CreateHost,
 		true,
 	},
+
+	//User
+	Route{
+		"Change password",
+		"POST",
+		"/user/change_password",
+		handlers.ChangePassword,
+		true,
+	},
+	Route{
+		"Change email",
+		"POST",
+		"/user/change_email",
+		handlers.ChangeEmail,
+		true,
+	},
+	Route{
+		"User profile",
+		"GET",
+		"/user/profile",
+		handlers.Profile,
+		true,
+	},
 }

@@ -12,6 +12,21 @@ import (
 )
 
 func ListHosts(w http.ResponseWriter, r *http.Request) {
+	// swagger:route POST /hosts Host list
+	//
+	// List hosts
+	//
+	//Consumes:
+	//	- application/json
+	//
+	//Produces:
+	//	- application/json
+	//
+	//Schemes: http, https
+	//
+	//Responses:
+	//	default: jsonError
+	//	200:
 	var hosts []models.Host
 
 	db.DB.Find(&hosts)
@@ -20,6 +35,21 @@ func ListHosts(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetHost(w http.ResponseWriter, r *http.Request) {
+	// swagger:route POST /hosts/{id} Host get
+	//
+	// Get a host
+	//
+	//Consumes:
+	//	- application/json
+	//
+	//Produces:
+	//	- application/json
+	//
+	//Schemes: http, https
+	//
+	//Responses:
+	//	default: jsonError
+	//	200:
 	params := mux.Vars(r)
 
 	var host models.Host
@@ -30,6 +60,21 @@ func GetHost(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateHost(w http.ResponseWriter, r *http.Request) {
+	// swagger:route POST /hosts Host create
+	//
+	// Creates new host
+	//
+	//Consumes:
+	//	- application/json
+	//
+	//Produces:
+	//	- application/json
+	//
+	//Schemes: http, https
+	//
+	//Responses:
+	//	default: jsonError
+	//	200:
 	host := &models.Host{}
 
 	err := json.NewDecoder(r.Body).Decode(host)

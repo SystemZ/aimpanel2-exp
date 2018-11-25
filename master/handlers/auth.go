@@ -10,6 +10,21 @@ import (
 )
 
 func Register(w http.ResponseWriter, r *http.Request) {
+	// swagger:route POST /auth/register Authentication register
+	//
+	// Registers new account
+	//
+	//Consumes:
+	//	- application/json
+	//
+	//Produces:
+	//	- application/json
+	//
+	//Schemes: http, https
+	//
+	//Responses:
+	//	default: jsonError
+	//	200: tokenResponse
 	decoder := json.NewDecoder(r.Body)
 	var registerRequest requests.RegisterRequest
 	err := decoder.Decode(&registerRequest)
@@ -63,6 +78,21 @@ func Register(w http.ResponseWriter, r *http.Request) {
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
+	// swagger:route POST /auth/login Authentication login
+	//
+	// Authenticates the user
+	//
+	//Consumes:
+	//	- application/json
+	//
+	//Produces:
+	//	- application/json
+	//
+	//Schemes: http, https
+	//
+	//Responses:
+	//	default: jsonError
+	//	200: tokenResponse
 	decoder := json.NewDecoder(r.Body)
 	var loginRequest requests.LoginRequest
 	err := decoder.Decode(&loginRequest)
