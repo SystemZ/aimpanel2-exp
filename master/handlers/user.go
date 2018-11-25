@@ -11,6 +11,21 @@ import (
 )
 
 func ChangePassword(w http.ResponseWriter, r *http.Request) {
+	// swagger:route POST /user/change_password User changePassword
+	//
+	// Changes authenticated user password
+	//
+	//Consumes:
+	//	- application/json
+	//
+	//Produces:
+	//	- application/json
+	//
+	//Schemes: http, https
+	//
+	//Responses:
+	//	default: jsonError
+	//	200:
 	decoder := json.NewDecoder(r.Body)
 	var changePasswordReq requests.ChangePasswordReq
 	err := decoder.Decode(&changePasswordReq)
@@ -43,6 +58,21 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 }
 
 func ChangeEmail(w http.ResponseWriter, r *http.Request) {
+	// swagger:route POST /user/change_email User changeEmail
+	//
+	// Changes authenticated user email
+	//
+	//Consumes:
+	//	- application/json
+	//
+	//Produces:
+	//	- application/json
+	//
+	//Schemes: http, https
+	//
+	//Responses:
+	//	default: jsonError
+	//	200:
 	decoder := json.NewDecoder(r.Body)
 	var changeEmailReq requests.ChangeEmailReq
 	err := decoder.Decode(&changeEmailReq)

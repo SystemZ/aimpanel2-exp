@@ -11,8 +11,7 @@ import (
 )
 
 // User represents the user for this application
-//
-// swagger:model
+// swagger:model user
 type User struct {
 	// ID of the user
 	//
