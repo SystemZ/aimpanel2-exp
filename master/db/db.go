@@ -31,6 +31,9 @@ func SetupDatabase() *gorm.DB {
 	db.AutoMigrate(&models.User{})
 	db.AutoMigrate(&models.Host{})
 
+	db.AutoMigrate(&models.Game{})
+	db.AutoMigrate(&models.GameEngine{})
+
 	log.Println("Connected to the database")
 
 	//Create test user
