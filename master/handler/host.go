@@ -1,12 +1,12 @@
-package handlers
+package handler
 
 import (
 	"encoding/json"
 	"github.com/gofrs/uuid"
 	"github.com/gorilla/mux"
 	"gitlab.com/systemz/aimpanel2/master/db"
-	"gitlab.com/systemz/aimpanel2/master/models"
-	"gitlab.com/systemz/aimpanel2/master/responses"
+	"gitlab.com/systemz/aimpanel2/master/model"
+	"gitlab.com/systemz/aimpanel2/master/response"
 	"log"
 	"net/http"
 )
@@ -27,7 +27,7 @@ func ListHosts(w http.ResponseWriter, r *http.Request) {
 	//Responses:
 	//	default: jsonError
 	//	200:
-	var hosts []models.Host
+	var hosts []model.Host
 
 	db.DB.Find(&hosts)
 
@@ -52,7 +52,7 @@ func GetHost(w http.ResponseWriter, r *http.Request) {
 	//	200:
 	params := mux.Vars(r)
 
-	var host models.Host
+	var host model.Host
 
 	db.DB.Where("id = ?", params["id"]).First(&host)
 
@@ -75,11 +75,11 @@ func CreateHost(w http.ResponseWriter, r *http.Request) {
 	//Responses:
 	//	default: jsonError
 	//	200:
-	host := &models.Host{}
+	host := &model.Host{}
 
 	err := json.NewDecoder(r.Body).Decode(host)
 	if err != nil {
-		json.NewEncoder(w).Encode(responses.JsonError{ErrorCode: 10, Message: "Invalid body."})
+		json.NewEncoder(w).Encode(response.JsonError{ErrorCode: 10, Message: "Invalid body."})
 		return
 	}
 

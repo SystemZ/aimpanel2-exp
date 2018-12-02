@@ -1,4 +1,4 @@
-package requests
+package request
 
 //swagger:parameters Authentication register
 type RegisterRequest struct {

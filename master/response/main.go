@@ -1,4 +1,4 @@
-package responses
+package response
 
 // A JsonError is the default error message that is generated.
 //swagger:response jsonError

@@ -9,6 +9,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"strings"
 	"sync"
 	"syscall"
 )
@@ -21,16 +22,21 @@ type Process struct {
 	Output chan string
 	Input  chan string
 
+	Game lib.Game
+
 	//amqp
-	Channel  *amqp.Channel
-	Queue    amqp.Queue
-	RpcQueue amqp.Queue
+	Channel     *amqp.Channel
+	QueueLow    amqp.Queue
+	QueueNormal amqp.Queue
+	QueueHigh   amqp.Queue
+	RpcQueue    amqp.Queue
 }
 
 func (p *Process) Run() {
-	p.Cmd = exec.Command("java", "-Djline.terminal=jline.UnsupportedTerminal", "-jar", "BungeeCord.jar")
+	command := strings.Split(p.Game.Command, " ")
+	p.Cmd = exec.Command(command[0], command[1:]...)
 	//p.Cmd = exec.Command("bash", "fake-server.sh")
-	p.Cmd.Dir = "bungee"
+	p.Cmd.Dir = p.Game.Path
 
 	stdout, _ := p.Cmd.StdoutPipe()
 	stderr, _ := p.Cmd.StderrPipe()
@@ -86,6 +92,19 @@ func (p *Process) Run() {
 						Exit status: 143 == SIGTERM
 						Exit status: -1  == SIGKILL?
 					*/
+					exitMessage := lib.ExitMessage{
+						Code:    status.ExitStatus(),
+						Message: "",
+					}
+
+					exitMessageJson, _ := json.Marshal(exitMessage)
+
+					err := p.Channel.Publish("", p.QueueHigh.Name, false, false, amqp.Publishing{
+						ContentType: "application/json",
+						Body:        exitMessageJson,
+					})
+					lib.FailOnError(err, "Publish error")
+
 					log.Printf("Exit status: %d", status.ExitStatus())
 				}
 			}
@@ -108,7 +127,7 @@ func (p *Process) Log() {
 
 		logMessageJson, _ := json.Marshal(logMessage)
 
-		err := p.Channel.Publish("", p.Queue.Name, false, false, amqp.Publishing{
+		err := p.Channel.Publish("", p.QueueNormal.Name, false, false, amqp.Publishing{
 			ContentType: "application/json",
 			Body:        logMessageJson,
 		})
@@ -183,6 +202,51 @@ func (p *Process) Rpc() {
 			log.Info("STOP_SIGTERM message")
 
 			p.Kill(syscall.SIGTERM)
+
+			err = p.Channel.Publish("", d.ReplyTo, false, false, amqp.Publishing{
+				ContentType:   "application/json",
+				CorrelationId: d.CorrelationId,
+				Body:          []byte(""),
+			})
+			lib.FailOnError(err, "Failed to publish a message")
+
+			d.Ack(false)
+
+		case lib.DOWNLOAD:
+			log.Info("DOWNLOAD message")
+
+			url := strings.Split(p.Game.DownloadUrl, "/")
+
+			filename := url[len(url)-1]
+
+			if _, err := os.Stat(p.Game.Path + filename); os.IsNotExist(err) {
+				err := lib.DownloadFile(p.Game.Path+filename, p.Game.DownloadUrl)
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				log.Info("Downloaded file")
+			}
+
+			if strings.Contains(filename, ".tar.bz2") {
+				_, err := exec.Command("tar", "xvf", p.Game.Path+filename, "-C", p.Game.Path).CombinedOutput()
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				log.Info("Extracted file")
+			}
+
+			err = p.Channel.Publish("", d.ReplyTo, false, false, amqp.Publishing{
+				ContentType:   "application/json",
+				CorrelationId: d.CorrelationId,
+				Body:          []byte(""),
+			})
+			lib.FailOnError(err, "Failed to publish a message")
+
+			d.Ack(false)
+		case lib.OS_COMMAND:
+			log.Info("OS_COMMAND message")
 
 			err = p.Channel.Publish("", d.ReplyTo, false, false, amqp.Publishing{
 				ContentType:   "application/json",

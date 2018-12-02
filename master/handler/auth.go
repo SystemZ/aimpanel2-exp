@@ -1,11 +1,11 @@
-package handlers
+package handler
 
 import (
 	"encoding/json"
 	"gitlab.com/systemz/aimpanel2/master/db"
-	"gitlab.com/systemz/aimpanel2/master/models"
-	"gitlab.com/systemz/aimpanel2/master/requests"
-	"gitlab.com/systemz/aimpanel2/master/responses"
+	"gitlab.com/systemz/aimpanel2/master/model"
+	"gitlab.com/systemz/aimpanel2/master/request"
+	"gitlab.com/systemz/aimpanel2/master/response"
 	"net/http"
 )
 
@@ -26,35 +26,35 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	//	default: jsonError
 	//	200: tokenResponse
 	decoder := json.NewDecoder(r.Body)
-	var registerRequest requests.RegisterRequest
+	var registerRequest request.RegisterRequest
 	err := decoder.Decode(&registerRequest)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(responses.JsonError{ErrorCode: 1, Message: "Invalid body."})
+		json.NewEncoder(w).Encode(response.JsonError{ErrorCode: 1, Message: "Invalid body."})
 		return
 	}
 
 	if registerRequest.Password != registerRequest.PasswordRepeat {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(responses.JsonError{ErrorCode: 2, Message: "Passwords do not match."})
+		json.NewEncoder(w).Encode(response.JsonError{ErrorCode: 2, Message: "Passwords do not match."})
 		return
 	}
 
 	if registerRequest.Email != registerRequest.EmailRepeat {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(responses.JsonError{ErrorCode: 3, Message: "Emails do not match."})
+		json.NewEncoder(w).Encode(response.JsonError{ErrorCode: 3, Message: "Emails do not match."})
 		return
 	}
 
 	var count int64
-	db.DB.Model(&models.User{}).Where("username = ?", registerRequest.Username).Count(&count)
+	db.DB.Model(&model.User{}).Where("username = ?", registerRequest.Username).Count(&count)
 	if count > 0 {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(responses.JsonError{ErrorCode: 4, Message: "User with this username already exist."})
+		json.NewEncoder(w).Encode(response.JsonError{ErrorCode: 4, Message: "User with this username already exist."})
 		return
 	}
 
-	var user models.User
+	var user model.User
 	user.Username = registerRequest.Username
 	user.Email = registerRequest.Email
 	user.PasswordHash = user.HashPassword(registerRequest.Password)
@@ -62,19 +62,19 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	err = db.DB.Save(&user).Error
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(responses.JsonError{ErrorCode: 5, Message: "Something went wrong."})
+		json.NewEncoder(w).Encode(response.JsonError{ErrorCode: 5, Message: "Something went wrong."})
 		return
 	}
 
 	token, err := user.GenerateJWT()
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(responses.JsonError{ErrorCode: 6, Message: "Something went wrong."})
+		json.NewEncoder(w).Encode(response.JsonError{ErrorCode: 6, Message: "Something went wrong."})
 		return
 	}
 
 	w.WriteHeader(200)
-	json.NewEncoder(w).Encode(responses.TokenResponse{Token: token})
+	json.NewEncoder(w).Encode(response.TokenResponse{Token: token})
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
@@ -94,30 +94,30 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	//	default: jsonError
 	//	200: tokenResponse
 	decoder := json.NewDecoder(r.Body)
-	var loginRequest requests.LoginRequest
+	var loginRequest request.LoginRequest
 	err := decoder.Decode(&loginRequest)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(responses.JsonError{ErrorCode: 7, Message: "Invalid body."})
+		json.NewEncoder(w).Encode(response.JsonError{ErrorCode: 7, Message: "Invalid body."})
 		return
 	}
 
-	var user models.User
+	var user model.User
 	db.DB.Where("username = ?", loginRequest.Username).Find(&user)
 
 	if user.CheckPassword(loginRequest.Password) {
 		token, err := user.GenerateJWT()
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(responses.JsonError{ErrorCode: 8, Message: "Something went wrong."})
+			json.NewEncoder(w).Encode(response.JsonError{ErrorCode: 8, Message: "Something went wrong."})
 			return
 		}
 
 		w.WriteHeader(200)
-		json.NewEncoder(w).Encode(responses.TokenResponse{Token: token})
+		json.NewEncoder(w).Encode(response.TokenResponse{Token: token})
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(responses.JsonError{ErrorCode: 9, Message: "Wrong password."})
+		json.NewEncoder(w).Encode(response.JsonError{ErrorCode: 9, Message: "Wrong password."})
 		return
 	}
 }

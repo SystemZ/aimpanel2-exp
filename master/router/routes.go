@@ -1,7 +1,7 @@
 package router
 
 import (
-	"gitlab.com/systemz/aimpanel2/master/handlers"
+	"gitlab.com/systemz/aimpanel2/master/handler"
 	"net/http"
 )
 
@@ -20,21 +20,21 @@ var routes = Routes{
 		"Index",
 		"GET",
 		"/",
-		handlers.Index,
+		handler.Index,
 		true,
 	},
 	Route{
 		"Register",
 		"POST",
 		"/auth/register",
-		handlers.Register,
+		handler.Register,
 		false,
 	},
 	Route{
 		"Login",
 		"POST",
 		"/auth/login",
-		handlers.Login,
+		handler.Login,
 		false,
 	},
 
@@ -43,21 +43,21 @@ var routes = Routes{
 		"List hosts",
 		"GET",
 		"/hosts",
-		handlers.ListHosts,
+		handler.ListHosts,
 		true,
 	},
 	Route{
 		"Get host",
 		"GET",
 		"/hosts/{id}",
-		handlers.GetHost,
+		handler.GetHost,
 		true,
 	},
 	Route{
 		"Create host",
 		"POST",
 		"/hosts",
-		handlers.CreateHost,
+		handler.CreateHost,
 		true,
 	},
 
@@ -66,21 +66,21 @@ var routes = Routes{
 		"Change password",
 		"POST",
 		"/user/change_password",
-		handlers.ChangePassword,
+		handler.ChangePassword,
 		true,
 	},
 	Route{
 		"Change email",
 		"POST",
 		"/user/change_email",
-		handlers.ChangeEmail,
+		handler.ChangeEmail,
 		true,
 	},
 	Route{
 		"User profile",
 		"GET",
 		"/user/profile",
-		handlers.Profile,
+		handler.Profile,
 		true,
 	},
 }
