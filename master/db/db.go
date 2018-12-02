@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
-	"gitlab.com/systemz/aimpanel2/master/models"
+	"gitlab.com/systemz/aimpanel2/master/model"
 	"log"
 	"os"
 )
@@ -28,11 +28,11 @@ func SetupDatabase() *gorm.DB {
 
 	db.LogMode(true)
 
-	db.AutoMigrate(&models.User{})
-	db.AutoMigrate(&models.Host{})
+	db.AutoMigrate(&model.User{})
+	db.AutoMigrate(&model.Host{})
 
-	db.AutoMigrate(&models.Game{})
-	db.AutoMigrate(&models.GameEngine{})
+	db.AutoMigrate(&model.Game{})
+	db.AutoMigrate(&model.GameEngine{})
 
 	log.Println("Connected to the database")
 

@@ -1,4 +1,4 @@
-package responses
+package response
 
 //swagger:response tokenResponse
 type TokenResponse struct {

@@ -1,4 +1,4 @@
-package requests
+package request
 
 //swagger:parameters User changePassword
 type ChangePasswordReq struct {

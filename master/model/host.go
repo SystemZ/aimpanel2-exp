@@ -1,4 +1,4 @@
-package models
+package model
 
 import (
 	"github.com/gofrs/uuid"
@@ -7,18 +7,28 @@ import (
 	"time"
 )
 
-// Game represents the game for this application
-// swagger:model game
-type Game struct {
-	// ID of the game
+// Host represents the host for this application
+// swagger:model host
+type Host struct {
+	// ID of the host
 	//
 	// required: true
-	ID uint `gorm:"primary_key" json:"id"`
+	ID uuid.UUID `json:"id" gorm:"primary_key;type:varchar(36)" json:"id"`
 
 	// Name
 	//
 	// required: true
 	Name string `gorm:"column:name" json:"name"`
+
+	// User ID
+	//
+	// required: true
+	UserId uuid.UUID `gorm:"column:user_id" json:"user_id"`
+
+	// Host IP address
+	//
+	// required: true
+	Ip string `gorm:"column:ip" json:"ip"`
 
 	//Created at timestamp
 	CreatedAt time.Time `json:"created_at"`
@@ -30,7 +40,7 @@ type Game struct {
 	DeletedAt *time.Time `json:"deleted_at"`
 }
 
-func (u *Game) BeforeCreate(scope *gorm.Scope) error {
+func (u *Host) BeforeCreate(scope *gorm.Scope) error {
 	uuidGen, err := uuid.NewV4()
 	if err != nil {
 		log.Println(err)
