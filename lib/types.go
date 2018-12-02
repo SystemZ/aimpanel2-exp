@@ -15,3 +15,8 @@ type RpcMessage struct {
 type LogMessage struct {
 	Message string
 }
+
+type ExitMessage struct {
+	Code    int
+	Message string
+}

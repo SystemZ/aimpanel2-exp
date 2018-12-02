@@ -88,6 +88,19 @@ func (p *Process) Run() {
 						Exit status: 143 == SIGTERM
 						Exit status: -1  == SIGKILL?
 					*/
+					exitMessage := lib.ExitMessage{
+						Code:    status.ExitStatus(),
+						Message: "",
+					}
+
+					exitMessageJson, _ := json.Marshal(exitMessage)
+
+					err := p.Channel.Publish("", p.QueueHigh.Name, false, false, amqp.Publishing{
+						ContentType: "application/json",
+						Body:        exitMessageJson,
+					})
+					lib.FailOnError(err, "Publish error")
+
 					log.Printf("Exit status: %d", status.ExitStatus())
 				}
 			}
