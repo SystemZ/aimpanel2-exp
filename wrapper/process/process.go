@@ -22,9 +22,11 @@ type Process struct {
 	Input  chan string
 
 	//amqp
-	Channel  *amqp.Channel
-	Queue    amqp.Queue
-	RpcQueue amqp.Queue
+	Channel     *amqp.Channel
+	QueueLow    amqp.Queue
+	QueueNormal amqp.Queue
+	QueueHigh   amqp.Queue
+	RpcQueue    amqp.Queue
 }
 
 func (p *Process) Run() {
@@ -108,7 +110,7 @@ func (p *Process) Log() {
 
 		logMessageJson, _ := json.Marshal(logMessage)
 
-		err := p.Channel.Publish("", p.Queue.Name, false, false, amqp.Publishing{
+		err := p.Channel.Publish("", p.QueueNormal.Name, false, false, amqp.Publishing{
 			ContentType: "application/json",
 			Body:        logMessageJson,
 		})
