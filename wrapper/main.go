@@ -5,6 +5,9 @@ import (
 	"github.com/streadway/amqp"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/wrapper/process"
+
+	//"gitlab.com/systemz/aimpanel2/wrapper/process"
+	"os"
 )
 
 var (
@@ -53,9 +56,36 @@ func main() {
 	output := make(chan string)
 	input := make(chan string)
 
+	games := []lib.Game{
+		{
+			Name:        "Minecraft",
+			Command:     "java -Djline.terminal=jline.UnsupportedTerminal -jar BungeeCord.jar",
+			DownloadUrl: "https://ci.md-5.net/job/BungeeCord/lastSuccessfulBuild/artifact/bootstrap/target/BungeeCord.jar",
+			Path:        "/tmp/minecraft/",
+		},
+		{
+			Name:        "TeamSpeak3",
+			Command:     "sh teamspeak3-server_linux_amd64/ts3server_minimal_runscript.sh",
+			DownloadUrl: "http://dl.4players.de/ts/releases/3.5.0/teamspeak3-server_linux_amd64-3.5.0.tar.bz2",
+			Path:        "/tmp/teamspeak3/",
+		},
+	}
+
+	arg := os.Args[1]
+
+	var game lib.Game
+
+	for _, v := range games {
+		if arg == v.Name {
+			game = v
+		}
+	}
+
 	p := &process.Process{
 		Output: output,
 		Input:  input,
+
+		Game: game,
 
 		//amqp
 		Channel:     channel,

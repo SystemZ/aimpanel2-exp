@@ -5,6 +5,8 @@ const (
 	COMMAND      = 1
 	STOP_SIGKILL = 2
 	STOP_SIGTERM = 3
+	DOWNLOAD     = 4
+	OS_COMMAND   = 5
 )
 
 type RpcMessage struct {
@@ -19,4 +21,11 @@ type LogMessage struct {
 type ExitMessage struct {
 	Code    int
 	Message string
+}
+
+type Game struct {
+	Name        string
+	Command     string
+	DownloadUrl string
+	Path        string
 }
