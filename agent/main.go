@@ -1,11 +1,7 @@
 package main
 
-import (
-	log "github.com/sirupsen/logrus"
-)
+import "gitlab.com/systemz/aimpanel2/agent/cmd"
 
 func main() {
-		log.Println("Starting agent")
-
-
+	cmd.Execute()
 }
