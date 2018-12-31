@@ -15,7 +15,7 @@ func init() {
 }
 
 var rootCmd = &cobra.Command{
-	Use:   "aimpanel-agent",
+	Use:   "slave",
 	Short: "",
 	Long:  "",
 	Run: func(cmd *cobra.Command, args []string) {

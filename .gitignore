@@ -5,3 +5,5 @@ master-frontend/.idea
 master/.idea
 wrapper/.idea
 agent/.idea
+slave/.idea
+slave/slave
