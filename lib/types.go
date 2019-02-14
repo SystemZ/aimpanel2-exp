@@ -2,14 +2,15 @@ package lib
 
 const (
 	//WRAPPER
-	START        = 0
-	COMMAND      = 1
-	STOP_SIGKILL = 2
-	STOP_SIGTERM = 3
+	GAME_START        = iota
+	GAME_COMMAND      = iota
+	GAME_STOP_SIGKILL = iota
+	GAME_STOP_SIGTERM = iota
 
 	//AGENT
-	INSTALL_GAME_SERVER = 4
-	START_WRAPPER       = 5
+	WRAPPER_START = iota
+	GAME_INSTALL  = iota
+	GAME_RESTART  = iota
 )
 
 type RpcMessage struct {

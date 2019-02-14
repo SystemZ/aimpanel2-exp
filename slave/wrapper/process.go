@@ -163,8 +163,8 @@ func (p *Process) Rpc() {
 		}
 
 		switch rpcMsg.Type {
-		case lib.START:
-			logrus.Info("Got START msg")
+		case lib.GAME_START:
+			logrus.Info("Got GAME_START msg")
 
 			p.Game = lib.GAMES[rpcMsg.Game]
 			p.GameServerUUID = rpcMsg.GameServerUUID
@@ -179,8 +179,8 @@ func (p *Process) Rpc() {
 			lib.FailOnError(err, "Failed to publish a message")
 
 			d.Ack(false)
-		case lib.COMMAND:
-			logrus.Info("Got COMMAND msg")
+		case lib.GAME_COMMAND:
+			logrus.Info("Got GAME_COMMAND msg")
 
 			go func() { p.Input <- string(rpcMsg.Body) }()
 
@@ -192,8 +192,8 @@ func (p *Process) Rpc() {
 			lib.FailOnError(err, "Failed to publish a message")
 
 			d.Ack(false)
-		case lib.STOP_SIGKILL:
-			logrus.Info("Got STOP_SIGKILL msg")
+		case lib.GAME_STOP_SIGKILL:
+			logrus.Info("Got GAME_STOP_SIGKILL msg")
 
 			p.Kill(syscall.SIGKILL)
 
@@ -205,8 +205,8 @@ func (p *Process) Rpc() {
 			lib.FailOnError(err, "Failed to publish a message")
 
 			d.Ack(false)
-		case lib.STOP_SIGTERM:
-			logrus.Info("Got STOP_SIGTERM msg")
+		case lib.GAME_STOP_SIGTERM:
+			logrus.Info("Got GAME_STOP_SIGTERM msg")
 
 			p.Kill(syscall.SIGTERM)
 

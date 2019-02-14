@@ -24,7 +24,7 @@ func Rpc(channel *amqp.Channel, rpcQueue amqp.Queue) {
 		}
 
 		switch rpcMsg.Type {
-		case lib.INSTALL_GAME_SERVER:
+		case lib.GAME_INSTALL:
 			logrus.Info("INSTALL_GAME_SERVER")
 
 			game := lib.GAMES[rpcMsg.Game]
@@ -76,7 +76,7 @@ func Rpc(channel *amqp.Channel, rpcQueue amqp.Queue) {
 			logrus.Info("Installation finished")
 
 			d.Ack(false)
-		case lib.START_WRAPPER:
+		case lib.WRAPPER_START:
 			logrus.Info("START_WRAPPER")
 			cmd := exec.Command("slave", "wrapper", "test-test-test-test")
 			if err := cmd.Start(); err != nil {
