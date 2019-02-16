@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 )
 
 func Rpc(channel *amqp.Channel, rpcQueue amqp.Queue) {
@@ -83,6 +84,70 @@ func Rpc(channel *amqp.Channel, rpcQueue amqp.Queue) {
 				logrus.Error(err)
 			}
 			cmd.Process.Release()
+
+			d.Ack(false)
+		case lib.GAME_RESTART:
+			logrus.Info("GAME_RESTART")
+
+			logrus.Info("STOPPING GAME SERVER")
+
+			rpcMsg := lib.RpcMessage{
+				Type:           lib.GAME_STOP_SIGTERM,
+				Body:           "",
+				Game:           "minecraft",
+				GameServerUUID: "test-test-test-test",
+			}
+			jsonMarshal, _ := json.Marshal(rpcMsg)
+
+			err := channel.Publish(
+				"",
+				"wrapper_rpc",
+				false,
+				false,
+				amqp.Publishing{
+					ContentType:   "application/json",
+					CorrelationId: lib.RandomString(32),
+					ReplyTo:       rpcQueue.Name,
+					Body:          jsonMarshal,
+				})
+			if err != nil {
+				lib.FailOnError(err, "Failed to publish a message")
+			}
+
+			time.Sleep(5 * time.Second)
+
+			logrus.Info("STARTING WRAPPER")
+			cmd := exec.Command("slave", "wrapper", "test-test-test-test")
+			if err := cmd.Start(); err != nil {
+				logrus.Error(err)
+			}
+			cmd.Process.Release()
+
+			time.Sleep(5 * time.Second)
+
+			logrus.Info("STARTING GAME SERVER")
+
+			start := lib.RpcMessage{
+				Type:           lib.GAME_START,
+				Body:           "",
+				Game:           "minecraft",
+				GameServerUUID: "test-test-test-test",
+			}
+			jsonMarshal, _ = json.Marshal(start)
+
+			err = channel.Publish("",
+				"wrapper_rpc",
+				false,
+				false,
+				amqp.Publishing{
+					ContentType:   "application/json",
+					CorrelationId: lib.RandomString(32),
+					ReplyTo:       rpcQueue.Name,
+					Body:          jsonMarshal,
+				})
+			if err != nil {
+				lib.FailOnError(err, "Failed to publish a message")
+			}
 
 			d.Ack(false)
 		}

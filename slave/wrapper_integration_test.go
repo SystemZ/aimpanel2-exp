@@ -38,7 +38,7 @@ func TestWrapperStart(t *testing.T) {
 	corrId := lib.RandomString(32)
 
 	start := lib.RpcMessage{
-		Type:           lib.START,
+		Type:           lib.GAME_START,
 		Body:           "",
 		Game:           "minecraft",
 		GameServerUUID: "test-test-test-test",
@@ -90,7 +90,7 @@ func TestWrapperCommand(t *testing.T) {
 	corrId := lib.RandomString(32)
 
 	start := lib.RpcMessage{
-		Type:           lib.COMMAND,
+		Type:           lib.GAME_COMMAND,
 		Body:           "alert test",
 		Game:           "minecraft",
 		GameServerUUID: "test-test-test-test",
@@ -142,7 +142,7 @@ func TestWrapperStopSigkill(t *testing.T) {
 	corrId := lib.RandomString(32)
 
 	start := lib.RpcMessage{
-		Type:           lib.STOP_SIGKILL,
+		Type:           lib.GAME_STOP_SIGKILL,
 		Body:           "",
 		Game:           "minecraft",
 		GameServerUUID: "test-test-test-test",
@@ -194,7 +194,7 @@ func TestWrapperStopSigterm(t *testing.T) {
 	corrId := lib.RandomString(32)
 
 	start := lib.RpcMessage{
-		Type:           lib.STOP_SIGTERM,
+		Type:           lib.GAME_STOP_SIGTERM,
 		Body:           "",
 		Game:           "minecraft",
 		GameServerUUID: "test-test-test-test",

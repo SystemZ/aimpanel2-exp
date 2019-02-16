@@ -38,7 +38,7 @@ func TestAgentInstallGameServer(t *testing.T) {
 	corrId := lib.RandomString(32)
 
 	start := lib.RpcMessage{
-		Type:           lib.INSTALL_GAME_SERVER,
+		Type:           lib.GAME_INSTALL,
 		Body:           "",
 		Game:           "minecraft",
 		GameServerUUID: "test-test-test-test",
@@ -90,7 +90,7 @@ func TestAgentStartWrapper(t *testing.T) {
 	corrId := lib.RandomString(32)
 
 	start := lib.RpcMessage{
-		Type:           lib.START_WRAPPER,
+		Type:           lib.WRAPPER_START,
 		Body:           "",
 		Game:           "minecraft",
 		GameServerUUID: "test-test-test-test",

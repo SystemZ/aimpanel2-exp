@@ -6,6 +6,7 @@ type Game struct {
 	FileName    string
 	DownloadUrl string
 	InstallCmds [][]string
+	StopCommand string
 }
 
 var GAMES = map[string]Game{
@@ -17,6 +18,7 @@ var GAMES = map[string]Game{
 		InstallCmds: [][]string{
 			{"cp", "/opt/aimpanel/storage/{fileName}", "/opt/aimpanel/gs/{uuid}/"},
 		},
+		StopCommand: "exit",
 	},
 	"teamspeak3": {
 		Name:        "TeamSpeak3",
@@ -24,5 +26,6 @@ var GAMES = map[string]Game{
 		FileName:    "teamspeak3-server_linux_amd64-3.5.0.tar.bz2",
 		DownloadUrl: "http://dl.4players.de/ts/releases/3.5.0/teamspeak3-server_linux_amd64-3.5.0.tar.bz2",
 		InstallCmds: [][]string{},
+		StopCommand: "",
 	},
 }
