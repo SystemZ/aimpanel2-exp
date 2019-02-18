@@ -59,7 +59,8 @@ func Start(startToken string) {
 		RpcQueue:    rpcQueue,
 	}
 
-	go p.Log()
+	go p.LogStdout()
+	go p.LogStderr()
 	go p.Rpc()
 
 	select {}

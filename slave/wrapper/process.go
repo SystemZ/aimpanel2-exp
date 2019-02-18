@@ -6,6 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
 	"gitlab.com/systemz/aimpanel2/lib"
+	"gitlab.com/systemz/aimpanel2/lib/rabbit"
 	"io"
 	"log"
 	"os"
@@ -15,28 +16,32 @@ import (
 )
 
 type Process struct {
-	Cmd *exec.Cmd
-
+	Cmd     *exec.Cmd
 	Running bool
 
 	Output chan string
 	Input  chan string
 
+	Stdout chan string
+	Stderr chan string
+
 	//amqp
-	Channel     *amqp.Channel
-	QueueLow    amqp.Queue
-	QueueNormal amqp.Queue
-	QueueHigh   amqp.Queue
-	RpcQueue    amqp.Queue
+	Channel             *amqp.Channel
+	QueueLow            amqp.Queue
+	QueueNormal         amqp.Queue
+	QueueHigh           amqp.Queue
+	RpcQueue            amqp.Queue
+	ClientCorrelationId string
+	ReplyTo             string
 
 	//
-	GameServerUUID string
-	Game           lib.Game
+	GameServerID string
+	Game         lib.Game
 }
 
 func (p *Process) Run() {
 	p.Cmd = exec.Command(p.Game.Command[0], p.Game.Command[1:]...)
-	p.Cmd.Dir = "/opt/aimpanel/gs/" + p.GameServerUUID
+	p.Cmd.Dir = "/opt/aimpanel/gs/" + p.GameServerID
 
 	stdout, _ := p.Cmd.StdoutPipe()
 	stderr, _ := p.Cmd.StderrPipe()
@@ -65,20 +70,19 @@ func (p *Process) Run() {
 		in := bufio.NewScanner(stdout)
 
 		for in.Scan() {
-			p.Output <- in.Text()
-		}
-
-		if err := in.Err(); err != nil {
-			logrus.Printf("error: %s", err)
+			p.Stdout <- in.Text()
+			logrus.Info(in.Text())
 		}
 	}()
 
 	go func() {
 		defer wg.Done()
 
-		in2 := bufio.NewScanner(stderr)
-		for in2.Scan() {
-			logrus.Info(in2.Text())
+		in := bufio.NewScanner(stderr)
+
+		for in.Scan() {
+			p.Stderr <- in.Text()
+			logrus.Info(in.Text())
 		}
 	}()
 
@@ -92,11 +96,10 @@ func (p *Process) Run() {
 						Exit status: 143 == SIGTERM
 						Exit status: -1  == SIGKILL?
 					*/
-					exitMessage := lib.ExitMessage{
+					exitMessage := rabbit.ExitMessage{
 						Code:    status.ExitStatus(),
 						Message: "",
 					}
-
 					exitMessageJson, _ := json.Marshal(exitMessage)
 
 					err := p.Channel.Publish("", p.QueueHigh.Name, false, false, amqp.Publishing{
@@ -119,25 +122,53 @@ func (p *Process) Run() {
 	wg.Wait()
 }
 
-func (p *Process) Log() {
+func (p *Process) LogStdout() {
 	for {
-		msg := <-p.Output
+		msg := <-p.Stdout
 
-		logMessage := lib.LogMessage{
-			Message: msg,
+		logMessage := rabbit.QueueMsg{
+			Stdout: msg,
 		}
 
 		logMessageJson, _ := json.Marshal(logMessage)
 
-		err := p.Channel.Publish("", p.QueueNormal.Name, false, false, amqp.Publishing{
-			ContentType: "application/json",
-			Body:        logMessageJson,
-		})
-		lib.FailOnError(err, "Publish error")
+		err := p.Channel.Publish(
+			"",
+			p.QueueNormal.Name,
+			false,
+			false,
+			amqp.Publishing{
+				ContentType:   "application/json",
+				CorrelationId: p.ClientCorrelationId,
+				Body:          logMessageJson,
+			})
 
-		logrus.WithFields(logrus.Fields{
-			"msg": msg,
-		}).Info()
+		lib.FailOnError(err, "Publish error")
+	}
+}
+
+func (p *Process) LogStderr() {
+	for {
+		msg := <-p.Stderr
+
+		logMessage := rabbit.QueueMsg{
+			Stderr: msg,
+		}
+
+		logMessageJson, _ := json.Marshal(logMessage)
+
+		err := p.Channel.Publish(
+			"",
+			p.QueueHigh.Name,
+			false,
+			false,
+			amqp.Publishing{
+				ContentType:   "application/json",
+				CorrelationId: p.ClientCorrelationId,
+				Body:          logMessageJson,
+			})
+
+		lib.FailOnError(err, "Publish error")
 	}
 }
 
@@ -149,75 +180,87 @@ func (p *Process) Kill(signal syscall.Signal) {
 
 }
 
+type rabbitTask struct {
+	msg     amqp.Delivery
+	msgBody rabbit.QueueMsg
+	ch      *amqp.Channel
+}
+
 func (p *Process) Rpc() {
 	msgs, err := p.Channel.Consume(p.RpcQueue.Name, "", false, false, false, false, nil)
 	lib.FailOnError(err, "Failed to register a consumer")
 
-	for d := range msgs {
-		logrus.Info("Got RPC call from RabbitMQ")
+	for msg := range msgs {
+		logrus.Info("Received a task")
 
-		var rpcMsg lib.RpcMessage
-		err := json.Unmarshal(d.Body, &rpcMsg)
+		var msgBody rabbit.QueueMsg
+		err := json.Unmarshal(msg.Body, &msgBody)
 		if err != nil {
 			logrus.Warn(err)
 		}
 
-		switch rpcMsg.Type {
-		case lib.GAME_START:
+		task := rabbitTask{
+			msg:     msg,
+			ch:      channel,
+			msgBody: msgBody,
+		}
+
+		switch msgBody.TaskId {
+		case rabbit.GAME_START:
 			logrus.Info("Got GAME_START msg")
 
-			p.Game = lib.GAMES[rpcMsg.Game]
-			p.GameServerUUID = rpcMsg.GameServerUUID
+			p.Game = lib.GAMES[task.msgBody.Game]
+			p.GameServerID = task.msgBody.GameServerID
 
 			go p.Run()
 
-			err = p.Channel.Publish("", d.ReplyTo, false, false, amqp.Publishing{
+			err = p.Channel.Publish("", msg.ReplyTo, false, false, amqp.Publishing{
 				ContentType:   "application/json",
-				CorrelationId: d.CorrelationId,
+				CorrelationId: p.ClientCorrelationId,
 				Body:          []byte(""),
 			})
 			lib.FailOnError(err, "Failed to publish a message")
 
-			d.Ack(false)
-		case lib.GAME_COMMAND:
+			msg.Ack(false)
+		case rabbit.GAME_COMMAND:
 			logrus.Info("Got GAME_COMMAND msg")
 
-			go func() { p.Input <- string(rpcMsg.Body) }()
+			go func() { p.Input <- string(msgBody.Body) }()
 
-			err = p.Channel.Publish("", d.ReplyTo, false, false, amqp.Publishing{
+			err = p.Channel.Publish("", msg.ReplyTo, false, false, amqp.Publishing{
 				ContentType:   "application/json",
-				CorrelationId: d.CorrelationId,
+				CorrelationId: p.ClientCorrelationId,
 				Body:          []byte(""),
 			})
 			lib.FailOnError(err, "Failed to publish a message")
 
-			d.Ack(false)
-		case lib.GAME_STOP_SIGKILL:
+			msg.Ack(false)
+		case rabbit.GAME_STOP_SIGKILL:
 			logrus.Info("Got GAME_STOP_SIGKILL msg")
 
 			p.Kill(syscall.SIGKILL)
 
-			err = p.Channel.Publish("", d.ReplyTo, false, false, amqp.Publishing{
+			err = p.Channel.Publish("", msg.ReplyTo, false, false, amqp.Publishing{
 				ContentType:   "application/json",
-				CorrelationId: d.CorrelationId,
+				CorrelationId: p.ClientCorrelationId,
 				Body:          []byte(""),
 			})
 			lib.FailOnError(err, "Failed to publish a message")
 
-			d.Ack(false)
-		case lib.GAME_STOP_SIGTERM:
+			msg.Ack(false)
+		case rabbit.GAME_STOP_SIGTERM:
 			logrus.Info("Got GAME_STOP_SIGTERM msg")
 
 			p.Kill(syscall.SIGTERM)
 
-			err = p.Channel.Publish("", d.ReplyTo, false, false, amqp.Publishing{
+			err = p.Channel.Publish("", msg.ReplyTo, false, false, amqp.Publishing{
 				ContentType:   "application/json",
-				CorrelationId: d.CorrelationId,
+				CorrelationId: p.ClientCorrelationId,
 				Body:          []byte(""),
 			})
 			lib.FailOnError(err, "Failed to publish a message")
 
-			d.Ack(false)
+			msg.Ack(false)
 		}
 	}
 }
