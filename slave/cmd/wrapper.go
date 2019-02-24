@@ -10,7 +10,7 @@ func init() {
 }
 
 var wrapperCmd = &cobra.Command{
-	Use:   "wrapper [start token]",
+	Use:   "wrapper [game server id]",
 	Short: "Start wrapper",
 	Long:  "",
 	Args:  cobra.MinimumNArgs(1),

@@ -1,11 +1,10 @@
-// +build integration
-
 package main_test
 
 import (
 	"encoding/json"
 	"github.com/streadway/amqp"
 	"gitlab.com/systemz/aimpanel2/lib"
+	"gitlab.com/systemz/aimpanel2/lib/rabbit"
 	"testing"
 )
 
@@ -37,17 +36,16 @@ func TestWrapperStart(t *testing.T) {
 
 	corrId := lib.RandomString(32)
 
-	start := lib.RpcMessage{
-		Type:           lib.GAME_START,
-		Body:           "",
-		Game:           "minecraft",
-		GameServerUUID: "test-test-test-test",
+	start := rabbit.QueueMsg{
+		TaskId:       rabbit.GAME_START,
+		Game:         "minecraft",
+		GameServerID: "test-test-test-test",
 	}
 	jsonMarshal, _ := json.Marshal(start)
 
 	err = channel.Publish(
 		"",
-		"wrapper_rpc",
+		"wrapper_test-test-test-test",
 		false,
 		false,
 		amqp.Publishing{
@@ -89,17 +87,17 @@ func TestWrapperCommand(t *testing.T) {
 
 	corrId := lib.RandomString(32)
 
-	start := lib.RpcMessage{
-		Type:           lib.GAME_COMMAND,
-		Body:           "alert test",
-		Game:           "minecraft",
-		GameServerUUID: "test-test-test-test",
+	start := rabbit.QueueMsg{
+		TaskId:       rabbit.GAME_COMMAND,
+		Body:         "alert test",
+		Game:         "minecraft",
+		GameServerID: "test-test-test-test",
 	}
 	jsonMarshal, _ := json.Marshal(start)
 
 	err = channel.Publish(
 		"",
-		"wrapper_rpc",
+		"wrapper_test-test-test-test",
 		false,
 		false,
 		amqp.Publishing{
@@ -141,17 +139,16 @@ func TestWrapperStopSigkill(t *testing.T) {
 
 	corrId := lib.RandomString(32)
 
-	start := lib.RpcMessage{
-		Type:           lib.GAME_STOP_SIGKILL,
-		Body:           "",
-		Game:           "minecraft",
-		GameServerUUID: "test-test-test-test",
+	start := rabbit.QueueMsg{
+		TaskId:       rabbit.GAME_STOP_SIGKILL,
+		Game:         "minecraft",
+		GameServerID: "test-test-test-test",
 	}
 	jsonMarshal, _ := json.Marshal(start)
 
 	err = channel.Publish(
 		"",
-		"wrapper_rpc",
+		"wrapper_test-test-test-test",
 		false,
 		false,
 		amqp.Publishing{
@@ -193,17 +190,17 @@ func TestWrapperStopSigterm(t *testing.T) {
 
 	corrId := lib.RandomString(32)
 
-	start := lib.RpcMessage{
-		Type:           lib.GAME_STOP_SIGTERM,
-		Body:           "",
-		Game:           "minecraft",
-		GameServerUUID: "test-test-test-test",
+	start := rabbit.QueueMsg{
+		TaskId:       rabbit.GAME_STOP_SIGTERM,
+		Body:         "",
+		Game:         "minecraft",
+		GameServerID: "test-test-test-test",
 	}
 	jsonMarshal, _ := json.Marshal(start)
 
 	err = channel.Publish(
 		"",
-		"wrapper_rpc",
+		"wrapper_test-test-test-test",
 		false,
 		false,
 		amqp.Publishing{

@@ -27,10 +27,7 @@ type Process struct {
 
 	//amqp
 	Channel             *amqp.Channel
-	QueueLow            amqp.Queue
-	QueueNormal         amqp.Queue
-	QueueHigh           amqp.Queue
-	RpcQueue            amqp.Queue
+	Queue               amqp.Queue
 	ClientCorrelationId string
 	ReplyTo             string
 
@@ -102,7 +99,7 @@ func (p *Process) Run() {
 					}
 					exitMessageJson, _ := json.Marshal(exitMessage)
 
-					err := p.Channel.Publish("", p.QueueHigh.Name, false, false, amqp.Publishing{
+					err := p.Channel.Publish("", p.Queue.Name, false, false, amqp.Publishing{
 						ContentType: "application/json",
 						Body:        exitMessageJson,
 					})
@@ -134,7 +131,7 @@ func (p *Process) LogStdout() {
 
 		err := p.Channel.Publish(
 			"",
-			p.QueueNormal.Name,
+			p.Queue.Name,
 			false,
 			false,
 			amqp.Publishing{
@@ -159,7 +156,7 @@ func (p *Process) LogStderr() {
 
 		err := p.Channel.Publish(
 			"",
-			p.QueueHigh.Name,
+			p.Queue.Name,
 			false,
 			false,
 			amqp.Publishing{
@@ -187,7 +184,7 @@ type rabbitTask struct {
 }
 
 func (p *Process) Rpc() {
-	msgs, err := p.Channel.Consume(p.RpcQueue.Name, "", false, false, false, false, nil)
+	msgs, err := p.Channel.Consume(p.Queue.Name, "", false, false, false, false, nil)
 	lib.FailOnError(err, "Failed to register a consumer")
 
 	for msg := range msgs {
@@ -201,7 +198,7 @@ func (p *Process) Rpc() {
 
 		task := rabbitTask{
 			msg:     msg,
-			ch:      channel,
+			ch:      p.Channel,
 			msgBody: msgBody,
 		}
 
@@ -210,7 +207,6 @@ func (p *Process) Rpc() {
 			logrus.Info("Got GAME_START msg")
 
 			p.Game = lib.GAMES[task.msgBody.Game]
-			p.GameServerID = task.msgBody.GameServerID
 
 			go p.Run()
 
