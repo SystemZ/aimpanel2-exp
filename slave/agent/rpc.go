@@ -156,7 +156,7 @@ func rabbitRpcSimpleResponse(task rabbitTask, msg rabbit.QueueMsg) {
 			Body:          body,
 		})
 	if err != nil {
-		logrus.Error("Failed to respond: %v", err.Error())
+		logrus.Errorf("Failed to respond: %v", err.Error())
 		return
 	}
 }
