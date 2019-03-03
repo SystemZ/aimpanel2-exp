@@ -17,18 +17,16 @@
 package main
 
 import (
-	"gitlab.com/systemz/aimpanel2/master/db"
 	"gitlab.com/systemz/aimpanel2/master/middleware"
-	"gitlab.com/systemz/aimpanel2/master/rabbit"
 	"gitlab.com/systemz/aimpanel2/master/router"
 	"log"
 	"net/http"
 )
 
 func main() {
-	db.DB = db.SetupDatabase()
+	//db.DB = db.SetupDatabase()
 
-	rabbit.RabbitListen()
+	//rabbit.RabbitListen()
 
 	log.Println("Starting API on port :8000")
 	r := router.NewRouter()

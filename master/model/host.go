@@ -3,6 +3,7 @@ package model
 import (
 	"github.com/gofrs/uuid"
 	"github.com/jinzhu/gorm"
+	"gitlab.com/systemz/aimpanel2/lib"
 	"log"
 	"time"
 )
@@ -30,6 +31,9 @@ type Host struct {
 	// required: true
 	Ip string `gorm:"column:ip" json:"ip"`
 
+	// Token
+	Token string `gorm:"column:token" json:"token"`
+
 	//Created at timestamp
 	CreatedAt time.Time `json:"created_at"`
 
@@ -46,5 +50,8 @@ func (u *Host) BeforeCreate(scope *gorm.Scope) error {
 		log.Println(err)
 	}
 	scope.SetColumn("ID", uuidGen)
+
+	scope.SetColumn("Token", lib.RandomString(32))
+
 	return nil
 }
