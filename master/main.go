@@ -17,6 +17,7 @@
 package main
 
 import (
+	"gitlab.com/systemz/aimpanel2/master/db"
 	"gitlab.com/systemz/aimpanel2/master/middleware"
 	"gitlab.com/systemz/aimpanel2/master/router"
 	"log"
@@ -24,7 +25,7 @@ import (
 )
 
 func main() {
-	//db.DB = db.SetupDatabase()
+	db.DB = db.SetupDatabase()
 
 	//rabbit.RabbitListen()
 

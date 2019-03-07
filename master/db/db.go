@@ -4,21 +4,17 @@ import (
 	"fmt"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"gitlab.com/systemz/aimpanel2/master/config"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"log"
-	"os"
 )
 
 var (
-	DB       *gorm.DB
-	hostname = os.Getenv("DB_HOSTNAME")
-	name     = os.Getenv("DB_NAME")
-	username = os.Getenv("DB_USERNAME")
-	password = os.Getenv("DB_PASSWORD")
+	DB *gorm.DB
 )
 
 func SetupDatabase() *gorm.DB {
-	db, err := gorm.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parseTime=True", username, password, hostname, name))
+	db, err := gorm.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True", config.DB_USERNAME, config.DB_PASSWORD, config.DB_HOST, config.DB_PORT, config.DB_NAME))
 	if err != nil {
 		panic("Failed to connect to database")
 	}
