@@ -7,7 +7,6 @@ import (
 	"gitlab.com/systemz/aimpanel2/master/db"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"gitlab.com/systemz/aimpanel2/master/response"
-	"log"
 	"net/http"
 )
 
@@ -84,9 +83,6 @@ func CreateHost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	host.UserId = uuid.FromStringOrNil(r.Header.Get("uid"))
-
-	log.Println(r.Header.Get("uid"))
-
 	db.DB.Save(host)
 
 	json.NewEncoder(w).Encode(host)
