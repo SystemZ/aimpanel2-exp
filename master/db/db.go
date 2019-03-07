@@ -26,6 +26,7 @@ func SetupDatabase() *gorm.DB {
 
 	db.AutoMigrate(&model.User{})
 	db.AutoMigrate(&model.Host{})
+	db.AutoMigrate(&model.GameServer{})
 
 	db.AutoMigrate(&model.Game{})
 	db.AutoMigrate(&model.GameEngine{})

@@ -61,6 +61,22 @@ var routes = Routes{
 		true,
 	},
 
+	//GameServers
+	Route{
+		"Get user game servers by host id",
+		"GET",
+		"/hosts/{id}/game_servers",
+		handler.ListUserGameServersByHostId,
+		true,
+	},
+	Route{
+		"Create game server",
+		"POST",
+		"/hosts/{id}/game_server",
+		handler.CreateGameServer,
+		true,
+	},
+
 	//User
 	Route{
 		"Change password",

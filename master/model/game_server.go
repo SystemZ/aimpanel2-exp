@@ -23,12 +23,12 @@ type GameServer struct {
 	// Host ID
 	//
 	// required: true
-	HostId uuid.UUID `gorm:"column:user_id" json:"host_id"`
+	HostId uuid.UUID `gorm:"column:host_id" json:"host_id"`
 
 	// Game ID
 	//
 	// required: true
-	GameId uuid.UUID `gorm:"column:ip" json:"ip"`
+	GameId uuid.UUID `gorm:"column:game_id" json:"game_id"`
 
 	//Created at timestamp
 	CreatedAt time.Time `json:"created_at"`
