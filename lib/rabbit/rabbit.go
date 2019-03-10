@@ -1,5 +1,7 @@
 package rabbit
 
+import "github.com/gofrs/uuid"
+
 const (
 	//WRAPPER
 	GAME_START        = iota
@@ -17,9 +19,9 @@ type QueueMsg struct {
 	TaskId int
 
 	// task specific arguments
-	Game         string `json:"game,omitempty"`
-	GameServerID string `json:"game_server_id,omitempty"`
-	Body         string `json:"body,omitempty"`
+	Game         string    `json:"game,omitempty"`
+	GameServerID uuid.UUID `json:"game_server_id,omitempty"`
+	Body         string    `json:"body,omitempty"`
 
 	// task started
 	TaskStarted bool `json:"task_started,omitempty"`

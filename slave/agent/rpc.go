@@ -75,7 +75,7 @@ func rabbitListen(queue string) {
 
 			logrus.Info("Creating gs dir")
 
-			gsPath := "/opt/aimpanel/gs/" + task.msgBody.GameServerID
+			gsPath := "/opt/aimpanel/gs/" + task.msgBody.GameServerID.String()
 			if _, err := os.Stat(gsPath); os.IsNotExist(err) {
 				os.Mkdir(gsPath, 0777)
 			}
@@ -98,7 +98,7 @@ func rabbitListen(queue string) {
 			for _, c := range game.InstallCmds {
 				var command []string
 				for _, arg := range c {
-					arg = strings.Replace(arg, "{uuid}", task.msgBody.GameServerID, -1)
+					arg = strings.Replace(arg, "{uuid}", task.msgBody.GameServerID.String(), -1)
 					arg = strings.Replace(arg, "{fileName}", game.FileName, -1)
 
 					command = append(command, arg)
@@ -127,7 +127,7 @@ func rabbitListen(queue string) {
 			msg.Ack(false)
 		case rabbit.WRAPPER_START:
 			logrus.Info("START_WRAPPER")
-			cmd := exec.Command("slave", "wrapper", task.msgBody.GameServerID)
+			cmd := exec.Command("slave", "wrapper", task.msgBody.GameServerID.String(), task.msgBody.Game)
 			if err := cmd.Start(); err != nil {
 				logrus.Error(err)
 			}

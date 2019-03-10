@@ -28,7 +28,7 @@ type GameServer struct {
 	// Game ID
 	//
 	// required: true
-	GameId uuid.UUID `gorm:"column:game_id" json:"game_id"`
+	GameId uint `gorm:"column:game_id" json:"game_id"`
 
 	//Created at timestamp
 	CreatedAt time.Time `json:"created_at"`

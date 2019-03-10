@@ -65,15 +65,29 @@ var routes = Routes{
 	Route{
 		"Get user game servers by host id",
 		"GET",
-		"/hosts/{id}/game_servers",
+		"/hosts/{id}/servers",
 		handler.ListUserGameServersByHostId,
 		true,
 	},
 	Route{
 		"Create game server",
 		"POST",
-		"/hosts/{id}/game_server",
+		"/hosts/{id}/servers",
 		handler.CreateGameServer,
+		true,
+	},
+	Route{
+		"Install game server",
+		"GET",
+		"/hosts/{host_id}/servers/{server_id}/install",
+		handler.InstallGameServer,
+		true,
+	},
+	Route{
+		"Install game server",
+		"GET",
+		"/hosts/{host_id}/servers/{server_id}/start",
+		handler.StartGameServer,
 		true,
 	},
 

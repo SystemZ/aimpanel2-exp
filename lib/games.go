@@ -10,7 +10,7 @@ type Game struct {
 }
 
 var GAMES = map[string]Game{
-	"minecraft": {
+	"Minecraft": {
 		Name:        "Minecraft",
 		Command:     []string{"java", "-Djline.terminal=jline.UnsupportedTerminal", "-jar", "BungeeCord.jar"},
 		FileName:    "BungeeCord.jar",

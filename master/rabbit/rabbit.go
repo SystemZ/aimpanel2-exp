@@ -19,7 +19,7 @@ func RabbitListen() {
 
 	channel, err = conn.Channel()
 	lib.FailOnError(err, "Failed to open a channel")
-	defer channel.Close()
+	//defer channel.Close()
 
 	err = channel.Qos(
 		1,
