@@ -7,6 +7,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/rabbit"
 	"gitlab.com/systemz/aimpanel2/slave/config"
+	"log"
 	"os"
 	"os/exec"
 	"strings"
@@ -71,9 +72,13 @@ func rabbitListen(queue string) {
 		case rabbit.GAME_INSTALL:
 			logrus.Info("INSTALL_GAME_SERVER")
 
-			game := lib.GAMES[task.msgBody.Game]
+			//game := lib.GAMES[task.msgBody.Game]
+
+			log.Println(task.msgBody.GameCommands)
 
 			logrus.Info("Creating gs dir")
+
+			gameFile := task.msgBody.GameFile
 
 			gsPath := "/opt/aimpanel/gs/" + task.msgBody.GameServerID.String()
 			if _, err := os.Stat(gsPath); os.IsNotExist(err) {
@@ -82,8 +87,8 @@ func rabbitListen(queue string) {
 
 			logrus.Info("Downloading install package")
 
-			if _, err = os.Stat("/opt/aimpanel/storage/" + game.FileName); os.IsNotExist(err) {
-				cmd := exec.Command("wget", game.DownloadUrl)
+			if _, err = os.Stat("/opt/aimpanel/storage/" + gameFile.Filename); os.IsNotExist(err) {
+				cmd := exec.Command("wget", gameFile.DownloadUrl)
 				cmd.Dir = "/opt/aimpanel/storage"
 
 				if err := cmd.Run(); err != nil {
@@ -95,14 +100,11 @@ func rabbitListen(queue string) {
 
 			logrus.Info("Executing install commands")
 
-			for _, c := range game.InstallCmds {
-				var command []string
-				for _, arg := range c {
-					arg = strings.Replace(arg, "{uuid}", task.msgBody.GameServerID.String(), -1)
-					arg = strings.Replace(arg, "{fileName}", game.FileName, -1)
+			for _, c := range task.msgBody.GameCommands {
+				c.Command = strings.Replace(c.Command, "{uuid}", task.msgBody.GameServerID.String(), -1)
+				c.Command = strings.Replace(c.Command, "{fileName}", gameFile.Filename, -1)
 
-					command = append(command, arg)
-				}
+				command := strings.Split(c.Command, " ")
 
 				logrus.Info("Executing")
 				logrus.Info(command)
@@ -127,7 +129,7 @@ func rabbitListen(queue string) {
 			msg.Ack(false)
 		case rabbit.WRAPPER_START:
 			logrus.Info("START_WRAPPER")
-			cmd := exec.Command("slave", "wrapper", task.msgBody.GameServerID.String(), task.msgBody.Game)
+			cmd := exec.Command("slave", "wrapper", task.msgBody.GameServerID.String())
 			if err := cmd.Start(); err != nil {
 				logrus.Error(err)
 			}

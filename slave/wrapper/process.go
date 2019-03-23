@@ -11,6 +11,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 	"sync"
 	"syscall"
 )
@@ -32,12 +33,12 @@ type Process struct {
 	ReplyTo             string
 
 	//
-	GameServerID string
-	Game         lib.Game
+	GameServerID     string
+	GameStartCommand []string
 }
 
 func (p *Process) Run() {
-	p.Cmd = exec.Command(p.Game.Command[0], p.Game.Command[1:]...)
+	p.Cmd = exec.Command(p.GameStartCommand[0], p.GameStartCommand[1:]...)
 	p.Cmd.Dir = "/opt/aimpanel/gs/" + p.GameServerID
 
 	stdout, _ := p.Cmd.StdoutPipe()
@@ -206,7 +207,7 @@ func (p *Process) Rpc() {
 		case rabbit.GAME_START:
 			logrus.Info("Got GAME_START msg")
 
-			p.Game = lib.GAMES[task.msgBody.Game]
+			p.GameStartCommand = strings.Split(task.msgBody.GameStartCommand.Command, " ")
 
 			go p.Run()
 

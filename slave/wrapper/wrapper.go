@@ -15,7 +15,7 @@ var (
 	err      error
 )
 
-func Start(gameServerID string, game string) {
+func Start(gameServerID string) {
 	logrus.Info("Starting wrapper")
 	//TODO: Make request to master to get creds to rabbit
 
@@ -46,14 +46,13 @@ func Start(gameServerID string, game string) {
 		Queue:   queue,
 
 		GameServerID: gameServerID,
-		Game:         lib.GAMES[game],
 	}
 
 	go p.LogStdout()
 	go p.LogStderr()
 	go p.Rpc()
 
-	go p.Run()
+	//go p.Run()
 
 	select {}
 }

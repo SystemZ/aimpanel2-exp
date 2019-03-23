@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"github.com/gofrs/uuid"
 	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
 	rabbit2 "gitlab.com/systemz/aimpanel2/lib/rabbit"
 	"gitlab.com/systemz/aimpanel2/master/db"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"gitlab.com/systemz/aimpanel2/master/rabbit"
 	"gitlab.com/systemz/aimpanel2/master/response"
 	"net/http"
+	"time"
 )
 
 func ListUserGameServersByHostId(w http.ResponseWriter, r *http.Request) {
@@ -105,14 +105,27 @@ func StartGameServer(w http.ResponseWriter, r *http.Request) {
 		if !db.DB.Where("id = ? and host_id = ?", gameServerId, hostId).First(&gameServer).RecordNotFound() {
 			var game model.Game
 			if !db.DB.Where("id = ?", gameServer.GameId).First(&game).RecordNotFound() {
-				msg := rabbit2.QueueMsg{
-					TaskId:       rabbit2.WRAPPER_START,
-					Game:         game.Name,
-					GameServerID: gameServer.ID,
-				}
-				rabbit.SendRpcMessage("agent_"+host.Token, msg)
+				var startCommand model.GameCommand
+				if !db.DB.Where("game_id = ? and type = ?", gameServer.GameId, "start").First(&startCommand).RecordNotFound() {
+					msg := rabbit2.QueueMsg{
+						TaskId:           rabbit2.WRAPPER_START,
+						Game:             game.Name,
+						GameServerID:     gameServer.ID,
+						GameStartCommand: startCommand,
+					}
+					rabbit.SendRpcMessage("agent_"+host.Token, msg)
 
-				json.NewEncoder(w).Encode(response.JsonSuccess{Message: "Started game server succesfully."})
+					time.Sleep(5 * time.Second)
+
+					msg = rabbit2.QueueMsg{
+						TaskId:           rabbit2.GAME_START,
+						GameServerID:     gameServer.ID,
+						GameStartCommand: startCommand,
+					}
+					rabbit.SendRpcMessage("wrapper_"+gameServer.ID.String(), msg)
+
+					json.NewEncoder(w).Encode(response.JsonSuccess{Message: "Started game server succesfully."})
+				}
 			}
 		}
 	}
@@ -125,24 +138,29 @@ func InstallGameServer(w http.ResponseWriter, r *http.Request) {
 	hostId := params["host_id"]
 	gameServerId := params["server_id"]
 
-	logrus.Info("1")
 	var host model.Host
+	//TODO: fix that ugly ifs :(
 	if !db.DB.Where("id = ? and user_id = ?", hostId, userId).First(&host).RecordNotFound() {
-		logrus.Info("2")
 		var gameServer model.GameServer
 		if !db.DB.Where("id = ? and host_id = ?", gameServerId, hostId).First(&gameServer).RecordNotFound() {
-			logrus.Info("3")
 			var game model.Game
 			if !db.DB.Where("id = ?", gameServer.GameId).First(&game).RecordNotFound() {
-				logrus.Info("4")
-				msg := rabbit2.QueueMsg{
-					TaskId:       rabbit2.GAME_INSTALL,
-					Game:         game.Name,
-					GameServerID: gameServer.ID,
-				}
-				rabbit.SendRpcMessage("agent_"+host.Token, msg)
+				var gameFile model.GameFile
+				if !db.DB.Where("game_id = ?", gameServer.GameId).First(&gameFile).RecordNotFound() {
+					var installCommands []model.GameCommand
+					if !db.DB.Where("game_id = ? and type = ?", gameServer.GameId, "install").Order("`order` asc").Find(&installCommands).RecordNotFound() {
+						msg := rabbit2.QueueMsg{
+							TaskId:       rabbit2.GAME_INSTALL,
+							Game:         game.Name,
+							GameServerID: gameServer.ID,
+							GameFile:     gameFile,
+							GameCommands: installCommands,
+						}
+						rabbit.SendRpcMessage("agent_"+host.Token, msg)
 
-				json.NewEncoder(w).Encode(response.JsonSuccess{Message: "Installed game server succesfully."})
+						json.NewEncoder(w).Encode(response.JsonSuccess{Message: "Installed game server succesfully."})
+					}
+				}
 			}
 		}
 	}

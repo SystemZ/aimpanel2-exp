@@ -1,6 +1,9 @@
 package rabbit
 
-import "github.com/gofrs/uuid"
+import (
+	"github.com/gofrs/uuid"
+	"gitlab.com/systemz/aimpanel2/master/model"
+)
 
 const (
 	//WRAPPER
@@ -19,9 +22,12 @@ type QueueMsg struct {
 	TaskId int
 
 	// task specific arguments
-	Game         string    `json:"game,omitempty"`
-	GameServerID uuid.UUID `json:"game_server_id,omitempty"`
-	Body         string    `json:"body,omitempty"`
+	Game             string              `json:"game,omitempty"`
+	GameServerID     uuid.UUID           `json:"game_server_id,omitempty"`
+	Body             string              `json:"body,omitempty"`
+	GameFile         model.GameFile      `json:"game_file,omitempty"`
+	GameCommands     []model.GameCommand `json:"game_commands,omitempty"`
+	GameStartCommand model.GameCommand   `json:"game_start_command,omitempty"`
 
 	// task started
 	TaskStarted bool `json:"task_started,omitempty"`

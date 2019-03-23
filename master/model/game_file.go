@@ -13,6 +13,8 @@ type GameFile struct {
 
 	DownloadUrl string `gorm:"column:download_url" json:"download_url"`
 
+	Filename string `gorm:"column:filename" json:"filename"`
+
 	//Created at timestamp
 	CreatedAt time.Time `json:"created_at"`
 
