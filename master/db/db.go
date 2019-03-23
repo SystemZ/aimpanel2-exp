@@ -29,7 +29,8 @@ func SetupDatabase() *gorm.DB {
 	db.AutoMigrate(&model.GameServer{})
 
 	db.AutoMigrate(&model.Game{})
-	db.AutoMigrate(&model.GameEngine{})
+	db.AutoMigrate(&model.GameFile{})
+	db.AutoMigrate(&model.GameCommand{})
 
 	log.Println("Connected to the database")
 

@@ -1,9 +1,6 @@
 package model
 
 import (
-	"github.com/gofrs/uuid"
-	"github.com/jinzhu/gorm"
-	"log"
 	"time"
 )
 
@@ -28,13 +25,4 @@ type Game struct {
 
 	//Deleted at timestamp
 	DeletedAt *time.Time `json:"deleted_at"`
-}
-
-func (u *Game) BeforeCreate(scope *gorm.Scope) error {
-	uuidGen, err := uuid.NewV4()
-	if err != nil {
-		log.Println(err)
-	}
-	scope.SetColumn("ID", uuidGen)
-	return nil
 }
