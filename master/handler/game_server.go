@@ -8,6 +8,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/master/db"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"gitlab.com/systemz/aimpanel2/master/rabbit"
+	"gitlab.com/systemz/aimpanel2/master/request/game_server"
 	"gitlab.com/systemz/aimpanel2/master/response"
 	"net/http"
 	"time"
@@ -150,29 +151,91 @@ func InstallGameServer(w http.ResponseWriter, r *http.Request) {
 	gameServerId := params["server_id"]
 
 	var host model.Host
-	//TODO: fix that ugly ifs :(
-	if !db.DB.Where("id = ? and user_id = ?", hostId, userId).First(&host).RecordNotFound() {
-		var gameServer model.GameServer
-		if !db.DB.Where("id = ? and host_id = ?", gameServerId, hostId).First(&gameServer).RecordNotFound() {
-			var game model.Game
-			if !db.DB.Where("id = ?", gameServer.GameId).First(&game).RecordNotFound() {
-				var gameFile model.GameFile
-				if !db.DB.Where("game_id = ?", gameServer.GameId).First(&gameFile).RecordNotFound() {
-					var installCommands []model.GameCommand
-					if !db.DB.Where("game_id = ? and type = ?", gameServer.GameId, "install").Order("`order` asc").Find(&installCommands).RecordNotFound() {
-						msg := rabbit2.QueueMsg{
-							TaskId:       rabbit2.GAME_INSTALL,
-							Game:         game.Name,
-							GameServerID: gameServer.ID,
-							GameFile:     gameFile,
-							GameCommands: installCommands,
-						}
-						rabbit.SendRpcMessage("agent_"+host.Token, msg)
-
-						json.NewEncoder(w).Encode(response.JsonSuccess{Message: "Installed game server succesfully."})
-					}
-				}
-			}
-		}
+	if db.DB.Where("id = ? and user_id = ?", hostId, userId).First(&host).RecordNotFound() {
+		json.NewEncoder(w).Encode(response.JsonError{ErrorCode: 20, Message: "Could not find host."})
+		return
 	}
+
+	var gameServer model.GameServer
+	if db.DB.Where("id = ? and host_id = ?", gameServerId, hostId).First(&gameServer).RecordNotFound() {
+		json.NewEncoder(w).Encode(response.JsonError{ErrorCode: 21, Message: "Could not find game server."})
+		return
+	}
+
+	var game model.Game
+	if db.DB.Where("id = ?", gameServer.GameId).First(&game).RecordNotFound() {
+		json.NewEncoder(w).Encode(response.JsonError{ErrorCode: 22, Message: "Could not find game."})
+		return
+	}
+
+	var gameFile model.GameFile
+	if db.DB.Where("game_id = ?", gameServer.GameId).First(&gameFile).RecordNotFound() {
+		json.NewEncoder(w).Encode(response.JsonError{ErrorCode: 23, Message: "Could not find game file."})
+		return
+	}
+
+	var installCommands []model.GameCommand
+	if db.DB.Where("game_id = ? and type = ?", gameServer.GameId, "install").Order("`order` asc").
+		Find(&installCommands).RecordNotFound() {
+		json.NewEncoder(w).Encode(response.JsonError{ErrorCode: 24, Message: "Could not find install commands."})
+		return
+	}
+
+	msg := rabbit2.QueueMsg{
+		TaskId:       rabbit2.GAME_INSTALL,
+		Game:         game.Name,
+		GameServerID: gameServer.ID,
+		GameFile:     gameFile,
+		GameCommands: installCommands,
+	}
+	rabbit.SendRpcMessage("agent_"+host.Token, msg)
+
+	json.NewEncoder(w).Encode(response.JsonSuccess{Message: "Installed game server succesfully."})
+}
+
+func StopGameServer(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+
+	userId := uuid.FromStringOrNil(r.Header.Get("uid"))
+	hostId := params["host_id"]
+	gameServerId := params["server_id"]
+
+	stopReq := &game_server.StopGameServerRequest{}
+
+	err := json.NewDecoder(r.Body).Decode(stopReq)
+	if err != nil {
+		json.NewEncoder(w).Encode(response.JsonError{ErrorCode: 10, Message: "Invalid body."})
+		return
+	}
+
+	var host model.Host
+	if db.DB.Where("id = ? and user_id = ?", hostId, userId).First(&host).RecordNotFound() {
+		json.NewEncoder(w).Encode(response.JsonError{ErrorCode: 20, Message: "Could not find host."})
+		return
+	}
+
+	var gameServer model.GameServer
+	if db.DB.Where("id = ? and host_id = ?", gameServerId, hostId).First(&gameServer).RecordNotFound() {
+		json.NewEncoder(w).Encode(response.JsonError{ErrorCode: 21, Message: "Could not find game server."})
+		return
+	}
+
+	if stopReq.Type == 1 {
+		//sigkill
+		msg := rabbit2.QueueMsg{
+			TaskId:       rabbit2.GAME_STOP_SIGKILL,
+			GameServerID: gameServer.ID,
+		}
+		rabbit.SendRpcMessage("wrapper_"+gameServer.ID.String(), msg)
+	} else if stopReq.Type == 2 {
+		//sigterm
+		msg := rabbit2.QueueMsg{
+			TaskId:       rabbit2.GAME_STOP_SIGTERM,
+			GameServerID: gameServer.ID,
+		}
+		rabbit.SendRpcMessage("wrapper_"+gameServer.ID.String(), msg)
+	}
+
+	json.NewEncoder(w).Encode(response.JsonSuccess{Message: "Stopped game server succesfully."})
+
 }
