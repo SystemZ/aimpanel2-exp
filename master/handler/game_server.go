@@ -43,6 +43,17 @@ func ListUserGameServersByHostId(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func ListUserGameServers(w http.ResponseWriter, r *http.Request) {
+	userId := uuid.FromStringOrNil(r.Header.Get("uid"))
+
+	var gameServers []model.GameServer
+	db.DB.Table("game_servers").Select("game_servers.*").Joins(
+		"LEFT JOIN hosts ON game_servers.host_id = hosts.id").Where(
+		"hosts.user_id = ?", userId).Find(&gameServers)
+
+	json.NewEncoder(w).Encode(&gameServers)
+}
+
 func CreateGameServer(w http.ResponseWriter, r *http.Request) {
 	// swagger:route POST /hosts/{id}/servers GameServer create
 	//

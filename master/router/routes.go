@@ -63,6 +63,13 @@ var routes = Routes{
 
 	//GameServers
 	Route{
+		"List user game servers",
+		"GET",
+		"/hosts/my/servers",
+		handler.ListUserGameServers,
+		true,
+	},
+	Route{
 		"Get user game servers by host id",
 		"GET",
 		"/hosts/{id}/servers",
@@ -111,6 +118,15 @@ var routes = Routes{
 		"GET",
 		"/user/profile",
 		handler.Profile,
+		true,
+	},
+
+	//Games
+	Route{
+		"List games",
+		"GET",
+		"/games",
+		handler.ListGames,
 		true,
 	},
 }
