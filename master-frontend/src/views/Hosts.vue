@@ -120,7 +120,7 @@
             },
             createHostCancel() {
                 this.createHost.dialog = false;
-                this.createHost.step = 0;
+                this.createHost.step = 1;
             },
             addHost() {
                 this.$http.post('/v1/hosts', this.createHost.host).then(res => {
