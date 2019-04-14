@@ -25,6 +25,16 @@ type GameServer struct {
 	// required: true
 	HostId uuid.UUID `gorm:"column:host_id" json:"host_id"`
 
+	// State
+	// 0 off, 1 running
+	// required: false
+	State uint `gorm:"column:state" json:"state"`
+
+	// State Last Changed
+	//
+	// required: false
+	StateLastChanged time.Time `gorm:"column:state_last_changed" json:"state_last_changed"`
+
 	// Game ID
 	//
 	// required: true
