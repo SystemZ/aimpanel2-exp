@@ -16,40 +16,21 @@ services:
       - db
     ports:
       - 8080:80
-  mongo:
-    image: mongo:3
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.6.1
-    environment:
-      - http.host=0.0.0.0
-      - transport.host=localhost
-      - network.host=0.0.0.0
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-  graylog:
-    image: graylog/graylog:3.0
-    depends_on:
-      - mongo
-      - elasticsearch
-    environment:
-      - GRAYLOG_HTTP_EXTERNAL_URI=http://127.0.0.1:9000/
-    ports:
-      # Graylog web interface and REST API
-      - 9000:9000
-      # Syslog TCP
-      - 1514:1514
-      # Syslog UDP
-      - 1514:1514/udp
-      # GELF TCP
-      - 12201:12201
-      # GELF UDP
-      - 12201:12201/udp
   rabbitmq:
     image: rabbitmq:3-management
     ports:
       - 15672:15672
       - 5672:5672
+  redis:
+    image: 'bitnami/redis:4.0'
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+    ports:
+      - 6379:6379
+    volumes:
+      - 'redis_data:/bitnami/redis/data'
+volumes:
+  redis_data:
+    driver: local
 
