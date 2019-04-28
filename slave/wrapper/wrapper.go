@@ -8,11 +8,8 @@ import (
 )
 
 var (
-	conn     *amqp.Connection
-	channel  *amqp.Channel
-	queue    amqp.Queue
-	rpcQueue amqp.Queue
-	err      error
+	channel *amqp.Channel
+	queue   amqp.Queue
 )
 
 func Start(gameServerID string) {
@@ -28,8 +25,13 @@ func Start(gameServerID string) {
 	lib.FailOnError(err, "Failed to open channel")
 	defer channel.Close()
 
-	queue, err = channel.QueueDeclare("wrapper_"+gameServerID, true, false, false, false, nil)
-	lib.FailOnError(err, "Failed to declare a low queue")
+	queue, err = channel.QueueDeclare("wrapper_"+gameServerID, true,
+		false, false, false, nil)
+	lib.FailOnError(err, "Failed to declare a wrapper queue")
+
+	queueLogs, err := channel.QueueDeclare("wrapper_logs", true,
+		false, false, false, nil)
+	lib.FailOnError(err, "Failed to declare a logs queue")
 
 	err = channel.Qos(1, 0, false)
 	lib.FailOnError(err, "Failed to set QoS")
@@ -42,8 +44,9 @@ func Start(gameServerID string) {
 		Input:  input,
 
 		//amqp
-		Channel: channel,
-		Queue:   queue,
+		Channel:   channel,
+		Queue:     queue,
+		QueueLogs: queueLogs,
 
 		GameServerID: gameServerID,
 	}

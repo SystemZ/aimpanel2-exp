@@ -3,6 +3,7 @@ package wrapper
 import (
 	"bufio"
 	"encoding/json"
+	"github.com/gofrs/uuid"
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
 	"gitlab.com/systemz/aimpanel2/lib"
@@ -29,6 +30,7 @@ type Process struct {
 	//amqp
 	Channel             *amqp.Channel
 	Queue               amqp.Queue
+	QueueLogs           amqp.Queue
 	ClientCorrelationId string
 	ReplyTo             string
 
@@ -125,14 +127,15 @@ func (p *Process) LogStdout() {
 		msg := <-p.Stdout
 
 		logMessage := rabbit.QueueMsg{
-			Stdout: msg,
+			Stdout:       msg,
+			GameServerID: uuid.FromStringOrNil(p.GameServerID),
 		}
 
 		logMessageJson, _ := json.Marshal(logMessage)
 
 		err := p.Channel.Publish(
 			"",
-			p.Queue.Name,
+			p.QueueLogs.Name,
 			false,
 			false,
 			amqp.Publishing{
@@ -150,14 +153,15 @@ func (p *Process) LogStderr() {
 		msg := <-p.Stderr
 
 		logMessage := rabbit.QueueMsg{
-			Stderr: msg,
+			Stderr:       msg,
+			GameServerID: uuid.FromStringOrNil(p.GameServerID),
 		}
 
 		logMessageJson, _ := json.Marshal(logMessage)
 
 		err := p.Channel.Publish(
 			"",
-			p.Queue.Name,
+			p.QueueLogs.Name,
 			false,
 			false,
 			amqp.Publishing{
