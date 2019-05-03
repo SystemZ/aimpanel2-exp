@@ -8,6 +8,7 @@ import (
 	"github.com/streadway/amqp"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/rabbit"
+	"gitlab.com/systemz/aimpanel2/slave/config"
 	"io"
 	"log"
 	"os"
@@ -41,7 +42,7 @@ type Process struct {
 
 func (p *Process) Run() {
 	p.Cmd = exec.Command(p.GameStartCommand[0], p.GameStartCommand[1:]...)
-	p.Cmd.Dir = "/opt/aimpanel/gs/" + p.GameServerID
+	p.Cmd.Dir = config.GS_DIR + p.GameServerID
 
 	stdout, _ := p.Cmd.StdoutPipe()
 	stderr, _ := p.Cmd.StderrPipe()

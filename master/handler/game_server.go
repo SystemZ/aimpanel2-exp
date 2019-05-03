@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/gofrs/uuid"
 	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 	rabbit2 "gitlab.com/systemz/aimpanel2/lib/rabbit"
 	"gitlab.com/systemz/aimpanel2/master/db"
 	"gitlab.com/systemz/aimpanel2/master/model"
@@ -189,6 +190,8 @@ func InstallGameServer(w http.ResponseWriter, r *http.Request) {
 		GameCommands: installCommands,
 	}
 	rabbit.SendRpcMessage("agent_"+host.Token, msg)
+
+	logrus.Info("Publish to agent_" + host.Token, msg)
 
 	json.NewEncoder(w).Encode(response.JsonSuccess{Message: "Installed game server succesfully."})
 }

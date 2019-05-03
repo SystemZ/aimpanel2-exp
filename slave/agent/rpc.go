@@ -80,16 +80,16 @@ func rabbitListen(queue string) {
 
 			gameFile := task.msgBody.GameFile
 
-			gsPath := "/opt/aimpanel/gs/" + task.msgBody.GameServerID.String()
+			gsPath := config.GS_DIR + task.msgBody.GameServerID.String()
 			if _, err := os.Stat(gsPath); os.IsNotExist(err) {
 				os.Mkdir(gsPath, 0777)
 			}
 
 			logrus.Info("Downloading install package")
 
-			if _, err = os.Stat("/opt/aimpanel/storage/" + gameFile.Filename); os.IsNotExist(err) {
+			if _, err = os.Stat(config.STORAGE_DIR + gameFile.Filename); os.IsNotExist(err) {
 				cmd := exec.Command("wget", gameFile.DownloadUrl)
-				cmd.Dir = "/opt/aimpanel/storage"
+				cmd.Dir = config.STORAGE_DIR
 
 				if err := cmd.Run(); err != nil {
 					logrus.Error(err)
@@ -101,6 +101,8 @@ func rabbitListen(queue string) {
 			logrus.Info("Executing install commands")
 
 			for _, c := range task.msgBody.GameCommands {
+				c.Command = strings.Replace(c.Command, "{storageDir}", config.STORAGE_DIR, -1)
+				c.Command = strings.Replace(c.Command, "{gsDir}", config.GS_DIR, -1)
 				c.Command = strings.Replace(c.Command, "{uuid}", task.msgBody.GameServerID.String(), -1)
 				c.Command = strings.Replace(c.Command, "{fileName}", gameFile.Filename, -1)
 

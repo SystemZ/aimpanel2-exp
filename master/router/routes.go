@@ -91,7 +91,7 @@ var routes = Routes{
 		true,
 	},
 	Route{
-		"Install game server",
+		"Start game server",
 		"GET",
 		"/hosts/{host_id}/servers/{server_id}/start",
 		handler.StartGameServer,

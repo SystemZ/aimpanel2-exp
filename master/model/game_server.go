@@ -33,7 +33,7 @@ type GameServer struct {
 	// State Last Changed
 	//
 	// required: false
-	StateLastChanged time.Time `gorm:"column:state_last_changed" json:"state_last_changed"`
+	StateLastChanged time.Time `gorm:"default:CURRENT_TIMESTAMP column:state_last_changed" json:"state_last_changed"`
 
 	// Game ID
 	//
