@@ -100,7 +100,7 @@ func rabbitListen(queue string) {
 
 			logrus.Info("Executing install commands")
 
-			for _, c := range task.msgBody.GameCommands {
+			for _, c := range *task.msgBody.GameCommands {
 				c.Command = strings.Replace(c.Command, "{storageDir}", config.STORAGE_DIR, -1)
 				c.Command = strings.Replace(c.Command, "{gsDir}", config.GS_DIR, -1)
 				c.Command = strings.Replace(c.Command, "{uuid}", task.msgBody.GameServerID.String(), -1)

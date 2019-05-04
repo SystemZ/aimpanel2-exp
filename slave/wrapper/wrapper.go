@@ -51,8 +51,6 @@ func Start(gameServerID string) {
 		GameServerID: gameServerID,
 	}
 
-	go p.LogStdout()
-	go p.LogStderr()
 	go p.Rpc()
 
 	//go p.Run()

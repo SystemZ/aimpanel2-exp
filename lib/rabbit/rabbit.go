@@ -19,15 +19,15 @@ const (
 
 type QueueMsg struct {
 	// task id
-	TaskId int
+	TaskId int `json:"task_id,omitempty"`
 
 	// task specific arguments
-	Game             string              `json:"game,omitempty"`
-	GameServerID     uuid.UUID           `json:"game_server_id,omitempty"`
-	Body             string              `json:"body,omitempty"`
-	GameFile         model.GameFile      `json:"game_file,omitempty"`
-	GameCommands     []model.GameCommand `json:"game_commands,omitempty"`
-	GameStartCommand model.GameCommand   `json:"game_start_command,omitempty"`
+	Game             string               `json:"game,omitempty"`
+	GameServerID     uuid.UUID            `json:"game_server_id,omitempty"`
+	Body             string               `json:"body,omitempty"`
+	GameFile         *model.GameFile      `json:"game_file,omitempty"`
+	GameCommands     *[]model.GameCommand `json:"game_commands,omitempty"`
+	GameStartCommand *model.GameCommand   `json:"game_start_command,omitempty"`
 
 	// task started
 	TaskStarted bool `json:"task_started,omitempty"`

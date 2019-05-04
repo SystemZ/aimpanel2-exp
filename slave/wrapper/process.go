@@ -25,9 +25,6 @@ type Process struct {
 	Output chan string
 	Input  chan string
 
-	Stdout chan string
-	Stderr chan string
-
 	//amqp
 	Channel             *amqp.Channel
 	Queue               amqp.Queue
@@ -71,7 +68,7 @@ func (p *Process) Run() {
 		in := bufio.NewScanner(stdout)
 
 		for in.Scan() {
-			p.Stdout <- in.Text()
+			p.LogStdout(in.Text())
 			logrus.Info(in.Text())
 		}
 	}()
@@ -82,7 +79,7 @@ func (p *Process) Run() {
 		in := bufio.NewScanner(stderr)
 
 		for in.Scan() {
-			p.Stderr <- in.Text()
+			p.LogStderr(in.Text())
 			logrus.Info(in.Text())
 		}
 	}()
@@ -121,58 +118,55 @@ func (p *Process) Run() {
 	}()
 
 	wg.Wait()
+	logrus.Info("WG Done")
 }
 
-func (p *Process) LogStdout() {
-	for {
-		msg := <-p.Stdout
-
-		logMessage := rabbit.QueueMsg{
-			Stdout:       msg,
-			GameServerID: uuid.FromStringOrNil(p.GameServerID),
-		}
-
-		logMessageJson, _ := json.Marshal(logMessage)
-
-		err := p.Channel.Publish(
-			"",
-			p.QueueLogs.Name,
-			false,
-			false,
-			amqp.Publishing{
-				ContentType:   "application/json",
-				CorrelationId: p.ClientCorrelationId,
-				Body:          logMessageJson,
-			})
-
-		lib.FailOnError(err, "Publish error")
+func (p *Process) LogStdout(msg string) {
+	logMessage := rabbit.QueueMsg{
+		Stdout:       msg,
+		GameServerID: uuid.FromStringOrNil(p.GameServerID),
 	}
+
+	logMessageJson, _ := json.Marshal(logMessage)
+
+	logrus.Info(logMessage)
+
+	err := p.Channel.Publish(
+		"",
+		p.QueueLogs.Name,
+		false,
+		false,
+		amqp.Publishing{
+			ContentType:   "application/json",
+			CorrelationId: p.ClientCorrelationId,
+			Body:          logMessageJson,
+		})
+
+	lib.FailOnError(err, "Publish error")
 }
 
-func (p *Process) LogStderr() {
-	for {
-		msg := <-p.Stderr
-
-		logMessage := rabbit.QueueMsg{
-			Stderr:       msg,
-			GameServerID: uuid.FromStringOrNil(p.GameServerID),
-		}
-
-		logMessageJson, _ := json.Marshal(logMessage)
-
-		err := p.Channel.Publish(
-			"",
-			p.QueueLogs.Name,
-			false,
-			false,
-			amqp.Publishing{
-				ContentType:   "application/json",
-				CorrelationId: p.ClientCorrelationId,
-				Body:          logMessageJson,
-			})
-
-		lib.FailOnError(err, "Publish error")
+func (p *Process) LogStderr(msg string) {
+	logMessage := rabbit.QueueMsg{
+		Stderr:       msg,
+		GameServerID: uuid.FromStringOrNil(p.GameServerID),
 	}
+
+	logMessageJson, _ := json.Marshal(logMessage)
+
+	logrus.Info(logMessage)
+
+	err := p.Channel.Publish(
+		"",
+		p.QueueLogs.Name,
+		false,
+		false,
+		amqp.Publishing{
+			ContentType:   "application/json",
+			CorrelationId: p.ClientCorrelationId,
+			Body:          logMessageJson,
+		})
+
+	lib.FailOnError(err, "Publish error")
 }
 
 func (p *Process) Kill(signal syscall.Signal) {

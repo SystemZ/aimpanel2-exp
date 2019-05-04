@@ -29,6 +29,7 @@ func main() {
 	db.DB = db.SetupDatabase()
 
 	rabbit.RabbitListen()
+	rabbit.ListenWrapperLogsQueue()
 
 	log.Println("Starting API on port :8000")
 	r := router.NewRouter()

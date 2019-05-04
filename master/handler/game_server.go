@@ -133,7 +133,7 @@ func StartGameServer(w http.ResponseWriter, r *http.Request) {
 					msg = rabbit2.QueueMsg{
 						TaskId:           rabbit2.GAME_START,
 						GameServerID:     gameServer.ID,
-						GameStartCommand: startCommand,
+						GameStartCommand: &startCommand,
 					}
 					rabbit.SendRpcMessage("wrapper_"+gameServer.ID.String(), msg)
 
@@ -186,12 +186,12 @@ func InstallGameServer(w http.ResponseWriter, r *http.Request) {
 		TaskId:       rabbit2.GAME_INSTALL,
 		Game:         game.Name,
 		GameServerID: gameServer.ID,
-		GameFile:     gameFile,
-		GameCommands: installCommands,
+		GameFile:     &gameFile,
+		GameCommands: &installCommands,
 	}
 	rabbit.SendRpcMessage("agent_"+host.Token, msg)
 
-	logrus.Info("Publish to agent_" + host.Token, msg)
+	logrus.Info("Publish to agent_"+host.Token, msg)
 
 	json.NewEncoder(w).Encode(response.JsonSuccess{Message: "Installed game server succesfully."})
 }
