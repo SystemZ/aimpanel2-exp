@@ -124,7 +124,7 @@ func StartGameServer(w http.ResponseWriter, r *http.Request) {
 						TaskId:           rabbit2.WRAPPER_START,
 						Game:             game.Name,
 						GameServerID:     gameServer.ID,
-						GameStartCommand: startCommand,
+						GameStartCommand: &startCommand,
 					}
 					rabbit.SendRpcMessage("agent_"+host.Token, msg)
 
