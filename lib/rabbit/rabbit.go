@@ -16,7 +16,9 @@ const (
 	WRAPPER_START = iota
 	GAME_INSTALL  = iota
 
-	SERVER_LOG = iota
+	SERVER_LOG      = iota
+	WRAPPER_STARTED = iota
+	WRAPPER_EXITED  = iota
 )
 
 type QueueMsg struct {

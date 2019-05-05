@@ -30,6 +30,14 @@ services:
       - 6379:6379
     volumes:
       - 'redis_data:/bitnami/redis/data'
+  phpredmin:
+    image: 'sasanrose/phpredmin'
+    environment:
+      - PHPREDMIN_DATABASE_REDIS_0_HOST=redis
+    ports:
+      - 8090:80
+    depends_on:
+      - redis
 volumes:
   redis_data:
     driver: local

@@ -94,25 +94,27 @@ func (p *Process) Run() {
 						Exit status: 143 == SIGTERM
 						Exit status: -1  == SIGKILL?
 					*/
-					exitMessage := rabbit.ExitMessage{
-						Code:    status.ExitStatus(),
-						Message: "",
-					}
-					exitMessageJson, _ := json.Marshal(exitMessage)
-
-					err := p.Channel.Publish("", p.Queue.Name, false, false, amqp.Publishing{
-						ContentType: "application/json",
-						Body:        exitMessageJson,
-					})
-					lib.FailOnError(err, "Publish error")
+					//Wrapper think that this is a GAME START command
+					//exitMessage := rabbit.ExitMessage{
+					//	Code:    status.ExitStatus(),
+					//	Message: "",
+					//}
+					//exitMessageJson, _ := json.Marshal(exitMessage)
+					//
+					//err := p.Channel.Publish("", p.Queue.Name, false, false, amqp.Publishing{
+					//	ContentType: "application/json",
+					//	Body:        exitMessageJson,
+					//})
+					//lib.FailOnError(err, "Publish error")
 
 					log.Printf("Exit status: %d", status.ExitStatus())
 				}
 			}
 			logrus.Errorf("cmd.Wait: %v", err)
-
+			p.WrapperExitMessage()
 			os.Exit(0)
 		} else {
+			p.WrapperExitMessage()
 			os.Exit(0)
 		}
 	}()
@@ -129,8 +131,6 @@ func (p *Process) LogStdout(msg string) {
 	}
 
 	logMessageJson, _ := json.Marshal(logMessage)
-
-	logrus.Info(logMessage)
 
 	err := p.Channel.Publish(
 		"",
@@ -172,6 +172,7 @@ func (p *Process) LogStderr(msg string) {
 }
 
 func (p *Process) Kill(signal syscall.Signal) {
+	logrus.Info("Kill" + signal.String())
 	if p.Running {
 		p.Cmd.Process.Signal(signal)
 		p.Running = false
@@ -261,4 +262,50 @@ func (p *Process) Rpc() {
 			msg.Ack(false)
 		}
 	}
+}
+
+
+func (p *Process) WrapperExitMessage() {
+	msg := rabbit.QueueMsg{
+		TaskId: rabbit.WRAPPER_EXITED,
+		GameServerID: uuid.FromStringOrNil(p.GameServerID),
+	}
+
+	msgJson, _ := json.Marshal(msg)
+
+	err := p.Channel.Publish(
+		"",
+		p.QueueLogs.Name,
+		false,
+		false,
+		amqp.Publishing{
+			ContentType:   "application/json",
+			CorrelationId: p.ClientCorrelationId,
+			Body:          msgJson,
+		})
+
+	lib.FailOnError(err, "Publish error")
+}
+
+func (p *Process) WrapperStartMessage() {
+	logrus.Info("Sending WRAPPER_STARTED")
+	msg := rabbit.QueueMsg{
+		TaskId: rabbit.WRAPPER_STARTED,
+		GameServerID: uuid.FromStringOrNil(p.GameServerID),
+	}
+
+	msgJson, _ := json.Marshal(msg)
+
+	err := p.Channel.Publish(
+		"",
+		p.QueueLogs.Name,
+		false,
+		false,
+		amqp.Publishing{
+			ContentType:   "application/json",
+			CorrelationId: p.ClientCorrelationId,
+			Body:          msgJson,
+		})
+
+	lib.FailOnError(err, "Publish error")
 }

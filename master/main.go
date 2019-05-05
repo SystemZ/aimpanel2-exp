@@ -27,7 +27,7 @@ import (
 )
 
 func main() {
-	db.Setup()
+	db.DB = db.Setup()
 	redis.Setup()
 
 	rabbit.Listen()

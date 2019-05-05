@@ -9,6 +9,8 @@ import (
 	"gitlab.com/systemz/aimpanel2/master/db"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	rabbitMaster "gitlab.com/systemz/aimpanel2/master/rabbit"
+	"gitlab.com/systemz/aimpanel2/master/redis"
+	"gitlab.com/systemz/aimpanel2/master/request/game_server"
 	"gitlab.com/systemz/aimpanel2/master/response"
 	"net/http"
 	"time"
@@ -134,7 +136,7 @@ func Install(w http.ResponseWriter, r *http.Request) {
 	err := rabbitMaster.SendRpcMessage("agent_"+host.Token, msg)
 	if err != nil {
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 50012, Message: "Could not install game server."})
+			response.JsonError{ErrorCode: 5012, Message: "Could not install game server."})
 		return
 	}
 
@@ -142,49 +144,66 @@ func Install(w http.ResponseWriter, r *http.Request) {
 		response.JsonSuccess{Message: "Installed game server successfully."})
 }
 
-//func StopGameServer(w http.ResponseWriter, r *http.Request) {
-//	params := mux.Vars(r)
-//
-//	userId := uuid.FromStringOrNil(r.Header.Get("uid"))
-//	hostId := params["host_id"]
-//	gameServerId := params["server_id"]
-//
-//	stopReq := &game_server.StopGameServerRequest{}
-//
-//	err := json.NewDecoder(r.Body).Decode(stopReq)
-//	if err != nil {
-//		json.NewEncoder(w).Encode(response.JsonError{ErrorCode: 10, Message: "Invalid body."})
-//		return
-//	}
-//
-//	var host model.Host
-//	if db.DB.Where("id = ? and user_id = ?", hostId, userId).First(&host).RecordNotFound() {
-//		json.NewEncoder(w).Encode(response.JsonError{ErrorCode: 20, Message: "Could not find host."})
-//		return
-//	}
-//
-//	var gameServer model.GameServer
-//	if db.DB.Where("id = ? and host_id = ?", gameServerId, hostId).First(&gameServer).RecordNotFound() {
-//		json.NewEncoder(w).Encode(response.JsonError{ErrorCode: 21, Message: "Could not find game server."})
-//		return
-//	}
-//
-//	if stopReq.Type == 1 {
-//		//sigkill
-//		msg := rabbit2.QueueMsg{
-//			TaskId:       rabbit2.GAME_STOP_SIGKILL,
-//			GameServerID: gameServer.ID,
-//		}
-//		rabbit.SendRpcMessage("wrapper_"+gameServer.ID.String(), msg)
-//	} else if stopReq.Type == 2 {
-//		//sigterm
-//		msg := rabbit2.QueueMsg{
-//			TaskId:       rabbit2.GAME_STOP_SIGTERM,
-//			GameServerID: gameServer.ID,
-//		}
-//		rabbit.SendRpcMessage("wrapper_"+gameServer.ID.String(), msg)
-//	}
-//
-//	json.NewEncoder(w).Encode(response.JsonSuccess{Message: "Stopped game server succesfully."})
-//
-//}
+func Stop(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+
+	hostId := params["host_id"]
+	gameServerId := params["server_id"]
+
+	stopReq := &game_server.StopGameServerRequest{}
+
+	err := json.NewDecoder(r.Body).Decode(stopReq)
+	if err != nil {
+		lib.MustEncode(json.NewEncoder(w),
+			response.JsonError{ErrorCode: 5013, Message: "Invalid body."})
+		return
+	}
+
+	user := context.Get(r, "user").(model.User)
+	host := user.GetHost(db.DB, hostId)
+	if host == nil {
+		lib.MustEncode(json.NewEncoder(w),
+			response.JsonError{ErrorCode: 5014, Message: "Could not find a host."})
+		return
+	}
+
+	gameServer := host.GetGameServer(db.DB, gameServerId)
+	if gameServer == nil {
+		lib.MustEncode(json.NewEncoder(w),
+			response.JsonError{ErrorCode: 5015, Message: "Could not find a game server."})
+		return
+	}
+
+	redis.Redis.Set("gs_restart_id_"+gameServer.ID.String(), 0, 1*time.Hour)
+
+	if stopReq.Type == 1 {
+		//sigkill
+		msg := rabbit.QueueMsg{
+			TaskId:       rabbit.GAME_STOP_SIGKILL,
+			GameServerID: gameServer.ID,
+		}
+
+		err = rabbitMaster.SendRpcMessage("wrapper_"+gameServer.ID.String(), msg)
+		if err != nil {
+			lib.MustEncode(json.NewEncoder(w),
+				response.JsonError{ErrorCode: 5016, Message: "Could not stop a game."})
+			return
+		}
+	} else if stopReq.Type == 2 {
+		//sigterm
+		msg := rabbit.QueueMsg{
+			TaskId:       rabbit.GAME_STOP_SIGTERM,
+			GameServerID: gameServer.ID,
+		}
+
+		err = rabbitMaster.SendRpcMessage("wrapper_"+gameServer.ID.String(), msg)
+		if err != nil {
+			lib.MustEncode(json.NewEncoder(w),
+				response.JsonError{ErrorCode: 5017, Message: "Could not start a game."})
+			return
+		}
+	}
+
+	redis.Redis.Set("gs_restart_id_"+gameServer.ID.String(), 1, 1*time.Hour)
+	lib.MustEncode(json.NewEncoder(w), response.JsonSuccess{Message: "Stopping the game server."})
+}

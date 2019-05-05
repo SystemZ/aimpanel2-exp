@@ -13,31 +13,31 @@ var (
 	DB *gorm.DB
 )
 
-func Setup() {
-	DB, err := gorm.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True", config.DB_USERNAME, config.DB_PASSWORD, config.DB_HOST, config.DB_PORT, config.DB_NAME))
+func Setup() *gorm.DB {
+	db, err := gorm.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True", config.DB_USERNAME, config.DB_PASSWORD, config.DB_HOST, config.DB_PORT, config.DB_NAME))
 	if err != nil {
 		panic("Failed to connect to database")
 	}
 
-	err = DB.DB().Ping()
+	err = db.DB().Ping()
 	if err != nil {
 		logrus.Panic("Ping to db failed")
 	}
 
 	//https://github.com/go-sql-driver/mysql/issues/257
-	DB.DB().SetMaxIdleConns(0)
+	db.DB().SetMaxIdleConns(0)
 
-	DB.LogMode(true)
+	db.LogMode(true)
 
-	DB.AutoMigrate(&model.User{})
-	DB.AutoMigrate(&model.Host{})
-	DB.AutoMigrate(&model.GameServer{})
+	db.AutoMigrate(&model.User{})
+	db.AutoMigrate(&model.Host{})
+	db.AutoMigrate(&model.GameServer{})
 
-	DB.AutoMigrate(&model.Game{})
-	DB.AutoMigrate(&model.GameFile{})
-	DB.AutoMigrate(&model.GameCommand{})
+	db.AutoMigrate(&model.Game{})
+	db.AutoMigrate(&model.GameFile{})
+	db.AutoMigrate(&model.GameCommand{})
 
-	DB.AutoMigrate(&model.GameServerLog{})
+	db.AutoMigrate(&model.GameServerLog{})
 
 	logrus.Info("Connection to database seems OK!")
 
@@ -49,4 +49,6 @@ func Setup() {
 	//var user models.User
 	//db.Where("ID = ?", "99a8f14e-1d5f-4de5-8812-2f23e5b1f446").First(&user)
 	//log.Println(user)
+
+	return db
 }

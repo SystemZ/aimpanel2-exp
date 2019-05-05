@@ -53,6 +53,8 @@ func Start(gameServerID string) {
 
 	go p.Rpc()
 
+	p.WrapperStartMessage()
+
 	//go p.Run()
 
 	select {}
