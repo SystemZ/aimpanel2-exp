@@ -2,41 +2,28 @@ package handler
 
 import (
 	"encoding/json"
+	"github.com/gorilla/context"
+	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/master/db"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"gitlab.com/systemz/aimpanel2/master/request"
 	"gitlab.com/systemz/aimpanel2/master/response"
-	"log"
 	"net/http"
 )
 
 func ChangePassword(w http.ResponseWriter, r *http.Request) {
-	// swagger:route POST /user/change_password User changePassword
-	//
-	// Changes authenticated user password
-	//
-	//Consumes:
-	//	- application/json
-	//
-	//Produces:
-	//	- application/json
-	//
-	//Schemes: http, https
-	//
-	//Responses:
-	//	default: jsonError
-	//	200:
+	user := context.Get(r, "user").(model.User)
+
 	decoder := json.NewDecoder(r.Body)
 	var changePasswordReq request.ChangePasswordReq
 	err := decoder.Decode(&changePasswordReq)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response.JsonError{ErrorCode: 11, Message: "Invalid body."})
+
+		lib.MustEncode(json.NewEncoder(w),
+			response.JsonError{ErrorCode: 2001, Message: "Invalid body."})
 		return
 	}
-
-	var user model.User
-	db.DB.Where("id = ?", r.Header.Get("uid")).First(&user)
 
 	if user.CheckPassword(changePasswordReq.Password) {
 		if changePasswordReq.NewPassword == changePasswordReq.NewPasswordRepeat {
@@ -47,47 +34,34 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 			return
 		} else {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(response.JsonError{ErrorCode: 12, Message: "Passwords do not match."})
+
+			lib.MustEncode(json.NewEncoder(w),
+				response.JsonError{ErrorCode: 2002, Message: "Passwords do not match."})
 			return
 		}
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response.JsonError{ErrorCode: 13, Message: "Current password is wrong."})
+
+		lib.MustEncode(json.NewEncoder(w),
+			response.JsonError{ErrorCode: 2003, Message: "Current password is wrong."})
 		return
 	}
 }
 
 func ChangeEmail(w http.ResponseWriter, r *http.Request) {
-	// swagger:route POST /user/change_email User changeEmail
-	//
-	// Changes authenticated user email
-	//
-	//Consumes:
-	//	- application/json
-	//
-	//Produces:
-	//	- application/json
-	//
-	//Schemes: http, https
-	//
-	//Responses:
-	//	default: jsonError
-	//	200:
+	user := context.Get(r, "user").(model.User)
+
 	decoder := json.NewDecoder(r.Body)
 	var changeEmailReq request.ChangeEmailReq
 	err := decoder.Decode(&changeEmailReq)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response.JsonError{ErrorCode: 14, Message: "Invalid body."})
+
+		lib.MustEncode(json.NewEncoder(w),
+			response.JsonError{ErrorCode: 2004, Message: "Invalid body."})
 		return
 	}
 
-	userId := r.Header.Get("uid")
-	var user model.User
-	db.DB.Where("id = ?", userId).First(&user)
-
-	log.Println(user.Email)
-	log.Println(changeEmailReq.Email)
 	if user.Email == changeEmailReq.Email {
 		if changeEmailReq.NewEmail == changeEmailReq.NewEmailRepeat {
 			user.Email = changeEmailReq.NewEmail
@@ -97,19 +71,21 @@ func ChangeEmail(w http.ResponseWriter, r *http.Request) {
 			return
 		} else {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(response.JsonError{ErrorCode: 15, Message: "Emails do not match."})
+
+			lib.MustEncode(json.NewEncoder(w),
+				response.JsonError{ErrorCode: 2005, Message: "Emails do not match."})
 			return
 		}
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response.JsonError{ErrorCode: 16, Message: "Current email is wrong."})
+
+		lib.MustEncode(json.NewEncoder(w),
+			response.JsonError{ErrorCode: 2006, Message: "Current email is wrong."})
 		return
 	}
 }
 
 func Profile(w http.ResponseWriter, r *http.Request) {
-	var user model.User
-	db.DB.Where("id = ?", r.Header.Get("uid")).First(&user)
-
-	json.NewEncoder(w).Encode(user)
+	user := context.Get(r, "user").(model.User)
+	lib.MustEncode(json.NewEncoder(w), user)
 }
