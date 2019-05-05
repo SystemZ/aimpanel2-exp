@@ -22,7 +22,7 @@ services:
       - 15672:15672
       - 5672:5672
   redis:
-    image: 'bitnami/redis:4.0'
+    image: 'redis:5'
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
       - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
