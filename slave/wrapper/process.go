@@ -123,6 +123,7 @@ func (p *Process) Run() {
 
 func (p *Process) LogStdout(msg string) {
 	logMessage := rabbit.QueueMsg{
+		TaskId: rabbit.SERVER_LOG,
 		Stdout:       msg,
 		GameServerID: uuid.FromStringOrNil(p.GameServerID),
 	}
@@ -147,6 +148,7 @@ func (p *Process) LogStdout(msg string) {
 
 func (p *Process) LogStderr(msg string) {
 	logMessage := rabbit.QueueMsg{
+		TaskId: rabbit.SERVER_LOG,
 		Stderr:       msg,
 		GameServerID: uuid.FromStringOrNil(p.GameServerID),
 	}

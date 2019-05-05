@@ -1,8 +1,12 @@
 package rabbit
 
 import (
+	"encoding/json"
+	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
-	"log"
+	"gitlab.com/systemz/aimpanel2/lib/rabbit"
+	"gitlab.com/systemz/aimpanel2/master/db"
+	"gitlab.com/systemz/aimpanel2/master/model"
 )
 
 func ListenWrapperLogsQueue() {
@@ -17,8 +21,34 @@ func ListenWrapperLogsQueue() {
 	lib.FailOnError(err, "Failed to register a consumer")
 
 	go func() {
-		for d := range msgs {
-			log.Printf("Received a message: %s", d.Body)
+		for msg := range msgs {
+			var msgBody rabbit.QueueMsg
+			err = json.Unmarshal(msg.Body, &msgBody)
+			if err != nil {
+				logrus.Warn(err)
+			}
+
+			if msgBody.TaskId == rabbit.SERVER_LOG {
+				var gsLog model.GameServerLog
+				gsLog.GameServerID = msgBody.GameServerID
+
+				if len(msgBody.Stdout) > 0 {
+					gsLog.Log = msgBody.Stdout
+					gsLog.Type = model.STDOUT
+				}
+
+				if len(msgBody.Stderr) > 0 {
+					gsLog.Log = msgBody.Stderr
+					gsLog.Type = model.STDERR
+				}
+
+				err = db.DB.Save(&gsLog).Error
+				if err != nil {
+					logrus.Warn(err)
+				}
+
+				logrus.Printf("Received a message: %s", gsLog)
+			}
 		}
 	}()
 }

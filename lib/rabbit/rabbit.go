@@ -15,6 +15,8 @@ const (
 	//AGENT
 	WRAPPER_START = iota
 	GAME_INSTALL  = iota
+
+	SERVER_LOG = iota
 )
 
 type QueueMsg struct {
