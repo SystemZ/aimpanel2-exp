@@ -21,10 +21,4 @@ type GameServerLog struct {
 
 	//Created at timestamp
 	CreatedAt time.Time `json:"created_at"`
-
-	//Updated at timestamp
-	UpdatedAt time.Time `json:"updated_at"`
-
-	//Deleted at timestamp
-	DeletedAt *time.Time `json:"deleted_at"`
 }
