@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"github.com/streadway/amqp"
 	"gitlab.com/systemz/aimpanel2/lib"
+	"gitlab.com/systemz/aimpanel2/lib/rabbit"
 	"testing"
 )
 
@@ -37,17 +38,17 @@ func TestAgentInstallGameServer(t *testing.T) {
 
 	corrId := lib.RandomString(32)
 
-	start := lib.RpcMessage{
-		Type:           lib.INSTALL_GAME_SERVER,
-		Body:           "",
-		Game:           "minecraft",
-		GameServerUUID: "test-test-test-test",
+	start := rabbit.QueueMsg{
+		TaskId:       rabbit.GAME_INSTALL,
+		Game:         "minecraft",
+		GameServerID: "test-test-test-test",
 	}
+
 	jsonMarshal, _ := json.Marshal(start)
 
 	err = channel.Publish(
 		"",
-		"agent_rpc",
+		"agent_1234",
 		false,
 		false,
 		amqp.Publishing{
@@ -89,17 +90,16 @@ func TestAgentStartWrapper(t *testing.T) {
 
 	corrId := lib.RandomString(32)
 
-	start := lib.RpcMessage{
-		Type:           lib.START_WRAPPER,
-		Body:           "",
-		Game:           "minecraft",
-		GameServerUUID: "test-test-test-test",
+	start := rabbit.QueueMsg{
+		TaskId:       rabbit.WRAPPER_START,
+		Game:         "minecraft",
+		GameServerID: "test-test-test-test",
 	}
 	jsonMarshal, _ := json.Marshal(start)
 
 	err = channel.Publish(
 		"",
-		"agent_rpc",
+		"agent_1234",
 		false,
 		false,
 		amqp.Publishing{

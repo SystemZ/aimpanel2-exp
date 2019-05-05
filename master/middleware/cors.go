@@ -9,9 +9,9 @@ import (
 func CorsMiddleware(handler http.Handler) http.Handler {
 	log.Println("CORS Middleware")
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:8080"},
+		AllowedOrigins:   []string{"*"},
 		AllowCredentials: true,
-		AllowedHeaders:   []string{"Authorization", "Content-Type"},
+		AllowedHeaders:   []string{"Authorization", "Content-Type", "Accept", "Content-Length"},
 		Debug:            true,
 	})
 	return c.Handler(handler)

@@ -2,6 +2,7 @@ package router
 
 import (
 	"gitlab.com/systemz/aimpanel2/master/handler"
+	"gitlab.com/systemz/aimpanel2/master/handler/game_server"
 	"net/http"
 )
 
@@ -61,6 +62,50 @@ var routes = Routes{
 		true,
 	},
 
+	//GameServers
+	Route{
+		"Create game server",
+		"POST",
+		"/hosts/{host_id}/servers",
+		game_server.Create,
+		true,
+	},
+	Route{
+		"List game servers by host id",
+		"GET",
+		"/hosts/{id}/servers",
+		game_server.ListByHostId,
+		true,
+	},
+	Route{
+		"List game servers by user id",
+		"GET",
+		"/hosts/my/servers",
+		game_server.ListByUser,
+		true,
+	},
+	Route{
+		"Install game server",
+		"GET",
+		"/hosts/{host_id}/servers/{server_id}/install",
+		game_server.Install,
+		true,
+	},
+	Route{
+		"Start game server",
+		"GET",
+		"/hosts/{host_id}/servers/{server_id}/start",
+		game_server.Start,
+		true,
+	},
+	Route{
+		"Stop game server",
+		"POST",
+		"/hosts/{host_id}/servers/{server_id}/stop",
+		game_server.Stop,
+		true,
+	},
+
 	//User
 	Route{
 		"Change password",
@@ -81,6 +126,15 @@ var routes = Routes{
 		"GET",
 		"/user/profile",
 		handler.Profile,
+		true,
+	},
+
+	//Games
+	Route{
+		"List games",
+		"GET",
+		"/games",
+		handler.ListGames,
 		true,
 	},
 }

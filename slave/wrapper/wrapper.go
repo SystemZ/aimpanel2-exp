@@ -4,24 +4,20 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
 	"gitlab.com/systemz/aimpanel2/lib"
+	"gitlab.com/systemz/aimpanel2/slave/config"
 )
 
 var (
-	conn        *amqp.Connection
-	channel     *amqp.Channel
-	queueLow    amqp.Queue
-	queueNormal amqp.Queue
-	queueHigh   amqp.Queue
-	rpcQueue    amqp.Queue
-	err         error
+	channel *amqp.Channel
+	queue   amqp.Queue
 )
 
-func Start(startToken string) {
+func Start(gameServerID string) {
 	logrus.Info("Starting wrapper")
 	//TODO: Make request to master to get creds to rabbit
 
 	// Defer can't be in init because this will be executed when the function return.
-	conn, err = amqp.Dial("amqp://guest:guest@localhost:5672/")
+	conn, err := amqp.Dial("amqp://" + config.RABBITMQ_USERNAME + ":" + config.RABBITMQ_PASSWORD + "@" + config.RABBITMQ_HOST + ":" + config.RABBITMQ_PORT + "/")
 	lib.FailOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
 
@@ -29,17 +25,13 @@ func Start(startToken string) {
 	lib.FailOnError(err, "Failed to open channel")
 	defer channel.Close()
 
-	queueLow, err = channel.QueueDeclare("wrapper_low", true, false, false, false, nil)
-	lib.FailOnError(err, "Failed to declare a low queue")
+	queue, err = channel.QueueDeclare("wrapper_"+gameServerID, true,
+		false, false, false, nil)
+	lib.FailOnError(err, "Failed to declare a wrapper queue")
 
-	queueNormal, err = channel.QueueDeclare("wrapper_normal", true, false, false, false, nil)
-	lib.FailOnError(err, "Failed to declare a normal queue")
-
-	queueHigh, err = channel.QueueDeclare("wrapper_high", true, false, false, false, nil)
-	lib.FailOnError(err, "Failed to declare a high queue")
-
-	rpcQueue, err = channel.QueueDeclare("wrapper_rpc", false, false, false, false, nil)
-	lib.FailOnError(err, "Failed to declare a rpc queue")
+	queueLogs, err := channel.QueueDeclare("wrapper_logs", true,
+		false, false, false, nil)
+	lib.FailOnError(err, "Failed to declare a logs queue")
 
 	err = channel.Qos(1, 0, false)
 	lib.FailOnError(err, "Failed to set QoS")
@@ -52,15 +44,18 @@ func Start(startToken string) {
 		Input:  input,
 
 		//amqp
-		Channel:     channel,
-		QueueLow:    queueLow,
-		QueueNormal: queueNormal,
-		QueueHigh:   queueHigh,
-		RpcQueue:    rpcQueue,
+		Channel:   channel,
+		Queue:     queue,
+		QueueLogs: queueLogs,
+
+		GameServerID: gameServerID,
 	}
 
-	go p.Log()
 	go p.Rpc()
+
+	p.WrapperStartMessage()
+
+	//go p.Run()
 
 	select {}
 }

@@ -26,6 +26,9 @@ test-backend:
       - go get -u github.com/jstemmer/go-junit-report
       - cd master
       - go get
+      - cd ..
+      - cd slave
+      - go get
       - go fmt $(go list ./... | grep -v /vendor/)
       - go vet $(go list ./... | grep -v /vendor/)
       - go test -race $(go list ./... | grep -v /vendor/)

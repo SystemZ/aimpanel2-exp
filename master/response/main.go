@@ -6,3 +6,7 @@ type JsonError struct {
 	ErrorCode int    `json:"error_code"`
 	Message   string `json:"message"`
 }
+
+type JsonSuccess struct {
+	Message string `json:"message"`
+}
