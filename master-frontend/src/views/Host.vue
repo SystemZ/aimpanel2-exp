@@ -113,6 +113,68 @@
                     </v-flex>
                 </v-layout>
             </v-flex>
+            <v-flex xs6>
+                <br>
+                <div class="display-1 grey--text text--darken-1">File Manager</div>
+                <br>
+                <v-layout row>
+                    <v-flex xs12>
+                        <v-card>
+                            <v-list two-line subheader>
+                                <v-subheader inset>Current directory {{ fileManager.current_dir }}</v-subheader>
+                                <v-subheader inset>Directories</v-subheader>
+
+                                <v-list-tile
+                                        v-for="dir in fileManager.directories"
+                                        :key="dir.title"
+                                        avatar
+                                        @click="">
+                                    <v-list-tile-avatar>
+                                        <v-icon>{{ dir.icon }}</v-icon>
+                                    </v-list-tile-avatar>
+
+                                    <v-list-tile-content>
+                                        <v-list-tile-title>{{ dir.title }}</v-list-tile-title>
+                                        <v-list-tile-sub-title>{{ dir.last_modification }}</v-list-tile-sub-title>
+                                    </v-list-tile-content>
+
+                                    <v-list-tile-action>
+                                        <v-btn icon ripple>
+                                            <v-icon color="red lighten-1">fa-trash-o</v-icon>
+                                        </v-btn>
+                                    </v-list-tile-action>
+                                </v-list-tile>
+
+                                <v-divider inset></v-divider>
+
+                                <v-subheader inset>Files</v-subheader>
+
+                                <v-list-tile
+                                        v-for="file in fileManager.files"
+                                        :key="file.title"
+                                        avatar
+                                        @click=""
+                                >
+                                    <v-list-tile-avatar>
+                                        <v-icon>{{ file.icon }}</v-icon>
+                                    </v-list-tile-avatar>
+
+                                    <v-list-tile-content>
+                                        <v-list-tile-title>{{ file.title }}</v-list-tile-title>
+                                        <v-list-tile-sub-title>{{ file.last_modification }}</v-list-tile-sub-title>
+                                    </v-list-tile-content>
+
+                                    <v-list-tile-action>
+                                        <v-btn icon ripple>
+                                            <v-icon color="red lighten-1">fa-trash-o</v-icon>
+                                        </v-btn>
+                                    </v-list-tile-action>
+                                </v-list-tile>
+                            </v-list>
+                        </v-card>
+                    </v-flex>
+                </v-layout>
+            </v-flex>
         </v-layout>
     </v-container>
 </template>
@@ -121,7 +183,39 @@
   export default {
     name: 'host',
     data: () => ({
-      host: {}
+      host: {},
+      fileManager: {
+        current_dir: '/home/test',
+        directories: [
+          {
+            icon: 'fa-folder',
+            title: 'plugins',
+            last_modification: '04.01.2019 20:44:33'
+          },
+          {
+            icon: 'fa-folder',
+            title: 'logs',
+            last_modification: '01.01.2019 19:43:00'
+          },
+          {
+            icon: 'fa-folder',
+            title: 'world',
+            last_modification: '12.12.2018 12:13:41'
+          }
+        ],
+        files: [
+          {
+            icon: 'fa-file',
+            title: 'server.properties',
+            last_modification: '14.12.2018 12:13:41'
+          },
+          {
+            icon: 'fa-file',
+            title: 'settings.yml',
+            last_modification: '03.12.2018 12:13:41'
+          }
+        ]
+      }
     }),
     mounted() {
       this.$http.get('/v1/hosts/' + this.$route.params.id).then(res => {

@@ -1,15 +1,15 @@
-package process
+package wrapper
 
 import (
 	"bufio"
 	"encoding/json"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"io"
+	"log"
 	"os"
 	"os/exec"
-	"strings"
 	"sync"
 	"syscall"
 )
@@ -22,28 +22,28 @@ type Process struct {
 	Output chan string
 	Input  chan string
 
-	Game lib.Game
-
 	//amqp
 	Channel     *amqp.Channel
 	QueueLow    amqp.Queue
 	QueueNormal amqp.Queue
 	QueueHigh   amqp.Queue
 	RpcQueue    amqp.Queue
+
+	//
+	GameServerUUID string
+	Game           lib.Game
 }
 
 func (p *Process) Run() {
-	command := strings.Split(p.Game.Command, " ")
-	p.Cmd = exec.Command(command[0], command[1:]...)
-	//p.Cmd = exec.Command("bash", "fake-server.sh")
-	p.Cmd.Dir = p.Game.Path
+	p.Cmd = exec.Command(p.Game.Command[0], p.Game.Command[1:]...)
+	p.Cmd.Dir = "/opt/aimpanel/gs/" + p.GameServerUUID
 
 	stdout, _ := p.Cmd.StdoutPipe()
 	stderr, _ := p.Cmd.StderrPipe()
 	stdin, _ := p.Cmd.StdinPipe()
 
 	if err := p.Cmd.Start(); err != nil {
-		log.Fatal("cmd.Start()", err)
+		logrus.Fatal("cmd.Start()", err)
 	}
 
 	p.Running = true
@@ -69,7 +69,7 @@ func (p *Process) Run() {
 		}
 
 		if err := in.Err(); err != nil {
-			log.Printf("error: %s", err)
+			logrus.Printf("error: %s", err)
 		}
 	}()
 
@@ -78,7 +78,7 @@ func (p *Process) Run() {
 
 		in2 := bufio.NewScanner(stderr)
 		for in2.Scan() {
-			log.Info(in2.Text())
+			logrus.Info(in2.Text())
 		}
 	}()
 
@@ -108,7 +108,9 @@ func (p *Process) Run() {
 					log.Printf("Exit status: %d", status.ExitStatus())
 				}
 			}
-			log.Errorf("cmd.Wait: %v", err)
+			logrus.Errorf("cmd.Wait: %v", err)
+
+			os.Exit(0)
 		} else {
 			os.Exit(0)
 		}
@@ -133,7 +135,7 @@ func (p *Process) Log() {
 		})
 		lib.FailOnError(err, "Publish error")
 
-		log.WithFields(log.Fields{
+		logrus.WithFields(logrus.Fields{
 			"msg": msg,
 		}).Info()
 	}
@@ -152,16 +154,21 @@ func (p *Process) Rpc() {
 	lib.FailOnError(err, "Failed to register a consumer")
 
 	for d := range msgs {
-		log.Info("Got RPC call from RabbitMQ")
-		var wr lib.RpcMessage
-		err := json.Unmarshal(d.Body, &wr)
+		logrus.Info("Got RPC call from RabbitMQ")
+
+		var rpcMsg lib.RpcMessage
+		err := json.Unmarshal(d.Body, &rpcMsg)
 		if err != nil {
-			log.Warn(err)
+			logrus.Warn(err)
 		}
 
-		switch wr.Type {
+		switch rpcMsg.Type {
 		case lib.START:
-			log.Info("START message")
+			logrus.Info("Got START msg")
+
+			p.Game = lib.GAMES[rpcMsg.Game]
+			p.GameServerUUID = rpcMsg.GameServerUUID
+
 			go p.Run()
 
 			err = p.Channel.Publish("", d.ReplyTo, false, false, amqp.Publishing{
@@ -173,9 +180,9 @@ func (p *Process) Rpc() {
 
 			d.Ack(false)
 		case lib.COMMAND:
-			log.Info("COMMAND message")
+			logrus.Info("Got COMMAND msg")
 
-			go func() { p.Input <- string(wr.Body) }()
+			go func() { p.Input <- string(rpcMsg.Body) }()
 
 			err = p.Channel.Publish("", d.ReplyTo, false, false, amqp.Publishing{
 				ContentType:   "application/json",
@@ -186,7 +193,7 @@ func (p *Process) Rpc() {
 
 			d.Ack(false)
 		case lib.STOP_SIGKILL:
-			log.Info("STOP_SIGKILL message")
+			logrus.Info("Got STOP_SIGKILL msg")
 
 			p.Kill(syscall.SIGKILL)
 
@@ -199,54 +206,9 @@ func (p *Process) Rpc() {
 
 			d.Ack(false)
 		case lib.STOP_SIGTERM:
-			log.Info("STOP_SIGTERM message")
+			logrus.Info("Got STOP_SIGTERM msg")
 
 			p.Kill(syscall.SIGTERM)
-
-			err = p.Channel.Publish("", d.ReplyTo, false, false, amqp.Publishing{
-				ContentType:   "application/json",
-				CorrelationId: d.CorrelationId,
-				Body:          []byte(""),
-			})
-			lib.FailOnError(err, "Failed to publish a message")
-
-			d.Ack(false)
-
-		case lib.DOWNLOAD:
-			log.Info("DOWNLOAD message")
-
-			url := strings.Split(p.Game.DownloadUrl, "/")
-
-			filename := url[len(url)-1]
-
-			if _, err := os.Stat(p.Game.Path + filename); os.IsNotExist(err) {
-				err := lib.DownloadFile(p.Game.Path+filename, p.Game.DownloadUrl)
-				if err != nil {
-					log.Fatal(err)
-				}
-
-				log.Info("Downloaded file")
-			}
-
-			if strings.Contains(filename, ".tar.bz2") {
-				_, err := exec.Command("tar", "xvf", p.Game.Path+filename, "-C", p.Game.Path).CombinedOutput()
-				if err != nil {
-					log.Fatal(err)
-				}
-
-				log.Info("Extracted file")
-			}
-
-			err = p.Channel.Publish("", d.ReplyTo, false, false, amqp.Publishing{
-				ContentType:   "application/json",
-				CorrelationId: d.CorrelationId,
-				Body:          []byte(""),
-			})
-			lib.FailOnError(err, "Failed to publish a message")
-
-			d.Ack(false)
-		case lib.OS_COMMAND:
-			log.Info("OS_COMMAND message")
 
 			err = p.Channel.Publish("", d.ReplyTo, false, false, amqp.Publishing{
 				ContentType:   "application/json",
