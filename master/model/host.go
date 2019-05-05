@@ -44,7 +44,7 @@ type Host struct {
 	DeletedAt *time.Time `json:"deleted_at"`
 }
 
-func (u *Host) BeforeCreate(scope *gorm.Scope) error {
+func (h *Host) BeforeCreate(scope *gorm.Scope) error {
 	uuidGen, err := uuid.NewV4()
 	if err != nil {
 		log.Println(err)
@@ -54,4 +54,24 @@ func (u *Host) BeforeCreate(scope *gorm.Scope) error {
 	scope.SetColumn("Token", lib.RandomString(32))
 
 	return nil
+}
+
+func (h *Host) GetGameServer(db *gorm.DB, gsId string) *GameServer {
+	var gs GameServer
+
+	if db.Where("id = ? and host_id = ?", gsId, h.ID).First(&gs).RecordNotFound() {
+		return nil
+	}
+
+	return &gs
+}
+
+func (h *Host) GetGameServers(db *gorm.DB) *[]GameServer {
+	var gs []GameServer
+
+	if db.Where("host_id = ?", h.ID).Find(&gs).RecordNotFound() {
+		return nil
+	}
+
+	return &gs
 }

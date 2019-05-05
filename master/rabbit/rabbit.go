@@ -2,7 +2,6 @@ package rabbit
 
 import (
 	"encoding/json"
-	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/rabbit"
@@ -13,7 +12,7 @@ var (
 	channel *amqp.Channel
 )
 
-func RabbitListen() {
+func Listen() {
 	conn, err := amqp.Dial("amqp://" + config.RABBITMQ_USERNAME + ":" + config.RABBITMQ_PASSWORD + "@" + config.RABBITMQ_HOST + ":" + config.RABBITMQ_PORT + "/")
 	lib.FailOnError(err, "Failed to connect to RabbitMQ")
 
@@ -29,7 +28,7 @@ func RabbitListen() {
 	lib.FailOnError(err, "Failed to set QoS")
 }
 
-func SendRpcMessage(queue string, msg rabbit.QueueMsg) {
+func SendRpcMessage(queue string, msg rabbit.QueueMsg) error {
 	body, err := json.Marshal(msg)
 
 	corrId := lib.RandomString(32)
@@ -45,7 +44,8 @@ func SendRpcMessage(queue string, msg rabbit.QueueMsg) {
 			Body:          body,
 		})
 	if err != nil {
-		logrus.Error("Failed to respond: %v", err.Error())
-		return
+		return err
 	}
+
+	return nil
 }

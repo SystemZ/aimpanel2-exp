@@ -28,7 +28,7 @@ import (
 func main() {
 	db.DB = db.SetupDatabase()
 
-	rabbit.RabbitListen()
+	rabbit.Listen()
 	rabbit.ListenWrapperLogsQueue()
 
 	log.Println("Starting API on port :8000")

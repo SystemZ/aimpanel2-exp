@@ -50,7 +50,7 @@ type GameServer struct {
 	DeletedAt *time.Time `json:"deleted_at"`
 }
 
-func (u *GameServer) BeforeCreate(scope *gorm.Scope) error {
+func (gs *GameServer) BeforeCreate(scope *gorm.Scope) error {
 	uuidGen, err := uuid.NewV4()
 	if err != nil {
 		log.Println(err)
@@ -58,4 +58,14 @@ func (u *GameServer) BeforeCreate(scope *gorm.Scope) error {
 	scope.SetColumn("ID", uuidGen)
 
 	return nil
+}
+
+func (gs *GameServer) GetGame(db *gorm.DB) *Game {
+	var game Game
+
+	if db.Where("id = ?", gs.GameId).First(&game).RecordNotFound() {
+		return nil
+	}
+
+	return &game
 }

@@ -2,6 +2,9 @@ package middleware
 
 import (
 	"github.com/dgrijalva/jwt-go"
+	"github.com/gorilla/context"
+	"gitlab.com/systemz/aimpanel2/master/db"
+	"gitlab.com/systemz/aimpanel2/master/model"
 	"net/http"
 	"os"
 	"strings"
@@ -24,7 +27,12 @@ func AuthMiddleware(handler http.Handler) http.Handler {
 			return
 		}
 
-		r.Header.Set("uid", token.Claims.(jwt.MapClaims)["uid"].(string))
+		var user model.User
+		if db.DB.Where("id = ?", token.Claims.(jwt.MapClaims)["uid"].(string)).First(&user).RecordNotFound() {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		context.Set(r, "user", user)
 
 		handler.ServeHTTP(w, r)
 	})

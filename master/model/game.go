@@ -1,6 +1,7 @@
 package model
 
 import (
+	"github.com/jinzhu/gorm"
 	"time"
 )
 
@@ -25,4 +26,35 @@ type Game struct {
 
 	//Deleted at timestamp
 	DeletedAt *time.Time `json:"deleted_at"`
+}
+
+func (g *Game) GetStartCommand(db *gorm.DB) *GameCommand {
+	var startCommand GameCommand
+
+	if db.Where("game_id = ? and type = ?", g.ID, "start").First(&startCommand).RecordNotFound() {
+		return nil
+	}
+
+	return &startCommand
+}
+
+func (g *Game) GetInstallCommands(db *gorm.DB) *[]GameCommand {
+	var installCommands []GameCommand
+
+	if db.Where("game_id = ? and type = ?", g.ID, "install").
+		Order("`order` asc").Find(&installCommands).RecordNotFound() {
+		return nil
+	}
+
+	return &installCommands
+}
+
+func (g *Game) GetInstallFile(db *gorm.DB) *GameFile {
+	var file GameFile
+
+	if db.Where("game_id = ?", g.ID).First(&file).RecordNotFound() {
+		return nil
+	}
+
+	return &file
 }
