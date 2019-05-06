@@ -105,6 +105,13 @@ var routes = Routes{
 		game_server.Restart,
 		true,
 	},
+	Route{
+		"Stop game server",
+		"POST",
+		"/hosts/{host_id}/servers/{server_id}/stop",
+		game_server.Stop,
+		true,
+	},
 
 	//User
 	Route{
