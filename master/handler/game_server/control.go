@@ -188,12 +188,73 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 		err = rabbitMaster.SendRpcMessage("wrapper_"+gameServer.ID.String(), msg)
 		if err != nil {
 			lib.MustEncode(json.NewEncoder(w),
-				response.JsonError{ErrorCode: 5017, Message: "Could not start a game."})
+				response.JsonError{ErrorCode: 5017, Message: "Could not stop a game."})
 			return
 		}
 	}
 
 	redis.Redis.Set("gs_restart_id_"+gameServer.ID.String(), 1, 1*time.Hour)
+
+	lib.MustEncode(json.NewEncoder(w), response.JsonSuccess{Message: "Restarting the game server."})
+}
+
+func Stop(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+
+	hostId := params["host_id"]
+	gameServerId := params["server_id"]
+
+	stopReq := &game_server.StopGameServerRequest{}
+
+	err := json.NewDecoder(r.Body).Decode(stopReq)
+	if err != nil {
+		lib.MustEncode(json.NewEncoder(w),
+			response.JsonError{ErrorCode: 5018, Message: "Invalid body."})
+		return
+	}
+
+	user := context.Get(r, "user").(model.User)
+	host := user.GetHost(db.DB, hostId)
+	if host == nil {
+		lib.MustEncode(json.NewEncoder(w),
+			response.JsonError{ErrorCode: 5019, Message: "Could not find a host."})
+		return
+	}
+
+	gameServer := host.GetGameServer(db.DB, gameServerId)
+	if gameServer == nil {
+		lib.MustEncode(json.NewEncoder(w),
+			response.JsonError{ErrorCode: 5020, Message: "Could not find a game server."})
+		return
+	}
+
+	if stopReq.Type == 1 {
+		//sigkill
+		msg := rabbit.QueueMsg{
+			TaskId:       rabbit.GAME_STOP_SIGKILL,
+			GameServerID: gameServer.ID,
+		}
+
+		err = rabbitMaster.SendRpcMessage("wrapper_"+gameServer.ID.String(), msg)
+		if err != nil {
+			lib.MustEncode(json.NewEncoder(w),
+				response.JsonError{ErrorCode: 5021, Message: "Could not stop a game."})
+			return
+		}
+	} else if stopReq.Type == 2 {
+		//sigterm
+		msg := rabbit.QueueMsg{
+			TaskId:       rabbit.GAME_STOP_SIGTERM,
+			GameServerID: gameServer.ID,
+		}
+
+		err = rabbitMaster.SendRpcMessage("wrapper_"+gameServer.ID.String(), msg)
+		if err != nil {
+			lib.MustEncode(json.NewEncoder(w),
+				response.JsonError{ErrorCode: 5022, Message: "Could not stop a game."})
+			return
+		}
+	}
 
 	lib.MustEncode(json.NewEncoder(w), response.JsonSuccess{Message: "Stopping the game server."})
 }
