@@ -99,10 +99,10 @@ var routes = Routes{
 		true,
 	},
 	Route{
-		"Stop game server",
+		"Restart game server",
 		"POST",
-		"/hosts/{host_id}/servers/{server_id}/stop",
-		game_server.Stop,
+		"/hosts/{host_id}/servers/{server_id}/restart",
+		game_server.Restart,
 		true,
 	},
 

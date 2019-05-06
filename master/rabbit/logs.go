@@ -84,6 +84,34 @@ func ListenWrapperLogsQueue() {
 					redis.Redis.Del("gs_restart_id_" + gs.ID.String())
 				}
 
+				_, err = redis.Redis.Get("gs_start_id_" + gameServerId.String()).Int()
+				if err == nil {
+					var gs model.GameServer
+					if db.DB.Where("id = ?", gameServerId).First(&gs).RecordNotFound() {
+						break
+					}
+
+					var startCommand model.GameCommand
+					if db.DB.Where("game_id = ? and type = ?", gs.GameId, "start").
+						First(&startCommand).RecordNotFound() {
+						break
+					}
+
+					msg := rabbit.QueueMsg{
+						TaskId:           rabbit.GAME_START,
+						GameServerID:     gs.ID,
+						GameStartCommand: &startCommand,
+					}
+
+					err := SendRpcMessage("wrapper_"+gs.ID.String(), msg)
+					if err != nil {
+						logrus.Error(err.Error())
+						break
+					}
+
+					redis.Redis.Del("gs_start_id_" + gs.ID.String())
+				}
+
 			case rabbit.WRAPPER_EXITED:
 				logrus.Info("WRAPPER_EXITED")
 				gameServerId := msgBody.GameServerID

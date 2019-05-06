@@ -51,6 +51,8 @@ func Start(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	redis.Redis.Set("gs_start_id_"+gameServer.ID.String(), 0, 1*time.Hour)
+
 	msg := rabbit.QueueMsg{
 		TaskId:       rabbit.WRAPPER_START,
 		Game:         game.Name,
@@ -59,25 +61,12 @@ func Start(w http.ResponseWriter, r *http.Request) {
 
 	err := rabbitMaster.SendRpcMessage("agent_"+host.Token, msg)
 	if err != nil {
-		lib.MustEncode(json.NewEncoder(w), response.JsonError{ErrorCode: 5005, Message: "Could not start a wrapper."})
-		return
-	}
-
-	//todo: change it to redis session
-
-	time.Sleep(5 * time.Second)
-
-	msg = rabbit.QueueMsg{
-		TaskId:           rabbit.GAME_START,
-		GameServerID:     gameServer.ID,
-		GameStartCommand: startCommand,
-	}
-	err = rabbitMaster.SendRpcMessage("wrapper_"+gameServer.ID.String(), msg)
-	if err != nil {
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 5006, Message: "Could not start a game."})
+			response.JsonError{ErrorCode: 5005, Message: "Could not start a wrapper."})
 		return
 	}
+
+	redis.Redis.Set("gs_start_id_"+gameServer.ID.String(), 1, 1*time.Hour)
 
 	lib.MustEncode(json.NewEncoder(w),
 		response.JsonSuccess{Message: "Started game server succesfully."})
@@ -144,7 +133,7 @@ func Install(w http.ResponseWriter, r *http.Request) {
 		response.JsonSuccess{Message: "Installed game server successfully."})
 }
 
-func Stop(w http.ResponseWriter, r *http.Request) {
+func Restart(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
 	hostId := params["host_id"]
@@ -205,5 +194,6 @@ func Stop(w http.ResponseWriter, r *http.Request) {
 	}
 
 	redis.Redis.Set("gs_restart_id_"+gameServer.ID.String(), 1, 1*time.Hour)
+
 	lib.MustEncode(json.NewEncoder(w), response.JsonSuccess{Message: "Stopping the game server."})
 }
