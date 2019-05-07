@@ -44,7 +44,7 @@ func Start(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	startCommand := game.GetStartCommand(db.DB)
+	startCommand := game.GetStartCommandByVersion(db.DB, gameServer.GameVersion)
 	if startCommand == nil {
 		lib.MustEncode(json.NewEncoder(w),
 			response.JsonError{ErrorCode: 5004, Message: "Could not find a start command."})
@@ -100,14 +100,14 @@ func Install(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	gameFile := game.GetInstallFile(db.DB)
+	gameFile := game.GetInstallFileByVersion(db.DB, gameServer.GameVersion)
 	if gameFile == nil {
 		lib.MustEncode(json.NewEncoder(w),
 			response.JsonError{ErrorCode: 5010, Message: "Could not find a install file."})
 		return
 	}
 
-	installCommands := game.GetInstallCommands(db.DB)
+	installCommands := game.GetInstallCommandsByVersion(db.DB, gameServer.GameVersion)
 	if installCommands == nil {
 		lib.MustEncode(json.NewEncoder(w),
 			response.JsonError{ErrorCode: 5011, Message: "Could not find a install commands."})
