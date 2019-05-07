@@ -18,7 +18,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 1001, Message: "Invalid body."})
+			response.JsonError{ErrorCode: 1001})
 		return
 	}
 
@@ -26,7 +26,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 1002, Message: "Passwords do not match."})
+			response.JsonError{ErrorCode: 1002})
 		return
 	}
 
@@ -34,7 +34,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 1003, Message: "Emails do not match."})
+			response.JsonError{ErrorCode: 1003})
 		return
 	}
 
@@ -44,7 +44,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 1004, Message: "User with this username already exist."})
+			response.JsonError{ErrorCode: 1004})
 		return
 	}
 
@@ -58,7 +58,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 1005, Message: "Something went wrong."})
+			response.JsonError{ErrorCode: 1005})
 		return
 	}
 
@@ -67,7 +67,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 1006, Message: "Something went wrong."})
+			response.JsonError{ErrorCode: 1006})
 		return
 	}
 
@@ -82,7 +82,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 1007, Message: "Invalid body."})
+			response.JsonError{ErrorCode: 1007})
 		return
 	}
 
@@ -95,7 +95,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 
 			lib.MustEncode(json.NewEncoder(w),
-				response.JsonError{ErrorCode: 1008, Message: "Something went wrong."})
+				response.JsonError{ErrorCode: 1008})
 			return
 		}
 
@@ -104,7 +104,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 1009, Message: "Wrong username or password."})
+			response.JsonError{ErrorCode: 1009})
 		return
 	}
 }

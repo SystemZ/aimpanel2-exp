@@ -29,3 +29,15 @@
 |Code|Msg|
 |---|---|
 |112|Data on disk is too fat|
+
+
+# Auth
+* 1001 - Invalid body.
+* 1002 - Passwords do not match.
+* 1003 - Emails do not match
+* 1004 - User with this username already exist.
+* 1005 - Something went wrong.
+* 1006 - Something went wrong.
+* 1007 - Invalid body.
+* 1008 - Something went wrong.
+* 1009 - Wrong username or password.
