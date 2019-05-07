@@ -2,12 +2,12 @@ package agent
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/rabbit"
 	"gitlab.com/systemz/aimpanel2/slave/config"
-	"log"
 	"os"
 	"os/exec"
 	"strings"
@@ -72,10 +72,6 @@ func rabbitListen(queue string) {
 		case rabbit.GAME_INSTALL:
 			logrus.Info("INSTALL_GAME_SERVER")
 
-			//game := lib.GAMES[task.msgBody.Game]
-
-			log.Println(task.msgBody.GameCommands)
-
 			logrus.Info("Creating gs dir")
 
 			gameFile := task.msgBody.GameFile
@@ -87,8 +83,10 @@ func rabbitListen(queue string) {
 
 			logrus.Info("Downloading install package")
 
-			if _, err = os.Stat(config.STORAGE_DIR + gameFile.Filename); os.IsNotExist(err) {
-				cmd := exec.Command("wget", gameFile.DownloadUrl)
+			fileNameWithVersion := fmt.Sprintf("%d_%s", gameFile.GameVersion, gameFile.Filename)
+
+			if _, err = os.Stat(config.STORAGE_DIR + fileNameWithVersion); os.IsNotExist(err) {
+				cmd := exec.Command("wget", "-O", fileNameWithVersion, gameFile.DownloadUrl)
 				cmd.Dir = config.STORAGE_DIR
 
 				if err := cmd.Run(); err != nil {
@@ -104,7 +102,7 @@ func rabbitListen(queue string) {
 				c.Command = strings.Replace(c.Command, "{storageDir}", config.STORAGE_DIR, -1)
 				c.Command = strings.Replace(c.Command, "{gsDir}", config.GS_DIR, -1)
 				c.Command = strings.Replace(c.Command, "{uuid}", task.msgBody.GameServerID.String(), -1)
-				c.Command = strings.Replace(c.Command, "{fileName}", gameFile.Filename, -1)
+				c.Command = strings.Replace(c.Command, "{fileName}", fileNameWithVersion, -1)
 
 				command := strings.Split(c.Command, " ")
 
