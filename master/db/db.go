@@ -36,6 +36,7 @@ func Setup() *gorm.DB {
 	db.AutoMigrate(&model.Game{})
 	db.AutoMigrate(&model.GameFile{})
 	db.AutoMigrate(&model.GameCommand{})
+	db.AutoMigrate(&model.GameVersion{})
 
 	db.AutoMigrate(&model.GameServerLog{})
 
