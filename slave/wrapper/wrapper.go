@@ -29,9 +29,9 @@ func Start(gameServerID string) {
 		false, false, false, nil)
 	lib.FailOnError(err, "Failed to declare a wrapper queue")
 
-	queueLogs, err := channel.QueueDeclare("wrapper_logs", true,
+	queueData, err := channel.QueueDeclare("wrapper_data", true,
 		false, false, false, nil)
-	lib.FailOnError(err, "Failed to declare a logs queue")
+	lib.FailOnError(err, "Failed to declare a data queue")
 
 	err = channel.Qos(1, 0, false)
 	lib.FailOnError(err, "Failed to set QoS")
@@ -46,7 +46,7 @@ func Start(gameServerID string) {
 		//amqp
 		Channel:   channel,
 		Queue:     queue,
-		QueueLogs: queueLogs,
+		QueueData: queueData,
 
 		GameServerID: gameServerID,
 	}
@@ -54,8 +54,6 @@ func Start(gameServerID string) {
 	go p.Rpc()
 
 	p.WrapperStartMessage()
-
-	//go p.Run()
 
 	select {}
 }
