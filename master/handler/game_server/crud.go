@@ -2,7 +2,6 @@ package game_server
 
 import (
 	"encoding/json"
-	"github.com/gofrs/uuid"
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 	"gitlab.com/systemz/aimpanel2/lib"
@@ -33,7 +32,8 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	gameServer.HostId = uuid.FromStringOrNil(params["id"])
+	gameServer.HostId = host.ID
+
 	db.DB.Save(gameServer)
 
 	lib.MustEncode(json.NewEncoder(w),
