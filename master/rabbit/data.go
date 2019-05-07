@@ -13,7 +13,7 @@ import (
 
 func ListenWrapperLogsQueue() {
 	msgs, err := channel.Consume(
-		"wrapper_logs",
+		"wrapper_data",
 		"",
 		true,
 		false,

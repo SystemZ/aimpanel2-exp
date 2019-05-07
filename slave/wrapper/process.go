@@ -28,7 +28,7 @@ type Process struct {
 	//amqp
 	Channel             *amqp.Channel
 	Queue               amqp.Queue
-	QueueLogs           amqp.Queue
+	QueueData           amqp.Queue
 	ClientCorrelationId string
 	ReplyTo             string
 
@@ -125,7 +125,7 @@ func (p *Process) Run() {
 
 func (p *Process) LogStdout(msg string) {
 	logMessage := rabbit.QueueMsg{
-		TaskId: rabbit.SERVER_LOG,
+		TaskId:       rabbit.SERVER_LOG,
 		Stdout:       msg,
 		GameServerID: uuid.FromStringOrNil(p.GameServerID),
 	}
@@ -134,7 +134,7 @@ func (p *Process) LogStdout(msg string) {
 
 	err := p.Channel.Publish(
 		"",
-		p.QueueLogs.Name,
+		p.QueueData.Name,
 		false,
 		false,
 		amqp.Publishing{
@@ -148,7 +148,7 @@ func (p *Process) LogStdout(msg string) {
 
 func (p *Process) LogStderr(msg string) {
 	logMessage := rabbit.QueueMsg{
-		TaskId: rabbit.SERVER_LOG,
+		TaskId:       rabbit.SERVER_LOG,
 		Stderr:       msg,
 		GameServerID: uuid.FromStringOrNil(p.GameServerID),
 	}
@@ -159,7 +159,7 @@ func (p *Process) LogStderr(msg string) {
 
 	err := p.Channel.Publish(
 		"",
-		p.QueueLogs.Name,
+		p.QueueData.Name,
 		false,
 		false,
 		amqp.Publishing{
@@ -264,10 +264,9 @@ func (p *Process) Rpc() {
 	}
 }
 
-
 func (p *Process) WrapperExitMessage() {
 	msg := rabbit.QueueMsg{
-		TaskId: rabbit.WRAPPER_EXITED,
+		TaskId:       rabbit.WRAPPER_EXITED,
 		GameServerID: uuid.FromStringOrNil(p.GameServerID),
 	}
 
@@ -275,7 +274,7 @@ func (p *Process) WrapperExitMessage() {
 
 	err := p.Channel.Publish(
 		"",
-		p.QueueLogs.Name,
+		p.QueueData.Name,
 		false,
 		false,
 		amqp.Publishing{
@@ -290,7 +289,7 @@ func (p *Process) WrapperExitMessage() {
 func (p *Process) WrapperStartMessage() {
 	logrus.Info("Sending WRAPPER_STARTED")
 	msg := rabbit.QueueMsg{
-		TaskId: rabbit.WRAPPER_STARTED,
+		TaskId:       rabbit.WRAPPER_STARTED,
 		GameServerID: uuid.FromStringOrNil(p.GameServerID),
 	}
 
@@ -298,7 +297,7 @@ func (p *Process) WrapperStartMessage() {
 
 	err := p.Channel.Publish(
 		"",
-		p.QueueLogs.Name,
+		p.QueueData.Name,
 		false,
 		false,
 		amqp.Publishing{
