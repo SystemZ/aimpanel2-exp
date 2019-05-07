@@ -49,3 +49,68 @@
 * 2004 - Invalid body.
 * 2005 - Emails do not match.
 * 2006 - Current email is wrong.
+
+
+# Game Server
+* 5001 - Could not find a host.
+* 5002 - Could not find a game server.
+* 5003 - Could not find a game.
+* 5004 - Could not find a start command.
+* 5005 - Could not start a wrapper.
+* 5006 - Could not find a host.
+* 5007 - Could not find a game server.
+* 5008 - Could not find a game.
+* 5009 - Could not find a install file.
+* 5010 - Could not find a install commands.
+* 5011 - Could not install game server.
+* 5012 - Invalid body.
+* 5013 - Could not find a host.
+* 5014 - Could not find a game server.
+* 5015 - Could not stop a game.
+* 5016 - Could not stop a game.
+* 5017 - Invalid body.
+* 5018 - Could not find a host.
+* 5019 - Could not find a game server.
+* 5020 - Could not stop a game.
+* 5021 - Could not stop a game.
+* 5022 - Invalid body.
+* 5023 - Could not find a host.
+* 5024 - Could not find a host.
+* 5025 - Could not find a game servers.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
