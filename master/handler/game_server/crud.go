@@ -19,7 +19,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(gameServer)
 	if err != nil {
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 5013, Message: "Invalid body."})
+			response.JsonError{ErrorCode: 5022})
 		return
 	}
 
@@ -28,7 +28,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	host := user.GetHost(db.DB, hostId)
 	if host == nil {
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 5014, Message: "Could not find a host."})
+			response.JsonError{ErrorCode: 5023})
 		return
 	}
 
@@ -49,14 +49,14 @@ func ListByHostId(w http.ResponseWriter, r *http.Request) {
 	host := user.GetHost(db.DB, hostId)
 	if host == nil {
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 5015, Message: "Could not find a host."})
+			response.JsonError{ErrorCode: 5024})
 		return
 	}
 
 	gameServers := host.GetGameServers(db.DB)
 	if gameServers == nil {
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 5016, Message: "Could not find a game servers."})
+			response.JsonError{ErrorCode: 5025})
 		return
 	}
 

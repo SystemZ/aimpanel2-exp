@@ -26,28 +26,28 @@ func Start(w http.ResponseWriter, r *http.Request) {
 	host := user.GetHost(db.DB, hostId)
 	if host == nil {
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 5001, Message: "Could not find a host."})
+			response.JsonError{ErrorCode: 5001})
 		return
 	}
 
 	gameServer := host.GetGameServer(db.DB, gameServerId)
 	if gameServer == nil {
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 5002, Message: "Could not find a game server."})
+			response.JsonError{ErrorCode: 5002})
 		return
 	}
 
 	game := gameServer.GetGame(db.DB)
 	if game == nil {
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 5003, Message: "Could not find a game."})
+			response.JsonError{ErrorCode: 5003})
 		return
 	}
 
 	startCommand := game.GetStartCommandByVersion(db.DB, gameServer.GameVersion)
 	if startCommand == nil {
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 5004, Message: "Could not find a start command."})
+			response.JsonError{ErrorCode: 5004})
 		return
 	}
 
@@ -62,7 +62,7 @@ func Start(w http.ResponseWriter, r *http.Request) {
 	err := rabbitMaster.SendRpcMessage("agent_"+host.Token, msg)
 	if err != nil {
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 5005, Message: "Could not start a wrapper."})
+			response.JsonError{ErrorCode: 5005})
 		return
 	}
 
@@ -82,35 +82,35 @@ func Install(w http.ResponseWriter, r *http.Request) {
 	host := user.GetHost(db.DB, hostId)
 	if host == nil {
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 5007, Message: "Could not find a host."})
+			response.JsonError{ErrorCode: 5006})
 		return
 	}
 
 	gameServer := host.GetGameServer(db.DB, gameServerId)
 	if gameServer == nil {
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 5008, Message: "Could not find a game server."})
+			response.JsonError{ErrorCode: 5007})
 		return
 	}
 
 	game := gameServer.GetGame(db.DB)
 	if game == nil {
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 5009, Message: "Could not find a game."})
+			response.JsonError{ErrorCode: 5008})
 		return
 	}
 
 	gameFile := game.GetInstallFileByVersion(db.DB, gameServer.GameVersion)
 	if gameFile == nil {
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 5010, Message: "Could not find a install file."})
+			response.JsonError{ErrorCode: 5009})
 		return
 	}
 
 	installCommands := game.GetInstallCommandsByVersion(db.DB, gameServer.GameVersion)
 	if installCommands == nil {
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 5011, Message: "Could not find a install commands."})
+			response.JsonError{ErrorCode: 5010})
 		return
 	}
 
@@ -125,7 +125,7 @@ func Install(w http.ResponseWriter, r *http.Request) {
 	err := rabbitMaster.SendRpcMessage("agent_"+host.Token, msg)
 	if err != nil {
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 5012, Message: "Could not install game server."})
+			response.JsonError{ErrorCode: 5011})
 		return
 	}
 
@@ -144,7 +144,7 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(stopReq)
 	if err != nil {
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 5013, Message: "Invalid body."})
+			response.JsonError{ErrorCode: 5012})
 		return
 	}
 
@@ -152,14 +152,14 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 	host := user.GetHost(db.DB, hostId)
 	if host == nil {
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 5014, Message: "Could not find a host."})
+			response.JsonError{ErrorCode: 5013})
 		return
 	}
 
 	gameServer := host.GetGameServer(db.DB, gameServerId)
 	if gameServer == nil {
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 5015, Message: "Could not find a game server."})
+			response.JsonError{ErrorCode: 5014})
 		return
 	}
 
@@ -175,7 +175,7 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 		err = rabbitMaster.SendRpcMessage("wrapper_"+gameServer.ID.String(), msg)
 		if err != nil {
 			lib.MustEncode(json.NewEncoder(w),
-				response.JsonError{ErrorCode: 5016, Message: "Could not stop a game."})
+				response.JsonError{ErrorCode: 5015})
 			return
 		}
 	} else if stopReq.Type == 2 {
@@ -188,7 +188,7 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 		err = rabbitMaster.SendRpcMessage("wrapper_"+gameServer.ID.String(), msg)
 		if err != nil {
 			lib.MustEncode(json.NewEncoder(w),
-				response.JsonError{ErrorCode: 5017, Message: "Could not stop a game."})
+				response.JsonError{ErrorCode: 5016})
 			return
 		}
 	}
@@ -209,7 +209,7 @@ func Stop(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(stopReq)
 	if err != nil {
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 5018, Message: "Invalid body."})
+			response.JsonError{ErrorCode: 5017})
 		return
 	}
 
@@ -217,14 +217,14 @@ func Stop(w http.ResponseWriter, r *http.Request) {
 	host := user.GetHost(db.DB, hostId)
 	if host == nil {
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 5019, Message: "Could not find a host."})
+			response.JsonError{ErrorCode: 5018})
 		return
 	}
 
 	gameServer := host.GetGameServer(db.DB, gameServerId)
 	if gameServer == nil {
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 5020, Message: "Could not find a game server."})
+			response.JsonError{ErrorCode: 5019})
 		return
 	}
 
@@ -238,7 +238,7 @@ func Stop(w http.ResponseWriter, r *http.Request) {
 		err = rabbitMaster.SendRpcMessage("wrapper_"+gameServer.ID.String(), msg)
 		if err != nil {
 			lib.MustEncode(json.NewEncoder(w),
-				response.JsonError{ErrorCode: 5021, Message: "Could not stop a game."})
+				response.JsonError{ErrorCode: 5020})
 			return
 		}
 	} else if stopReq.Type == 2 {
@@ -251,7 +251,7 @@ func Stop(w http.ResponseWriter, r *http.Request) {
 		err = rabbitMaster.SendRpcMessage("wrapper_"+gameServer.ID.String(), msg)
 		if err != nil {
 			lib.MustEncode(json.NewEncoder(w),
-				response.JsonError{ErrorCode: 5022, Message: "Could not stop a game."})
+				response.JsonError{ErrorCode: 5021})
 			return
 		}
 	}
