@@ -41,3 +41,11 @@
 * 1007 - Invalid body.
 * 1008 - Something went wrong.
 * 1009 - Wrong username or password.
+
+# User
+* 2001 - Invalid body.
+* 2002 - Passwords do not match.
+* 2003 - Current password is wrong.
+* 2004 - Invalid body.
+* 2005 - Emails do not match.
+* 2006 - Current email is wrong.

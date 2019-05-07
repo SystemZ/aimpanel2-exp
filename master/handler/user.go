@@ -21,7 +21,7 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 2001, Message: "Invalid body."})
+			response.JsonError{ErrorCode: 2001})
 		return
 	}
 
@@ -36,14 +36,14 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 
 			lib.MustEncode(json.NewEncoder(w),
-				response.JsonError{ErrorCode: 2002, Message: "Passwords do not match."})
+				response.JsonError{ErrorCode: 2002})
 			return
 		}
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 2003, Message: "Current password is wrong."})
+			response.JsonError{ErrorCode: 2003})
 		return
 	}
 }
@@ -58,7 +58,7 @@ func ChangeEmail(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 2004, Message: "Invalid body."})
+			response.JsonError{ErrorCode: 2004})
 		return
 	}
 
@@ -73,14 +73,14 @@ func ChangeEmail(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 
 			lib.MustEncode(json.NewEncoder(w),
-				response.JsonError{ErrorCode: 2005, Message: "Emails do not match."})
+				response.JsonError{ErrorCode: 2005})
 			return
 		}
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 2006, Message: "Current email is wrong."})
+			response.JsonError{ErrorCode: 2006})
 		return
 	}
 }
