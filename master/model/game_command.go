@@ -9,7 +9,7 @@ type GameCommand struct {
 
 	GameId uint `gorm:"column:game_id" json:"game_id"`
 
-	Version string `gorm:"column:version" json:"version"`
+	GameVersion uint `gorm:"column:game_version" json:"game_version"`
 
 	Order uint `gorm:"column:order" json:"order"`
 

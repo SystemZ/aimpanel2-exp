@@ -38,6 +38,16 @@ func (g *Game) GetStartCommand(db *gorm.DB) *GameCommand {
 	return &startCommand
 }
 
+func (g *Game) GetStartCommandByVersion(db *gorm.DB, version uint) *GameCommand {
+	var startCommand GameCommand
+
+	if db.Where("game_id = ? and type = ? and game_version = ?", g.ID, "start", version).First(&startCommand).RecordNotFound() {
+		return nil
+	}
+
+	return &startCommand
+}
+
 func (g *Game) GetInstallCommands(db *gorm.DB) *[]GameCommand {
 	var installCommands []GameCommand
 

@@ -9,7 +9,7 @@ type GameFile struct {
 
 	GameId uint `gorm:"column:game_id" json:"game_id"`
 
-	Version string `gorm:"column:version" json:"version"`
+	GameVersion uint `gorm:"column:game_version" json:"game_version"`
 
 	DownloadUrl string `gorm:"column:download_url" json:"download_url"`
 
