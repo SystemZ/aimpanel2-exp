@@ -2,18 +2,23 @@ package model
 
 import "time"
 
-type GameCommand struct {
+// Game represents the game for this application
+// swagger:model game
+type GameVersion struct {
+	// ID of the game
+	//
+	// required: true
 	ID uint `gorm:"primary_key" json:"id"`
 
-	Type string `gorm:"column:type" json:"name"`
+	// Name
+	//
+	// required: true
+	Name string `gorm:"column:name" json:"name"`
 
+	// Game ID
+	//
+	// required: true
 	GameId uint `gorm:"column:game_id" json:"game_id"`
-
-	GameVersion uint `gorm:"column:game_version" json:"game_version"`
-
-	Order uint `gorm:"column:order" json:"order"`
-
-	Command string `gorm:"column:command" json:"command"`
 
 	//Created at timestamp
 	CreatedAt time.Time `json:"created_at"`

@@ -40,6 +40,11 @@ type GameServer struct {
 	// required: true
 	GameId uint `gorm:"column:game_id" json:"game_id"`
 
+	// Game Version
+	//
+	// required: true
+	GameVersion uint `gorm:"column:game_version" json:"game_version"`
+
 	//Created at timestamp
 	CreatedAt time.Time `json:"created_at"`
 
