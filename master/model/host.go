@@ -34,6 +34,8 @@ type Host struct {
 	// Token
 	Token string `gorm:"column:token" json:"token"`
 
+	MetricFrequency int `gorm:"column:metric_frequency" json:"metric_frequency"`
+
 	//Created at timestamp
 	CreatedAt time.Time `json:"created_at"`
 

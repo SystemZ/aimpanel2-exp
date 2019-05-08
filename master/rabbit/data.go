@@ -11,9 +11,19 @@ import (
 	"time"
 )
 
-func ListenWrapperLogsQueue() {
-	msgs, err := channel.Consume(
+func ListenWrapperData() {
+	queue, err := channel.QueueDeclare(
 		"wrapper_data",
+		true,   // durable
+		false,   // delete when unused
+		false,   // exclusive
+		false,   // no-wait
+		nil,     // arguments
+		)
+	lib.FailOnError(err, "Failed to declare a queue")
+
+	msgs, err := channel.Consume(
+		queue.Name,
 		"",
 		true,
 		false,
@@ -168,6 +178,86 @@ func ListenWrapperLogsQueue() {
 					GameServerId: gameServerId,
 					CpuUsage: msgBody.CpuUsage,
 					RamUsage: msgBody.RamUsage,
+				}
+				db.DB.Save(metric)
+			}
+		}
+	}()
+}
+
+func ListenAgentData() {
+	queue, err := channel.QueueDeclare(
+		"agent_data",
+		true,   // durable
+		false,   // delete when unused
+		false,   // exclusive
+		false,   // no-wait
+		nil,     // arguments
+	)
+	lib.FailOnError(err, "Failed to declare a queue")
+
+	msgs, err := channel.Consume(
+		queue.Name,
+		"",
+		true,
+		false,
+		false,
+		false,
+		nil)
+	lib.FailOnError(err, "Failed to register a consumer")
+
+	go func() {
+		for msg := range msgs {
+			var msgBody rabbit.QueueMsg
+			err = json.Unmarshal(msg.Body, &msgBody)
+			if err != nil {
+				logrus.Warn(err)
+			}
+
+			logrus.Info(msgBody)
+
+			switch msgBody.TaskId {
+			case rabbit.AGENT_METRICS_FREQUENCY:
+				agentToken := msgBody.AgentToken
+
+				var host model.Host
+				if db.DB.Where("token = ?", agentToken).First(&host).RecordNotFound() {
+					break
+				}
+
+				msg := rabbit.QueueMsg{
+					TaskId: rabbit.AGENT_METRICS_FREQUENCY,
+					MetricFrequency: host.MetricFrequency,
+				}
+
+				err := SendRpcMessage("agent_" + agentToken, msg)
+				if err != nil {
+					logrus.Error(err.Error())
+				}
+			case rabbit.WRAPPER_METRICS:
+				agentToken := msgBody.AgentToken
+
+				var host model.Host
+				if db.DB.Where("token = ?", agentToken).First(&host).RecordNotFound() {
+					break
+				}
+
+				metric := &model.MetricHost{
+					HostId: host.ID,
+					CpuUsage: msgBody.CpuUsage,
+					RamFree: msgBody.RamFree,
+					DiskFree: msgBody.DiskFree,
+					User: msgBody.User,
+					System: msgBody.System,
+					Idle: msgBody.Idle,
+					Nice: msgBody.Nice,
+					Iowait: msgBody.Iowait,
+					Irq: msgBody.Irq,
+					Softirq: msgBody.Softirq,
+					Steal: msgBody.Steal,
+					Guest: msgBody.Guest,
+					GuestNice: msgBody.GuestNice,
+					Stolen: msgBody.Stolen,
 				}
 				db.DB.Save(metric)
 			}

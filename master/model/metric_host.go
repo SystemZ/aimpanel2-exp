@@ -10,11 +10,33 @@ type MetricHost struct {
 
 	HostId uuid.UUID `gorm:"column:host_id" json:"host_id"`
 
-	CpuUsage int64 `gorm:"column:cpu_usage" json:"cpu_usage"`
+	CpuUsage int `gorm:"column:cpu_usage" json:"cpu_usage"`
 
-	RamFree int64 `gorm:"column:ram_free" json:"ram_free"`
+	RamFree int `gorm:"column:ram_free" json:"ram_free"`
 
-	DiskFree int64 `gorm:"column:disk_free" json:"disk_free"`
+	DiskFree int `gorm:"column:disk_free" json:"disk_free"`
+
+	User      int `gorm:"column:user" json:"user"`
+
+	System    int `gorm:"column:system" json:"system"`
+
+	Idle      int `gorm:"column:idle" json:"idle"`
+
+	Nice      int `gorm:"column:nice" json:"nice"`
+
+	Iowait    int `gorm:"column:iowait" json:"iowait"`
+
+	Irq       int `gorm:"column:irq" json:"irq"`
+
+	Softirq   int `gorm:"column:softirq" json:"softirq"`
+
+	Steal     int `gorm:"column:steal" json:"steal"`
+
+	Guest     int `gorm:"column:guest" json:"guest"`
+
+	GuestNice int `gorm:"column:guest_nice" json:"guest_nice"`
+
+	Stolen    int `gorm:"column:stolen" json:"stolen"`
 
 	//Created at timestamp
 	CreatedAt time.Time `json:"created_at"`

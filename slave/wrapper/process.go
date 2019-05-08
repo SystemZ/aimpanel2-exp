@@ -309,10 +309,6 @@ func (p *Process) Metrics() {
 		<-time.After(time.Duration(p.MetricFrequency) * time.Second)
 
 		if p.Running {
-			ramUsage, _ := lib.GetMemoryUsageByPid(p.Cmd.Process.Pid)
-
-			logrus.Info("Ram usage: ", ramUsage/1024, " MB")
-
 			process, err := proc.NewProcess(int32(p.Cmd.Process.Pid))
 			if err != nil {
 				logrus.Error(err.Error())
@@ -329,9 +325,6 @@ func (p *Process) Metrics() {
 			}
 
 			rss := memoryInfoStat.RSS / 1024 / 1024
-
-			logrus.Info("Rss (MB): ", rss)
-			logrus.Info(cpuPercent)
 
 			msg := rabbit.QueueMsg{
 				TaskId:       rabbit.WRAPPER_METRICS,
