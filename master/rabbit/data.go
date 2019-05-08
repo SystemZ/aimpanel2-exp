@@ -14,12 +14,12 @@ import (
 func ListenWrapperData() {
 	queue, err := channel.QueueDeclare(
 		"wrapper_data",
-		true,   // durable
-		false,   // delete when unused
-		false,   // exclusive
-		false,   // no-wait
-		nil,     // arguments
-		)
+		true,  // durable
+		false, // delete when unused
+		false, // exclusive
+		false, // no-wait
+		nil,   // arguments
+	)
 	lib.FailOnError(err, "Failed to declare a queue")
 
 	msgs, err := channel.Consume(
@@ -163,11 +163,11 @@ func ListenWrapperData() {
 				}
 
 				msg := rabbit.QueueMsg{
-					TaskId: rabbit.WRAPPER_METRICS_FREQUENCY,
+					TaskId:          rabbit.WRAPPER_METRICS_FREQUENCY,
 					MetricFrequency: gs.MetricFrequency,
 				}
 
-				err := SendRpcMessage("wrapper_" + gameServerId.String(), msg)
+				err := SendRpcMessage("wrapper_"+gameServerId.String(), msg)
 				if err != nil {
 					logrus.Error(err.Error())
 				}
@@ -176,8 +176,8 @@ func ListenWrapperData() {
 
 				metric := &model.MetricGameServer{
 					GameServerId: gameServerId,
-					CpuUsage: msgBody.CpuUsage,
-					RamUsage: msgBody.RamUsage,
+					CpuUsage:     msgBody.CpuUsage,
+					RamUsage:     msgBody.RamUsage,
 				}
 				db.DB.Save(metric)
 			}
@@ -188,11 +188,11 @@ func ListenWrapperData() {
 func ListenAgentData() {
 	queue, err := channel.QueueDeclare(
 		"agent_data",
-		true,   // durable
-		false,   // delete when unused
-		false,   // exclusive
-		false,   // no-wait
-		nil,     // arguments
+		true,  // durable
+		false, // delete when unused
+		false, // exclusive
+		false, // no-wait
+		nil,   // arguments
 	)
 	lib.FailOnError(err, "Failed to declare a queue")
 
@@ -226,15 +226,15 @@ func ListenAgentData() {
 				}
 
 				msg := rabbit.QueueMsg{
-					TaskId: rabbit.AGENT_METRICS_FREQUENCY,
+					TaskId:          rabbit.AGENT_METRICS_FREQUENCY,
 					MetricFrequency: host.MetricFrequency,
 				}
 
-				err := SendRpcMessage("agent_" + agentToken, msg)
+				err := SendRpcMessage("agent_"+agentToken, msg)
 				if err != nil {
 					logrus.Error(err.Error())
 				}
-			case rabbit.WRAPPER_METRICS:
+			case rabbit.AGENT_METRICS:
 				agentToken := msgBody.AgentToken
 
 				var host model.Host
@@ -243,21 +243,21 @@ func ListenAgentData() {
 				}
 
 				metric := &model.MetricHost{
-					HostId: host.ID,
-					CpuUsage: msgBody.CpuUsage,
-					RamFree: msgBody.RamFree,
-					DiskFree: msgBody.DiskFree,
-					User: msgBody.User,
-					System: msgBody.System,
-					Idle: msgBody.Idle,
-					Nice: msgBody.Nice,
-					Iowait: msgBody.Iowait,
-					Irq: msgBody.Irq,
-					Softirq: msgBody.Softirq,
-					Steal: msgBody.Steal,
-					Guest: msgBody.Guest,
+					HostId:    host.ID,
+					CpuUsage:  msgBody.CpuUsage,
+					RamFree:   msgBody.RamFree,
+					DiskFree:  msgBody.DiskFree,
+					User:      msgBody.User,
+					System:    msgBody.System,
+					Idle:      msgBody.Idle,
+					Nice:      msgBody.Nice,
+					Iowait:    msgBody.Iowait,
+					Irq:       msgBody.Irq,
+					Softirq:   msgBody.Softirq,
+					Steal:     msgBody.Steal,
+					Guest:     msgBody.Guest,
 					GuestNice: msgBody.GuestNice,
-					Stolen: msgBody.Stolen,
+					Stolen:    msgBody.Stolen,
 				}
 				db.DB.Save(metric)
 			}

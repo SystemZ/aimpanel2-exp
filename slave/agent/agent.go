@@ -35,8 +35,6 @@ func Start(t string) {
 	logrus.Info("Starting Agent")
 	token = t
 
-	metrics()
-
 	conn, err := amqp.Dial("amqp://" + config.RABBITMQ_USERNAME + ":" + config.RABBITMQ_PASSWORD + "@" + config.RABBITMQ_HOST + ":" + config.RABBITMQ_PORT + "/")
 	lib.FailOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
@@ -205,12 +203,14 @@ func metrics() {
 
 		diskUsage, _ := disk.Usage("/")
 
+		diskFree := diskUsage.Free / 1024 / 1024
+
 		msg := rabbit.QueueMsg{
 			TaskId:     rabbit.AGENT_METRICS,
 			AgentToken: token,
 			CpuUsage:   int(cpuPercent[0]),
 			RamFree:    int(ramFree),
-			DiskFree:   int(diskUsage.Free),
+			DiskFree:   int(diskFree),
 			User:       int(cpuTimes[0].User),
 			System:     int(cpuTimes[0].System),
 			Idle:       int(cpuTimes[0].Idle),
