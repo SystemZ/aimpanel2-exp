@@ -31,7 +31,8 @@ func main() {
 	redis.Setup()
 
 	rabbit.Listen()
-	rabbit.ListenWrapperLogsQueue()
+	rabbit.ListenWrapperData()
+	rabbit.ListenAgentData()
 
 	logrus.Info("Starting API on port :8000")
 	r := router.NewRouter()

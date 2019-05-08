@@ -4,6 +4,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
 	"gitlab.com/systemz/aimpanel2/lib"
+	"gitlab.com/systemz/aimpanel2/lib/rabbit"
 	"gitlab.com/systemz/aimpanel2/slave/config"
 )
 
@@ -53,7 +54,11 @@ func Start(gameServerID string) {
 
 	go p.Rpc()
 
-	p.WrapperStartMessage()
+	logrus.Info("Send WRAPPER_STARTED")
+	p.SendToQueueData(rabbit.WRAPPER_STARTED)
+
+	logrus.Info("Send WRAPPER_METRICS_FREQUENCY")
+	p.SendToQueueData(rabbit.WRAPPER_METRICS_FREQUENCY)
 
 	select {}
 }

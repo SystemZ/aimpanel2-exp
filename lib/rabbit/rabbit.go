@@ -19,6 +19,12 @@ const (
 	SERVER_LOG      = iota
 	WRAPPER_STARTED = iota
 	WRAPPER_EXITED  = iota
+
+	WRAPPER_METRICS_FREQUENCY = iota
+	WRAPPER_METRICS           = iota
+
+	AGENT_METRICS_FREQUENCY = iota
+	AGENT_METRICS           = iota
 )
 
 type QueueMsg struct {
@@ -43,6 +49,25 @@ type QueueMsg struct {
 	TaskEnd    bool   `json:"task_end,omitempty"`
 	TaskOk     bool   `json:"task_ok,omitempty"`
 	TaskError  bool   `json:"task_error,omitempty"`
+
+	MetricFrequency int `json:"metric_frequency,omitempty"`
+	CpuUsage        int `json:"cpu_usage,omitempty"`
+	RamUsage        int `json:"ram_usage,omitempty"`
+	RamFree         int `json:"ram_free,omitempty"`
+	DiskFree        int `json:"disk_free,omitempty"`
+
+	AgentToken string `json:"agent_token,omitempty"`
+	User       int    `json:"user,omitempty"`
+	System     int    `json:"system,omitempty"`
+	Idle       int    `json:"idle,omitempty"`
+	Nice       int    `json:"nice,omitempty"`
+	Iowait     int    `json:"iowait,omitempty"`
+	Irq        int    `json:"irq,omitempty"`
+	Softirq    int    `json:"softirq,omitempty"`
+	Steal      int    `json:"steal,omitempty"`
+	Guest      int    `json:"guest,omitempty"`
+	GuestNice  int    `json:"guest_nice,omitempty"`
+	Stolen     int    `json:"stolen,omitempty"`
 }
 
 type LogMessage struct {

@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"github.com/gofrs/uuid"
+	proc "github.com/shirou/gopsutil/process"
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
 	"gitlab.com/systemz/aimpanel2/lib"
@@ -16,6 +17,7 @@ import (
 	"strings"
 	"sync"
 	"syscall"
+	"time"
 )
 
 type Process struct {
@@ -35,6 +37,7 @@ type Process struct {
 	//
 	GameServerID     string
 	GameStartCommand []string
+	MetricFrequency  int
 }
 
 func (p *Process) Run() {
@@ -111,10 +114,10 @@ func (p *Process) Run() {
 				}
 			}
 			logrus.Errorf("cmd.Wait: %v", err)
-			p.WrapperExitMessage()
+			p.SendToQueueData(rabbit.WRAPPER_EXITED)
 			os.Exit(0)
 		} else {
-			p.WrapperExitMessage()
+			p.SendToQueueData(rabbit.WRAPPER_EXITED)
 			os.Exit(0)
 		}
 	}()
@@ -260,13 +263,28 @@ func (p *Process) Rpc() {
 			lib.FailOnError(err, "Failed to publish a message")
 
 			msg.Ack(false)
+		case rabbit.WRAPPER_METRICS_FREQUENCY:
+			logrus.Info("Got WRAPPER_METRICS_FREQUENCY msg")
+
+			p.MetricFrequency = msgBody.MetricFrequency
+
+			go p.Metrics()
+
+			err = p.Channel.Publish("", msg.ReplyTo, false, false, amqp.Publishing{
+				ContentType:   "application/json",
+				CorrelationId: p.ClientCorrelationId,
+				Body:          []byte(""),
+			})
+			lib.FailOnError(err, "Failed to publish a message")
+
+			msg.Ack(false)
 		}
 	}
 }
 
-func (p *Process) WrapperExitMessage() {
+func (p *Process) SendToQueueData(taskId int) {
 	msg := rabbit.QueueMsg{
-		TaskId:       rabbit.WRAPPER_EXITED,
+		TaskId:       taskId,
 		GameServerID: uuid.FromStringOrNil(p.GameServerID),
 	}
 
@@ -286,25 +304,50 @@ func (p *Process) WrapperExitMessage() {
 	lib.FailOnError(err, "Publish error")
 }
 
-func (p *Process) WrapperStartMessage() {
-	logrus.Info("Sending WRAPPER_STARTED")
-	msg := rabbit.QueueMsg{
-		TaskId:       rabbit.WRAPPER_STARTED,
-		GameServerID: uuid.FromStringOrNil(p.GameServerID),
+func (p *Process) Metrics() {
+	for {
+		<-time.After(time.Duration(p.MetricFrequency) * time.Second)
+
+		if p.Running {
+			process, err := proc.NewProcess(int32(p.Cmd.Process.Pid))
+			if err != nil {
+				logrus.Error(err.Error())
+			}
+
+			memoryInfoStat, err := process.MemoryInfo()
+			if err != nil {
+				logrus.Error(err.Error())
+			}
+
+			cpuPercent, err := process.CPUPercent()
+			if err != nil {
+				logrus.Error(err.Error())
+			}
+
+			rss := memoryInfoStat.RSS / 1024 / 1024
+
+			msg := rabbit.QueueMsg{
+				TaskId:       rabbit.WRAPPER_METRICS,
+				GameServerID: uuid.FromStringOrNil(p.GameServerID),
+				CpuUsage:     int(cpuPercent),
+				RamUsage:     int(rss),
+			}
+
+			msgJson, _ := json.Marshal(msg)
+
+			err = p.Channel.Publish(
+				"",
+				p.QueueData.Name,
+				false,
+				false,
+				amqp.Publishing{
+					ContentType:   "application/json",
+					CorrelationId: p.ClientCorrelationId,
+					Body:          msgJson,
+				})
+
+			lib.FailOnError(err, "Publish error")
+		}
+
 	}
-
-	msgJson, _ := json.Marshal(msg)
-
-	err := p.Channel.Publish(
-		"",
-		p.QueueData.Name,
-		false,
-		false,
-		amqp.Publishing{
-			ContentType:   "application/json",
-			CorrelationId: p.ClientCorrelationId,
-			Body:          msgJson,
-		})
-
-	lib.FailOnError(err, "Publish error")
 }
