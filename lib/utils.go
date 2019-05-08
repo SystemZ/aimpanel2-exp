@@ -1,10 +1,13 @@
 package lib
 
 import (
+	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"math/rand"
+	"os"
 )
 
 func FailOnError(err error, msg string) {
@@ -31,4 +34,32 @@ func MustEncode(enc *json.Encoder, v interface{}) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func GetMemoryUsageByPid(pid int) (uint64, error) {
+	f, err := os.Open(fmt.Sprintf("/proc/%d/smaps", pid))
+	if err != nil {
+		return 0, err
+	}
+	defer f.Close()
+
+	res := uint64(0)
+	pfx := []byte("Pss:")
+	r := bufio.NewScanner(f)
+	for r.Scan() {
+		line := r.Bytes()
+		if bytes.HasPrefix(line, pfx) {
+			var size uint64
+			_, err := fmt.Sscanf(string(line[4:]), "%d", &size)
+			if err != nil {
+				return 0, err
+			}
+			res += size
+		}
+	}
+	if err := r.Err(); err != nil {
+		return 0, err
+	}
+
+	return res, nil
 }

@@ -161,6 +161,15 @@ func ListenWrapperLogsQueue() {
 				if err != nil {
 					logrus.Error(err.Error())
 				}
+			case rabbit.WRAPPER_METRICS:
+				gameServerId := msgBody.GameServerID
+
+				metric := &model.MetricGameServer{
+					GameServerId: gameServerId,
+					CpuUsage: msgBody.CpuUsage,
+					RamUsage: msgBody.RamUsage,
+				}
+				db.DB.Save(metric)
 			}
 		}
 	}()

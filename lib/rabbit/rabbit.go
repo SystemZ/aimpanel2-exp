@@ -21,6 +21,7 @@ const (
 	WRAPPER_EXITED  = iota
 
 	WRAPPER_METRICS_FREQUENCY = iota
+	WRAPPER_METRICS = iota
 )
 
 type QueueMsg struct {
@@ -47,6 +48,10 @@ type QueueMsg struct {
 	TaskError  bool   `json:"task_error,omitempty"`
 
 	MetricFrequency int `json:"metric_frequency,omitempty"`
+	CpuUsage        int `json:"cpu_usage,omitempty"`
+	RamUsage        int `json:"ram_usage,omitempty"`
+	RamFree         int `json:"ram_free,omitempty"`
+	DiskFree        int `json:"disk_free,omitempty"`
 }
 
 type LogMessage struct {

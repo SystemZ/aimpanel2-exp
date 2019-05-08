@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"github.com/gofrs/uuid"
+	proc "github.com/shirou/gopsutil/process"
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
 	"gitlab.com/systemz/aimpanel2/lib"
@@ -16,6 +17,7 @@ import (
 	"strings"
 	"sync"
 	"syscall"
+	"time"
 )
 
 type Process struct {
@@ -266,6 +268,8 @@ func (p *Process) Rpc() {
 
 			p.MetricFrequency = msgBody.MetricFrequency
 
+			go p.Metrics()
+
 			err = p.Channel.Publish("", msg.ReplyTo, false, false, amqp.Publishing{
 				ContentType:   "application/json",
 				CorrelationId: p.ClientCorrelationId,
@@ -298,4 +302,59 @@ func (p *Process) SendToQueueData(taskId int) {
 		})
 
 	lib.FailOnError(err, "Publish error")
+}
+
+func (p *Process) Metrics() {
+	for {
+		<-time.After(time.Duration(p.MetricFrequency) * time.Second)
+
+		if p.Running {
+			ramUsage, _ := lib.GetMemoryUsageByPid(p.Cmd.Process.Pid)
+
+			logrus.Info("Ram usage: ", ramUsage/1024, " MB")
+
+			process, err := proc.NewProcess(int32(p.Cmd.Process.Pid))
+			if err != nil {
+				logrus.Error(err.Error())
+			}
+
+			memoryInfoStat, err := process.MemoryInfo()
+			if err != nil {
+				logrus.Error(err.Error())
+			}
+
+			cpuPercent, err := process.CPUPercent()
+			if err != nil {
+				logrus.Error(err.Error())
+			}
+
+			rss := memoryInfoStat.RSS / 1024 / 1024
+
+			logrus.Info("Rss (MB): ", rss)
+			logrus.Info(cpuPercent)
+
+			msg := rabbit.QueueMsg{
+				TaskId:       rabbit.WRAPPER_METRICS,
+				GameServerID: uuid.FromStringOrNil(p.GameServerID),
+				CpuUsage:     int(cpuPercent),
+				RamUsage:     int(rss),
+			}
+
+			msgJson, _ := json.Marshal(msg)
+
+			err = p.Channel.Publish(
+				"",
+				p.QueueData.Name,
+				false,
+				false,
+				amqp.Publishing{
+					ContentType:   "application/json",
+					CorrelationId: p.ClientCorrelationId,
+					Body:          msgJson,
+				})
+
+			lib.FailOnError(err, "Publish error")
+		}
+
+	}
 }

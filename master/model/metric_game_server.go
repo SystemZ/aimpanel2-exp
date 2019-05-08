@@ -10,9 +10,9 @@ type MetricGameServer struct {
 
 	GameServerId uuid.UUID `gorm:"column:game_server_id" json:"game_server_id"`
 
-	RamUsage int64 `gorm:"column:ram_usage" json:"ram_usage"`
+	RamUsage int `gorm:"column:ram_usage" json:"ram_usage"`
 
-	CpuUsage int64 `gorm:"column:cpu_usage" json:"cpu_usage"`
+	CpuUsage int `gorm:"column:cpu_usage" json:"cpu_usage"`
 
 	//Created at timestamp
 	CreatedAt time.Time `json:"created_at"`
