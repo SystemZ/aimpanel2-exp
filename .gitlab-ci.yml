@@ -36,6 +36,9 @@ test-backend:
     artifacts:
       reports:
         junit: report.xml
+    only:
+      - master
+      - merge_requests
 
 compile-frontend:
     stage: build
@@ -54,6 +57,9 @@ compile-frontend:
       paths:
         - aimpanel-master-frontend
       expire_in: 1 month
+    only:
+      - master
+      - merge_requests
 
 compile-backend:
     stage: build
@@ -70,6 +76,9 @@ compile-backend:
         - aimpanel-master
         - aimpanel-slave
       expire_in: 1 month
+    only:
+      - master
+      - merge_requests
 
 build-frontend:
     stage: build-docker
@@ -81,6 +90,9 @@ build-frontend:
     - docker build --tag $CI_REGISTRY_IMAGE/frontend:pipeline-$CI_PIPELINE_ID --tag $CI_REGISTRY_IMAGE/frontend:${CI_COMMIT_REF_SLUG}-latest -f frontend.Dockerfile .
     - docker push $CI_REGISTRY_IMAGE/frontend:pipeline-$CI_PIPELINE_ID
     - docker push $CI_REGISTRY_IMAGE/frontend:${CI_COMMIT_REF_SLUG}-latest
+    only:
+      - master
+      - merge_requests
 
 build-master:
     stage: build-docker
@@ -92,6 +104,9 @@ build-master:
     - docker build --tag $CI_REGISTRY_IMAGE/master:pipeline-$CI_PIPELINE_ID --tag $CI_REGISTRY_IMAGE/master:${CI_COMMIT_REF_SLUG}-latest -f master.Dockerfile .
     - docker push $CI_REGISTRY_IMAGE/master:pipeline-$CI_PIPELINE_ID
     - docker push $CI_REGISTRY_IMAGE/master:${CI_COMMIT_REF_SLUG}-latest
+    only:
+      - master
+      - merge_requests
 
 build-slave:
     stage: build-docker
@@ -103,6 +118,9 @@ build-slave:
     - docker build --tag $CI_REGISTRY_IMAGE/slave:pipeline-$CI_PIPELINE_ID --tag $CI_REGISTRY_IMAGE/slave:${CI_COMMIT_REF_SLUG}-latest -f slave.Dockerfile .
     - docker push $CI_REGISTRY_IMAGE/slave:pipeline-$CI_PIPELINE_ID
     - docker push $CI_REGISTRY_IMAGE/slave:${CI_COMMIT_REF_SLUG}-latest
+    only:
+      - master
+      - merge_requests
 
 .build-agent:
     stage: build-docker
@@ -114,3 +132,6 @@ build-slave:
     - docker build --tag $CI_REGISTRY_IMAGE/agent:pipeline-$CI_PIPELINE_ID --tag $CI_REGISTRY_IMAGE/agent:${CI_COMMIT_REF_SLUG}-latest -f agent.Dockerfile .
     - docker push $CI_REGISTRY_IMAGE/agent:pipeline-$CI_PIPELINE_ID
     - docker push $CI_REGISTRY_IMAGE/agent:${CI_COMMIT_REF_SLUG}-latest
+    only:
+      - master
+      - merge_requests
