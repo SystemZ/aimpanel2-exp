@@ -31,25 +31,19 @@ func Setup() *gorm.DB {
 
 	db.AutoMigrate(&model.User{})
 	db.AutoMigrate(&model.Host{})
+
 	db.AutoMigrate(&model.GameServer{})
+	db.AutoMigrate(&model.GameServerLog{})
 
 	db.AutoMigrate(&model.Game{})
 	db.AutoMigrate(&model.GameFile{})
 	db.AutoMigrate(&model.GameCommand{})
 	db.AutoMigrate(&model.GameVersion{})
 
-	db.AutoMigrate(&model.GameServerLog{})
+	db.AutoMigrate(&model.MetricHost{})
+	db.AutoMigrate(&model.MetricGameServer{})
 
 	logrus.Info("Connection to database seems OK!")
-
-	//Create test user
-	//user := models.User{Username: "test", Password: "test"}
-	//db.Create(&user)
-
-	//Find user
-	//var user models.User
-	//db.Where("ID = ?", "99a8f14e-1d5f-4de5-8812-2f23e5b1f446").First(&user)
-	//log.Println(user)
 
 	return db
 }

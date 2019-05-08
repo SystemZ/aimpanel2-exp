@@ -40,6 +40,8 @@ type GameServer struct {
 	// required: true
 	GameId uint `gorm:"column:game_id" json:"game_id"`
 
+	MetricFrequency int `gorm:"column:metric_frequency" json:"metric_frequency"`
+
 	// Game Version
 	//
 	// required: true

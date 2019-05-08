@@ -5,20 +5,19 @@ import (
 	"time"
 )
 
-const (
-	STDOUT = iota
-	STDERR = iota
-)
-
-type GameServerLog struct {
+type MetricGameServer struct {
 	ID uint `gorm:"primary_key" json:"id"`
 
 	GameServerId uuid.UUID `gorm:"column:game_server_id" json:"game_server_id"`
 
-	Type uint `gorm:"column:type" json:"type"`
+	RamUsage int64 `gorm:"column:ram_usage" json:"ram_usage"`
 
-	Log string `gorm:"column:log" json:"log"`
+	CpuUsage int64 `gorm:"column:cpu_usage" json:"cpu_usage"`
 
 	//Created at timestamp
 	CreatedAt time.Time `json:"created_at"`
+}
+
+func (m *MetricGameServer) TableName() string {
+	return "metrics_game_server"
 }

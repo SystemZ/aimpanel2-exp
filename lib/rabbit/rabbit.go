@@ -19,6 +19,8 @@ const (
 	SERVER_LOG      = iota
 	WRAPPER_STARTED = iota
 	WRAPPER_EXITED  = iota
+
+	WRAPPER_METRICS_FREQUENCY = iota
 )
 
 type QueueMsg struct {
@@ -43,6 +45,8 @@ type QueueMsg struct {
 	TaskEnd    bool   `json:"task_end,omitempty"`
 	TaskOk     bool   `json:"task_ok,omitempty"`
 	TaskError  bool   `json:"task_error,omitempty"`
+
+	MetricFrequency int `json:"metric_frequency,omitempty"`
 }
 
 type LogMessage struct {

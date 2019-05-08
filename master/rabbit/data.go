@@ -35,7 +35,7 @@ func ListenWrapperLogsQueue() {
 			switch msgBody.TaskId {
 			case rabbit.SERVER_LOG:
 				var gsLog model.GameServerLog
-				gsLog.GameServerID = msgBody.GameServerID
+				gsLog.GameServerId = msgBody.GameServerID
 
 				if len(msgBody.Stdout) > 0 {
 					gsLog.Log = msgBody.Stdout
@@ -142,6 +142,24 @@ func ListenWrapperLogsQueue() {
 					}
 
 					redis.Redis.Set("gs_restart_id_"+gameServerId.String(), 3, 1*time.Hour)
+				}
+
+			case rabbit.WRAPPER_METRICS_FREQUENCY:
+				gameServerId := msgBody.GameServerID
+
+				var gs model.GameServer
+				if db.DB.Where("id = ?", gameServerId).First(&gs).RecordNotFound() {
+					break
+				}
+
+				msg := rabbit.QueueMsg{
+					TaskId: rabbit.WRAPPER_METRICS_FREQUENCY,
+					MetricFrequency: gs.MetricFrequency,
+				}
+
+				err := SendRpcMessage("wrapper_" + gameServerId.String(), msg)
+				if err != nil {
+					logrus.Error(err.Error())
 				}
 			}
 		}
