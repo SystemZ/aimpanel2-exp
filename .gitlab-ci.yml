@@ -18,7 +18,7 @@ stages:
     - test
     - build
     - build-docker
-    #- deploy
+    - deploy
 
 test-backend:
     stage: test
@@ -135,3 +135,12 @@ build-slave:
     only:
       - master
       - merge_requests
+
+k8s:
+    stage: deploy
+    image: alpine:latest
+    script:
+    - apk add --no-cache curl
+    - curl -X POST -F token=$INFRA_TOKEN -F "ref=master" -F "variables[AIMPANEL_FRONTEND_IMAGE]=pipeline-$CI_PIPELINE_ID" https://gitlab.com/api/v4/projects/6986946/trigger/pipeline
+    only:
+    - master
