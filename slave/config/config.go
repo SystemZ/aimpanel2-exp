@@ -11,6 +11,7 @@ var (
 	RABBITMQ_PORT     string
 	RABBITMQ_USERNAME string
 	RABBITMQ_PASSWORD string
+	RABBITMQ_VHOST    string
 	GS_DIR            string
 	STORAGE_DIR       string
 )
@@ -35,6 +36,9 @@ func init() {
 
 	viper.SetDefault("RABBITMQ_PASSWORD", "guest")
 	RABBITMQ_PASSWORD = viper.GetString("RABBITMQ_PASSWORD")
+
+	viper.SetDefault("RABBITMQ_VHOST", "/")
+	RABBITMQ_VHOST = viper.GetString("RABBITMQ_VHOST")
 
 	viper.SetDefault("GS_DIR", "/opt/aimpanel/gs/")
 	GS_DIR = viper.GetString("GS_DIR")

@@ -35,7 +35,7 @@ func Start(t string) {
 	logrus.Info("Starting Agent")
 	token = t
 
-	conn, err := amqp.Dial("amqp://" + config.RABBITMQ_USERNAME + ":" + config.RABBITMQ_PASSWORD + "@" + config.RABBITMQ_HOST + ":" + config.RABBITMQ_PORT + "/")
+	conn, err := amqp.Dial("amqp://" + config.RABBITMQ_USERNAME + ":" + config.RABBITMQ_PASSWORD + "@" + config.RABBITMQ_HOST + ":" + config.RABBITMQ_PORT + config.RABBITMQ_VHOST)
 	lib.FailOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
 

@@ -18,7 +18,7 @@ func Start(gameServerID string) {
 	//TODO: Make request to master to get creds to rabbit
 
 	// Defer can't be in init because this will be executed when the function return.
-	conn, err := amqp.Dial("amqp://" + config.RABBITMQ_USERNAME + ":" + config.RABBITMQ_PASSWORD + "@" + config.RABBITMQ_HOST + ":" + config.RABBITMQ_PORT + "/")
+	conn, err := amqp.Dial("amqp://" + config.RABBITMQ_USERNAME + ":" + config.RABBITMQ_PASSWORD + "@" + config.RABBITMQ_HOST + ":" + config.RABBITMQ_PORT + config.RABBITMQ_VHOST)
 	lib.FailOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
 
