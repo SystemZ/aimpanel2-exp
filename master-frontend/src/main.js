@@ -7,7 +7,8 @@ import './registerServiceWorker'
 import auth from './auth'
 import axios from 'axios';
 
-axios.defaults.baseURL = 'http://localhost:8000';
+axios.defaults.baseURL = process.env.API_URL;
+
 Vue.prototype.$http = axios;
 
 Vue.config.productionTip = false
