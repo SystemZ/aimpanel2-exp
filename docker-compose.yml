@@ -1,19 +1,21 @@
 version: "3.7"
 services:
-  db:
-    image: mysql:8.0.15
-    command: ["mysqld", "--default-authentication-plugin=mysql_native_password"]
+  db1:
+    image: docker.io/bitnami/mariadb:10.1.37
     environment:
       - MYSQL_ROOT_PASSWORD=dev
       - MYSQL_DATABASE=dev
       - MYSQL_USER=dev
       - MYSQL_PASSWORD=dev
+      - MARIADB_ROOT_PASSWORD=root
     ports:
       - 3306:3306
+    volumes:
+      - mariadb:/bitnami/mariadb
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:edge
     depends_on:
-      - db
+      - db1
     ports:
       - 8080:80
   rabbitmq:
@@ -41,4 +43,7 @@ services:
 volumes:
   redis_data:
     driver: local
+  mariadb:
+    driver: local
+  
 
