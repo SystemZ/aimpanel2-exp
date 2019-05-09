@@ -57,9 +57,9 @@ compile-frontend:
       paths:
         - aimpanel-master-frontend
       expire_in: 1 month
-    only:
-      - master
-      - merge_requests
+#    only:
+#      - master
+#      - merge_requests
 
 compile-backend:
     stage: build
@@ -80,7 +80,7 @@ compile-backend:
       - master
       - merge_requests
 
-build-frontend:
+.build-frontend:
     stage: build-docker
     image: docker:stable
     services:
@@ -93,6 +93,18 @@ build-frontend:
     only:
       - master
       - merge_requests
+
+frontend:
+  stage: build-docker
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  script:
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/frontend.Dockerfile --destination $CI_REGISTRY_IMAGE/frontend:pipeline-$CI_PIPELINE_ID
+#  only:
+#    - master
+#    - merge_requests
 
 build-master:
     stage: build-docker
