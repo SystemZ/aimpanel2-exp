@@ -22,6 +22,8 @@ var (
 )
 
 func init() {
+	viper.AutomaticEnv()
+
 	viper.SetDefault("DB_HOST", "localhost")
 	DB_HOST = viper.GetString("DB_HOST")
 
