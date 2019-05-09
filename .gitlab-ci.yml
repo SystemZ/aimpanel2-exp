@@ -48,8 +48,8 @@ backend:
     - cd ./master
     - go get
     # - go build -race -ldflags "-extldflags '-static'" -o $CI_PROJECT_DIR/aimpanel-master
-    - go fmt $(go list ./... | grep -v /vendor/)
-    - go vet $(go list ./... | grep -v /vendor/)
+    #- go fmt $(go list ./... | grep -v /vendor/)
+    #- go vet $(go list ./... | grep -v /vendor/)
     - go test -race $(go list ./... | grep -v /vendor/)
     - go test -v 2>&1 | go-junit-report > $CI_PROJECT_DIR/report.xml
     - CGO_ENABLED=0 go build -o $CI_PROJECT_DIR/aimpanel-master
