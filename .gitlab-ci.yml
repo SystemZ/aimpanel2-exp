@@ -1,5 +1,3 @@
-image: golang:latest
-
 variables:
   REPO_NAME: gitlab.com/systemz/aimpanel2
 
@@ -15,126 +13,85 @@ before_script:
   - cd $GOPATH/src/$REPO_NAME
 
 stages:
-    - test
+    - compile
     - build
-    - build-docker
     - deploy
 
-test-backend:
-    stage: test
+frontend:
+    stage: compile
+    image: node:10-alpine
     script:
-      - go get -u github.com/jstemmer/go-junit-report
-      - cd master
-      - go get
-      - cd ..
-      - cd slave
-      - go get
-      - go fmt $(go list ./... | grep -v /vendor/)
-      - go vet $(go list ./... | grep -v /vendor/)
-      - go test -race $(go list ./... | grep -v /vendor/)
-      - go test -v 2>&1 | go-junit-report > $CI_PROJECT_DIR/report.xml
+    - cd master-frontend
+    - npm install &>/dev/null
+    - npm run build
+    - ls -alh dist
+    - mv dist $CI_PROJECT_DIR/aimpanel-master-frontend
+    cache:
+      key: "$CI_JOB_NAME"
+      paths:
+      - master-frontend/node_modules
+    artifacts:
+      paths:
+      - aimpanel-master-frontend
+      expire_in: 1 month
+    only:
+    - master
+    - merge_requests
+    tags:
+    - docker
+
+backend:
+    image: golang:latest
+    stage: compile
+    script:
+    - go get -u github.com/jstemmer/go-junit-report
+    - cd ./master
+    - go get
+    #- go build -race -ldflags "-extldflags '-static'" -o $CI_PROJECT_DIR/aimpanel-master
+    #- go fmt $(go list ./... | grep -v /vendor/)
+    #- go vet $(go list ./... | grep -v /vendor/)
+    #- go test -race $(go list ./... | grep -v /vendor/)
+    #- go test -v 2>&1 | go-junit-report > $CI_PROJECT_DIR/report.xml
+    - CGO_ENABLED=0 go build -o $CI_PROJECT_DIR/aimpanel-master
+    - cd ../slave
+    - go get
+    - CGO_ENABLED=0 go build -o $CI_PROJECT_DIR/aimpanel-slave
+    - cd $CI_PROJECT_DIR
+    cache:
+      key: "$CI_JOB_NAME"
+      paths:
+        - $GOPATH/src/github.com
     artifacts:
       reports:
         junit: report.xml
-    only:
-      - master
-      - merge_requests
-
-compile-frontend:
-    stage: build
-    image: node:10-alpine
-    script:
-      - cd master-frontend
-      - npm install &>/dev/null
-      - npm run build
-      - ls -alh dist
-      - mv dist $CI_PROJECT_DIR/aimpanel-master-frontend
-    cache:
-      key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
       paths:
-        - master-frontend/node_modules
-    artifacts:
-      paths:
-        - aimpanel-master-frontend
+      - aimpanel-master
+      - aimpanel-slave
       expire_in: 1 month
     only:
-      - master
-      - merge_requests
+    - master
+    - merge_requests
+    tags:
+    - docker
 
-compile-backend:
+docker-images:
     stage: build
-    script:
-      - cd ./master
-      - go get
-      # - go build -race -ldflags "-extldflags '-static'" -o $CI_PROJECT_DIR/aimpanel-master
-      - CGO_ENABLED=0 go build -o $CI_PROJECT_DIR/aimpanel-master
-      - cd ../slave
-      - go get
-      - CGO_ENABLED=0 go build -o $CI_PROJECT_DIR/aimpanel-slave
-    artifacts:
-      paths:
-        - aimpanel-master
-        - aimpanel-slave
-      expire_in: 1 month
-    only:
-      - master
-      - merge_requests
-
-build-frontend:
-    stage: build-docker
     image: docker:stable
     services:
     - docker:stable-dind
     script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - docker build --tag $CI_REGISTRY_IMAGE/frontend:pipeline-$CI_PIPELINE_ID --tag $CI_REGISTRY_IMAGE/frontend:${CI_COMMIT_REF_SLUG}-latest -f frontend.Dockerfile .
+    - docker build --tag $CI_REGISTRY_IMAGE/frontend:pipeline-$CI_PIPELINE_ID -f frontend.Dockerfile .
     - docker push $CI_REGISTRY_IMAGE/frontend:pipeline-$CI_PIPELINE_ID
-    - docker push $CI_REGISTRY_IMAGE/frontend:${CI_COMMIT_REF_SLUG}-latest
-    only:
-      - master
-      - merge_requests
-
-build-master:
-    stage: build-docker
-    image: docker:stable
-    services:
-    - docker:stable-dind
-    script:
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - docker build --tag $CI_REGISTRY_IMAGE/master:pipeline-$CI_PIPELINE_ID --tag $CI_REGISTRY_IMAGE/master:${CI_COMMIT_REF_SLUG}-latest -f master.Dockerfile .
+    - docker build --tag $CI_REGISTRY_IMAGE/master:pipeline-$CI_PIPELINE_ID -f master.Dockerfile .
     - docker push $CI_REGISTRY_IMAGE/master:pipeline-$CI_PIPELINE_ID
-    - docker push $CI_REGISTRY_IMAGE/master:${CI_COMMIT_REF_SLUG}-latest
-    only:
-      - master
-      - merge_requests
-
-build-slave:
-    stage: build-docker
-    image: docker:stable
-    services:
-    - docker:stable-dind
-    script:
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - docker build --tag $CI_REGISTRY_IMAGE/slave:pipeline-$CI_PIPELINE_ID --tag $CI_REGISTRY_IMAGE/slave:${CI_COMMIT_REF_SLUG}-latest -f slave.Dockerfile .
+    - docker build --tag $CI_REGISTRY_IMAGE/slave:pipeline-$CI_PIPELINE_ID -f slave.Dockerfile .
     - docker push $CI_REGISTRY_IMAGE/slave:pipeline-$CI_PIPELINE_ID
-    - docker push $CI_REGISTRY_IMAGE/slave:${CI_COMMIT_REF_SLUG}-latest
     only:
-      - master
-      - merge_requests
-
-.build-agent:
-    stage: build-docker
-    image: docker:stable
-    services:
-    - docker:stable-dind
-    script:
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - docker build --tag $CI_REGISTRY_IMAGE/agent:pipeline-$CI_PIPELINE_ID --tag $CI_REGISTRY_IMAGE/agent:${CI_COMMIT_REF_SLUG}-latest -f agent.Dockerfile .
-    - docker push $CI_REGISTRY_IMAGE/agent:pipeline-$CI_PIPELINE_ID
-    - docker push $CI_REGISTRY_IMAGE/agent:${CI_COMMIT_REF_SLUG}-latest
-    only:
-      - master
-      - merge_requests
+    - master
+    - merge_requests
+    tags:
+    - docker
 
 k8s:
     stage: deploy
@@ -144,3 +101,5 @@ k8s:
     - curl -X POST -F token=$INFRA_TOKEN -F "ref=master" -F "variables[AIMPANEL_IMAGE]=pipeline-$CI_PIPELINE_ID" https://gitlab.com/api/v4/projects/6986946/trigger/pipeline
     only:
     - master
+    tags:
+    - k8s
