@@ -221,7 +221,6 @@ func metrics() {
 			Steal:      int(cpuTimes[0].Steal),
 			Guest:      int(cpuTimes[0].Guest),
 			GuestNice:  int(cpuTimes[0].GuestNice),
-			Stolen:     int(cpuTimes[0].Stolen),
 		}
 
 		msgJson, _ := json.Marshal(msg)
