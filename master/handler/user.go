@@ -15,7 +15,7 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 	user := context.Get(r, "user").(model.User)
 
 	decoder := json.NewDecoder(r.Body)
-	var changePasswordReq request.ChangePasswordReq
+	var changePasswordReq request.UserChangePasswordReq
 	err := decoder.Decode(&changePasswordReq)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -52,7 +52,7 @@ func ChangeEmail(w http.ResponseWriter, r *http.Request) {
 	user := context.Get(r, "user").(model.User)
 
 	decoder := json.NewDecoder(r.Body)
-	var changeEmailReq request.ChangeEmailReq
+	var changeEmailReq request.UserChangeEmailReq
 	err := decoder.Decode(&changeEmailReq)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)

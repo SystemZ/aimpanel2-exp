@@ -1,7 +1,7 @@
 package request
 
 //swagger:parameters Authentication register
-type RegisterRequest struct {
+type AuthRegisterReq struct {
 	// required: true
 	Username string `json:"username"`
 	// required: true
@@ -15,7 +15,7 @@ type RegisterRequest struct {
 }
 
 //swagger:parameters Authentication login
-type LoginRequest struct {
+type AuthLoginReq struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }

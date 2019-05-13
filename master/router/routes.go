@@ -112,6 +112,13 @@ var routes = Routes{
 		game_server.Stop,
 		true,
 	},
+	Route{
+		"Send command to game server",
+		"POST",
+		"/hosts/{host_id}/servers/{server_id}/command",
+		game_server.SendCommand,
+		true,
+	},
 
 	//User
 	Route{

@@ -1,23 +1,24 @@
 version: "3.7"
 services:
-  db1:
+  database:
     image: docker.io/bitnami/mariadb:10.1.37
     environment:
-      - MYSQL_ROOT_PASSWORD=dev
-      - MYSQL_DATABASE=dev
-      - MYSQL_USER=dev
-      - MYSQL_PASSWORD=dev
       - MARIADB_ROOT_PASSWORD=root
+      - MARIADB_DATABASE=dev
+      - MARIADB_USER=dev
+      - MARIADB_PASSWORD=dev
     ports:
       - 3306:3306
     volumes:
       - mariadb:/bitnami/mariadb
   phpmyadmin:
-    image: phpmyadmin/phpmyadmin:edge
-    depends_on:
-      - db1
+    image: phpmyadmin/phpmyadmin
     ports:
       - 8080:80
+    environment:
+      - PMA_HOST=database
+      - PMA_USER=dev
+      - PMA_PASSWORD=dev
   rabbitmq:
     image: rabbitmq:3-management
     ports:
@@ -45,5 +46,4 @@ volumes:
     driver: local
   mariadb:
     driver: local
-  
 
