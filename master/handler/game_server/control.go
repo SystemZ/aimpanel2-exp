@@ -10,7 +10,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/master/model"
 	rabbitMaster "gitlab.com/systemz/aimpanel2/master/rabbit"
 	"gitlab.com/systemz/aimpanel2/master/redis"
-	"gitlab.com/systemz/aimpanel2/master/request/game_server"
+	"gitlab.com/systemz/aimpanel2/master/request"
 	"gitlab.com/systemz/aimpanel2/master/response"
 	"net/http"
 	"time"
@@ -139,7 +139,7 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 	hostId := params["host_id"]
 	gameServerId := params["server_id"]
 
-	stopReq := &game_server.StopGameServerRequest{}
+	stopReq := &request.GameServerStopReq{}
 
 	err := json.NewDecoder(r.Body).Decode(stopReq)
 	if err != nil {
@@ -204,7 +204,7 @@ func Stop(w http.ResponseWriter, r *http.Request) {
 	hostId := params["host_id"]
 	gameServerId := params["server_id"]
 
-	stopReq := &game_server.StopGameServerRequest{}
+	stopReq := &request.GameServerStopReq{}
 
 	err := json.NewDecoder(r.Body).Decode(stopReq)
 	if err != nil {
@@ -257,4 +257,49 @@ func Stop(w http.ResponseWriter, r *http.Request) {
 	}
 
 	lib.MustEncode(json.NewEncoder(w), response.JsonSuccess{Message: "Stopping the game server."})
+}
+
+func SendCommand(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+
+	hostId := params["host_id"]
+	gameServerId := params["server_id"]
+
+	cmdReq := &request.GameServerSendCommandReq{}
+
+	err := json.NewDecoder(r.Body).Decode(cmdReq)
+	if err != nil {
+		lib.MustEncode(json.NewEncoder(w),
+			response.JsonError{ErrorCode: 5026})
+		return
+	}
+
+	user := context.Get(r, "user").(model.User)
+	host := user.GetHost(db.DB, hostId)
+	if host == nil {
+		lib.MustEncode(json.NewEncoder(w),
+			response.JsonError{ErrorCode: 5027})
+		return
+	}
+
+	gameServer := host.GetGameServer(db.DB, gameServerId)
+	if gameServer == nil {
+		lib.MustEncode(json.NewEncoder(w),
+			response.JsonError{ErrorCode: 5028})
+		return
+	}
+
+	msg := rabbit.QueueMsg{
+		TaskId: rabbit.GAME_COMMAND,
+		Body:   cmdReq.Command,
+	}
+
+	err = rabbitMaster.SendRpcMessage("wrapper_"+gameServer.ID.String(), msg)
+	if err != nil {
+		lib.MustEncode(json.NewEncoder(w),
+			response.JsonError{ErrorCode: 5029})
+		return
+	}
+
+	lib.MustEncode(json.NewEncoder(w), response.JsonSuccess{Message: "Sending command to server"})
 }

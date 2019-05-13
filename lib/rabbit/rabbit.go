@@ -67,7 +67,6 @@ type QueueMsg struct {
 	Steal      int    `json:"steal,omitempty"`
 	Guest      int    `json:"guest,omitempty"`
 	GuestNice  int    `json:"guest_nice,omitempty"`
-	Stolen     int    `json:"stolen,omitempty"`
 }
 
 type LogMessage struct {

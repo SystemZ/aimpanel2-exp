@@ -257,7 +257,6 @@ func ListenAgentData() {
 					Steal:     msgBody.Steal,
 					Guest:     msgBody.Guest,
 					GuestNice: msgBody.GuestNice,
-					Stolen:    msgBody.Stolen,
 				}
 				db.DB.Save(metric)
 			}

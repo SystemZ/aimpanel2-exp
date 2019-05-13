@@ -12,7 +12,7 @@ import (
 
 func Register(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
-	var registerRequest request.RegisterRequest
+	var registerRequest request.AuthRegisterReq
 	err := decoder.Decode(&registerRequest)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -76,7 +76,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 func Login(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
-	var loginRequest request.LoginRequest
+	var loginRequest request.AuthLoginReq
 	err := decoder.Decode(&loginRequest)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)

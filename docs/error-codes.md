@@ -77,7 +77,10 @@
 * 5023 - Could not find a host.
 * 5024 - Could not find a host.
 * 5025 - Could not find a game servers.
-
+* 5026 - Invalid body.
+* 5027 - Could not find a host.
+* 5028 - Could not find a game server.
+* 5029 - Could not send command to server.
 
 
 

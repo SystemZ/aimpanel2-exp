@@ -36,8 +36,6 @@ type MetricHost struct {
 
 	GuestNice int `gorm:"column:guest_nice" json:"guest_nice"`
 
-	Stolen    int `gorm:"column:stolen" json:"stolen"`
-
 	//Created at timestamp
 	CreatedAt time.Time `json:"created_at"`
 }
