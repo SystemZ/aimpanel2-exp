@@ -44,14 +44,18 @@ backend:
     image: golang:latest
     stage: compile
     script:
-    - go get -u github.com/jstemmer/go-junit-report
+    - go get github.com/jstemmer/go-junit-report
+    - go get github.com/go-swagger/go-swagger/cmd/swagger
     - cd ./master
     - go get
+    - cd ../
+    - bash Taskfile.sh swagger-gen
     #- go build -race -ldflags "-extldflags '-static'" -o $CI_PROJECT_DIR/aimpanel-master
     #- go fmt $(go list ./... | grep -v /vendor/)
     #- go vet $(go list ./... | grep -v /vendor/)
     #- go test -race $(go list ./... | grep -v /vendor/)
     #- go test -v 2>&1 | go-junit-report > $CI_PROJECT_DIR/report.xml
+    - cd ./master
     - CGO_ENABLED=0 go build -o $CI_PROJECT_DIR/aimpanel-master
     - cd ../slave
     - go get
@@ -67,6 +71,7 @@ backend:
       paths:
       - aimpanel-master
       - aimpanel-slave
+      - swagger.json
       expire_in: 1 month
     only:
     - master
