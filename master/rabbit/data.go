@@ -66,7 +66,7 @@ func ListenWrapperData() {
 			case rabbit.WRAPPER_STARTED:
 				logrus.Info("WRAPPER_STARTED")
 				gameServerId := msgBody.GameServerID
-				_, err := redis.Redis.Get("gs_restart_id_" + gameServerId.String()).Int()
+				_, err := redis.Redis.Get("gs_restart_id_" + gameServerId.String()).Int64()
 				if err == nil {
 					var gs model.GameServer
 					if db.DB.Where("id = ?", gameServerId).First(&gs).RecordNotFound() {
@@ -94,7 +94,7 @@ func ListenWrapperData() {
 					redis.Redis.Del("gs_restart_id_" + gs.ID.String())
 				}
 
-				_, err = redis.Redis.Get("gs_start_id_" + gameServerId.String()).Int()
+				_, err = redis.Redis.Get("gs_start_id_" + gameServerId.String()).Int64()
 				if err == nil {
 					var gs model.GameServer
 					if db.DB.Where("id = ?", gameServerId).First(&gs).RecordNotFound() {
@@ -126,7 +126,7 @@ func ListenWrapperData() {
 				logrus.Info("WRAPPER_EXITED")
 				gameServerId := msgBody.GameServerID
 
-				_, err := redis.Redis.Get("gs_restart_id_" + gameServerId.String()).Int()
+				_, err := redis.Redis.Get("gs_restart_id_" + gameServerId.String()).Int64()
 				if err == nil {
 					redis.Redis.Set("gs_restart_id_"+gameServerId.String(), 2, 1*time.Hour)
 
