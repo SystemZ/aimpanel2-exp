@@ -28,7 +28,7 @@ function swagger-serve {
 }
 
 function default {
-    up
+    help
 }
 
 TIMEFORMAT="Task completed in %3lR"
