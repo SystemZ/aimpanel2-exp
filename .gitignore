@@ -1,9 +1,7 @@
 # Created by .ignore support plugin (hsz.mobi)
 .idea
-wrapper/bungee
 master-frontend/.idea
 master/.idea
-wrapper/.idea
-agent/.idea
 slave/.idea
 slave/slave
+swagger.json
