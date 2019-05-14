@@ -25,6 +25,13 @@ var routes = Routes{
 		true,
 	},
 	Route{
+		"SwaggerSpec",
+		"GET",
+		"/swagger.json",
+		handler.SwaggerSpec,
+		false,
+	},
+	Route{
 		"Register",
 		"POST",
 		"/auth/register",
