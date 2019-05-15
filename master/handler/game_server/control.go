@@ -170,32 +170,21 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 
 	model.Redis.Set("gs_restart_id_"+gameServer.ID.String(), 0, 1*time.Hour)
 
+	msg := rabbit.QueueMsg{
+		GameServerID: gameServer.ID,
+	}
+
 	if stopReq.Type == 1 {
-		//sigkill
-		msg := rabbit.QueueMsg{
-			TaskId:       rabbit.GAME_STOP_SIGKILL,
-			GameServerID: gameServer.ID,
-		}
-
-		err = rabbitMaster.SendRpcMessage("wrapper_"+gameServer.ID.String(), msg)
-		if err != nil {
-			lib.MustEncode(json.NewEncoder(w),
-				handler.JsonError{ErrorCode: 5015})
-			return
-		}
+		msg.TaskId = rabbit.GAME_STOP_SIGKILL
 	} else if stopReq.Type == 2 {
-		//sigterm
-		msg := rabbit.QueueMsg{
-			TaskId:       rabbit.GAME_STOP_SIGTERM,
-			GameServerID: gameServer.ID,
-		}
+		msg.TaskId = rabbit.GAME_STOP_SIGTERM
+	}
 
-		err = rabbitMaster.SendRpcMessage("wrapper_"+gameServer.ID.String(), msg)
-		if err != nil {
-			lib.MustEncode(json.NewEncoder(w),
-				handler.JsonError{ErrorCode: 5016})
-			return
-		}
+	err = rabbitMaster.SendRpcMessage("wrapper_"+gameServer.ID.String(), msg)
+	if err != nil {
+		lib.MustEncode(json.NewEncoder(w),
+			handler.JsonError{ErrorCode: 5015})
+		return
 	}
 
 	model.Redis.Set("gs_restart_id_"+gameServer.ID.String(), 1, 1*time.Hour)
@@ -233,32 +222,21 @@ func Stop(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	msg := rabbit.QueueMsg{
+		GameServerID: gameServer.ID,
+	}
+
 	if stopReq.Type == 1 {
-		//sigkill
-		msg := rabbit.QueueMsg{
-			TaskId:       rabbit.GAME_STOP_SIGKILL,
-			GameServerID: gameServer.ID,
-		}
-
-		err = rabbitMaster.SendRpcMessage("wrapper_"+gameServer.ID.String(), msg)
-		if err != nil {
-			lib.MustEncode(json.NewEncoder(w),
-				handler.JsonError{ErrorCode: 5020})
-			return
-		}
+		msg.TaskId = rabbit.GAME_STOP_SIGKILL
 	} else if stopReq.Type == 2 {
-		//sigterm
-		msg := rabbit.QueueMsg{
-			TaskId:       rabbit.GAME_STOP_SIGTERM,
-			GameServerID: gameServer.ID,
-		}
+		msg.TaskId = rabbit.GAME_STOP_SIGTERM
+	}
 
-		err = rabbitMaster.SendRpcMessage("wrapper_"+gameServer.ID.String(), msg)
-		if err != nil {
-			lib.MustEncode(json.NewEncoder(w),
-				handler.JsonError{ErrorCode: 5021})
-			return
-		}
+	err = rabbitMaster.SendRpcMessage("wrapper_"+gameServer.ID.String(), msg)
+	if err != nil {
+		lib.MustEncode(json.NewEncoder(w),
+			handler.JsonError{ErrorCode: 5020})
+		return
 	}
 
 	lib.MustEncode(json.NewEncoder(w), handler.JsonSuccess{Message: "Stopping the game server."})
