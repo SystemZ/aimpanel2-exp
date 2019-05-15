@@ -3,7 +3,7 @@
 // Package classification Aimpanel Master API
 //
 // Schemes: http, https
-// Host: localhost:9000
+// Host: localhost:8000
 // BasePath: /v1
 // Version: 0.0.1
 //
