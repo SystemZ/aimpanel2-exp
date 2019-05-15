@@ -168,37 +168,39 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	model.Redis.Set("gs_restart_id_"+gameServer.ID.String(), 0, 1*time.Hour)
+	model.Redis.Set("gs_restart_id_"+gameServer.ID.String(), 0, 24*time.Hour)
 
-	if stopReq.Type == 1 {
-		//sigkill
-		msg := rabbit.QueueMsg{
-			TaskId:       rabbit.GAME_STOP_SIGKILL,
-			GameServerID: gameServer.ID,
-		}
-
-		err = rabbitMaster.SendRpcMessage("wrapper_"+gameServer.ID.String(), msg)
-		if err != nil {
-			lib.MustEncode(json.NewEncoder(w),
-				handler.JsonError{ErrorCode: 5015})
-			return
-		}
-	} else if stopReq.Type == 2 {
-		//sigterm
-		msg := rabbit.QueueMsg{
-			TaskId:       rabbit.GAME_STOP_SIGTERM,
-			GameServerID: gameServer.ID,
-		}
-
-		err = rabbitMaster.SendRpcMessage("wrapper_"+gameServer.ID.String(), msg)
-		if err != nil {
-			lib.MustEncode(json.NewEncoder(w),
-				handler.JsonError{ErrorCode: 5016})
-			return
-		}
+	msg := rabbit.QueueMsg{
+		GameServerID: gameServer.ID,
 	}
 
-	model.Redis.Set("gs_restart_id_"+gameServer.ID.String(), 1, 1*time.Hour)
+	if stopReq.Type == 1 {
+		msg.TaskId = rabbit.GAME_STOP_SIGKILL
+	} else if stopReq.Type == 2 {
+		msg.TaskId = rabbit.GAME_STOP_SIGTERM
+	}
+
+	err = rabbitMaster.SendRpcMessage("wrapper_"+gameServer.ID.String(), msg)
+	if err != nil {
+		lib.MustEncode(json.NewEncoder(w),
+			handler.JsonError{ErrorCode: 5015})
+		return
+	}
+
+	model.Redis.Set("gs_restart_id_"+gameServer.ID.String(), 1, 24*time.Hour)
+
+	go func() {
+		<-time.After(time.Duration(gameServer.StopTimeout) * time.Second)
+
+		val, err := model.Redis.Get("gs_restart_id_" + gameServer.ID.String()).Int64()
+		if err != nil {
+			return
+		}
+
+		if val == 1 {
+			model.Redis.Set("gs_restart_id_"+gameServer.ID.String(), -1, 24*time.Hour)
+		}
+	}()
 
 	lib.MustEncode(json.NewEncoder(w), handler.JsonSuccess{Message: "Restarting the game server."})
 }
@@ -233,32 +235,21 @@ func Stop(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	msg := rabbit.QueueMsg{
+		GameServerID: gameServer.ID,
+	}
+
 	if stopReq.Type == 1 {
-		//sigkill
-		msg := rabbit.QueueMsg{
-			TaskId:       rabbit.GAME_STOP_SIGKILL,
-			GameServerID: gameServer.ID,
-		}
-
-		err = rabbitMaster.SendRpcMessage("wrapper_"+gameServer.ID.String(), msg)
-		if err != nil {
-			lib.MustEncode(json.NewEncoder(w),
-				handler.JsonError{ErrorCode: 5020})
-			return
-		}
+		msg.TaskId = rabbit.GAME_STOP_SIGKILL
 	} else if stopReq.Type == 2 {
-		//sigterm
-		msg := rabbit.QueueMsg{
-			TaskId:       rabbit.GAME_STOP_SIGTERM,
-			GameServerID: gameServer.ID,
-		}
+		msg.TaskId = rabbit.GAME_STOP_SIGTERM
+	}
 
-		err = rabbitMaster.SendRpcMessage("wrapper_"+gameServer.ID.String(), msg)
-		if err != nil {
-			lib.MustEncode(json.NewEncoder(w),
-				handler.JsonError{ErrorCode: 5021})
-			return
-		}
+	err = rabbitMaster.SendRpcMessage("wrapper_"+gameServer.ID.String(), msg)
+	if err != nil {
+		lib.MustEncode(json.NewEncoder(w),
+			handler.JsonError{ErrorCode: 5020})
+		return
 	}
 
 	lib.MustEncode(json.NewEncoder(w), handler.JsonSuccess{Message: "Stopping the game server."})
