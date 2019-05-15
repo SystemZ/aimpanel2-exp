@@ -20,14 +20,13 @@ import (
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"gitlab.com/systemz/aimpanel2/master/rabbit"
-	"gitlab.com/systemz/aimpanel2/master/redis"
 	"gitlab.com/systemz/aimpanel2/master/router"
 	"net/http"
 )
 
 func main() {
 	model.DB = model.InitMysql()
-	redis.Setup()
+	model.InitRedis()
 
 	rabbit.Listen()
 	rabbit.ListenWrapperData()

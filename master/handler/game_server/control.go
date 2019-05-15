@@ -9,7 +9,6 @@ import (
 	"gitlab.com/systemz/aimpanel2/master/handler"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	rabbitMaster "gitlab.com/systemz/aimpanel2/master/rabbit"
-	"gitlab.com/systemz/aimpanel2/master/redis"
 	"net/http"
 	"time"
 )
@@ -57,7 +56,7 @@ func Start(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	redis.Redis.Set("gs_start_id_"+gameServer.ID.String(), 0, 1*time.Hour)
+	model.Redis.Set("gs_start_id_"+gameServer.ID.String(), 0, 1*time.Hour)
 
 	msg := rabbit.QueueMsg{
 		TaskId:       rabbit.WRAPPER_START,
@@ -72,7 +71,7 @@ func Start(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	redis.Redis.Set("gs_start_id_"+gameServer.ID.String(), 1, 1*time.Hour)
+	model.Redis.Set("gs_start_id_"+gameServer.ID.String(), 1, 1*time.Hour)
 
 	lib.MustEncode(json.NewEncoder(w),
 		handler.JsonSuccess{Message: "Started game server succesfully."})
@@ -169,7 +168,7 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	redis.Redis.Set("gs_restart_id_"+gameServer.ID.String(), 0, 1*time.Hour)
+	model.Redis.Set("gs_restart_id_"+gameServer.ID.String(), 0, 1*time.Hour)
 
 	if stopReq.Type == 1 {
 		//sigkill
@@ -199,7 +198,7 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	redis.Redis.Set("gs_restart_id_"+gameServer.ID.String(), 1, 1*time.Hour)
+	model.Redis.Set("gs_restart_id_"+gameServer.ID.String(), 1, 1*time.Hour)
 
 	lib.MustEncode(json.NewEncoder(w), handler.JsonSuccess{Message: "Restarting the game server."})
 }
