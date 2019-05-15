@@ -1,14 +1,22 @@
-package middleware
+package router
 
 import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/context"
-	"gitlab.com/systemz/aimpanel2/master/db"
+	"github.com/rs/cors"
 	"gitlab.com/systemz/aimpanel2/master/model"
+	"log"
 	"net/http"
 	"os"
 	"strings"
 )
+
+func CommonMiddleware(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Content-Type", "application/json")
+		handler.ServeHTTP(w, r)
+	})
+}
 
 func AuthMiddleware(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -28,7 +36,7 @@ func AuthMiddleware(handler http.Handler) http.Handler {
 		}
 
 		var user model.User
-		if db.DB.Where("id = ?", token.Claims.(jwt.MapClaims)["uid"].(string)).First(&user).RecordNotFound() {
+		if model.DB.Where("id = ?", token.Claims.(jwt.MapClaims)["uid"].(string)).First(&user).RecordNotFound() {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
@@ -36,4 +44,15 @@ func AuthMiddleware(handler http.Handler) http.Handler {
 
 		handler.ServeHTTP(w, r)
 	})
+}
+
+func CorsMiddleware(handler http.Handler) http.Handler {
+	log.Println("CORS Middleware")
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowCredentials: true,
+		AllowedHeaders:   []string{"Authorization", "Content-Type", "Accept", "Content-Length"},
+		Debug:            true,
+	})
+	return c.Handler(handler)
 }

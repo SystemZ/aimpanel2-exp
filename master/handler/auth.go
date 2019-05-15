@@ -3,12 +3,34 @@ package handler
 import (
 	"encoding/json"
 	"gitlab.com/systemz/aimpanel2/lib"
-	"gitlab.com/systemz/aimpanel2/master/db"
 	"gitlab.com/systemz/aimpanel2/master/model"
-	"gitlab.com/systemz/aimpanel2/master/request"
-	"gitlab.com/systemz/aimpanel2/master/response"
 	"net/http"
 )
+
+//swagger:response tokenResponse
+type TokenResponse struct {
+	Token string `json:"token"`
+}
+
+//swagger:parameters Authentication register
+type AuthRegisterReq struct {
+	// required: true
+	Username string `json:"username"`
+	// required: true
+	Password string `json:"password"`
+	// required: true
+	PasswordRepeat string `json:"password_repeat"`
+	// required: true
+	Email string `json:"email"`
+	// required: true
+	EmailRepeat string `json:"email_repeat"`
+}
+
+//swagger:parameters Authentication login
+type AuthLoginReq struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
 
 // swagger:route POST /auth/register Auth Register
 //
@@ -21,13 +43,13 @@ import (
 
 func Register(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
-	var registerRequest request.AuthRegisterReq
+	var registerRequest AuthRegisterReq
 	err := decoder.Decode(&registerRequest)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 1001})
+			JsonError{ErrorCode: 1001})
 		return
 	}
 
@@ -35,7 +57,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 1002})
+			JsonError{ErrorCode: 1002})
 		return
 	}
 
@@ -43,17 +65,17 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 1003})
+			JsonError{ErrorCode: 1003})
 		return
 	}
 
 	var count int64
-	db.DB.Model(&model.User{}).Where("username = ?", registerRequest.Username).Count(&count)
+	model.DB.Model(&model.User{}).Where("username = ?", registerRequest.Username).Count(&count)
 	if count > 0 {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 1004})
+			JsonError{ErrorCode: 1004})
 		return
 	}
 
@@ -62,12 +84,12 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	user.Email = registerRequest.Email
 	user.PasswordHash = user.HashPassword(registerRequest.Password)
 
-	err = db.DB.Save(&user).Error
+	err = model.DB.Save(&user).Error
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 1005})
+			JsonError{ErrorCode: 1005})
 		return
 	}
 
@@ -76,11 +98,11 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 1006})
+			JsonError{ErrorCode: 1006})
 		return
 	}
 
-	lib.MustEncode(json.NewEncoder(w), response.TokenResponse{Token: token})
+	lib.MustEncode(json.NewEncoder(w), TokenResponse{Token: token})
 }
 
 // swagger:route POST /auth/login Auth Login
@@ -94,18 +116,18 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 func Login(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
-	var loginRequest request.AuthLoginReq
+	var loginRequest AuthLoginReq
 	err := decoder.Decode(&loginRequest)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 1007})
+			JsonError{ErrorCode: 1007})
 		return
 	}
 
 	var user model.User
-	db.DB.Where("username = ?", loginRequest.Username).Find(&user)
+	model.DB.Where("username = ?", loginRequest.Username).Find(&user)
 
 	if user.CheckPassword(loginRequest.Password) {
 		token, err := user.GenerateJWT()
@@ -113,16 +135,16 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 
 			lib.MustEncode(json.NewEncoder(w),
-				response.JsonError{ErrorCode: 1008})
+				JsonError{ErrorCode: 1008})
 			return
 		}
 
-		lib.MustEncode(json.NewEncoder(w), response.TokenResponse{Token: token})
+		lib.MustEncode(json.NewEncoder(w), TokenResponse{Token: token})
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 1009})
+			JsonError{ErrorCode: 1009})
 		return
 	}
 }
