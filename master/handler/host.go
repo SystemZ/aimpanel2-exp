@@ -11,6 +11,15 @@ import (
 	"net/http"
 )
 
+// swagger:route GET /host Host List
+//
+// List Hosts linked to the current signed-in account
+//
+//Responses:
+//	default: jsonError
+//  400: jsonError
+//	200:
+
 func ListHosts(w http.ResponseWriter, r *http.Request) {
 	var hosts []model.Host
 
@@ -18,6 +27,15 @@ func ListHosts(w http.ResponseWriter, r *http.Request) {
 
 	lib.MustEncode(json.NewEncoder(w), hosts)
 }
+
+// swagger:route GET /host/{id} Host Get
+//
+// Get info about Host with selected ID linked to the current signed-in account
+//
+//Responses:
+//	default: jsonError
+//  400: jsonError
+//	200:
 
 func GetHost(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
@@ -28,6 +46,15 @@ func GetHost(w http.ResponseWriter, r *http.Request) {
 
 	lib.MustEncode(json.NewEncoder(w), host)
 }
+
+// swagger:route POST /host Host Create
+//
+// Create new Host linked to the current signed-in account
+//
+//Responses:
+//	default: jsonError
+//  400: jsonError
+//	200:
 
 func CreateHost(w http.ResponseWriter, r *http.Request) {
 	user := context.Get(r, "user").(model.User)

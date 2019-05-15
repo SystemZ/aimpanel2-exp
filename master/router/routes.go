@@ -25,6 +25,15 @@ var routes = Routes{
 		true,
 	},
 	Route{
+		"SwaggerSpec",
+		"GET",
+		"/swagger.json",
+		handler.SwaggerSpec,
+		false,
+	},
+
+	//Auth
+	Route{
 		"Register",
 		"POST",
 		"/auth/register",
@@ -39,7 +48,7 @@ var routes = Routes{
 		false,
 	},
 
-	//Hosts
+	//Host
 	Route{
 		"List hosts",
 		"GET",
@@ -61,6 +70,8 @@ var routes = Routes{
 		handler.CreateHost,
 		true,
 	},
+
+	//TODO add to swagger from here
 
 	//GameServers
 	Route{
