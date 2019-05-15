@@ -5,7 +5,6 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/master/db"
 	"gitlab.com/systemz/aimpanel2/master/model"
-	"gitlab.com/systemz/aimpanel2/master/request"
 	"gitlab.com/systemz/aimpanel2/master/response"
 	"net/http"
 )
@@ -13,6 +12,26 @@ import (
 //swagger:response tokenResponse
 type TokenResponse struct {
 	Token string `json:"token"`
+}
+
+//swagger:parameters Authentication register
+type AuthRegisterReq struct {
+	// required: true
+	Username string `json:"username"`
+	// required: true
+	Password string `json:"password"`
+	// required: true
+	PasswordRepeat string `json:"password_repeat"`
+	// required: true
+	Email string `json:"email"`
+	// required: true
+	EmailRepeat string `json:"email_repeat"`
+}
+
+//swagger:parameters Authentication login
+type AuthLoginReq struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 // swagger:route POST /auth/register Auth Register
@@ -26,7 +45,7 @@ type TokenResponse struct {
 
 func Register(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
-	var registerRequest request.AuthRegisterReq
+	var registerRequest AuthRegisterReq
 	err := decoder.Decode(&registerRequest)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -99,7 +118,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 func Login(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
-	var loginRequest request.AuthLoginReq
+	var loginRequest AuthLoginReq
 	err := decoder.Decode(&loginRequest)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)

@@ -10,11 +10,18 @@ import (
 	"gitlab.com/systemz/aimpanel2/master/model"
 	rabbitMaster "gitlab.com/systemz/aimpanel2/master/rabbit"
 	"gitlab.com/systemz/aimpanel2/master/redis"
-	"gitlab.com/systemz/aimpanel2/master/request"
 	"gitlab.com/systemz/aimpanel2/master/response"
 	"net/http"
 	"time"
 )
+
+type GameServerStopReq struct {
+	Type uint `json:"type"`
+}
+
+type GameServerSendCommandReq struct {
+	Command string `json:"command"`
+}
 
 func Start(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
@@ -139,7 +146,7 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 	hostId := params["host_id"]
 	gameServerId := params["server_id"]
 
-	stopReq := &request.GameServerStopReq{}
+	stopReq := &GameServerStopReq{}
 
 	err := json.NewDecoder(r.Body).Decode(stopReq)
 	if err != nil {
@@ -204,7 +211,7 @@ func Stop(w http.ResponseWriter, r *http.Request) {
 	hostId := params["host_id"]
 	gameServerId := params["server_id"]
 
-	stopReq := &request.GameServerStopReq{}
+	stopReq := &GameServerStopReq{}
 
 	err := json.NewDecoder(r.Body).Decode(stopReq)
 	if err != nil {
@@ -265,7 +272,7 @@ func SendCommand(w http.ResponseWriter, r *http.Request) {
 	hostId := params["host_id"]
 	gameServerId := params["server_id"]
 
-	cmdReq := &request.GameServerSendCommandReq{}
+	cmdReq := &GameServerSendCommandReq{}
 
 	err := json.NewDecoder(r.Body).Decode(cmdReq)
 	if err != nil {

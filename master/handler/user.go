@@ -6,16 +6,29 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/master/db"
 	"gitlab.com/systemz/aimpanel2/master/model"
-	"gitlab.com/systemz/aimpanel2/master/request"
 	"gitlab.com/systemz/aimpanel2/master/response"
 	"net/http"
 )
+
+//swagger:parameters User changePassword
+type UserChangePasswordReq struct {
+	Password          string `json:"password"`
+	NewPassword       string `json:"new_password"`
+	NewPasswordRepeat string `json:"new_password_repeat"`
+}
+
+//swagger:parameters User changeEmail
+type UserChangeEmailReq struct {
+	Email          string `json:"email"`
+	NewEmail       string `json:"new_email"`
+	NewEmailRepeat string `json:"new_email_repeat"`
+}
 
 func ChangePassword(w http.ResponseWriter, r *http.Request) {
 	user := context.Get(r, "user").(model.User)
 
 	decoder := json.NewDecoder(r.Body)
-	var changePasswordReq request.UserChangePasswordReq
+	var changePasswordReq UserChangePasswordReq
 	err := decoder.Decode(&changePasswordReq)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -52,7 +65,7 @@ func ChangeEmail(w http.ResponseWriter, r *http.Request) {
 	user := context.Get(r, "user").(model.User)
 
 	decoder := json.NewDecoder(r.Body)
-	var changeEmailReq request.UserChangeEmailReq
+	var changeEmailReq UserChangeEmailReq
 	err := decoder.Decode(&changeEmailReq)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
