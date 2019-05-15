@@ -4,7 +4,6 @@ import (
 	"github.com/gorilla/mux"
 	"gitlab.com/systemz/aimpanel2/master/handler"
 	"gitlab.com/systemz/aimpanel2/master/handler/game_server"
-	"gitlab.com/systemz/aimpanel2/master/middleware"
 	"net/http"
 )
 
@@ -19,7 +18,7 @@ func NewRouter() *mux.Router {
 		handler = route.HandlerFunc
 
 		if route.AuthRequired {
-			handler = middleware.AuthMiddleware(route.HandlerFunc)
+			handler = AuthMiddleware(route.HandlerFunc)
 		}
 
 		v1.Path(route.Pattern).Handler(handler).Name(route.Name).Methods(route.Method)

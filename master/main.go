@@ -19,7 +19,6 @@ package main
 import (
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/master/db"
-	"gitlab.com/systemz/aimpanel2/master/middleware"
 	"gitlab.com/systemz/aimpanel2/master/rabbit"
 	"gitlab.com/systemz/aimpanel2/master/redis"
 	"gitlab.com/systemz/aimpanel2/master/router"
@@ -37,5 +36,5 @@ func main() {
 	logrus.Info("Starting API on port :8000")
 	r := router.NewRouter()
 	logrus.Fatal(http.ListenAndServe(":8000",
-		middleware.CommonMiddleware(middleware.CorsMiddleware(r))))
+		router.CommonMiddleware(router.CorsMiddleware(r))))
 }
