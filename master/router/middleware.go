@@ -4,7 +4,6 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/context"
 	"github.com/rs/cors"
-	"gitlab.com/systemz/aimpanel2/master/db"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"log"
 	"net/http"
@@ -37,7 +36,7 @@ func AuthMiddleware(handler http.Handler) http.Handler {
 		}
 
 		var user model.User
-		if db.DB.Where("id = ?", token.Claims.(jwt.MapClaims)["uid"].(string)).First(&user).RecordNotFound() {
+		if model.DB.Where("id = ?", token.Claims.(jwt.MapClaims)["uid"].(string)).First(&user).RecordNotFound() {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}

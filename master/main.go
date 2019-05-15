@@ -18,7 +18,7 @@ package main
 
 import (
 	"github.com/sirupsen/logrus"
-	"gitlab.com/systemz/aimpanel2/master/db"
+	"gitlab.com/systemz/aimpanel2/master/model"
 	"gitlab.com/systemz/aimpanel2/master/rabbit"
 	"gitlab.com/systemz/aimpanel2/master/redis"
 	"gitlab.com/systemz/aimpanel2/master/router"
@@ -26,7 +26,7 @@ import (
 )
 
 func main() {
-	db.DB = db.Setup()
+	model.DB = model.InitMysql()
 	redis.Setup()
 
 	rabbit.Listen()

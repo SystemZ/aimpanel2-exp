@@ -5,7 +5,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/rabbit"
-	"gitlab.com/systemz/aimpanel2/master/db"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"gitlab.com/systemz/aimpanel2/master/redis"
 	"time"
@@ -57,7 +56,7 @@ func ListenWrapperData() {
 					gsLog.Type = model.STDERR
 				}
 
-				err = db.DB.Save(&gsLog).Error
+				err = model.DB.Save(&gsLog).Error
 				if err != nil {
 					logrus.Warn(err)
 				}
@@ -69,12 +68,12 @@ func ListenWrapperData() {
 				_, err := redis.Redis.Get("gs_restart_id_" + gameServerId.String()).Int64()
 				if err == nil {
 					var gs model.GameServer
-					if db.DB.Where("id = ?", gameServerId).First(&gs).RecordNotFound() {
+					if model.DB.Where("id = ?", gameServerId).First(&gs).RecordNotFound() {
 						break
 					}
 
 					var startCommand model.GameCommand
-					if db.DB.Where("game_id = ? and type = ?", gs.GameId, "start").
+					if model.DB.Where("game_id = ? and type = ?", gs.GameId, "start").
 						First(&startCommand).RecordNotFound() {
 						break
 					}
@@ -97,12 +96,12 @@ func ListenWrapperData() {
 				_, err = redis.Redis.Get("gs_start_id_" + gameServerId.String()).Int64()
 				if err == nil {
 					var gs model.GameServer
-					if db.DB.Where("id = ?", gameServerId).First(&gs).RecordNotFound() {
+					if model.DB.Where("id = ?", gameServerId).First(&gs).RecordNotFound() {
 						break
 					}
 
 					var startCommand model.GameCommand
-					if db.DB.Where("game_id = ? and type = ?", gs.GameId, "start").
+					if model.DB.Where("game_id = ? and type = ?", gs.GameId, "start").
 						First(&startCommand).RecordNotFound() {
 						break
 					}
@@ -131,12 +130,12 @@ func ListenWrapperData() {
 					redis.Redis.Set("gs_restart_id_"+gameServerId.String(), 2, 1*time.Hour)
 
 					var gs model.GameServer
-					if db.DB.Where("id = ?", gameServerId).First(&gs).RecordNotFound() {
+					if model.DB.Where("id = ?", gameServerId).First(&gs).RecordNotFound() {
 						break
 					}
 
 					var host model.Host
-					if db.DB.Where("id = ?", gs.HostId).First(&host).RecordNotFound() {
+					if model.DB.Where("id = ?", gs.HostId).First(&host).RecordNotFound() {
 						break
 					}
 
@@ -158,7 +157,7 @@ func ListenWrapperData() {
 				gameServerId := msgBody.GameServerID
 
 				var gs model.GameServer
-				if db.DB.Where("id = ?", gameServerId).First(&gs).RecordNotFound() {
+				if model.DB.Where("id = ?", gameServerId).First(&gs).RecordNotFound() {
 					break
 				}
 
@@ -179,7 +178,7 @@ func ListenWrapperData() {
 					CpuUsage:     msgBody.CpuUsage,
 					RamUsage:     msgBody.RamUsage,
 				}
-				db.DB.Save(metric)
+				model.DB.Save(metric)
 			}
 		}
 	}()
@@ -221,7 +220,7 @@ func ListenAgentData() {
 				agentToken := msgBody.AgentToken
 
 				var host model.Host
-				if db.DB.Where("token = ?", agentToken).First(&host).RecordNotFound() {
+				if model.DB.Where("token = ?", agentToken).First(&host).RecordNotFound() {
 					break
 				}
 
@@ -238,7 +237,7 @@ func ListenAgentData() {
 				agentToken := msgBody.AgentToken
 
 				var host model.Host
-				if db.DB.Where("token = ?", agentToken).First(&host).RecordNotFound() {
+				if model.DB.Where("token = ?", agentToken).First(&host).RecordNotFound() {
 					break
 				}
 
@@ -258,7 +257,7 @@ func ListenAgentData() {
 					Guest:     msgBody.Guest,
 					GuestNice: msgBody.GuestNice,
 				}
-				db.DB.Save(metric)
+				model.DB.Save(metric)
 			}
 		}
 	}()

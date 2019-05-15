@@ -5,7 +5,6 @@ import (
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 	"gitlab.com/systemz/aimpanel2/lib"
-	"gitlab.com/systemz/aimpanel2/master/db"
 	"gitlab.com/systemz/aimpanel2/master/handler"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"net/http"
@@ -25,7 +24,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 	user := context.Get(r, "user").(model.User)
 
-	host := user.GetHost(db.DB, hostId)
+	host := user.GetHost(model.DB, hostId)
 	if host == nil {
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: 5023})
@@ -34,7 +33,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 	gameServer.HostId = host.ID
 
-	db.DB.Save(gameServer)
+	model.DB.Save(gameServer)
 
 	lib.MustEncode(json.NewEncoder(w),
 		gameServer)
@@ -46,14 +45,14 @@ func ListByHostId(w http.ResponseWriter, r *http.Request) {
 
 	user := context.Get(r, "user").(model.User)
 
-	host := user.GetHost(db.DB, hostId)
+	host := user.GetHost(model.DB, hostId)
 	if host == nil {
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: 5024})
 		return
 	}
 
-	gameServers := host.GetGameServers(db.DB)
+	gameServers := host.GetGameServers(model.DB)
 	if gameServers == nil {
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: 5025})
@@ -68,7 +67,7 @@ func ListByUser(w http.ResponseWriter, r *http.Request) {
 	user := context.Get(r, "user").(model.User)
 
 	var gameServers []model.GameServer
-	db.DB.Table("game_servers").Select("game_servers.*").Joins(
+	model.DB.Table("game_servers").Select("game_servers.*").Joins(
 		"LEFT JOIN hosts ON game_servers.host_id = hosts.id").Where(
 		"hosts.user_id = ?", user.ID).Find(&gameServers)
 

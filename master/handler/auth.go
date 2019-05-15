@@ -3,7 +3,6 @@ package handler
 import (
 	"encoding/json"
 	"gitlab.com/systemz/aimpanel2/lib"
-	"gitlab.com/systemz/aimpanel2/master/db"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"net/http"
 )
@@ -71,7 +70,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var count int64
-	db.DB.Model(&model.User{}).Where("username = ?", registerRequest.Username).Count(&count)
+	model.DB.Model(&model.User{}).Where("username = ?", registerRequest.Username).Count(&count)
 	if count > 0 {
 		w.WriteHeader(http.StatusBadRequest)
 
@@ -85,7 +84,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	user.Email = registerRequest.Email
 	user.PasswordHash = user.HashPassword(registerRequest.Password)
 
-	err = db.DB.Save(&user).Error
+	err = model.DB.Save(&user).Error
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 
@@ -128,7 +127,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var user model.User
-	db.DB.Where("username = ?", loginRequest.Username).Find(&user)
+	model.DB.Where("username = ?", loginRequest.Username).Find(&user)
 
 	if user.CheckPassword(loginRequest.Password) {
 		token, err := user.GenerateJWT()

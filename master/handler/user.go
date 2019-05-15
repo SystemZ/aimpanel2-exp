@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"github.com/gorilla/context"
 	"gitlab.com/systemz/aimpanel2/lib"
-	"gitlab.com/systemz/aimpanel2/master/db"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"net/http"
 )
@@ -40,7 +39,7 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 	if user.CheckPassword(changePasswordReq.Password) {
 		if changePasswordReq.NewPassword == changePasswordReq.NewPasswordRepeat {
 			user.PasswordHash = user.HashPassword(changePasswordReq.NewPassword)
-			db.DB.Save(&user)
+			model.DB.Save(&user)
 
 			w.WriteHeader(http.StatusOK)
 			return
@@ -77,7 +76,7 @@ func ChangeEmail(w http.ResponseWriter, r *http.Request) {
 	if user.Email == changeEmailReq.Email {
 		if changeEmailReq.NewEmail == changeEmailReq.NewEmailRepeat {
 			user.Email = changeEmailReq.NewEmail
-			db.DB.Save(&user)
+			model.DB.Save(&user)
 
 			w.WriteHeader(http.StatusOK)
 			return

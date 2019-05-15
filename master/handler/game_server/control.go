@@ -6,7 +6,6 @@ import (
 	"github.com/gorilla/mux"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/rabbit"
-	"gitlab.com/systemz/aimpanel2/master/db"
 	"gitlab.com/systemz/aimpanel2/master/handler"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	rabbitMaster "gitlab.com/systemz/aimpanel2/master/rabbit"
@@ -30,28 +29,28 @@ func Start(w http.ResponseWriter, r *http.Request) {
 	gameServerId := params["server_id"]
 
 	user := context.Get(r, "user").(model.User)
-	host := user.GetHost(db.DB, hostId)
+	host := user.GetHost(model.DB, hostId)
 	if host == nil {
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: 5001})
 		return
 	}
 
-	gameServer := host.GetGameServer(db.DB, gameServerId)
+	gameServer := host.GetGameServer(model.DB, gameServerId)
 	if gameServer == nil {
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: 5002})
 		return
 	}
 
-	game := gameServer.GetGame(db.DB)
+	game := gameServer.GetGame(model.DB)
 	if game == nil {
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: 5003})
 		return
 	}
 
-	startCommand := game.GetStartCommandByVersion(db.DB, gameServer.GameVersion)
+	startCommand := game.GetStartCommandByVersion(model.DB, gameServer.GameVersion)
 	if startCommand == nil {
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: 5004})
@@ -86,35 +85,35 @@ func Install(w http.ResponseWriter, r *http.Request) {
 	gameServerId := params["server_id"]
 
 	user := context.Get(r, "user").(model.User)
-	host := user.GetHost(db.DB, hostId)
+	host := user.GetHost(model.DB, hostId)
 	if host == nil {
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: 5006})
 		return
 	}
 
-	gameServer := host.GetGameServer(db.DB, gameServerId)
+	gameServer := host.GetGameServer(model.DB, gameServerId)
 	if gameServer == nil {
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: 5007})
 		return
 	}
 
-	game := gameServer.GetGame(db.DB)
+	game := gameServer.GetGame(model.DB)
 	if game == nil {
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: 5008})
 		return
 	}
 
-	gameFile := game.GetInstallFileByVersion(db.DB, gameServer.GameVersion)
+	gameFile := game.GetInstallFileByVersion(model.DB, gameServer.GameVersion)
 	if gameFile == nil {
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: 5009})
 		return
 	}
 
-	installCommands := game.GetInstallCommandsByVersion(db.DB, gameServer.GameVersion)
+	installCommands := game.GetInstallCommandsByVersion(model.DB, gameServer.GameVersion)
 	if installCommands == nil {
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: 5010})
@@ -156,14 +155,14 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user := context.Get(r, "user").(model.User)
-	host := user.GetHost(db.DB, hostId)
+	host := user.GetHost(model.DB, hostId)
 	if host == nil {
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: 5013})
 		return
 	}
 
-	gameServer := host.GetGameServer(db.DB, gameServerId)
+	gameServer := host.GetGameServer(model.DB, gameServerId)
 	if gameServer == nil {
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: 5014})
@@ -221,14 +220,14 @@ func Stop(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user := context.Get(r, "user").(model.User)
-	host := user.GetHost(db.DB, hostId)
+	host := user.GetHost(model.DB, hostId)
 	if host == nil {
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: 5018})
 		return
 	}
 
-	gameServer := host.GetGameServer(db.DB, gameServerId)
+	gameServer := host.GetGameServer(model.DB, gameServerId)
 	if gameServer == nil {
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: 5019})
@@ -282,14 +281,14 @@ func SendCommand(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user := context.Get(r, "user").(model.User)
-	host := user.GetHost(db.DB, hostId)
+	host := user.GetHost(model.DB, hostId)
 	if host == nil {
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: 5027})
 		return
 	}
 
-	gameServer := host.GetGameServer(db.DB, gameServerId)
+	gameServer := host.GetGameServer(model.DB, gameServerId)
 	if gameServer == nil {
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: 5028})
