@@ -10,6 +10,11 @@ import (
 	"net/http"
 )
 
+//swagger:response tokenResponse
+type TokenResponse struct {
+	Token string `json:"token"`
+}
+
 // swagger:route POST /auth/register Auth Register
 //
 // Create new account
@@ -80,7 +85,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	lib.MustEncode(json.NewEncoder(w), response.TokenResponse{Token: token})
+	lib.MustEncode(json.NewEncoder(w), TokenResponse{Token: token})
 }
 
 // swagger:route POST /auth/login Auth Login
@@ -117,7 +122,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		lib.MustEncode(json.NewEncoder(w), response.TokenResponse{Token: token})
+		lib.MustEncode(json.NewEncoder(w), TokenResponse{Token: token})
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
 
