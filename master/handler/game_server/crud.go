@@ -6,8 +6,8 @@ import (
 	"github.com/gorilla/mux"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/master/db"
+	"gitlab.com/systemz/aimpanel2/master/handler"
 	"gitlab.com/systemz/aimpanel2/master/model"
-	"gitlab.com/systemz/aimpanel2/master/response"
 	"net/http"
 )
 
@@ -19,7 +19,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(gameServer)
 	if err != nil {
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 5022})
+			handler.JsonError{ErrorCode: 5022})
 		return
 	}
 
@@ -28,7 +28,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	host := user.GetHost(db.DB, hostId)
 	if host == nil {
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 5023})
+			handler.JsonError{ErrorCode: 5023})
 		return
 	}
 
@@ -49,14 +49,14 @@ func ListByHostId(w http.ResponseWriter, r *http.Request) {
 	host := user.GetHost(db.DB, hostId)
 	if host == nil {
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 5024})
+			handler.JsonError{ErrorCode: 5024})
 		return
 	}
 
 	gameServers := host.GetGameServers(db.DB)
 	if gameServers == nil {
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 5025})
+			handler.JsonError{ErrorCode: 5025})
 		return
 	}
 

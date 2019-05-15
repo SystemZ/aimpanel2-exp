@@ -7,7 +7,6 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/master/db"
 	"gitlab.com/systemz/aimpanel2/master/model"
-	"gitlab.com/systemz/aimpanel2/master/response"
 	"net/http"
 )
 
@@ -63,7 +62,7 @@ func CreateHost(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(host)
 	if err != nil {
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 3001, Message: "Invalid body."})
+			JsonError{ErrorCode: 3001, Message: "Invalid body."})
 		return
 	}
 

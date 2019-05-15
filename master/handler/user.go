@@ -6,7 +6,6 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/master/db"
 	"gitlab.com/systemz/aimpanel2/master/model"
-	"gitlab.com/systemz/aimpanel2/master/response"
 	"net/http"
 )
 
@@ -34,7 +33,7 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 2001})
+			JsonError{ErrorCode: 2001})
 		return
 	}
 
@@ -49,14 +48,14 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 
 			lib.MustEncode(json.NewEncoder(w),
-				response.JsonError{ErrorCode: 2002})
+				JsonError{ErrorCode: 2002})
 			return
 		}
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 2003})
+			JsonError{ErrorCode: 2003})
 		return
 	}
 }
@@ -71,7 +70,7 @@ func ChangeEmail(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 2004})
+			JsonError{ErrorCode: 2004})
 		return
 	}
 
@@ -86,14 +85,14 @@ func ChangeEmail(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 
 			lib.MustEncode(json.NewEncoder(w),
-				response.JsonError{ErrorCode: 2005})
+				JsonError{ErrorCode: 2005})
 			return
 		}
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 2006})
+			JsonError{ErrorCode: 2006})
 		return
 	}
 }

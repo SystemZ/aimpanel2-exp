@@ -5,7 +5,6 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/master/db"
 	"gitlab.com/systemz/aimpanel2/master/model"
-	"gitlab.com/systemz/aimpanel2/master/response"
 	"net/http"
 )
 
@@ -51,7 +50,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 1001})
+			JsonError{ErrorCode: 1001})
 		return
 	}
 
@@ -59,7 +58,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 1002})
+			JsonError{ErrorCode: 1002})
 		return
 	}
 
@@ -67,7 +66,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 1003})
+			JsonError{ErrorCode: 1003})
 		return
 	}
 
@@ -77,7 +76,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 1004})
+			JsonError{ErrorCode: 1004})
 		return
 	}
 
@@ -91,7 +90,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 1005})
+			JsonError{ErrorCode: 1005})
 		return
 	}
 
@@ -100,7 +99,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 1006})
+			JsonError{ErrorCode: 1006})
 		return
 	}
 
@@ -124,7 +123,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 1007})
+			JsonError{ErrorCode: 1007})
 		return
 	}
 
@@ -137,7 +136,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 
 			lib.MustEncode(json.NewEncoder(w),
-				response.JsonError{ErrorCode: 1008})
+				JsonError{ErrorCode: 1008})
 			return
 		}
 
@@ -146,7 +145,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			response.JsonError{ErrorCode: 1009})
+			JsonError{ErrorCode: 1009})
 		return
 	}
 }
