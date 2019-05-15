@@ -168,7 +168,7 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	model.Redis.Set("gs_restart_id_"+gameServer.ID.String(), 0, 1*time.Hour)
+	model.Redis.Set("gs_restart_id_"+gameServer.ID.String(), 0, 24*time.Hour)
 
 	msg := rabbit.QueueMsg{
 		GameServerID: gameServer.ID,
@@ -187,7 +187,20 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	model.Redis.Set("gs_restart_id_"+gameServer.ID.String(), 1, 1*time.Hour)
+	model.Redis.Set("gs_restart_id_"+gameServer.ID.String(), 1, 24*time.Hour)
+
+	go func() {
+		<-time.After(time.Duration(gameServer.StopTimeout) * time.Second)
+
+		val, err := model.Redis.Get("gs_restart_id_" + gameServer.ID.String()).Int64()
+		if err != nil {
+			return
+		}
+
+		if val == 1 {
+			model.Redis.Set("gs_restart_id_"+gameServer.ID.String(), -1, 24*time.Hour)
+		}
+	}()
 
 	lib.MustEncode(json.NewEncoder(w), handler.JsonSuccess{Message: "Restarting the game server."})
 }

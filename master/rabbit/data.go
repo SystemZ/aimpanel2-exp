@@ -2,6 +2,7 @@ package rabbit
 
 import (
 	"encoding/json"
+	"github.com/go-redis/redis"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/rabbit"
@@ -38,8 +39,6 @@ func ListenWrapperData() {
 				logrus.Warn(err)
 			}
 
-			logrus.Info(msgBody)
-
 			switch msgBody.TaskId {
 			case rabbit.SERVER_LOG:
 				var gsLog model.GameServerLog
@@ -59,8 +58,6 @@ func ListenWrapperData() {
 				if err != nil {
 					logrus.Warn(err)
 				}
-
-				logrus.Printf("Received a message: %s", gsLog)
 			case rabbit.WRAPPER_STARTED:
 				logrus.Info("WRAPPER_STARTED")
 				gameServerId := msgBody.GameServerID
@@ -124,9 +121,9 @@ func ListenWrapperData() {
 				logrus.Info("WRAPPER_EXITED")
 				gameServerId := msgBody.GameServerID
 
-				_, err := model.Redis.Get("gs_restart_id_" + gameServerId.String()).Int64()
-				if err == nil {
-					model.Redis.Set("gs_restart_id_"+gameServerId.String(), 2, 1*time.Hour)
+				val, err := model.Redis.Get("gs_restart_id_" + gameServerId.String()).Int()
+				if err != redis.Nil && val != -1 {
+					model.Redis.Set("gs_restart_id_"+gameServerId.String(), 2, 24*time.Hour)
 
 					var gs model.GameServer
 					if model.DB.Where("id = ?", gameServerId).First(&gs).RecordNotFound() {
@@ -149,7 +146,7 @@ func ListenWrapperData() {
 						break
 					}
 
-					model.Redis.Set("gs_restart_id_"+gameServerId.String(), 3, 1*time.Hour)
+					model.Redis.Set("gs_restart_id_"+gameServerId.String(), 3, 24*time.Hour)
 				}
 
 			case rabbit.WRAPPER_METRICS_FREQUENCY:
