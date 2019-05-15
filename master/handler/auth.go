@@ -10,6 +10,15 @@ import (
 	"net/http"
 )
 
+// swagger:route POST /auth/register Auth Register
+//
+// Create new account
+//
+//Responses:
+//	default: jsonError
+//  400: jsonError
+//	200:
+
 func Register(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var registerRequest request.AuthRegisterReq
@@ -73,6 +82,15 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 	lib.MustEncode(json.NewEncoder(w), response.TokenResponse{Token: token})
 }
+
+// swagger:route POST /auth/login Auth Login
+//
+// Get session token
+//
+//Responses:
+//	default: jsonError
+//  400: jsonError
+//	200:
 
 func Login(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
