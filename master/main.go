@@ -17,23 +17,9 @@
 package main
 
 import (
-	"github.com/sirupsen/logrus"
-	"gitlab.com/systemz/aimpanel2/master/model"
-	"gitlab.com/systemz/aimpanel2/master/rabbit"
-	"gitlab.com/systemz/aimpanel2/master/router"
-	"net/http"
+	"gitlab.com/systemz/aimpanel2/master/cmd"
 )
 
 func main() {
-	model.DB = model.InitMysql()
-	model.InitRedis()
-
-	rabbit.Listen()
-	rabbit.ListenWrapperData()
-	rabbit.ListenAgentData()
-
-	logrus.Info("Starting API on port :8000")
-	r := router.NewRouter()
-	logrus.Fatal(http.ListenAndServe(":8000",
-		router.CommonMiddleware(router.CorsMiddleware(r))))
+	cmd.Execute()
 }
