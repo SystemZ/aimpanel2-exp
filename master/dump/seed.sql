@@ -1,0 +1,23 @@
+INSERT INTO `games` (`id`, `name`, `created_at`, `updated_at`, `deleted_at`) VALUES(1, 'Teamspeak3', '2019-05-13 16:36:17', '2019-05-13 16:36:20', NULL);
+INSERT INTO `games` (`id`, `name`, `created_at`, `updated_at`, `deleted_at`) VALUES(2, 'BungeeCord', '2019-05-13 16:42:49', '2019-05-13 16:42:50', NULL);
+
+INSERT INTO `game_commands` (`id`, `type`, `game_id`, `game_version`, `order`, `command`, `created_at`, `updated_at`, `deleted_at`) VALUES(1, 'start', 1, 1, 0, 'sh ts3server_minimal_runscript.sh', '2019-05-13 16:39:45', '2019-05-13 16:39:45', NULL);
+INSERT INTO `game_commands` (`id`, `type`, `game_id`, `game_version`, `order`, `command`, `created_at`, `updated_at`, `deleted_at`) VALUES(2, 'install', 1, 1, 0, 'cp {storageDir}/{fileName} {gsDir}/{uuid}/', '2019-05-13 16:40:25', '2019-05-13 16:40:30', NULL);
+INSERT INTO `game_commands` (`id`, `type`, `game_id`, `game_version`, `order`, `command`, `created_at`, `updated_at`, `deleted_at`) VALUES(3, 'install', 1, 1, 1, 'tar xfvj {fileName} --strip-components=1', '2019-05-13 16:40:26', '2019-05-13 16:40:31', NULL);
+INSERT INTO `game_commands` (`id`, `type`, `game_id`, `game_version`, `order`, `command`, `created_at`, `updated_at`, `deleted_at`) VALUES(4, 'install', 1, 1, 2, 'rm {fileName}', '2019-05-13 16:40:28', '2019-05-13 16:40:31', NULL);
+INSERT INTO `game_commands` (`id`, `type`, `game_id`, `game_version`, `order`, `command`, `created_at`, `updated_at`, `deleted_at`) VALUES(5, 'install', 1, 1, 3, 'touch .ts3server_license_accepted', '2019-05-13 16:40:29', '2019-05-13 16:40:32', NULL);
+INSERT INTO `game_commands` (`id`, `type`, `game_id`, `game_version`, `order`, `command`, `created_at`, `updated_at`, `deleted_at`) VALUES(6, 'start', 2, 2, 0, 'java -Djline.terminal=jline.UnsupportedTerminal -jar BungeeCord.jar', '2019-05-13 16:48:06', '2019-05-13 16:48:08', NULL);
+INSERT INTO `game_commands` (`id`, `type`, `game_id`, `game_version`, `order`, `command`, `created_at`, `updated_at`, `deleted_at`) VALUES(7, 'install', 2, 2, 0, 'cp {storageDir}/{fileName} {gsDir}/{uuid}/BungeeCord.jar', '2019-05-13 16:48:10', '2019-05-13 16:48:10', NULL);
+
+INSERT INTO `game_files` (`id`, `type`, `game_id`, `game_version`, `download_url`, `filename`, `created_at`, `updated_at`, `deleted_at`) VALUES(1, 'tar.bz2', 1, 1, 'https://files.teamspeak-services.com/releases/server/3.7.1/teamspeak3-server_linux_amd64-3.7.1.tar.bz2', 'teamspeak3-server_linux_amd64-3.7.1.tar.bz2', '2019-05-13 16:49:45', '2019-05-13 16:49:45', NULL);
+INSERT INTO `game_files` (`id`, `type`, `game_id`, `game_version`, `download_url`, `filename`, `created_at`, `updated_at`, `deleted_at`) VALUES(2, 'jar', 2, 2, 'https://ci.md-5.net/job/BungeeCord/1411/artifact/bootstrap/target/BungeeCord.jar', 'BungeeCord.jar', '2019-05-13 16:49:46', '2019-05-13 16:49:46', NULL);
+
+INSERT INTO `game_servers` (`id`, `name`, `host_id`, `state`, `state_last_changed`, `game_id`, `metric_frequency`, `stop_timeout`, `game_version`, `created_at`, `updated_at`, `deleted_at`) VALUES('109da5bf-55f3-4224-9d8c-a3728ceda317', 'BC', 0x37623039623139652d396639662d346566332d613630392d303130363932653764396663, 0, '2019-05-13 16:51:25', 2, 30, 0, 2, '2019-05-13 16:51:25', '2019-05-13 16:51:25', NULL);
+INSERT INTO `game_servers` (`id`, `name`, `host_id`, `state`, `state_last_changed`, `game_id`, `metric_frequency`, `stop_timeout`, `game_version`, `created_at`, `updated_at`, `deleted_at`) VALUES('a4cdf58c-7f85-45ec-aa02-1431b8ab2871', 'TS3', 0x37623039623139652d396639662d346566332d613630392d303130363932653764396663, 0, '2019-05-13 16:38:01', 1, 30, 0, 1, '2019-05-13 16:38:01', '2019-05-13 16:38:01', NULL);
+
+INSERT INTO `game_versions` (`id`, `name`, `game_id`, `created_at`, `updated_at`, `deleted_at`) VALUES(1, '3.7.1', 1, '2019-05-13 16:36:38', '2019-05-13 16:36:40', NULL);
+INSERT INTO `game_versions` (`id`, `name`, `game_id`, `created_at`, `updated_at`, `deleted_at`) VALUES(2, '1411', 2, '2019-05-13 16:43:07', '2019-05-13 16:43:07', NULL);
+
+INSERT INTO `hosts` (`id`, `name`, `user_id`, `ip`, `token`, `metric_frequency`, `created_at`, `updated_at`, `deleted_at`) VALUES('7b09b19e-9f9f-4ef3-a609-010692e7d9fc', 'Local', 0x30333335393363382d656637662d346232312d626263312d386532346438646334363961, '127.0.0.1', 'GMWJGSAPGATLMODYLUMGUQDIWWMNPPQI', 30, '2019-05-13 16:35:37', '2019-05-13 16:35:37', NULL);
+
+INSERT INTO `users` (`id`, `username`, `password_hash`, `email`, `created_at`, `updated_at`, `deleted_at`) VALUES('033593c8-ef7f-4b21-bbc1-8e24d8dc469a', 'admin', '$2a$04$XIG6zAPHtJcvQrSH4.f6r.5QmkI2qzLccXYUvqCst2gnBuhDuSWOG', 'admin@lvlup.pro', '2019-05-13 16:35:13', '2019-05-13 16:35:13', NULL);
