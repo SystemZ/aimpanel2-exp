@@ -44,7 +44,7 @@ backend:
     image: golang:latest
     stage: compile
     script:
-    - go get github.com/jstemmer/go-junit-report
+    #- go get github.com/jstemmer/go-junit-report
     - go get github.com/go-swagger/go-swagger/cmd/swagger
     - cd ./master
     - go get
@@ -66,8 +66,9 @@ backend:
       paths:
         - $GOPATH/src/github.com
     artifacts:
-      reports:
-        junit: report.xml
+      #reports:
+      #  junit: report.xml
+      # https://docs.gitlab.com/ee/ci/yaml/README.html#artifactsreportscodequality-starter
       paths:
       - aimpanel-master
       - aimpanel-slave
