@@ -2,13 +2,10 @@ package game_server
 
 import (
 	"encoding/json"
-	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/master/gs"
 	"gitlab.com/systemz/aimpanel2/master/handler"
-	"gitlab.com/systemz/aimpanel2/master/model"
-
 	"net/http"
 )
 
@@ -23,12 +20,9 @@ type GameServerSendCommandReq struct {
 func Start(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
-	hostId := params["host_id"]
 	gameServerId := params["server_id"]
 
-	user := context.Get(r, "user").(model.User)
-
-	err := gs.Start(hostId, gameServerId, user).(*lib.Error)
+	err := gs.Start(gameServerId).(*lib.Error)
 	if err != nil {
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: err.ErrorCode})
@@ -41,11 +35,9 @@ func Start(w http.ResponseWriter, r *http.Request) {
 func Install(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
-	hostId := params["host_id"]
 	gameServerId := params["server_id"]
-	user := context.Get(r, "user").(model.User)
 
-	err := gs.Install(hostId, gameServerId, user).(*lib.Error)
+	err := gs.Install(gameServerId).(*lib.Error)
 	if err != nil {
 
 	}
@@ -57,9 +49,7 @@ func Install(w http.ResponseWriter, r *http.Request) {
 func Restart(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
-	hostId := params["host_id"]
 	gameServerId := params["server_id"]
-	user := context.Get(r, "user").(model.User)
 
 	stopReq := &GameServerStopReq{}
 
@@ -70,7 +60,7 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err2 := gs.Restart(hostId, gameServerId, user, stopReq.Type).(*lib.Error)
+	err2 := gs.Restart(gameServerId, stopReq.Type).(*lib.Error)
 	if err2 != nil {
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: err2.ErrorCode})
@@ -82,9 +72,7 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 func Stop(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
-	hostId := params["host_id"]
 	gameServerId := params["server_id"]
-	user := context.Get(r, "user").(model.User)
 
 	stopReq := &GameServerStopReq{}
 
@@ -95,7 +83,7 @@ func Stop(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err2 := gs.Stop(hostId, gameServerId, user, stopReq.Type).(*lib.Error)
+	err2 := gs.Stop(gameServerId, stopReq.Type).(*lib.Error)
 	if err2 != nil {
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: err2.ErrorCode})
@@ -107,9 +95,7 @@ func Stop(w http.ResponseWriter, r *http.Request) {
 func SendCommand(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
-	hostId := params["host_id"]
 	gameServerId := params["server_id"]
-	user := context.Get(r, "user").(model.User)
 
 	cmdReq := &GameServerSendCommandReq{}
 	err := json.NewDecoder(r.Body).Decode(cmdReq)
@@ -119,7 +105,7 @@ func SendCommand(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err2 := gs.SendCommand(hostId, gameServerId, user, cmdReq.Command).(*lib.Error)
+	err2 := gs.SendCommand(gameServerId, cmdReq.Command).(*lib.Error)
 	if err2 != nil {
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: err2.ErrorCode})

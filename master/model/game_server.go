@@ -75,12 +75,22 @@ func (gs *GameServer) BeforeCreate(scope *gorm.Scope) error {
 	return nil
 }
 
-func (gs *GameServer) GetGame(db *gorm.DB) *Game {
-	var game Game
+func GetGameServer(db *gorm.DB, gsId string) *GameServer {
+	var gs GameServer
 
-	if db.Where("id = ?", gs.GameId).First(&game).RecordNotFound() {
+	if db.Where("id = ?", gsId).First(&gs).RecordNotFound() {
 		return nil
 	}
 
-	return &game
+	return &gs
+}
+
+func GetGameServersByHostId(db *gorm.DB, hostId string) *[]GameServer {
+	var gs []GameServer
+
+	if db.Where("host_id = ?", hostId).Find(&gs).RecordNotFound() {
+		return nil
+	}
+
+	return &gs
 }

@@ -22,9 +22,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := context.Get(r, "user").(model.User)
-
-	host := user.GetHost(model.DB, hostId)
+	host := model.GetHost(model.DB, hostId)
 	if host == nil {
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: 5023})
@@ -43,16 +41,14 @@ func ListByHostId(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	hostId := params["id"]
 
-	user := context.Get(r, "user").(model.User)
-
-	host := user.GetHost(model.DB, hostId)
+	host := model.GetHost(model.DB, hostId)
 	if host == nil {
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: 5024})
 		return
 	}
 
-	gameServers := host.GetGameServers(model.DB)
+	gameServers := model.GetGameServersByHostId(model.DB, host.ID.String())
 	if gameServers == nil {
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: 5025})

@@ -8,32 +8,26 @@ import (
 	"time"
 )
 
-func Start(hostId string, gsId string, user model.User) error {
-	host := user.GetHost(model.DB, hostId)
-	if host == nil {
-		return &lib.Error{ErrorCode: 5001}
-	}
-
-	gameServer := host.GetGameServer(model.DB, gsId)
+func Start(gsId string) error {
+	gameServer := model.GetGameServer(model.DB, gsId)
 	if gameServer == nil {
 		return &lib.Error{ErrorCode: 5002}
 	}
 
-	game := gameServer.GetGame(model.DB)
-	if game == nil {
+	hostToken := model.GetHostToken(model.DB, gameServer.HostId.String())
+	if hostToken == "" {
 		return &lib.Error{ErrorCode: 5003}
 	}
 
-	startCommand := game.GetStartCommandByVersion(model.DB, gameServer.GameVersion)
+	startCommand := model.GetGameStartCommandByVersion(model.DB, gameServer.GameId, gameServer.GameVersion)
 	if startCommand == nil {
 		return &lib.Error{ErrorCode: 5004}
 	}
 
 	model.Redis.Set("gs_start_id_"+gameServer.ID.String(), 0, 1*time.Hour)
 
-	err := rabbitMaster.SendRpcMessage("agent_"+host.Token, rabbit.QueueMsg{
+	err := rabbitMaster.SendRpcMessage("agent_"+hostToken, rabbit.QueueMsg{
 		TaskId:       rabbit.WRAPPER_START,
-		Game:         game.Name,
 		GameServerID: gameServer.ID,
 	})
 	if err != nil {
@@ -45,13 +39,8 @@ func Start(hostId string, gsId string, user model.User) error {
 	return nil
 }
 
-func Stop(hostId string, gsId string, user model.User, stopType uint) error {
-	host := user.GetHost(model.DB, hostId)
-	if host == nil {
-		return &lib.Error{ErrorCode: 5018}
-	}
-
-	gameServer := host.GetGameServer(model.DB, gsId)
+func Stop(gsId string, stopType uint) error {
+	gameServer := model.GetGameServer(model.DB, gsId)
 	if gameServer == nil {
 		return &lib.Error{ErrorCode: 5019}
 	}
@@ -73,35 +62,29 @@ func Stop(hostId string, gsId string, user model.User, stopType uint) error {
 	return nil
 }
 
-func Install(hostId string, gsId string, user model.User) error {
-	host := user.GetHost(model.DB, hostId)
-	if host == nil {
-		return &lib.Error{ErrorCode: 5006}
-	}
-
-	gameServer := host.GetGameServer(model.DB, gsId)
+func Install(gsId string) error {
+	gameServer := model.GetGameServer(model.DB, gsId)
 	if gameServer == nil {
 		return &lib.Error{ErrorCode: 5007}
 	}
 
-	game := gameServer.GetGame(model.DB)
-	if game == nil {
-		return &lib.Error{ErrorCode: 5008}
+	hostToken := model.GetHostToken(model.DB, gameServer.HostId.String())
+	if hostToken == "" {
+		return &lib.Error{ErrorCode: 5003}
 	}
 
-	gameFile := game.GetInstallFileByVersion(model.DB, gameServer.GameVersion)
+	gameFile := model.GetGameInstallFileByVersion(model.DB, gameServer.GameId, gameServer.GameVersion)
 	if gameFile == nil {
 		return &lib.Error{ErrorCode: 5009}
 	}
 
-	installCommands := game.GetInstallCommandsByVersion(model.DB, gameServer.GameVersion)
+	installCommands := model.GetGameInstallCommandsByVersion(model.DB, gameServer.GameId, gameServer.GameVersion)
 	if installCommands == nil {
 		return &lib.Error{ErrorCode: 5010}
 	}
 
-	err := rabbitMaster.SendRpcMessage("agent_"+host.Token, rabbit.QueueMsg{
+	err := rabbitMaster.SendRpcMessage("agent_"+hostToken, rabbit.QueueMsg{
 		TaskId:       rabbit.GAME_INSTALL,
-		Game:         game.Name,
 		GameServerID: gameServer.ID,
 		GameFile:     gameFile,
 		GameCommands: installCommands,
@@ -113,13 +96,8 @@ func Install(hostId string, gsId string, user model.User) error {
 	return nil
 }
 
-func SendCommand(hostId string, gsId string, user model.User, command string) error {
-	host := user.GetHost(model.DB, hostId)
-	if host == nil {
-		return &lib.Error{ErrorCode: 5027}
-	}
-
-	gameServer := host.GetGameServer(model.DB, gsId)
+func SendCommand(gsId string, command string) error {
+	gameServer := model.GetGameServer(model.DB, gsId)
 	if gameServer == nil {
 		return &lib.Error{ErrorCode: 5028}
 	}
@@ -135,13 +113,8 @@ func SendCommand(hostId string, gsId string, user model.User, command string) er
 	return nil
 }
 
-func Restart(hostId string, gsId string, user model.User, stopType uint) error {
-	host := user.GetHost(model.DB, hostId)
-	if host == nil {
-		return &lib.Error{ErrorCode: 5013}
-	}
-
-	gameServer := host.GetGameServer(model.DB, gsId)
+func Restart(gsId string, stopType uint) error {
+	gameServer := model.GetGameServer(model.DB, gsId)
 	if gameServer == nil {
 		return &lib.Error{ErrorCode: 5014}
 	}
