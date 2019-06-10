@@ -28,20 +28,10 @@ type Game struct {
 	DeletedAt *time.Time `json:"deleted_at"`
 }
 
-func (g *Game) GetStartCommand(db *gorm.DB) *GameCommand {
+func GetGameStartCommandByVersion(db *gorm.DB, gameId uint, versionId uint) *GameCommand {
 	var startCommand GameCommand
 
-	if db.Where("game_id = ? and type = ?", g.ID, "start").First(&startCommand).RecordNotFound() {
-		return nil
-	}
-
-	return &startCommand
-}
-
-func (g *Game) GetStartCommandByVersion(db *gorm.DB, versionId uint) *GameCommand {
-	var startCommand GameCommand
-
-	if db.Where("game_id = ? and type = ? and game_version = ?", g.ID, "start", versionId).
+	if db.Where("game_id = ? and type = ? and game_version = ?", gameId, "start", versionId).
 		First(&startCommand).RecordNotFound() {
 		return nil
 	}
@@ -49,10 +39,10 @@ func (g *Game) GetStartCommandByVersion(db *gorm.DB, versionId uint) *GameComman
 	return &startCommand
 }
 
-func (g *Game) GetInstallCommands(db *gorm.DB) *[]GameCommand {
+func GetGameInstallCommandsByVersion(db *gorm.DB, gameId uint, versionId uint) *[]GameCommand {
 	var installCommands []GameCommand
 
-	if db.Where("game_id = ? and type = ?", g.ID, "install").
+	if db.Where("game_id = ? and type = ? and game_version = ?", gameId, "install", versionId).
 		Order("`order` asc").Find(&installCommands).RecordNotFound() {
 		return nil
 	}
@@ -60,31 +50,10 @@ func (g *Game) GetInstallCommands(db *gorm.DB) *[]GameCommand {
 	return &installCommands
 }
 
-func (g *Game) GetInstallCommandsByVersion(db *gorm.DB, versionId uint) *[]GameCommand {
-	var installCommands []GameCommand
-
-	if db.Where("game_id = ? and type = ? and game_version = ?", g.ID, "install", versionId).
-		Order("`order` asc").Find(&installCommands).RecordNotFound() {
-		return nil
-	}
-
-	return &installCommands
-}
-
-func (g *Game) GetInstallFile(db *gorm.DB) *GameFile {
+func GetGameInstallFileByVersion(db *gorm.DB, gameId uint, versionId uint) *GameFile {
 	var file GameFile
 
-	if db.Where("game_id = ?", g.ID).First(&file).RecordNotFound() {
-		return nil
-	}
-
-	return &file
-}
-
-func (g *Game) GetInstallFileByVersion(db *gorm.DB, versionId uint) *GameFile {
-	var file GameFile
-
-	if db.Where("game_id = ? and game_version = ?", g.ID, versionId).First(&file).RecordNotFound() {
+	if db.Where("game_id = ? and game_version = ?", gameId, versionId).First(&file).RecordNotFound() {
 		return nil
 	}
 

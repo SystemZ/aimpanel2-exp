@@ -58,22 +58,19 @@ func (h *Host) BeforeCreate(scope *gorm.Scope) error {
 	return nil
 }
 
-func (h *Host) GetGameServer(db *gorm.DB, gsId string) *GameServer {
-	var gs GameServer
-
-	if db.Where("id = ? and host_id = ?", gsId, h.ID).First(&gs).RecordNotFound() {
+func GetHost(db *gorm.DB, hostId string) *Host {
+	var host Host
+	if db.Where("id = ?", hostId).First(&host).RecordNotFound() {
 		return nil
 	}
-
-	return &gs
+	return &host
 }
 
-func (h *Host) GetGameServers(db *gorm.DB) *[]GameServer {
-	var gs []GameServer
-
-	if db.Where("host_id = ?", h.ID).Find(&gs).RecordNotFound() {
-		return nil
+func GetHostToken(db *gorm.DB, hostId string) string {
+	var token string
+	if db.Select("token").Where("id = ?", hostId).First(&token).RecordNotFound() {
+		return ""
 	}
 
-	return &gs
+	return token
 }

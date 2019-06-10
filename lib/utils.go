@@ -32,3 +32,11 @@ func MustEncode(enc *json.Encoder, v interface{}) {
 		panic(err)
 	}
 }
+
+type Error struct {
+	ErrorCode int
+}
+
+func (e *Error) Error() string {
+	return fmt.Sprintf("Error Code: %d", e.ErrorCode)
+}
