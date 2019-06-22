@@ -69,3 +69,17 @@ func ListByUser(w http.ResponseWriter, r *http.Request) {
 
 	lib.MustEncode(json.NewEncoder(w), gameServers)
 }
+
+func ConsoleLog(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	gameServerId := params["server_id"]
+
+	logs := model.GetLogsByGameServer(model.DB, gameServerId, 10)
+	if logs == nil {
+		lib.MustEncode(json.NewEncoder(w),
+			handler.JsonError{ErrorCode: 5030})
+		return
+	}
+
+	lib.MustEncode(json.NewEncoder(w), logs)
+}
