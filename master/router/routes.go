@@ -151,6 +151,13 @@ var routes = Routes{
 		game_server.SendCommand,
 		true,
 	},
+	Route{
+		"Game server logs",
+		"PUT",
+		"/host/{host_id}/server/{server_id}/logs",
+		game_server.ConsoleLog,
+		true,
+	},
 
 	//User
 	Route{
