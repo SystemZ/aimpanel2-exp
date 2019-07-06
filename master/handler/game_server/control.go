@@ -3,6 +3,7 @@ package game_server
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/master/gs"
 	"gitlab.com/systemz/aimpanel2/master/handler"
@@ -22,10 +23,10 @@ func Start(w http.ResponseWriter, r *http.Request) {
 
 	gameServerId := params["server_id"]
 
-	err := gs.Start(gameServerId).(*lib.Error)
-	if err != nil {
+	if err, ok := gs.Start(gameServerId).(*lib.Error); ok {
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: err.ErrorCode})
+		return
 	}
 
 	lib.MustEncode(json.NewEncoder(w),
@@ -34,12 +35,14 @@ func Start(w http.ResponseWriter, r *http.Request) {
 
 func Install(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
+	logrus.Info("1")
 
 	gameServerId := params["server_id"]
 
-	err := gs.Install(gameServerId).(*lib.Error)
-	if err != nil {
-
+	if err, ok := gs.Install(gameServerId).(*lib.Error); ok {
+		lib.MustEncode(json.NewEncoder(w),
+			handler.JsonError{ErrorCode: err.ErrorCode})
+		return
 	}
 
 	lib.MustEncode(json.NewEncoder(w),
@@ -60,10 +63,10 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err2 := gs.Restart(gameServerId, stopReq.Type).(*lib.Error)
-	if err2 != nil {
+	if err2, ok := gs.Restart(gameServerId, stopReq.Type).(*lib.Error); ok {
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: err2.ErrorCode})
+		return
 	}
 
 	lib.MustEncode(json.NewEncoder(w), handler.JsonSuccess{Message: "Restarting the game server."})
@@ -83,10 +86,10 @@ func Stop(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err2 := gs.Stop(gameServerId, stopReq.Type).(*lib.Error)
-	if err2 != nil {
+	if err2, ok := gs.Stop(gameServerId, stopReq.Type).(*lib.Error); ok {
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: err2.ErrorCode})
+		return
 	}
 
 	lib.MustEncode(json.NewEncoder(w), handler.JsonSuccess{Message: "Stopping the game server."})
@@ -105,10 +108,10 @@ func SendCommand(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err2 := gs.SendCommand(gameServerId, cmdReq.Command).(*lib.Error)
-	if err2 != nil {
+	if err2, ok := gs.SendCommand(gameServerId, cmdReq.Command).(*lib.Error); ok {
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: err2.ErrorCode})
+		return
 	}
 
 	lib.MustEncode(json.NewEncoder(w), handler.JsonSuccess{Message: "Sending command to game server"})

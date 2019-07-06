@@ -67,10 +67,10 @@ func GetHost(db *gorm.DB, hostId string) *Host {
 }
 
 func GetHostToken(db *gorm.DB, hostId string) string {
-	var token string
-	if db.Select("token").Where("id = ?", hostId).First(&token).RecordNotFound() {
+	var host Host
+	if db.Where("id = ?", hostId).First(&host).RecordNotFound() {
 		return ""
 	}
 
-	return token
+	return host.Token
 }
