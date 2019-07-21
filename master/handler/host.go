@@ -18,6 +18,7 @@ import (
 //  400: jsonError
 //	200:
 
+//TODO: find by current signed-in account
 func ListHosts(w http.ResponseWriter, r *http.Request) {
 	var hosts []model.Host
 
@@ -67,6 +68,34 @@ func CreateHost(w http.ResponseWriter, r *http.Request) {
 
 	host.UserId = user.ID
 	model.DB.Save(host)
+
+	group := model.GetGroup(model.DB, "USER-"+user.ID.String())
+	if group == nil {
+		lib.MustEncode(json.NewEncoder(w),
+			JsonError{ErrorCode: 3002})
+		return
+	}
+
+	model.DB.Save(&model.Permission{
+		Name:     "Get host",
+		Verb:     lib.GetVerbByName("GET"),
+		GroupId:  group.ID,
+		Endpoint: "/v1/host/" + host.ID.String(),
+	})
+
+	model.DB.Save(&model.Permission{
+		Name:     "Create game server",
+		Verb:     lib.GetVerbByName("POST"),
+		GroupId:  group.ID,
+		Endpoint: "/v1/host/" + host.ID.String() + "/server",
+	})
+
+	model.DB.Save(&model.Permission{
+		Name:     "List game servers by host id",
+		Verb:     lib.GetVerbByName("GET"),
+		GroupId:  group.ID,
+		Endpoint: "/v1/host/" + host.ID.String() + "/server",
+	})
 
 	lib.MustEncode(json.NewEncoder(w), host)
 }

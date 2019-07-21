@@ -18,7 +18,7 @@ func NewRouter() *mux.Router {
 		handler = route.HandlerFunc
 
 		if route.AuthRequired {
-			handler = AuthMiddleware(route.HandlerFunc)
+			handler = AuthMiddleware(PermissionMiddleware(route.HandlerFunc))
 		}
 
 		v1.Path(route.Pattern).Handler(handler).Name(route.Name).Methods(route.Method)

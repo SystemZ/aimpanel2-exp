@@ -4,6 +4,8 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/context"
 	"github.com/rs/cors"
+	"github.com/sirupsen/logrus"
+	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"log"
 	"net/http"
@@ -41,6 +43,33 @@ func AuthMiddleware(handler http.Handler) http.Handler {
 			return
 		}
 		context.Set(r, "user", user)
+
+		handler.ServeHTTP(w, r)
+	})
+}
+
+func PermissionMiddleware(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Println(r.URL)
+		user := context.Get(r, "user").(model.User)
+
+		logrus.Info(user.ID.String())
+
+		var count int
+		row := model.DB.Raw("SELECT COUNT(*) FROM group_users WHERE "+
+			"group_id = (SELECT group_id FROM permissions WHERE endpoint = ? AND verb = ?) "+
+			"AND user_id = ?", r.URL.Path, lib.GetVerbByName(r.Method), user.ID.String()).Row()
+		err := row.Scan(&count)
+		if err != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		if count == 0 {
+			logrus.Info("Access denied")
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
 
 		handler.ServeHTTP(w, r)
 	})

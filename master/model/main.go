@@ -45,6 +45,11 @@ func InitMysql() *gorm.DB {
 	db.AutoMigrate(&MetricHost{})
 	db.AutoMigrate(&MetricGameServer{})
 
+	db.AutoMigrate(&Group{})
+	db.AutoMigrate(&GroupUser{})
+
+	db.AutoMigrate(&Permission{})
+
 	logrus.Info("Connection to database seems OK!")
 
 	return db

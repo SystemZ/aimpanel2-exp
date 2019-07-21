@@ -14,6 +14,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	hostId := params["host_id"]
 
+	//Decode json
 	gameServer := &model.GameServer{}
 	err := json.NewDecoder(r.Body).Decode(gameServer)
 	if err != nil {
@@ -22,6 +23,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//Check if host exist
 	host := model.GetHost(model.DB, hostId)
 	if host == nil {
 		lib.MustEncode(json.NewEncoder(w),
@@ -31,7 +33,59 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 	gameServer.HostId = host.ID
 
+	//Save game server to db
 	model.DB.Save(gameServer)
+
+	//TODO: create array of permissions?
+	user := context.Get(r, "user").(model.User)
+	group := model.GetGroup(model.DB, "USER-"+user.ID.String())
+	if group == nil {
+		lib.MustEncode(json.NewEncoder(w),
+			handler.JsonError{ErrorCode: 3002})
+		return
+	}
+
+	model.DB.Save(&model.Permission{
+		Name:     "Install game server",
+		Verb:     lib.GetVerbByName("PUT"),
+		GroupId:  group.ID,
+		Endpoint: "/v1/host/" + host.ID.String() + "/server/" + gameServer.ID.String() + "/install",
+	})
+
+	model.DB.Save(&model.Permission{
+		Name:     "Start game server",
+		Verb:     lib.GetVerbByName("PUT"),
+		GroupId:  group.ID,
+		Endpoint: "/v1/host/" + host.ID.String() + "/server/" + gameServer.ID.String() + "/start",
+	})
+
+	model.DB.Save(&model.Permission{
+		Name:     "Restart game server",
+		Verb:     lib.GetVerbByName("PUT"),
+		GroupId:  group.ID,
+		Endpoint: "/v1/host/" + host.ID.String() + "/server/" + gameServer.ID.String() + "/restart",
+	})
+
+	model.DB.Save(&model.Permission{
+		Name:     "Stop game server",
+		Verb:     lib.GetVerbByName("PUT"),
+		GroupId:  group.ID,
+		Endpoint: "/v1/host/" + host.ID.String() + "/server/" + gameServer.ID.String() + "/stop",
+	})
+
+	model.DB.Save(&model.Permission{
+		Name:     "Send command to game server",
+		Verb:     lib.GetVerbByName("PUT"),
+		GroupId:  group.ID,
+		Endpoint: "/v1/host/" + host.ID.String() + "/server/" + gameServer.ID.String() + "/command",
+	})
+
+	model.DB.Save(&model.Permission{
+		Name:     "Get logs from game server",
+		Verb:     lib.GetVerbByName("PUT"),
+		GroupId:  group.ID,
+		Endpoint: "/v1/host/" + host.ID.String() + "/server/" + gameServer.ID.String() + "/logs",
+	})
 
 	lib.MustEncode(json.NewEncoder(w),
 		gameServer)
