@@ -1,6 +1,7 @@
 package model
 
 import (
+	"github.com/jinzhu/gorm"
 	"time"
 )
 
@@ -25,4 +26,12 @@ type Group struct {
 
 	// Deleted at timestamp
 	DeletedAt *time.Time `json:"-"`
+}
+
+func GetGroup(db *gorm.DB, name string) *Group {
+	var group Group
+	if db.Where("name = ?", name).First(&group).RecordNotFound() {
+		return nil
+	}
+	return &group
 }

@@ -50,6 +50,9 @@
 * 2005 - Emails do not match.
 * 2006 - Current email is wrong.
 
+# Host
+* 2007 - Could not find a group.
+
 
 # Game Server
 * 5001 - Could not find a host.

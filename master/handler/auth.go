@@ -129,6 +129,41 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		Endpoint: "/v1/host",
 	})
 
+	model.DB.Save(&model.Permission{
+		Name:     "List game servers by user id",
+		Verb:     lib.GetVerbByName("GET"),
+		GroupId:  group.ID,
+		Endpoint: "/v1/host/my/server",
+	})
+
+	model.DB.Save(&model.Permission{
+		Name:     "Change password",
+		Verb:     lib.GetVerbByName("POST"),
+		GroupId:  group.ID,
+		Endpoint: "/v1/user/change_password",
+	})
+
+	model.DB.Save(&model.Permission{
+		Name:     "Change email",
+		Verb:     lib.GetVerbByName("POST"),
+		GroupId:  group.ID,
+		Endpoint: "/v1/user/change_email",
+	})
+
+	model.DB.Save(&model.Permission{
+		Name:     "User profile",
+		Verb:     lib.GetVerbByName("GET"),
+		GroupId:  group.ID,
+		Endpoint: "/v1/user/profile",
+	})
+
+	model.DB.Save(&model.Permission{
+		Name:     "List games",
+		Verb:     lib.GetVerbByName("GET"),
+		GroupId:  group.ID,
+		Endpoint: "/v1/game",
+	})
+
 	lib.MustEncode(json.NewEncoder(w), TokenResponse{Token: token})
 }
 
