@@ -1,6 +1,7 @@
 package model
 
 import (
+	"github.com/gofrs/uuid"
 	"time"
 )
 
@@ -10,7 +11,7 @@ type GroupUser struct {
 	// ID of the group
 	//
 	// required: true
-	ID uint `gorm:"primary_key" json:"id"`
+	ID int `gorm:"primary_key" json:"id"`
 
 	// ID of the group
 	//
@@ -20,7 +21,7 @@ type GroupUser struct {
 	// ID of the user
 	//
 	// required: true
-	UserId int `gorm:"column:user_id" json:"id"`
+	UserId uuid.UUID `gorm:"column:user_id" json:"id"`
 
 	// Created at timestamp
 	CreatedAt time.Time `json:"created_at"`

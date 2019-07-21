@@ -10,7 +10,7 @@ type Group struct {
 	// ID of the group
 	//
 	// required: true
-	ID uint `gorm:"primary_key" json:"id"`
+	ID int `gorm:"primary_key" json:"id"`
 
 	// Name of the group
 	//

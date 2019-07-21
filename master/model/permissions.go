@@ -12,12 +12,12 @@ type Permission struct {
 	// required: true
 	ID uint `gorm:"primary_key" json:"id"`
 
-	// Name of the group
+	// Name of the permission
 	//
 	// required: true
 	Name string `gorm:"column:name" json:"name"`
 
-	// ID of the group
+	// ID of the permission
 	//
 	// required: true
 	GroupId int `gorm:"column:group_id" json:"id"`

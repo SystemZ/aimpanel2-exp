@@ -14,6 +14,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	hostId := params["host_id"]
 
+	//Decode json
 	gameServer := &model.GameServer{}
 	err := json.NewDecoder(r.Body).Decode(gameServer)
 	if err != nil {
@@ -22,6 +23,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//Check if host exist
 	host := model.GetHost(model.DB, hostId)
 	if host == nil {
 		lib.MustEncode(json.NewEncoder(w),
@@ -31,6 +33,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 	gameServer.HostId = host.ID
 
+	//Save game server to db
 	model.DB.Save(gameServer)
 
 	lib.MustEncode(json.NewEncoder(w),

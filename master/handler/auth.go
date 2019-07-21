@@ -102,6 +102,33 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//Create group
+	group := &model.Group{
+		Name: "USER-" + user.ID.String(),
+	}
+	model.DB.Save(group)
+
+	//Add user to group
+	groupUser := &model.GroupUser{
+		GroupId: group.ID,
+		UserId:  user.ID,
+	}
+	model.DB.Save(groupUser)
+
+	model.DB.Save(&model.Permission{
+		Name:     "List hosts",
+		Verb:     lib.GetVerbByName("GET"),
+		GroupId:  group.ID,
+		Endpoint: "/v1/host",
+	})
+
+	model.DB.Save(&model.Permission{
+		Name:     "Create host",
+		Verb:     lib.GetVerbByName("POST"),
+		GroupId:  group.ID,
+		Endpoint: "/v1/host",
+	})
+
 	lib.MustEncode(json.NewEncoder(w), TokenResponse{Token: token})
 }
 
