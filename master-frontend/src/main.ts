@@ -6,7 +6,7 @@ import './registerServiceWorker';
 import vuetify from './plugins/vuetify';
 import '@babel/polyfill';
 import axios, {AxiosStatic} from 'axios';
-import auth from './auth';
+import auth, {AuthInterface} from './auth';
 
 Vue.config.productionTip = false;
 
@@ -20,6 +20,12 @@ declare module  'vue/types/vue' {
 }
 
 Vue.prototype.$auth = auth;
+declare module 'vue/types/vue' {
+  interface Vue {
+    $auth: AuthInterface;
+  }
+}
+
 auth.checkAuthentication();
 
 new Vue({

@@ -1,7 +1,18 @@
-import Vue from 'vue'
+import Vue from 'vue';
 import axios from 'axios';
 import router from '../router';
 import jwt_decode from 'jwt-decode';
+
+export interface AuthInterface {
+    email: string;
+    username: string;
+    logged: boolean;
+    login(context: any , data: any, redirect: any): any;
+    register(context: any , data: any, redirect: any): any;
+    logout(): any;
+    checkAuthentication(): any;
+    getAuthorizationHeader(): any;
+}
 
 export default new Vue({
     data: {
