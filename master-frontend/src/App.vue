@@ -1,9 +1,49 @@
 <template>
   <v-app>
-    <v-app-bar app>
-      <v-toolbar-title class="headline text-uppercase">
-        <span>Vuetify</span>
-        <span class="font-weight-light">MATERIAL DESIGN</span>
+    <v-navigation-drawer v-model="drawer" app>
+      <v-list-item>
+        <v-list-item-content>
+          <v-list-item-title class="title">
+            Aimpanel
+          </v-list-item-title>
+          <v-list-item-subtitle>
+            v2.0.0
+          </v-list-item-subtitle>
+        </v-list-item-content>
+      </v-list-item>
+      <v-divider></v-divider>
+
+      <v-list dense nav>
+        <v-list-item
+                v-for="item in menu"
+                :key="item.title"
+                :to="item.path"
+                v-if="(item.authRequired && loggedIn) || (!item.authRequired && !loggedIn) || !item.authRequired"
+                link
+                active-class="red--text red--darken-1">
+          <v-list-item-icon>
+            <v-icon>{{item.icon}}</v-icon>
+          </v-list-item-icon>
+
+          <v-list-item-content>
+            <v-list-item-title>{{item.title}}</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+
+        <v-list-item v-if="!loggedIn" to="login" active-class="red--text red--darken-1">
+          <v-list-item-action>
+            <v-icon>fa-sign-in</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Login</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
+    </v-navigation-drawer>
+
+    <v-app-bar color="red darken-1" dark app>
+      <v-toolbar-title>
+        Home
       </v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn
@@ -28,7 +68,39 @@ import Vue from 'vue';
 export default Vue.extend({
   name: 'App',
   data: () => ({
-    //
+    drawer: null,
+    menu: [
+      {
+        title: 'Home',
+        icon: 'fa-home',
+        path: '/',
+        authRequired: false
+      },
+      {
+        title: 'Hosts',
+        icon: 'fa-server',
+        path: '/hosts',
+        authRequired: true
+      },
+      {
+        title: 'Game servers',
+        icon: 'fa-gamepad',
+        path: '/game-servers',
+        authRequired: true
+      },
+      {
+        title: 'License',
+        icon: 'fa-certificate',
+        path: '/license',
+        authRequired: false
+      },
+      {
+        title: 'Help',
+        icon: 'fa-question',
+        path: '/help',
+        authRequired: false
+      }
+    ]
   }),
 });
 </script>
