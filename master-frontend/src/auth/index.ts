@@ -39,7 +39,11 @@ export default new Vue({
                     }
                 }
             }).catch((e: any) => {
-                context.loginError = e.response.data.message;
+                if(!e.response) {
+                    context.loginError = 'Network error';
+                } else {
+                    context.loginError = e.response.data.message;
+                }
             });
         },
         register(context: any, data: any, redirect: any) {
