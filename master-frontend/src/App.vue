@@ -1,4 +1,4 @@
-<template>
+<template xmlns:v-slot="http://www.w3.org/1999/XSL/Transform">
     <v-app>
         <v-navigation-drawer v-model="drawer" app>
             <v-list-item>
@@ -48,9 +48,11 @@
             <v-spacer></v-spacer>
             <span v-if="loggedIn">
                 <v-menu offset-y>
-                    <v-btn slot="activator">
-                        {{$auth.username}}&nbsp; <v-icon size="12">fa-chevron-down fa-small</v-icon>
-                    </v-btn>
+                    <template v-slot:activator="{ on }">
+                        <v-btn v-on="on">
+                            {{$auth.username}} <v-icon size="12">fa-chevron-down fa-small</v-icon>
+                        </v-btn>
+                    </template>
                     <v-list>
                         <v-list-item to="profile">
                             <v-list-item-title>Profile</v-list-item-title>
