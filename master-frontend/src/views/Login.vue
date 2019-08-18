@@ -1,7 +1,7 @@
 <template>
     <v-container fluid fill-height>
-        <v-layout align-center justify-center>
-            <v-flex xs12 sm8 md6>
+        <v-row align-center justify-center>
+            <v-col xs12 sm8 md6>
                 <v-card class="elevation-12">
                     <v-tabs
                             v-model="active"
@@ -92,8 +92,8 @@
                         </v-tab-item>
                     </v-tabs>
                 </v-card>
-            </v-flex>
-        </v-layout>
+            </v-col>
+        </v-row>
     </v-container>
 </template>
 
@@ -122,7 +122,7 @@
                 ],
                 password: [
                     (v: string) => !!v || "Password is required",
-                    (v: string) => v.length >= 6 || "Password must be of minimum 6 characters"
+                    (v: string) => v.length >= 5 || "Password must be of minimum 5 characters"
                 ],
                 email: [
                     (v: string) => !!v || "Email is required",

@@ -48,6 +48,15 @@ export default new Router({
             component: () => import(/* webpackChunkName: "hosts" */ './views/Profile.vue')
         },
         {
+            path: '/hosts',
+            name: 'hosts',
+            meta: {
+                title: 'Hosts',
+                authRequired: true,
+            },
+            component: () => import(/* webpackChunkName: "hosts" */ './views/Hosts.vue')
+        },
+        {
             path: '*',
             name: '404',
             meta: {
