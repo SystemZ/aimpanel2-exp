@@ -28,7 +28,7 @@ export default new Router({
             meta: {
                 title: 'License',
             },
-            component: () => import(/* webpackChunkName: "license" */ './views/License.vue')
+            component: () => import(/* webpackChunkName: "license" */ './views/License.vue'),
         },
         {
             path: '/help',
@@ -36,7 +36,7 @@ export default new Router({
             meta: {
                 title: 'Help',
             },
-            component: () => import(/* webpackChunkName: "help" */ './views/Help.vue')
+            component: () => import(/* webpackChunkName: "help" */ './views/Help.vue'),
         },
         {
             path: '/profile',
@@ -45,7 +45,7 @@ export default new Router({
                 title: 'Profile',
                 authRequired: true,
             },
-            component: () => import(/* webpackChunkName: "hosts" */ './views/Profile.vue')
+            component: () => import(/* webpackChunkName: "hosts" */ './views/Profile.vue'),
         },
         {
             path: '/hosts',
@@ -54,7 +54,16 @@ export default new Router({
                 title: 'Hosts',
                 authRequired: true,
             },
-            component: () => import(/* webpackChunkName: "hosts" */ './views/Hosts.vue')
+            component: () => import(/* webpackChunkName: "hosts" */ './views/Hosts.vue'),
+        },
+        {
+            path: '/game-servers',
+            name: 'game-servers',
+            meta: {
+                title: 'Game Servers',
+                authRequired: true,
+            },
+            component: () => import(/* webpackChunkName: "game-servers" */ './views/GameServers.vue'),
         },
         {
             path: '*',
@@ -62,7 +71,7 @@ export default new Router({
             meta: {
                 title: '404 - Page Not Found'
             },
-            component: () => import(/* webpackChunkName: "404" */ './views/404.vue')
+            component: () => import(/* webpackChunkName: "404" */ './views/404.vue'),
         },
     ],
 });
