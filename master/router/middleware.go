@@ -50,10 +50,7 @@ func AuthMiddleware(handler http.Handler) http.Handler {
 
 func PermissionMiddleware(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Println(r.URL)
 		user := context.Get(r, "user").(model.User)
-
-		logrus.Info(user.ID.String())
 
 		var count int
 		row := model.DB.Raw("SELECT COUNT(*) FROM group_users WHERE "+

@@ -91,6 +91,13 @@ var routes = Routes{
 		handler.CreateHost,
 		true,
 	},
+	Route{
+		"Get host metric",
+		"GET",
+		"/host/{id}/metric",
+		handler.GetHostMetric,
+		true,
+	},
 
 	//TODO add to swagger from here
 

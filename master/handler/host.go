@@ -97,5 +97,19 @@ func CreateHost(w http.ResponseWriter, r *http.Request) {
 		Endpoint: "/v1/host/" + host.ID.String() + "/server",
 	})
 
+	model.DB.Save(&model.Permission{
+		Name:     "Get host metric",
+		Verb:     lib.GetVerbByName("GET"),
+		GroupId:  group.ID,
+		Endpoint: "/v1/host/" + host.ID.String() + "/metric",
+	})
+
 	lib.MustEncode(json.NewEncoder(w), host)
+}
+
+func GetHostMetric(w http.ResponseWriter, r *http.Request) {
+	var metric model.MetricHost
+	model.DB.Order("created_at desc").Limit(1).First(&metric)
+
+	lib.MustEncode(json.NewEncoder(w), metric)
 }
