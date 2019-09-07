@@ -14,25 +14,31 @@ type MetricHost struct {
 
 	RamFree int `gorm:"column:ram_free" json:"ram_free"`
 
+	RamTotal int `gorm:"column:ram_total" json:"ram_total"`
+
 	DiskFree int `gorm:"column:disk_free" json:"disk_free"`
 
-	User      int `gorm:"column:user" json:"user"`
+	DiskUsed int `gorm:"column:disk_used" json:"disk_used"`
 
-	System    int `gorm:"column:system" json:"system"`
+	DiskTotal int `gorm:"column:disk_total" json:"disk_total"`
 
-	Idle      int `gorm:"column:idle" json:"idle"`
+	User int `gorm:"column:user" json:"user"`
 
-	Nice      int `gorm:"column:nice" json:"nice"`
+	System int `gorm:"column:system" json:"system"`
 
-	Iowait    int `gorm:"column:iowait" json:"iowait"`
+	Idle int `gorm:"column:idle" json:"idle"`
 
-	Irq       int `gorm:"column:irq" json:"irq"`
+	Nice int `gorm:"column:nice" json:"nice"`
 
-	Softirq   int `gorm:"column:softirq" json:"softirq"`
+	Iowait int `gorm:"column:iowait" json:"iowait"`
 
-	Steal     int `gorm:"column:steal" json:"steal"`
+	Irq int `gorm:"column:irq" json:"irq"`
 
-	Guest     int `gorm:"column:guest" json:"guest"`
+	Softirq int `gorm:"column:softirq" json:"softirq"`
+
+	Steal int `gorm:"column:steal" json:"steal"`
+
+	Guest int `gorm:"column:guest" json:"guest"`
 
 	GuestNice int `gorm:"column:guest_nice" json:"guest_nice"`
 

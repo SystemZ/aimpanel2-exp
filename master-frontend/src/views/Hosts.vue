@@ -58,18 +58,22 @@
                         hide-default-footer
                         class="elevation-1"
                 >
-                    <template slot="items" slot-scope="props">
-                        <td @click="goToHost(props.item.id)" class="clickable">{{ props.item.name }}</td>
-                        <td @click="goToHost(props.item.id)" class="text-xs-right clickable">{{ props.item.ip }}</td>
-                        <td @click="goToHost(props.item.id)" class="text-xs-right clickable">0</td>
-                        <td @click="goToHost(props.item.id)" class="text-xs-right clickable">
-                            <span v-if="props.item.state === 1">
-                                <v-icon class="green--text" small>fa-circle</v-icon> Active
-                            </span>
-                            <span v-else>
-                                <v-icon class="red--text" small>fa-circle</v-icon> Locked
-                            </span>
-                        </td>
+                    <template v-slot:body="{ items }">
+                        <tbody>
+                            <tr v-for="item in items" :key="item.id" class="clickable" @click="goToHost(item.id)">
+                                <td>{{item.name}}</td>
+                                <td class="text-right">{{item.ip}}</td>
+                                <td class="text-right">0</td>
+                                <td class="text-right">
+                                    <span v-if="item.state === 1">
+                                        <v-icon class="green--text" small>fa-circle</v-icon> Active
+                                    </span>
+                                        <span v-else>
+                                        <v-icon class="red--text" small>fa-circle</v-icon> Locked
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
                     </template>
                 </v-data-table>
             </v-col>
@@ -118,7 +122,8 @@
             },
         }),
         methods: {
-            goToHost(id: string) {
+            goToHost(id: any) {
+                console.log('tes');
                 this.$router.push("/host/" + id);
             },
             getHosts() {
@@ -158,3 +163,9 @@
         }
     });
 </script>
+
+<style>
+    .clickable {
+        cursor: pointer;
+    }
+</style>

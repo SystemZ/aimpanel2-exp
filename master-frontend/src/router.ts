@@ -57,6 +57,15 @@ export default new Router({
             component: () => import(/* webpackChunkName: "hosts" */ './views/Hosts.vue'),
         },
         {
+            path: '/host/:id',
+            name: 'host',
+            meta: {
+                title: 'Host',
+                authRequired: true,
+            },
+            component: () => import(/* webpackChunkName: "hosts" */ './views/Host.vue'),
+        },
+        {
             path: '/game-servers',
             name: 'game-servers',
             meta: {
