@@ -1,7 +1,7 @@
-<template>
+<template xmlns:v-slot="http://www.w3.org/1999/XSL/Transform">
     <v-container fluid>
-        <v-layout row wrap>
-            <v-flex xs12>
+        <v-row>
+            <v-col xs12>
                 <v-dialog v-model="createGameServer.dialog" persistent max-width="600px">
                     <template v-slot:activator="{ on }">
                         <v-btn color="info" v-on="on">
@@ -29,7 +29,8 @@
                                             </v-select>
                                         </v-flex>
                                         <v-flex xs12>
-                                            <v-text-field label="Name" required v-model="createGameServer.game.name"></v-text-field>
+                                            <v-text-field label="Name" required
+                                                          v-model="createGameServer.game.name"></v-text-field>
                                         </v-flex>
                                         <v-flex xs12>
                                             <v-select
@@ -40,6 +41,15 @@
                                                     label="Select game">
                                             </v-select>
                                         </v-flex>
+                                        <v-flex xs12>
+                                            <v-select
+                                                    :items="gameVersions.filter((gv) => { return gv.game_id === createGameServer.game.game_id })"
+                                                    item-text="name"
+                                                    item-value="id"
+                                                    v-model="createGameServer.game.game_version"
+                                                    label="Select game version">
+                                            </v-select>
+                                        </v-flex>
                                     </v-layout>
                                 </v-container>
 
@@ -48,65 +58,74 @@
                                     Next
                                 </v-btn>
 
-                                <v-btn flat @click="createGameServerCancel()">Cancel</v-btn>
+                                <v-btn text @click="createGameServerCancel()">Cancel</v-btn>
                             </v-stepper-content>
                             <v-stepper-content step="2">
                                 <v-container grid-list-md>
                                     <p>Game server was successfully created. Do you want to install it now?</p>
-                                    <v-btn color="info" @click="install()">Yes, install now</v-btn>
                                 </v-container>
-                                <v-btn flat @click="finish()">Close</v-btn>
+                                <v-btn color="info" @click="install()">Yes, install now</v-btn>
+                                <v-btn text @click="finish()">Close</v-btn>
                             </v-stepper-content>
                         </v-stepper-items>
                     </v-stepper>
                 </v-dialog>
-
-            </v-flex>
-        </v-layout>
-        <v-layout row wrap>
-            <v-flex xs12>
+            </v-col>
+        </v-row>
+        <v-row>
+            <v-col xs12>
                 <v-data-table
                         :headers="headers"
                         :items="gameServers"
-                        hide-actions
+                        hide-default-footer
                         class="elevation-1"
                 >
-                    <template slot="items" slot-scope="props">
-                        <td @click="goToGameServer(props.item.id)" class="clickable">{{ props.item.name }}</td>
-                        <td @click="goToGameServer(props.item.id)" class="text-xs-right clickable">
-                            {{ hosts.find(x => x.id === props.item.host_id).name || '' }}</td>
-                        <td @click="goToGameServer(props.item.id)" class="text-xs-right clickable">
-                            {{ games.find(x => x.id === props.item.game_id).name || '' }}</td>
+                    <template v-slot:body="{ items }">
+                        <tbody>
+                        <tr v-for="item in gameServers" :key="item.id" class="clickable"
+                            @click="goToGameServer(item.host_id, item.id)">
+                            <td class="clickable">{{ item.name }}</td>
+                            <td class="text-right">
+                                {{ hosts.find(x => x.id === item.host_id).name || '' }}
+                            </td>
+                            <td class="text-right">
+                                {{ games.find(x => x.id === item.game_id).name || '' }}
+                            </td>
+                        </tr>
+                        </tbody>
                     </template>
                 </v-data-table>
-            </v-flex>
-        </v-layout>
+            </v-col>
+        </v-row>
     </v-container>
 </template>
 
-<script>
-    export default {
-        name: 'game_servers',
+<script lang="ts">
+    import Vue from "vue";
+
+    export default Vue.extend({
+        name: "game_servers",
         data: () => ({
             headers: [
                 {
-                    text: 'Name',
-                    align: 'left',
+                    text: "Name",
+                    align: "left",
                     sortable: true,
-                    value: 'name'
+                    value: "name"
                 },
                 {
-                    text: 'Host',
-                    align: 'right',
-                    value: 'host'
+                    text: "Host",
+                    align: "right",
+                    value: "host"
                 },
                 {
-                    text: 'Game',
-                    align: 'right',
-                    value: 'game'
+                    text: "Game",
+                    align: "right",
+                    value: "game"
                 }
             ],
             games: [],
+            gameVersions: [],
             gameServers: [],
             hosts: [],
             createGameServer: {
@@ -114,45 +133,54 @@
                 step: 0,
                 selectedHost: [],
                 game: {
-                    name: '',
-                    game_id: 0
+                    name: "",
+                    game_id: 0,
+                    game_version: 0,
                 },
-                gameId: '',
+                gameId: "",
             }
         }),
         methods: {
-            goToGameServer(id) {
-              //this.$router.push('/host/' + id)
+            goToGameServer(host_id: string, id: string) {
+                this.$router.push('/host/' + host_id + '/server/' + id)
             },
             getGames() {
-                this.$http.get('/v1/games').then(res => {
+                return this.$http.get("/v1/game").then(res => {
                     this.games = res.data;
                 }).catch(e => {
                     console.error(e);
-                })
+                });
+            },
+            getGameVersions() {
+                return this.$http.get("/v1/game/version").then(res => {
+                    this.gameVersions = res.data;
+                }).catch(e => {
+                    console.error(e);
+                });
             },
             getGameServers() {
-                this.$http.get('/v1/hosts/my/servers').then(res => {
+                return this.$http.get("/v1/host/my/server").then(res => {
                     this.gameServers = res.data;
+                    console.log(this.gameServers)
                 }).catch(e => {
-                    console.error(e)
-                })
+                    console.error(e);
+                });
             },
             getHosts() {
-                this.$http.get('/v1/hosts').then(res => {
+                return this.$http.get("/v1/host").then(res => {
                     this.hosts = res.data;
                 }).catch(e => {
-                    console.error(e)
-                })
+                    console.error(e);
+                });
             },
             addGameServer() {
-                this.$http.post('/v1/hosts/' + this.createGameServer.selectedHost + '/servers',
+                this.$http.post("/v1/host/" + this.createGameServer.selectedHost + "/server",
                     this.createGameServer.game).then(res => {
 
                     this.createGameServer.gameId = res.data.id;
 
                     this.createGameServer.step = 2;
-                })
+                });
             },
             createGameServerCancel() {
                 this.createGameServer.dialog = false;
@@ -162,23 +190,37 @@
                 this.createGameServer = {
                     dialog: false,
                     step: 0,
+                    selectedHost: [],
                     game: {
-                        name: '',
-                        game_id: 0
-                    }
-                }
+                        name: "",
+                        game_id: 0,
+                        game_version: 0,
+                    },
+                    gameId: "",
+                };
             },
             install() {
-                this.$http.get('/v1/hosts/' + this.createGameServer.selectedHost +
-                    '/servers/' + this.createGameServer.gameId + '/install').then(res => {
-                        console.log(res)
-                })
+                this.$http.put("/v1/host/" + this.createGameServer.selectedHost +
+                    "/server/" + this.createGameServer.gameId + "/install").then(res => {
+                    console.log(res);
+                });
             }
         },
         mounted() {
-            this.getGames();
-            this.getHosts();
-            this.getGameServers();
-        }
-    }
+            this.getGames().then(() => {
+                this.getGameVersions().then(() => {
+                    this.getHosts().then(() => {
+                        this.getGameServers();
+                    });
+                })
+
+            });
+        },
+    });
 </script>
+
+<style>
+    .clickable {
+        cursor: pointer;
+    }
+</style>

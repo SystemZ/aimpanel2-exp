@@ -41,6 +41,7 @@ func ListenWrapperData() {
 
 			switch msgBody.TaskId {
 			case rabbit.SERVER_LOG:
+				logrus.Info("SERVER_LOG")
 				var gsLog model.GameServerLog
 				gsLog.GameServerId = msgBody.GameServerID
 
@@ -241,7 +242,10 @@ func ListenAgentData() {
 					HostId:    host.ID,
 					CpuUsage:  msgBody.CpuUsage,
 					RamFree:   msgBody.RamFree,
+					RamTotal:  msgBody.RamTotal,
 					DiskFree:  msgBody.DiskFree,
+					DiskUsed:  msgBody.DiskUsed,
+					DiskTotal: msgBody.DiskTotal,
 					User:      msgBody.User,
 					System:    msgBody.System,
 					Idle:      msgBody.Idle,
@@ -254,6 +258,22 @@ func ListenAgentData() {
 					GuestNice: msgBody.GuestNice,
 				}
 				model.DB.Save(metric)
+			case rabbit.AGENT_OS:
+				agentToken := msgBody.AgentToken
+
+				var host model.Host
+				if model.DB.Where("token = ?", agentToken).First(&host).RecordNotFound() {
+					break
+				}
+
+				host.OS = msgBody.OS
+				host.Platform = msgBody.Platform
+				host.PlatformFamily = msgBody.PlatformFamily
+				host.PlatformVersion = msgBody.PlatformVersion
+				host.KernelVersion = msgBody.KernelVersion
+				host.KernelArch = msgBody.KernelArch
+
+				model.DB.Save(&host)
 			}
 		}
 	}()

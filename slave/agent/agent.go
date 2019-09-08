@@ -1,16 +1,19 @@
 package agent
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/disk"
+	"github.com/shirou/gopsutil/host"
 	"github.com/shirou/gopsutil/mem"
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/rabbit"
 	"gitlab.com/systemz/aimpanel2/slave/config"
+	"io"
 	"os"
 	"os/exec"
 	"strings"
@@ -71,6 +74,8 @@ func Start(t string) {
 	go agent()
 
 	sendToQueueData(rabbit.AGENT_METRICS_FREQUENCY)
+
+	sendOSInfo()
 
 	select {}
 }
@@ -163,9 +168,17 @@ func agent() {
 		case rabbit.WRAPPER_START:
 			logrus.Info("START_WRAPPER")
 			cmd := exec.Command("slave", "wrapper", task.msgBody.GameServerID.String())
+
+			//FOR TESTING ONLY
+			var stdBuffer bytes.Buffer
+			mw := io.MultiWriter(os.Stdout, &stdBuffer)
+			cmd.Stdout = mw
+			cmd.Stderr = mw
+
 			if err := cmd.Start(); err != nil {
 				logrus.Error(err)
 			}
+
 			cmd.Process.Release()
 
 			rabbitRpcSimpleResponse(task, rabbit.QueueMsg{
@@ -198,19 +211,24 @@ func metrics() {
 
 		virtualMemory, _ := mem.VirtualMemory()
 		ramFree := virtualMemory.Free / 1024 / 1024
+		ramTotal := virtualMemory.Total / 1024 / 1024
 		cpuPercent, _ := cpu.Percent(time.Duration(1)*time.Second, false)
 		cpuTimes, _ := cpu.Times(false)
 
 		diskUsage, _ := disk.Usage("/")
-
 		diskFree := diskUsage.Free / 1024 / 1024
+		diskTotal := diskUsage.Total / 1024 / 1024
+		diskUsed := diskUsage.Used / 1024 / 1024
 
 		msg := rabbit.QueueMsg{
 			TaskId:     rabbit.AGENT_METRICS,
 			AgentToken: token,
 			CpuUsage:   int(cpuPercent[0]),
 			RamFree:    int(ramFree),
+			RamTotal:   int(ramTotal),
 			DiskFree:   int(diskFree),
+			DiskTotal:  int(diskTotal),
+			DiskUsed:   int(diskUsed),
 			User:       int(cpuTimes[0].User),
 			System:     int(cpuTimes[0].System),
 			Idle:       int(cpuTimes[0].Idle),
@@ -244,6 +262,37 @@ func sendToQueueData(taskId int) {
 	msg := rabbit.QueueMsg{
 		TaskId:     taskId,
 		AgentToken: token,
+	}
+
+	msgJson, _ := json.Marshal(msg)
+
+	err := channel.Publish(
+		"",
+		queueData.Name,
+		false,
+		false,
+		amqp.Publishing{
+			ContentType:   "application/json",
+			CorrelationId: lib.RandomString(32),
+			Body:          msgJson,
+		})
+
+	lib.FailOnError(err, "Publish error")
+}
+
+func sendOSInfo() {
+	h, _ := host.Info()
+
+	msg := rabbit.QueueMsg{
+		TaskId:     rabbit.AGENT_OS,
+		AgentToken: token,
+
+		OS:              h.OS,
+		Platform:        h.Platform,
+		PlatformFamily:  h.PlatformFamily,
+		PlatformVersion: h.PlatformVersion,
+		KernelVersion:   h.KernelVersion,
+		KernelArch:      h.KernelArch,
 	}
 
 	msgJson, _ := json.Marshal(msg)

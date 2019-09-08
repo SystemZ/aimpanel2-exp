@@ -46,6 +46,13 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	model.DB.Save(&model.Permission{
+		Name:     "Get game server",
+		Verb:     lib.GetVerbByName("GET"),
+		GroupId:  group.ID,
+		Endpoint: "/v1/host/" + host.ID.String() + "/server/" + gameServer.ID.String(),
+	})
+
+	model.DB.Save(&model.Permission{
 		Name:     "Install game server",
 		Verb:     lib.GetVerbByName("PUT"),
 		GroupId:  group.ID,
@@ -124,11 +131,21 @@ func ListByUser(w http.ResponseWriter, r *http.Request) {
 	lib.MustEncode(json.NewEncoder(w), gameServers)
 }
 
+func Get(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+
+	var gs model.GameServer
+
+	model.DB.Where("id = ? and host_id = ?", params["server_id"], params["host_id"]).First(&gs)
+
+	lib.MustEncode(json.NewEncoder(w), gs)
+}
+
 func ConsoleLog(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	gameServerId := params["server_id"]
 
-	logs := model.GetLogsByGameServer(model.DB, gameServerId, 10)
+	logs := model.GetLogsByGameServer(model.DB, gameServerId, 20)
 	if logs == nil {
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: 5030})
