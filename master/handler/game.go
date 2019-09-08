@@ -13,3 +13,10 @@ func ListGames(w http.ResponseWriter, r *http.Request) {
 
 	lib.MustEncode(json.NewEncoder(w), games)
 }
+
+func ListGameVersions(w http.ResponseWriter, r *http.Request) {
+	var gameVersions []model.GameVersion
+	model.DB.Find(&gameVersions)
+
+	lib.MustEncode(json.NewEncoder(w), gameVersions)
+}

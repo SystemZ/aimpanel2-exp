@@ -1,35 +1,30 @@
 <template>
-    <v-container fluid>
-        <v-slide-y-transition mode="out-in">
-            <v-layout column align-center>
-                <img src="@/assets/logo.png" alt="Vuetify.js" class="mb-5">
-                <blockquote>
-                    &#8220;First, solve the problem. Then, write the code.&#8221;
-                    <footer>
-                        <small>
-                            <em>&mdash;John Johnson</em>
-                        </small>
-                    </footer>
-                </blockquote>
-            </v-layout>
-        </v-slide-y-transition>
+    <v-container>
+        <v-layout
+                text-center
+                wrap
+        >
+            <v-flex xs12>
+                <v-img
+                        :src="require('../assets/logo.svg')"
+                        class="my-3"
+                        contain
+                        height="200"
+                ></v-img>
+            </v-flex>
+
+            <v-flex mb-4>
+                <h1 class="display-2 font-weight-bold mb-3">
+                    Welcome to Vuetify
+                </h1>
+                <p class="subheading font-weight-regular">
+                    For help and collaboration with other Vuetify developers,
+                    <br>please join our online
+                    <a href="https://community.vuetifyjs.com" target="_blank">Discord Community</a>
+                </p>
+            </v-flex>
+        </v-layout>
     </v-container>
 </template>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-    h1, h2 {
-        font-weight: normal;
-    }
-    ul {
-        list-style-type: none;
-        padding: 0;
-    }
-    li {
-        display: inline-block;
-        margin: 0 10px;
-    }
-    a {
-        color: #42b983;
-    }
-</style>
+

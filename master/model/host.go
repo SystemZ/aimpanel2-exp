@@ -36,6 +36,13 @@ type Host struct {
 
 	MetricFrequency int `gorm:"column:metric_frequency" json:"metric_frequency"`
 
+	OS              string `gorm:"column:os" json:"os"`
+	Platform        string `gorm:"column:platform" json:"platform"`
+	PlatformFamily  string `gorm:"column:platform_family" json:"platform_family"`
+	PlatformVersion string `gorm:"column:platform_version" json:"platform_version"`
+	KernelVersion   string `gorm:"column:kernel_version" json:"kernel_version"`
+	KernelArch      string `gorm:"column:kernel_arch" json:"kernel_arch"`
+
 	//Created at timestamp
 	CreatedAt time.Time `json:"created_at"`
 

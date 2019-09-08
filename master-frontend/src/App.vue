@@ -1,114 +1,120 @@
-<template>
+<template xmlns:v-slot="http://www.w3.org/1999/XSL/Transform">
     <v-app>
-        <v-navigation-drawer
-                v-model="drawer"
-                app
-                dark
-                absolute
-        >
-            <v-toolbar flat>
-                <v-list>
-                    <v-list-tile>
-                        <v-list-tile-title class="title">
-                            <p class="text-xs-center font-weight-regular font-weight-thin">Aimpanel</p>
-                        </v-list-tile-title>
-                    </v-list-tile>
-                </v-list>
-            </v-toolbar>
-            <v-list class="pt-0" dense>
-                <v-divider></v-divider>
-                <v-list-tile
+        <v-navigation-drawer v-model="drawer" app>
+            <v-list-item>
+                <v-list-item-content>
+                    <v-list-item-title class="title">
+                        Aimpanel
+                    </v-list-item-title>
+                    <v-list-item-subtitle>
+                        v2.0.0
+                    </v-list-item-subtitle>
+                </v-list-item-content>
+            </v-list-item>
+            <v-divider></v-divider>
+
+            <v-list dense nav>
+                <v-list-item
                         v-for="item in menu"
                         :key="item.title"
                         :to="item.path"
                         v-if="(item.authRequired && loggedIn) || (!item.authRequired && !loggedIn) || !item.authRequired"
+                        link
                         active-class="red--text red--darken-1">
-                    <v-list-tile-action>
+                    <v-list-item-icon>
                         <v-icon>{{item.icon}}</v-icon>
-                    </v-list-tile-action>
-                    <v-list-tile-content>
-                        <v-list-tile-title>{{item.title}}</v-list-tile-title>
-                    </v-list-tile-content>
-                </v-list-tile>
+                    </v-list-item-icon>
 
-                <v-list-tile v-if="!loggedIn" to="login" active-class="red--text red--darken-1">
-                    <v-list-tile-action>
+                    <v-list-item-content>
+                        <v-list-item-title>{{item.title}}</v-list-item-title>
+                    </v-list-item-content>
+                </v-list-item>
+
+                <v-list-item v-if="!loggedIn" to="login" active-class="red--text red--darken-1">
+                    <v-list-item-action>
                         <v-icon>fa-sign-in</v-icon>
-                    </v-list-tile-action>
-                    <v-list-tile-content>
-                        <v-list-tile-title>Login</v-list-tile-title>
-                    </v-list-tile-content>
-                </v-list-tile>
+                    </v-list-item-action>
+                    <v-list-item-content>
+                        <v-list-item-title>Login</v-list-item-title>
+                    </v-list-item-content>
+                </v-list-item>
             </v-list>
         </v-navigation-drawer>
-        <v-toolbar color="red darken-1" dark fixed app>
-            <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
-            <v-toolbar-title>{{$route.meta.title}}</v-toolbar-title>
+
+        <v-app-bar color="red darken-1" dark app>
+            <v-toolbar-title>
+                {{$route.meta.title}}
+            </v-toolbar-title>
             <v-spacer></v-spacer>
             <span v-if="loggedIn">
                 <v-menu offset-y>
-                <v-btn slot="activator">
-                    {{$auth.username}}&nbsp; <v-icon size="12">fa-chevron-down fa-small</v-icon>
-                </v-btn>
-                <v-list>
-                    <v-list-tile to="profile">
-                        <v-list-tile-title>Profile</v-list-tile-title>
-                    </v-list-tile>
-                    <v-list-tile @click="$auth.logout()">
-                        <v-list-tile-title>Log out</v-list-tile-title>
-                    </v-list-tile>
-                </v-list>
-            </v-menu>
+                    <template v-slot:activator="{ on }">
+                        <v-btn v-on="on">
+                            {{$auth.username}} <v-icon size="12">fa-chevron-down fa-small</v-icon>
+                        </v-btn>
+                    </template>
+                    <v-list>
+                        <v-list-item to="profile">
+                            <v-list-item-title>Profile</v-list-item-title>
+                        </v-list-item>
+                        <v-list-item @click="$auth.logout()">
+                            <v-list-item-title>Log out</v-list-item-title>
+                        </v-list-item>
+                    </v-list>
+                </v-menu>
             </span>
-        </v-toolbar>
+        </v-app-bar>
+
         <v-content>
             <router-view/>
         </v-content>
     </v-app>
 </template>
 
-<script>
-  export default {
-    name: 'Aimpanel',
-    computed: {
-      loggedIn() {
-        return this.$auth.logged;
-      }
-    },
-    data: () => ({
-      drawer: null,
-      menu: [
-        {
-          title: 'Home',
-          icon: 'fa-home',
-          path: '/',
-          authRequired: false
+<script lang="ts">
+    import Vue from "vue";
+
+    export default Vue.extend({
+        name: "App",
+        computed: {
+            loggedIn() {
+                return this.$auth.logged;
+            },
         },
-        {
-          title: 'Hosts',
-          icon: 'fa-server',
-          path: '/hosts',
-          authRequired: true
-        },
-        {
-          title: 'Game servers',
-          icon: 'fa-gamepad',
-          path: '/game-servers',
-          authRequired: true
-        },
-        {
-          title: 'License',
-          icon: 'fa-certificate',
-          path: '/license',
-          authRequired: false
-        },
-        {
-          title: 'Help',
-          icon: 'fa-question',
-          path: '/help',
-          authRequired: false
-        }
-      ]
-    })
-  }
+        data: () => ({
+            drawer: null,
+            menu: [
+                {
+                    title: "Home",
+                    icon: "fa-home",
+                    path: "/",
+                    authRequired: false
+                },
+                {
+                    title: "Hosts",
+                    icon: "fa-server",
+                    path: "/hosts",
+                    authRequired: true
+                },
+                {
+                    title: "Game servers",
+                    icon: "fa-gamepad",
+                    path: "/game-servers",
+                    authRequired: true
+                },
+                {
+                    title: "License",
+                    icon: "fa-certificate",
+                    path: "/license",
+                    authRequired: false
+                },
+                {
+                    title: "Help",
+                    icon: "fa-question",
+                    path: "/help",
+                    authRequired: false
+                }
+            ]
+        }),
+    });
 </script>

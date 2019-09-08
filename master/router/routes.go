@@ -91,10 +91,31 @@ var routes = Routes{
 		handler.CreateHost,
 		true,
 	},
+	Route{
+		"Get host metric",
+		"GET",
+		"/host/{id}/metric",
+		handler.GetHostMetric,
+		true,
+	},
 
 	//TODO add to swagger from here
 
 	//GameServers
+	Route{
+		"List game servers by user id",
+		"GET",
+		"/host/my/server",
+		game_server.ListByUser,
+		true,
+	},
+	Route{
+		"Get game server",
+		"GET",
+		"/host/{host_id}/server/{server_id}",
+		game_server.Get,
+		true,
+	},
 	Route{
 		"Create game server",
 		"POST",
@@ -107,13 +128,6 @@ var routes = Routes{
 		"GET",
 		"/host/{id}/server",
 		game_server.ListByHostId,
-		true,
-	},
-	Route{
-		"List game servers by user id",
-		"GET",
-		"/host/my/server",
-		game_server.ListByUser,
 		true,
 	},
 	Route{
@@ -188,6 +202,13 @@ var routes = Routes{
 		"GET",
 		"/game",
 		handler.ListGames,
+		true,
+	},
+	Route{
+		"List game versions",
+		"GET",
+		"/game/version",
+		handler.ListGameVersions,
 		true,
 	},
 }
