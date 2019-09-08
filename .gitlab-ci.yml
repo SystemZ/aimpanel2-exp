@@ -22,8 +22,9 @@ frontend:
     image: node:10-alpine
     script:
     - cd master-frontend
-    - npm install &>/dev/null
-    - npm run build
+    - apk add yarn
+    - yarn install --frozen-lockfile
+    - yarn build
     - ls -alh dist
     - mv dist $CI_PROJECT_DIR/aimpanel-master-frontend
     cache:
