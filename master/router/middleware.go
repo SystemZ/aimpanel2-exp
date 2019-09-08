@@ -77,8 +77,8 @@ func CorsMiddleware(handler http.Handler) http.Handler {
 	c := cors.New(cors.Options{
 		AllowedOrigins:     []string{"*"},
 		AllowCredentials:   true,
-		AllowedHeaders:     []string{"Authorization", "Content-Type", "Accept", "Content-Length"},
-		AllowedMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:     []string{"Authorization", "Content-Type", "Accept", "Content-Length", "X-Requested-With"},
+		AllowedMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"},
 		OptionsPassthrough: true,
 		Debug:              true,
 	})
