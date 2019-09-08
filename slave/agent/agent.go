@@ -1,6 +1,7 @@
 package agent
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/shirou/gopsutil/cpu"
@@ -12,6 +13,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/rabbit"
 	"gitlab.com/systemz/aimpanel2/slave/config"
+	"io"
 	"os"
 	"os/exec"
 	"strings"
@@ -166,9 +168,17 @@ func agent() {
 		case rabbit.WRAPPER_START:
 			logrus.Info("START_WRAPPER")
 			cmd := exec.Command("slave", "wrapper", task.msgBody.GameServerID.String())
+
+			//FOR TESTING ONLY
+			var stdBuffer bytes.Buffer
+			mw := io.MultiWriter(os.Stdout, &stdBuffer)
+			cmd.Stdout = mw
+			cmd.Stderr = mw
+
 			if err := cmd.Start(); err != nil {
 				logrus.Error(err)
 			}
+
 			cmd.Process.Release()
 
 			rabbitRpcSimpleResponse(task, rabbit.QueueMsg{

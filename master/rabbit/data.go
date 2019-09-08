@@ -41,6 +41,7 @@ func ListenWrapperData() {
 
 			switch msgBody.TaskId {
 			case rabbit.SERVER_LOG:
+				logrus.Info("SERVER_LOG")
 				var gsLog model.GameServerLog
 				gsLog.GameServerId = msgBody.GameServerID
 
@@ -272,7 +273,7 @@ func ListenAgentData() {
 				host.KernelVersion = msgBody.KernelVersion
 				host.KernelArch = msgBody.KernelArch
 
-				model.DB.Save(host)
+				model.DB.Save(&host)
 			}
 		}
 	}()

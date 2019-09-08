@@ -10,7 +10,7 @@ import auth, {AuthInterface} from './auth';
 
 Vue.config.productionTip = false;
 
-axios.defaults.baseURL = 'http://localhost:9000/';
+axios.defaults.baseURL = process.env.API_URL;
 
 Vue.prototype.$http = axios;
 declare module  'vue/types/vue' {

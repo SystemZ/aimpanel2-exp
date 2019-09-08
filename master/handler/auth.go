@@ -164,6 +164,13 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		Endpoint: "/v1/game",
 	})
 
+	model.DB.Save(&model.Permission{
+		Name:     "List game versions",
+		Verb:     lib.GetVerbByName("GET"),
+		GroupId:  group.ID,
+		Endpoint: "/v1/game/version",
+	})
+
 	lib.MustEncode(json.NewEncoder(w), TokenResponse{Token: token})
 }
 

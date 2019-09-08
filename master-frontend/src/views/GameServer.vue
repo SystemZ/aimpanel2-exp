@@ -80,7 +80,8 @@
             hostId: '',
             logs: [],
             message: '',
-            serverUrl: ''
+            serverUrl: '',
+            timer: '',
         }),
         mounted() {
             this.serverId = this.$route.params.server_id;
@@ -96,7 +97,7 @@
 
             this.updateLogs();
 
-            setInterval(() => { this.updateLogs() }, 10*1000)
+            this.timer = setInterval(() => { this.updateLogs() }, 10*1000)
         },
         methods: {
             start() {
@@ -132,6 +133,9 @@
                     console.error(e)
                 })
             }
+        },
+        beforeDestroy() {
+            clearInterval(this.timer)
         }
     }
 </script>
