@@ -41,6 +41,15 @@
                                                     label="Select game">
                                             </v-select>
                                         </v-flex>
+                                        <v-flex xs12>
+                                            <v-select
+                                                    :items="gameVersions.filter((gv) => { return gv.game_id === createGameServer.game.game_id })"
+                                                    item-text="name"
+                                                    item-value="id"
+                                                    v-model="createGameServer.game.game_version"
+                                                    label="Select game version">
+                                            </v-select>
+                                        </v-flex>
                                     </v-layout>
                                 </v-container>
 
@@ -71,14 +80,19 @@
                         hide-default-footer
                         class="elevation-1"
                 >
-                    <template slot="items" slot-scope="props">
-                        <td @click="goToGameServer(props.item.id)" class="clickable">{{ props.item.name }}</td>
-                        <td @click="goToGameServer(props.item.id)" class="text-xs-right clickable">
-<!--                            {{ props.item.host_name || '' }} //TODO: FIX-->
-                        </td>
-                        <td @click="goToGameServer(props.item.id)" class="text-xs-right clickable">
-<!--                            {{ games.find(x => x.id === props.item.game_id).name || '' }} //TODO: FIX-->
-                        </td>
+                    <template v-slot:body="{ items }">
+                        <tbody>
+                        <tr v-for="item in gameServers" :key="item.id" class="clickable"
+                            @click="goToGameServer(item.host_id, item.id)">
+                            <td class="clickable">{{ item.name }}</td>
+                            <td class="text-right">
+                                {{ hosts.find(x => x.id === item.host_id).name || '' }}
+                            </td>
+                            <td class="text-right">
+                                {{ games.find(x => x.id === item.game_id).name || '' }}
+                            </td>
+                        </tr>
+                        </tbody>
                     </template>
                 </v-data-table>
             </v-col>
@@ -111,6 +125,7 @@
                 }
             ],
             games: [],
+            gameVersions: [],
             gameServers: [],
             hosts: [],
             createGameServer: {
@@ -119,14 +134,15 @@
                 selectedHost: [],
                 game: {
                     name: "",
-                    game_id: 0
+                    game_id: 0,
+                    game_version: 0,
                 },
                 gameId: "",
             }
         }),
         methods: {
-            goToGameServer(id: string) {
-                //this.$router.push('/host/' + id)
+            goToGameServer(host_id: string, id: string) {
+                this.$router.push('/host/' + host_id + '/server/' + id)
             },
             getGames() {
                 return this.$http.get("/v1/game").then(res => {
@@ -135,9 +151,17 @@
                     console.error(e);
                 });
             },
+            getGameVersions() {
+                return this.$http.get("/v1/game/version").then(res => {
+                    this.gameVersions = res.data;
+                }).catch(e => {
+                    console.error(e);
+                });
+            },
             getGameServers() {
                 return this.$http.get("/v1/host/my/server").then(res => {
                     this.gameServers = res.data;
+                    console.log(this.gameServers)
                 }).catch(e => {
                     console.error(e);
                 });
@@ -169,13 +193,14 @@
                     selectedHost: [],
                     game: {
                         name: "",
-                        game_id: 0
+                        game_id: 0,
+                        game_version: 0,
                     },
                     gameId: "",
                 };
             },
             install() {
-                this.$http.get("/v1/host/" + this.createGameServer.selectedHost +
+                this.$http.put("/v1/host/" + this.createGameServer.selectedHost +
                     "/server/" + this.createGameServer.gameId + "/install").then(res => {
                     console.log(res);
                 });
@@ -183,13 +208,19 @@
         },
         mounted() {
             this.getGames().then(() => {
-                console.log('1');
-                this.getHosts().then(() => {
-                    console.log('2')
-                    this.getGameServers();
-                });
-            });
+                this.getGameVersions().then(() => {
+                    this.getHosts().then(() => {
+                        this.getGameServers();
+                    });
+                })
 
+            });
         },
     });
 </script>
+
+<style>
+    .clickable {
+        cursor: pointer;
+    }
+</style>

@@ -33,7 +33,7 @@
                         </v-list-item>
                     </v-card-text>
                     <v-card-actions>
-                        <v-btn color="red darken-2 accent-4" text>Remove host</v-btn>
+                        <v-btn color="red darken-2 accent-4" text disabled>Remove host</v-btn>
                     </v-card-actions>
                 </v-card>
             </v-col>

@@ -63,14 +63,15 @@
                             <tr v-for="item in items" :key="item.id" class="clickable" @click="goToHost(item.id)">
                                 <td>{{item.name}}</td>
                                 <td class="text-right">{{item.ip}}</td>
-                                <td class="text-right">0</td>
+                                <td class="text-right">N/A</td>
                                 <td class="text-right">
-                                    <span v-if="item.state === 1">
-                                        <v-icon class="green--text" small>fa-circle</v-icon> Active
-                                    </span>
-                                        <span v-else>
-                                        <v-icon class="red--text" small>fa-circle</v-icon> Locked
-                                    </span>
+                                    N/A
+<!--                                    <span v-if="item.state === 1">-->
+<!--                                        <v-icon class="green&#45;&#45;text" small>fa-circle</v-icon> Active-->
+<!--                                    </span>-->
+<!--                                        <span v-else>-->
+<!--                                        <v-icon class="red&#45;&#45;text" small>fa-circle</v-icon> Locked-->
+<!--                                    </span>-->
                                 </td>
                             </tr>
                         </tbody>

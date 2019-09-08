@@ -45,7 +45,7 @@ export default new Router({
                 title: 'Profile',
                 authRequired: true,
             },
-            component: () => import(/* webpackChunkName: "hosts" */ './views/Profile.vue'),
+            component: () => import(/* webpackChunkName: "profile" */ './views/Profile.vue'),
         },
         {
             path: '/hosts',
@@ -63,7 +63,16 @@ export default new Router({
                 title: 'Host',
                 authRequired: true,
             },
-            component: () => import(/* webpackChunkName: "hosts" */ './views/Host.vue'),
+            component: () => import(/* webpackChunkName: "host" */ './views/Host.vue'),
+        },
+        {
+            path: '/host/:id/server/:server_id',
+            name: 'game_server',
+            meta: {
+                title: 'Game Server',
+                authRequired: true,
+            },
+            component: () => import(/* webpackChunkName: "game_server" */ './views/GameServer.vue'),
         },
         {
             path: '/game-servers',
