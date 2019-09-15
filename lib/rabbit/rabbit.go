@@ -25,7 +25,10 @@ const (
 
 	AGENT_METRICS_FREQUENCY = iota
 	AGENT_METRICS           = iota
-	AGENT_OS				= iota
+	AGENT_OS                = iota
+
+	AGENT_HEARTBEAT   = iota
+	WRAPPER_HEARTBEAT = iota
 )
 
 type QueueMsg struct {
@@ -55,7 +58,7 @@ type QueueMsg struct {
 	CpuUsage        int `json:"cpu_usage,omitempty"`
 	RamUsage        int `json:"ram_usage,omitempty"`
 	RamFree         int `json:"ram_free,omitempty"`
-	RamTotal		int `json:"ram_total,omitempty"`
+	RamTotal        int `json:"ram_total,omitempty"`
 	DiskFree        int `json:"disk_free,omitempty"`
 	DiskTotal       int `json:"disk_total,omitempty"`
 	DiskUsed        int `json:"disk_used,omitempty"`
@@ -72,13 +75,14 @@ type QueueMsg struct {
 	Guest      int    `json:"guest,omitempty"`
 	GuestNice  int    `json:"guest_nice,omitempty"`
 
-	OS string `json:"os,omitempty"`
-	Platform string `json:"platform,omitempty"`
-	PlatformFamily string `json:"platform_family,omitempty"`
+	OS              string `json:"os,omitempty"`
+	Platform        string `json:"platform,omitempty"`
+	PlatformFamily  string `json:"platform_family,omitempty"`
 	PlatformVersion string `json:"platform_version,omitempty"`
-	KernelVersion string `json:"kernel_version,omitempty"`
-	KernelArch string `json:"kernel_arch,omitempty"`
+	KernelVersion   string `json:"kernel_version,omitempty"`
+	KernelArch      string `json:"kernel_arch,omitempty"`
 
+	Timestamp int64 `json:"timestamp,omitempty"`
 }
 
 type LogMessage struct {

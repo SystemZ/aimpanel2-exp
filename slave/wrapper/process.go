@@ -351,3 +351,30 @@ func (p *Process) Metrics() {
 
 	}
 }
+
+func (p *Process) Heartbeat() {
+	for {
+		<-time.After(5 * time.Second)
+
+		logrus.Info("Sending heartbeat")
+
+		msg := rabbit.QueueMsg{
+			TaskId:       rabbit.AGENT_HEARTBEAT,
+			GameServerID: uuid.FromStringOrNil(p.GameServerID),
+			Timestamp:    time.Now().Unix(),
+		}
+		msgJson, _ := json.Marshal(msg)
+
+		err := channel.Publish(
+			"",
+			p.QueueData.Name,
+			false,
+			false,
+			amqp.Publishing{
+				ContentType:   "application/json",
+				CorrelationId: lib.RandomString(32),
+				Body:          msgJson,
+			})
+		lib.FailOnError(err, "Publish error")
+	}
+}
