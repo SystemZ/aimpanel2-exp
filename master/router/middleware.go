@@ -75,12 +75,10 @@ func PermissionMiddleware(handler http.Handler) http.Handler {
 func CorsMiddleware(handler http.Handler) http.Handler {
 	log.Println("CORS Middleware")
 	c := cors.New(cors.Options{
-		AllowedOrigins:     []string{"*"},
-		AllowCredentials:   true,
-		AllowedHeaders:     []string{"Authorization", "Content-Type", "Accept", "Content-Length", "X-Requested-With"},
-		AllowedMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"},
-		OptionsPassthrough: true,
-		Debug:              true,
+		AllowedOrigins: []string{"*"},
+		AllowedHeaders: []string{"Authorization", "Content-Type", "Accept", "Content-Length", "X-Requested-With", "Origin"},
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"},
+		Debug:          true,
 	})
 	return c.Handler(handler)
 }
