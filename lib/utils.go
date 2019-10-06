@@ -5,6 +5,7 @@ import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"math/rand"
+	"time"
 )
 
 func FailOnError(err error, msg string) {
@@ -15,10 +16,13 @@ func FailOnError(err error, msg string) {
 }
 
 func RandomString(l int) string {
+	rand.Seed(time.Now().UTC().UnixNano())
+
 	bytes := make([]byte, l)
 	for i := 0; i < l; i++ {
 		bytes[i] = byte(RandInt(65, 90))
 	}
+
 	return string(bytes)
 }
 

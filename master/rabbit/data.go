@@ -176,6 +176,9 @@ func ListenWrapperData() {
 					RamUsage:     msgBody.RamUsage,
 				}
 				model.DB.Save(metric)
+			case rabbit.WRAPPER_HEARTBEAT:
+				gameServerId := msgBody.GameServerID
+				model.Redis.Set("wrapper_heartbeat_id_"+gameServerId.String(), msgBody.Timestamp, 24*time.Hour)
 			}
 		}
 	}()
@@ -209,8 +212,6 @@ func ListenAgentData() {
 			if err != nil {
 				logrus.Warn(err)
 			}
-
-			logrus.Info(msgBody)
 
 			switch msgBody.TaskId {
 			case rabbit.AGENT_METRICS_FREQUENCY:
@@ -274,6 +275,10 @@ func ListenAgentData() {
 				host.KernelArch = msgBody.KernelArch
 
 				model.DB.Save(&host)
+
+			case rabbit.AGENT_HEARTBEAT:
+				agentToken := msgBody.AgentToken
+				model.Redis.Set("agent_heartbeat_token_"+agentToken, msgBody.Timestamp, 24*time.Hour)
 			}
 		}
 	}()

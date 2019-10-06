@@ -77,6 +77,8 @@ func Start(t string) {
 
 	sendOSInfo()
 
+	go heartbeat()
+
 	select {}
 }
 
@@ -254,6 +256,33 @@ func metrics() {
 				Body:          msgJson,
 			})
 
+		lib.FailOnError(err, "Publish error")
+	}
+}
+
+func heartbeat() {
+	for {
+		<-time.After(5 * time.Second)
+
+		logrus.Info("Sending heartbeat")
+
+		msg := rabbit.QueueMsg{
+			TaskId:     rabbit.AGENT_HEARTBEAT,
+			AgentToken: token,
+			Timestamp:  time.Now().Unix(),
+		}
+		msgJson, _ := json.Marshal(msg)
+
+		err := channel.Publish(
+			"",
+			queueData.Name,
+			false,
+			false,
+			amqp.Publishing{
+				ContentType:   "application/json",
+				CorrelationId: lib.RandomString(32),
+				Body:          msgJson,
+			})
 		lib.FailOnError(err, "Publish error")
 	}
 }

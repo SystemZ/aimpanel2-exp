@@ -3,6 +3,7 @@ package cmd
 import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"gitlab.com/systemz/aimpanel2/master/cron"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"gitlab.com/systemz/aimpanel2/master/rabbit"
 	"gitlab.com/systemz/aimpanel2/master/router"
@@ -25,6 +26,9 @@ var serverCmd = &cobra.Command{
 		rabbit.Listen()
 		rabbit.ListenWrapperData()
 		rabbit.ListenAgentData()
+
+		go cron.CheckHostsHeartbeat()
+		go cron.CheckGSHeartbeat()
 
 		logrus.Info("Starting API on port :" + args[0])
 		r := router.NewRouter()
