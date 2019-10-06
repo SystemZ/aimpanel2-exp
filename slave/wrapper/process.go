@@ -359,7 +359,7 @@ func (p *Process) Heartbeat() {
 		logrus.Info("Sending heartbeat")
 
 		msg := rabbit.QueueMsg{
-			TaskId:       rabbit.AGENT_HEARTBEAT,
+			TaskId:       rabbit.WRAPPER_HEARTBEAT,
 			GameServerID: uuid.FromStringOrNil(p.GameServerID),
 			Timestamp:    time.Now().Unix(),
 		}

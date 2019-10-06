@@ -24,7 +24,7 @@
 
                         <v-list-item two-line>
                             <v-list-item-content>
-                                <v-list-item-title>Active</v-list-item-title>
+                                <v-list-item-title>{{game_server.state == 1 ? 'Active' : 'Locked'}}</v-list-item-title>
                                 <v-list-item-subtitle>Status</v-list-item-subtitle>
                             </v-list-item-content>
                         </v-list-item>
