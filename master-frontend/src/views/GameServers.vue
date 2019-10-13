@@ -91,6 +91,14 @@
                             <td class="text-right">
                                 {{ games.find(x => x.id === item.game_id).name || '' }}
                             </td>
+                            <td class="text-right">
+                                    <span v-if="item.state === 1">
+                                        <v-icon class="green--text" small>fa-circle</v-icon> Active
+                                    </span>
+                                <span v-else>
+                                        <v-icon class="red--text" small>fa-circle</v-icon> Locked
+                                    </span>
+                            </td>
                         </tr>
                         </tbody>
                     </template>
@@ -122,6 +130,11 @@
                     text: "Game",
                     align: "right",
                     value: "game"
+                },
+                {
+                    text: "State",
+                    align: "right",
+                    value: "state"
                 }
             ],
             games: [],

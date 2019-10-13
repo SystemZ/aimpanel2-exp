@@ -43,6 +43,11 @@ type Host struct {
 	KernelVersion   string `gorm:"column:kernel_version" json:"kernel_version"`
 	KernelArch      string `gorm:"column:kernel_arch" json:"kernel_arch"`
 
+	// State
+	// 0 off, 1 running
+	// required: false
+	State uint `gorm:"column:state" json:"state"`
+
 	//Created at timestamp
 	CreatedAt time.Time `json:"created_at"`
 
