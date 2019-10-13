@@ -24,7 +24,7 @@ frontend:
     - cd master-frontend
     - apk add yarn
     - yarn install --frozen-lockfile
-    - VUE_APP_API_URL=https://api-lab.aimpanel.pro yarn build
+    - VUE_APP_API_URL=https://my-lab.aimpanel.pro yarn build
     - ls -alh dist
     - mv dist $CI_PROJECT_DIR/aimpanel-master-frontend
     cache:
