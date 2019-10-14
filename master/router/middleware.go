@@ -53,9 +53,9 @@ func PermissionMiddleware(handler http.Handler) http.Handler {
 		user := context.Get(r, "user").(model.User)
 
 		var count int
-		row := model.DB.Raw("SELECT COUNT(*) FROM group_users WHERE "+
-			"group_id = (SELECT group_id FROM permissions WHERE endpoint = ? AND verb = ?) "+
-			"AND user_id = ?", r.URL.Path, lib.GetVerbByName(r.Method), user.ID.String()).Row()
+		row := model.DB.Raw("SELECT COUNT(*) FROM permissions WHERE "+
+			"endpoint = ? AND verb = ? AND group_id = (SELECT group_id FROM group_users WHERE user_id = ?);",
+			r.URL.Path, lib.GetVerbByName(r.Method), user.ID.String()).Row()
 		err := row.Scan(&count)
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
