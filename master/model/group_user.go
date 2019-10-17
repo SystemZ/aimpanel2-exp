@@ -16,12 +16,12 @@ type GroupUser struct {
 	// ID of the group
 	//
 	// required: true
-	GroupId int `gorm:"column:group_id" json:"id"`
+	GroupId int `gorm:"column:group_id" json:"group_id"`
 
 	// ID of the user
 	//
 	// required: true
-	UserId uuid.UUID `gorm:"column:user_id" json:"id"`
+	UserId uuid.UUID `gorm:"column:user_id" json:"user_id"`
 
 	// Created at timestamp
 	CreatedAt time.Time `json:"created_at"`
