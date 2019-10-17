@@ -20,7 +20,7 @@ type Permission struct {
 	// ID of the permission
 	//
 	// required: true
-	GroupId int `gorm:"column:group_id" json:"id"`
+	GroupId int `gorm:"column:group_id" json:"group_id"`
 
 	Verb uint8 `gorm:"column:verb" json:"verb"`
 

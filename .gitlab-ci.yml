@@ -1,11 +1,14 @@
 stages:
-    - test
-    - compile
-    - build
-    - deploy
+#- test
+- compile
+- build
+- deploy
 
-include:
-  - template: Code-Quality.gitlab-ci.yml
+#include:
+#  - template: Code-Quality.gitlab-ci.yml
+# this doesn't support Go right now (2019-10-17)
+# https://docs.gitlab.com/ee/user/project/merge_requests/code_quality.html#example-configuration
+# https://gitlab.com/gitlab-org/security-products/codequality
 
 frontend:
     stage: compile
@@ -44,6 +47,7 @@ backend:
     - bash Taskfile.sh swagger-gen
     # generate code report
     - go get github.com/jstemmer/go-junit-report
+    - go test -v $(go list ./... | grep -v /src/)
     - go test -v $(go list ./... | grep -v /src/) 2>&1 | go-junit-report > $CI_PROJECT_DIR/report.xml
     # tests at the end to still allow artifacts uploading
     - go fmt $(go list ./... | grep -v /src/) || true
