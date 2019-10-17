@@ -1,21 +1,11 @@
-variables:
-  REPO_NAME: gitlab.com/systemz/aimpanel2
-
-# The problem is that to be able to use go get, one needs to put
-# the repository in the $GOPATH. So for example if your gitlab domain
-# is gitlab.com, and that your repository is namespace/project, and
-# the default GOPATH being /go, then you'd need to have your
-# repository in /go/src/gitlab.com/namespace/project
-# Thus, making a symbolic link corrects this.
-before_script:
-  - mkdir -p $GOPATH/src/$(dirname $REPO_NAME)
-  - ln -svf $CI_PROJECT_DIR $GOPATH/src/$REPO_NAME
-  - cd $GOPATH/src/$REPO_NAME
-
 stages:
+    - test
     - compile
     - build
     - deploy
+
+include:
+  - template: Code-Quality.gitlab-ci.yml
 
 frontend:
     stage: compile
@@ -30,7 +20,7 @@ frontend:
     cache:
       key: "$CI_JOB_NAME"
       paths:
-      - master-frontend/node_modules
+        - master-frontend/node_modules
     artifacts:
       paths:
       - aimpanel-master-frontend
@@ -45,36 +35,33 @@ backend:
     image: golang:latest
     stage: compile
     script:
-    #- go get github.com/jstemmer/go-junit-report
-    - go get github.com/go-swagger/go-swagger/cmd/swagger
-    - cd ./master
-    - go get
-    - cd ../
-    - bash Taskfile.sh swagger-gen
     #- go build -race -ldflags "-extldflags '-static'" -o $CI_PROJECT_DIR/aimpanel-master
-    #- go fmt $(go list ./... | grep -v /vendor/)
-    #- go vet $(go list ./... | grep -v /vendor/)
     #- go test -race $(go list ./... | grep -v /vendor/)
-    #- go test -v 2>&1 | go-junit-report > $CI_PROJECT_DIR/report.xml
-    - cd ./master
-    - CGO_ENABLED=0 go build -o $CI_PROJECT_DIR/aimpanel-master
-    - cd ../slave
-    - go get
-    - CGO_ENABLED=0 go build -o $CI_PROJECT_DIR/aimpanel-slave
-    - cd $CI_PROJECT_DIR
+    - CGO_ENABLED=0 go build -o $CI_PROJECT_DIR/aimpanel-master gitlab.com/systemz/aimpanel2/master
+    - CGO_ENABLED=0 go build -o $CI_PROJECT_DIR/aimpanel-slave gitlab.com/systemz/aimpanel2/slave
+    # generate RESTful API spec
+    - go get github.com/go-swagger/go-swagger/cmd/swagger
+    - bash Taskfile.sh swagger-gen
+    # generate code report
+    - go get github.com/jstemmer/go-junit-report
+    - go test -v $(go list ./... | grep -v /src/) 2>&1 | go-junit-report > $CI_PROJECT_DIR/report.xml
+    # tests at the end to still allow artifacts uploading
+    - go fmt $(go list ./... | grep -v /src/) || true
+    - go vet $(go list ./... | grep -v /src/)
     cache:
-      key: "$CI_JOB_NAME"
+      key: "$CI_JOB_NAME-src"
       paths:
-        - $GOPATH/src/github.com
+        - $GOPATH/src
     artifacts:
-      #reports:
-      #  junit: report.xml
       # https://docs.gitlab.com/ee/ci/yaml/README.html#artifactsreportscodequality-starter
+      reports:
+        junit: report.xml
       paths:
       - aimpanel-master
       - aimpanel-slave
       - swagger.json
-      expire_in: 1 month
+      - report.xml
+      when: always
     only:
     - master
     - merge_requests
