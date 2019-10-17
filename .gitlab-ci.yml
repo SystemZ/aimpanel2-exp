@@ -3,6 +3,9 @@ stages:
     - build
     - deploy
 
+include:
+  - template: Code-Quality.gitlab-ci.yml
+
 frontend:
     stage: compile
     image: node:10-alpine
