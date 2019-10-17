@@ -1,11 +1,14 @@
 stages:
-    - test
-    - compile
-    - build
-    - deploy
+#- test
+- compile
+- build
+- deploy
 
-include:
-  - template: Code-Quality.gitlab-ci.yml
+#include:
+#  - template: Code-Quality.gitlab-ci.yml
+# this doesn't support Go right now (2019-10-17)
+# https://docs.gitlab.com/ee/user/project/merge_requests/code_quality.html#example-configuration
+# https://gitlab.com/gitlab-org/security-products/codequality
 
 frontend:
     stage: compile
