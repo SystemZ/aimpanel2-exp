@@ -44,6 +44,7 @@ backend:
     - bash Taskfile.sh swagger-gen
     # generate code report
     - go get github.com/jstemmer/go-junit-report
+    - go test -v $(go list ./... | grep -v /src/)
     - go test -v $(go list ./... | grep -v /src/) 2>&1 | go-junit-report > $CI_PROJECT_DIR/report.xml
     # tests at the end to still allow artifacts uploading
     - go fmt $(go list ./... | grep -v /src/) || true
