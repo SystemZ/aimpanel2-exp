@@ -4,6 +4,7 @@ go 1.12
 
 require (
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
+	github.com/badoux/checkmail v0.0.0-20181210160741-9661bd69e9ad // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/go-redis/redis v6.15.6+incompatible
@@ -19,6 +20,7 @@ require (
 	github.com/shirou/gopsutil v2.19.9+incompatible
 	github.com/shirou/w32 v0.0.0-20160930032740-bb4de0191aa4 // indirect
 	github.com/sirupsen/logrus v1.4.2
+	github.com/softbrewery/gojoi v0.0.0-20180423202125-34d5e1054ec7
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/viper v1.4.0
 	github.com/streadway/amqp v0.0.0-20190827072141-edfb9018d271
