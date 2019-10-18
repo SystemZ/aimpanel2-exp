@@ -11,6 +11,7 @@ require (
 	github.com/go-swagger/go-swagger v0.20.1 // indirect
 	github.com/gofrs/uuid v3.2.0+incompatible
 	github.com/gorilla/context v1.1.1
+	github.com/gorilla/handlers v1.4.2
 	github.com/gorilla/mux v1.7.3
 	github.com/jinzhu/gorm v1.9.11
 	github.com/jstemmer/go-junit-report v0.9.1 // indirect

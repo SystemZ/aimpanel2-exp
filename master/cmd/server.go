@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/gorilla/handlers"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"gitlab.com/systemz/aimpanel2/master/cron"
@@ -8,6 +9,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/master/rabbit"
 	"gitlab.com/systemz/aimpanel2/master/router"
 	"net/http"
+	"os"
 )
 
 func init() {
@@ -32,7 +34,13 @@ var serverCmd = &cobra.Command{
 
 		logrus.Info("Starting API on port :" + args[0])
 		r := router.NewRouter()
-		logrus.Fatal(http.ListenAndServe(":"+args[0],
-			router.CommonMiddleware(router.CorsMiddleware(r))))
+		logrus.Fatal(http.ListenAndServe(
+			":"+args[0],
+			router.CommonMiddleware(
+				router.CorsMiddleware(
+					handlers.LoggingHandler(os.Stdout, r),
+				),
+			),
+		))
 	},
 }
