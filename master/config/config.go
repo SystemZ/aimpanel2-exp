@@ -19,6 +19,8 @@ var (
 	RABBITMQ_USERNAME string
 	RABBITMQ_PASSWORD string
 	RABBITMQ_VHOST    string
+
+	LOG_DEV bool
 )
 
 func init() {
@@ -59,4 +61,7 @@ func init() {
 
 	viper.SetDefault("RABBITMQ_VHOST", "/")
 	RABBITMQ_VHOST = viper.GetString("RABBITMQ_VHOST")
+
+	viper.SetDefault("LOG_DEV", false)
+	LOG_DEV = viper.GetBool("LOG_DEV")
 }
