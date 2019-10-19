@@ -32,6 +32,8 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	gameServer.HostId = host.ID
+	gameServer.MetricFrequency = 30
+	gameServer.StopTimeout = 30
 
 	//Save game server to db
 	model.DB.Save(gameServer)

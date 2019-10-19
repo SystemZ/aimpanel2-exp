@@ -69,6 +69,8 @@ func CreateHost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	host.UserId = user.ID
+	host.MetricFrequency = 30
+
 	model.DB.Save(host)
 
 	group := model.GetGroup(model.DB, "USER-"+user.ID.String())
