@@ -60,7 +60,7 @@
                                         :rotate="-90"
                                         :value="(metric.ram_used/metric.ram_total) * 100"
                                         color="primary">
-                                     {{this.metric.ram_used }}/{{this.metric.ram_total }} GB
+                                     {{metric.ram_used }}/{{metric.ram_total }} GB
                                 </v-progress-circular>
                                 <div class="text-xs-center">RAM</div>
                             </v-col>
@@ -206,7 +206,7 @@
 
                 this.metric.ram_total = (this.metric.ram_total / 1024).toFixed(1);
                 this.metric.ram_free = (this.metric.ram_free / 1024).toFixed(1);
-                this.metric.ram_used = this.metric.ram_total - this.metric.ram_free
+                this.metric.ram_used = (this.metric.ram_total - this.metric.ram_free).toFixed(1);
 
                 console.log(this.metric)
             }).catch(e => {
