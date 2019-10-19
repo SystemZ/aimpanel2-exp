@@ -81,7 +81,7 @@
     </v-container>
 </template>
 
-<script lang="ts">
+<script>
     import Vue from "vue";
 
     export default Vue.extend({
@@ -120,10 +120,10 @@
                 },
                 token: ""
             },
+            timer: '',
         }),
         methods: {
-            goToHost(id: any) {
-                console.log('tes');
+            goToHost(id) {
                 this.$router.push("/host/" + id);
             },
             getHosts() {
@@ -160,6 +160,10 @@
         },
         mounted() {
             this.getHosts();
+            this.timer = setInterval(() => { this.getHosts() }, 10*1000)
+        },
+        beforeDestroy() {
+            clearInterval(this.timer)
         }
     });
 </script>

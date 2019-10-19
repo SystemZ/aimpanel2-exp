@@ -108,7 +108,7 @@
     </v-container>
 </template>
 
-<script lang="ts">
+<script>
     import Vue from "vue";
 
     export default Vue.extend({
@@ -151,10 +151,11 @@
                     game_version: 0,
                 },
                 gameId: "",
-            }
+            },
+            timer: ''
         }),
         methods: {
-            goToGameServer(host_id: string, id: string) {
+            goToGameServer(host_id, id) {
                 this.$router.push('/host/' + host_id + '/server/' + id)
             },
             getGames() {
@@ -226,9 +227,13 @@
                         this.getGameServers();
                     });
                 })
-
             });
+
+            this.timer = setInterval(() => { this.getGameServers() }, 10*1000)
         },
+        beforeDestroy() {
+            clearInterval(this.timer)
+        }
     });
 </script>
 
