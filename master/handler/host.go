@@ -21,8 +21,10 @@ import (
 //TODO: find by current signed-in account
 func ListHosts(w http.ResponseWriter, r *http.Request) {
 	var hosts []model.Host
+	user := context.Get(r, "user").(model.User)
 
-	model.DB.Find(&hosts)
+	model.DB.Table("hosts").Where(
+		"hosts.user_id = ?", user.ID).Find(&hosts)
 
 	lib.MustEncode(json.NewEncoder(w), hosts)
 }
