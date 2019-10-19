@@ -1,8 +1,6 @@
 package config
 
 import (
-	"fmt"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
@@ -17,13 +15,7 @@ var (
 )
 
 func init() {
-	viper.SetConfigName("config")
-	viper.AddConfigPath(".")
-
-	err := viper.ReadInConfig()
-	if err != nil {
-		logrus.Error(fmt.Sprintf("Fatal error config file: %s", err))
-	}
+	viper.AutomaticEnv()
 
 	viper.SetDefault("RABBITMQ_HOST", "localhost")
 	RABBITMQ_HOST = viper.GetString("RABBITMQ_HOST")
