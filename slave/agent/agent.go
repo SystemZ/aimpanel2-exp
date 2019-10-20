@@ -16,6 +16,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -116,7 +117,7 @@ func agent() {
 
 			gameFile := task.msgBody.GameFile
 
-			gsPath := config.GS_DIR + task.msgBody.GameServerID.String()
+			gsPath := filepath.Clean(config.GS_DIR) + "/" + task.msgBody.GameServerID.String()
 			if _, err := os.Stat(gsPath); os.IsNotExist(err) {
 				os.Mkdir(gsPath, 0777)
 			}
@@ -140,7 +141,7 @@ func agent() {
 
 			for _, c := range *task.msgBody.GameCommands {
 				c.Command = strings.Replace(c.Command, "{storageDir}", config.STORAGE_DIR, -1)
-				c.Command = strings.Replace(c.Command, "{gsDir}", config.GS_DIR, -1)
+				c.Command = strings.Replace(c.Command, "{gsDir}", filepath.Clean(config.GS_DIR) + "/", -1)
 				c.Command = strings.Replace(c.Command, "{uuid}", task.msgBody.GameServerID.String(), -1)
 				c.Command = strings.Replace(c.Command, "{fileName}", fileNameWithVersion, -1)
 

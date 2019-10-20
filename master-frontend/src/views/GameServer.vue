@@ -6,6 +6,7 @@
                     <v-card-text>
                         <v-btn class="ma-2" color="green" dark @click="start()">Start</v-btn>
                         <v-btn class="ma-2" color="red" dark @click="stop()">Stop</v-btn>
+                        <v-btn class="ma-2" color="blue" dark @click="install()">Install</v-btn>
                     </v-card-text>
                 </v-card>
             </v-col>
@@ -68,6 +69,18 @@
                 </v-card>
             </v-col>
         </v-row>
+        <v-snackbar
+                v-model="installSnackbar"
+        >
+            Installing game server...
+            <v-btn
+                    color="red"
+                    text
+                    @click="installSnackbar = false"
+            >
+                Close
+            </v-btn>
+        </v-snackbar>
     </v-container>
 </template>
 
@@ -82,6 +95,7 @@
             message: '',
             serverUrl: '',
             timer: '',
+            installSnackbar: false,
         }),
         mounted() {
             this.serverId = this.$route.params.server_id;
@@ -132,6 +146,12 @@
                 }).catch(e => {
                     console.error(e)
                 })
+            },
+            install() {
+                this.$http.put(this.serverUrl + "/install").then(res => {
+                    this.installSnackbar = true;
+                    console.log(res);
+                });
             }
         },
         beforeDestroy() {
