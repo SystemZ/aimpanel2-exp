@@ -8,8 +8,10 @@ import (
 
 const (
 	GAME_SPIGOT     = iota
-	GAME_TEAMSPEAK3 = iota
 	GAME_BUNGEECORD = iota
+
+	GAME_TEAMSPEAK3     = iota
+	GAME_TEAMSPEAK3_BOT = iota
 )
 
 type Game struct {
@@ -87,7 +89,17 @@ func (game *Game) GetCmd() (cmd string, err error) {
 			"sh",
 			"ts3server_minimal_runscript.sh",
 		}
+
+	case GAME_TEAMSPEAK3_BOT:
+		command = []string{
+			"mono",
+			"TS3AudioBot.exe",
+		}
 	}
 
 	return strings.Join(command, " "), nil
+}
+
+func (game *Game) GetInstallCmd() (cmd string, err error) {
+	return "", nil
 }
