@@ -115,38 +115,39 @@ func agent() {
 
 			logrus.Info("Creating gs dir")
 
-			gameFile := task.msgBody.GameFile
+			//gameFile := task.msgBody.GameFile
 
 			gsPath := filepath.Clean(config.GS_DIR) + "/" + task.msgBody.GameServerID.String()
 			if _, err := os.Stat(gsPath); os.IsNotExist(err) {
-				os.Mkdir(gsPath, 0777)
+				_ = os.Mkdir(gsPath, 0777)
 			}
 
-			logrus.Info("Downloading install package")
-
-			fileNameWithVersion := fmt.Sprintf("%d_%s", gameFile.GameVersion, gameFile.Filename)
-
-			if _, err = os.Stat(config.STORAGE_DIR + fileNameWithVersion); os.IsNotExist(err) {
-				cmd := exec.Command("wget", "-O", fileNameWithVersion, gameFile.DownloadUrl)
-				cmd.Dir = config.STORAGE_DIR
-
-				if err := cmd.Run(); err != nil {
-					logrus.Error(err)
-				}
-
-				cmd.Wait()
-			}
+			//logrus.Info("Downloading install package")
+			//fileNameWithVersion := fmt.Sprintf("%d_%s", gameFile.GameVersion, gameFile.Filename)
+			//
+			//if _, err = os.Stat(config.STORAGE_DIR + fileNameWithVersion); os.IsNotExist(err) {
+			//	cmd := exec.Command("wget", "-O", fileNameWithVersion, gameFile.DownloadUrl)
+			//	cmd.Dir = config.STORAGE_DIR
+			//
+			//	if err := cmd.Run(); err != nil {
+			//		logrus.Error(err)
+			//	}
+			//
+			//	cmd.Wait()
+			//}
 
 			logrus.Info("Executing install commands")
 
-			for _, c := range *task.msgBody.GameCommands {
-				c.Command = strings.Replace(c.Command, "{storageDir}", config.STORAGE_DIR, -1)
-				c.Command = strings.Replace(c.Command, "{gsDir}", filepath.Clean(config.GS_DIR) + "/", -1)
-				c.Command = strings.Replace(c.Command, "{uuid}", task.msgBody.GameServerID.String(), -1)
-				c.Command = strings.Replace(c.Command, "{fileName}", fileNameWithVersion, -1)
+			cmds, err := task.msgBody.Game.GetInstallCmds()
+			if err != nil {
+				logrus.Error(err)
+			}
 
-				command := strings.Split(c.Command, " ")
+			for _, c := range cmds {
+				c = strings.Replace(c, "{storagePath}", config.STORAGE_DIR, -1)
+				c = strings.Replace(c, "{gsPath}", gsPath, -1)
 
+				command := strings.Split(c, " ")
 				logrus.Info("Executing")
 				logrus.Info(command)
 
@@ -159,6 +160,27 @@ func agent() {
 
 				cmd.Wait()
 			}
+
+			//for _, c := range *task.msgBody.GameCommands {
+			//	c.Command = strings.Replace(c.Command, "{storageDir}", config.STORAGE_DIR, -1)
+			//	c.Command = strings.Replace(c.Command, "{gsDir}", filepath.Clean(config.GS_DIR) + "/", -1)
+			//	c.Command = strings.Replace(c.Command, "{uuid}", task.msgBody.GameServerID.String(), -1)
+			//	c.Command = strings.Replace(c.Command, "{fileName}", fileNameWithVersion, -1)
+			//
+			//	command := strings.Split(c.Command, " ")
+			//
+			//	logrus.Info("Executing")
+			//	logrus.Info(command)
+			//
+			//	cmd := exec.Command(command[0], command[1:]...)
+			//	cmd.Dir = gsPath
+			//
+			//	if err = cmd.Run(); err != nil {
+			//		logrus.Error(err)
+			//	}
+			//
+			//	cmd.Wait()
+			//}
 
 			logrus.Info("Installation finished")
 

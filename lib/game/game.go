@@ -7,18 +7,17 @@ import (
 )
 
 const (
-	GAME_SPIGOT     = iota
-	GAME_BUNGEECORD = iota
+	GAME_SPIGOT = iota
+	GAME_BUNGEECORD
 
-	GAME_TEAMSPEAK3     = iota
-	GAME_TEAMSPEAK3_BOT = iota
+	GAME_TEAMSPEAK3
+	GAME_TEAMSPEAK3_BOT
 )
 
 type Game struct {
 	Id int
 
-	DeveloperName string
-	DeveloperUrl  string
+	DownloadUrl string
 
 	RamMinM     int
 	RamMaxM     int
@@ -100,6 +99,12 @@ func (game *Game) GetCmd() (cmd string, err error) {
 	return strings.Join(command, " "), nil
 }
 
-func (game *Game) GetInstallCmd() (cmd string, err error) {
-	return "", nil
+func (game *Game) GetInstallCmds() (cmds []string, err error) {
+	switch game.Id {
+	case GAME_SPIGOT:
+		cmds = append(cmds, "wget "+game.DownloadUrl+" -O {storageDir}/spigot.jar")
+		cmds = append(cmds, "cp {storageDir}/spigot.jar {gsDir}/{uuid}/")
+	}
+
+	return cmds, nil
 }

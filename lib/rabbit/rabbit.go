@@ -2,6 +2,7 @@ package rabbit
 
 import (
 	"github.com/gofrs/uuid"
+	"gitlab.com/systemz/aimpanel2/lib/game"
 	"gitlab.com/systemz/aimpanel2/master/model"
 )
 
@@ -36,12 +37,13 @@ type QueueMsg struct {
 	TaskId int `json:"task_id,omitempty"`
 
 	// task specific arguments
-	Game             string               `json:"game,omitempty"`
-	GameServerID     uuid.UUID            `json:"game_server_id,omitempty"`
-	Body             string               `json:"body,omitempty"`
-	GameFile         *model.GameFile      `json:"game_file,omitempty"`
-	GameCommands     *[]model.GameCommand `json:"game_commands,omitempty"`
-	GameStartCommand *model.GameCommand   `json:"game_start_command,omitempty"`
+	//Game             string               `json:"game,omitempty"`
+	Game         game.Game       `json:"game,omitempty"`
+	GameServerID uuid.UUID       `json:"game_server_id,omitempty"`
+	Body         string          `json:"body,omitempty"`
+	GameFile     *model.GameFile `json:"game_file,omitempty"`
+	//GameCommands     *[]model.GameCommand `json:"game_commands,omitempty"`
+	//GameStartCommand *model.GameCommand   `json:"game_start_command,omitempty"`
 
 	// task started
 	TaskStarted bool `json:"task_started,omitempty"`
