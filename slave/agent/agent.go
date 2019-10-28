@@ -3,7 +3,6 @@ package agent
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/host"
@@ -122,20 +121,6 @@ func agent() {
 				_ = os.Mkdir(gsPath, 0777)
 			}
 
-			//logrus.Info("Downloading install package")
-			//fileNameWithVersion := fmt.Sprintf("%d_%s", gameFile.GameVersion, gameFile.Filename)
-			//
-			//if _, err = os.Stat(config.STORAGE_DIR + fileNameWithVersion); os.IsNotExist(err) {
-			//	cmd := exec.Command("wget", "-O", fileNameWithVersion, gameFile.DownloadUrl)
-			//	cmd.Dir = config.STORAGE_DIR
-			//
-			//	if err := cmd.Run(); err != nil {
-			//		logrus.Error(err)
-			//	}
-			//
-			//	cmd.Wait()
-			//}
-
 			logrus.Info("Executing install commands")
 
 			cmds, err := task.msgBody.Game.GetInstallCmds()
@@ -160,27 +145,6 @@ func agent() {
 
 				cmd.Wait()
 			}
-
-			//for _, c := range *task.msgBody.GameCommands {
-			//	c.Command = strings.Replace(c.Command, "{storageDir}", config.STORAGE_DIR, -1)
-			//	c.Command = strings.Replace(c.Command, "{gsDir}", filepath.Clean(config.GS_DIR) + "/", -1)
-			//	c.Command = strings.Replace(c.Command, "{uuid}", task.msgBody.GameServerID.String(), -1)
-			//	c.Command = strings.Replace(c.Command, "{fileName}", fileNameWithVersion, -1)
-			//
-			//	command := strings.Split(c.Command, " ")
-			//
-			//	logrus.Info("Executing")
-			//	logrus.Info(command)
-			//
-			//	cmd := exec.Command(command[0], command[1:]...)
-			//	cmd.Dir = gsPath
-			//
-			//	if err = cmd.Run(); err != nil {
-			//		logrus.Error(err)
-			//	}
-			//
-			//	cmd.Wait()
-			//}
 
 			logrus.Info("Installation finished")
 

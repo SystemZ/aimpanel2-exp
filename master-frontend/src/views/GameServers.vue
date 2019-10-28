@@ -41,15 +41,15 @@
                                                     label="Select game">
                                             </v-select>
                                         </v-flex>
-                                        <v-flex xs12>
-                                            <v-select
-                                                    :items="gameVersions.filter((gv) => { return gv.game_id === createGameServer.game.game_id })"
-                                                    item-text="name"
-                                                    item-value="id"
-                                                    v-model="createGameServer.game.game_version"
-                                                    label="Select game version">
-                                            </v-select>
-                                        </v-flex>
+<!--                                        <v-flex xs12>-->
+<!--                                            <v-select-->
+<!--                                                    :items="gameVersions.filter((gv) => { return gv.game_id === createGameServer.game.game_id })"-->
+<!--                                                    item-text="name"-->
+<!--                                                    item-value="id"-->
+<!--                                                    v-model="createGameServer.game.game_version"-->
+<!--                                                    label="Select game version">-->
+<!--                                            </v-select>-->
+<!--                                        </v-flex>-->
                                     </v-layout>
                                 </v-container>
 
@@ -148,7 +148,6 @@
                 game: {
                     name: "",
                     game_id: 0,
-                    game_version: 0,
                 },
                 gameId: "",
             },
@@ -161,13 +160,6 @@
             getGames() {
                 return this.$http.get("/v1/game").then(res => {
                     this.games = res.data;
-                }).catch(e => {
-                    console.error(e);
-                });
-            },
-            getGameVersions() {
-                return this.$http.get("/v1/game/version").then(res => {
-                    this.gameVersions = res.data;
                 }).catch(e => {
                     console.error(e);
                 });
@@ -222,14 +214,14 @@
         },
         mounted() {
             this.getGames().then(() => {
-                this.getGameVersions().then(() => {
-                    this.getHosts().then(() => {
-                        this.getGameServers();
-                    });
-                })
+                this.getHosts().then(() => {
+                    this.getGameServers();
+                });
             });
 
-            this.timer = setInterval(() => { this.getGameServers() }, 10*1000)
+            this.timer = setInterval(() => {
+                this.getGameServers()
+            }, 10 * 1000)
         },
         beforeDestroy() {
             clearInterval(this.timer)

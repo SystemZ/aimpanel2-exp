@@ -1,6 +1,9 @@
 package model
 
-import "time"
+import (
+	"github.com/jinzhu/gorm"
+	"time"
+)
 
 type GameFile struct {
 	ID uint `gorm:"primary_key" json:"id"`
@@ -19,4 +22,14 @@ type GameFile struct {
 
 	//Deleted at timestamp
 	DeletedAt *time.Time `json:"deleted_at"`
+}
+
+func GetGameFileByGameId(db *gorm.DB, gameId uint) *GameFile {
+	var gf GameFile
+
+	if db.Where("game_id = ?", gameId).First(&gf).RecordNotFound() {
+		return nil
+	}
+
+	return &gf
 }

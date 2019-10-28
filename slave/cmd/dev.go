@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"gitlab.com/systemz/aimpanel2/lib"
 )
 
 func init() {
@@ -15,6 +14,6 @@ var devCmd = &cobra.Command{
 	Long:  "",
 	//Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		lib.GetGameCmd()
+		//lib.GetGameCmd()
 	},
 }

@@ -17,12 +17,10 @@ var devCmd = &cobra.Command{
 	//Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		g := game.Game{
-			Id:            game.GAME_SPIGOT,
-			DeveloperName: "",
-			DeveloperUrl:  "",
-			RamMinM:       1024,
-			RamMaxM:       2048,
-			JarFilename:   "spigot.jar",
+			Id:          game.GAME_SPIGOT,
+			RamMinM:     1024,
+			RamMaxM:     2048,
+			JarFilename: "spigot.jar",
 		}
 
 		c, err := g.GetCmd()

@@ -15,8 +15,8 @@ const (
 )
 
 type GameDefinition struct {
-	Id   uint
-	Name string
+	Id   uint   `json:"id"`
+	Name string `json:"name"`
 }
 
 var Games = []GameDefinition{
@@ -126,8 +126,8 @@ func (game *Game) GetCmd() (cmd string, err error) {
 func (game *Game) GetInstallCmds() (cmds []string, err error) {
 	switch game.Id {
 	case GAME_SPIGOT:
-		cmds = append(cmds, "wget "+game.DownloadUrl+" -O {storageDir}/spigot.jar")
-		cmds = append(cmds, "cp {storageDir}/spigot.jar {gsDir}/{uuid}/")
+		cmds = append(cmds, "wget -nc "+game.DownloadUrl+" -O {storagePath}/spigot.jar")
+		cmds = append(cmds, "cp {storagePath}/spigot.jar {gsPath}/")
 	}
 
 	return cmds, nil

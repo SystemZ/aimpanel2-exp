@@ -1,7 +1,10 @@
 package gs
 
 import (
+	"encoding/json"
+	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
+	"gitlab.com/systemz/aimpanel2/lib/game"
 	"gitlab.com/systemz/aimpanel2/lib/rabbit"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	rabbitMaster "gitlab.com/systemz/aimpanel2/master/rabbit"
@@ -17,11 +20,6 @@ func Start(gsId string) error {
 	hostToken := model.GetHostToken(model.DB, gameServer.HostId.String())
 	if hostToken == "" {
 		return &lib.Error{ErrorCode: 5003}
-	}
-
-	startCommand := model.GetGameStartCommandByVersion(model.DB, gameServer.GameId, gameServer.GameVersion)
-	if startCommand == nil {
-		return &lib.Error{ErrorCode: 5004}
 	}
 
 	model.Redis.Set("gs_start_id_"+gameServer.ID.String(), 0, 1*time.Hour)
@@ -73,16 +71,22 @@ func Install(gsId string) error {
 		return &lib.Error{ErrorCode: 5003}
 	}
 
-	gameFile := model.GetGameInstallFileByVersion(model.DB, gameServer.GameId, gameServer.GameVersion)
+	gameFile := model.GetGameFileByGameId(model.DB, gameServer.GameId)
 	if gameFile == nil {
 		return &lib.Error{ErrorCode: 5009}
 	}
 
-	err := rabbitMaster.SendRpcMessage("agent_"+hostToken, rabbit.QueueMsg{
+	var g game.Game
+	err := json.Unmarshal([]byte(gameServer.GameJson), &g)
+	if err != nil {
+		logrus.Error(err)
+	}
+	g.DownloadUrl = gameFile.DownloadUrl
+
+	err = rabbitMaster.SendRpcMessage("agent_"+hostToken, rabbit.QueueMsg{
 		TaskId:       rabbit.GAME_INSTALL,
 		GameServerID: gameServer.ID,
-		GameFile:     gameFile,
-		GameCommands: installCommands,
+		Game:         g,
 	})
 	if err != nil {
 		return &lib.Error{ErrorCode: 5011}
