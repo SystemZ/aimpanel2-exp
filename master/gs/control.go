@@ -78,11 +78,6 @@ func Install(gsId string) error {
 		return &lib.Error{ErrorCode: 5009}
 	}
 
-	installCommands := model.GetGameInstallCommandsByVersion(model.DB, gameServer.GameId, gameServer.GameVersion)
-	if installCommands == nil {
-		return &lib.Error{ErrorCode: 5010}
-	}
-
 	err := rabbitMaster.SendRpcMessage("agent_"+hostToken, rabbit.QueueMsg{
 		TaskId:       rabbit.GAME_INSTALL,
 		GameServerID: gameServer.ID,

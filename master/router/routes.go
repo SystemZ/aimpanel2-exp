@@ -204,11 +204,4 @@ var routes = Routes{
 		handler.ListGames,
 		true,
 	},
-	Route{
-		"List game versions",
-		"GET",
-		"/game/version",
-		handler.ListGameVersions,
-		true,
-	},
 }

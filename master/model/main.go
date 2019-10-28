@@ -36,10 +36,7 @@ func InitMysql() *gorm.DB {
 	db.AutoMigrate(&GameServer{})
 	db.AutoMigrate(&GameServerLog{})
 
-	db.AutoMigrate(&Game{})
 	db.AutoMigrate(&GameFile{})
-	db.AutoMigrate(&GameCommand{})
-	db.AutoMigrate(&GameVersion{})
 
 	db.AutoMigrate(&MetricHost{})
 	db.AutoMigrate(&MetricGameServer{})

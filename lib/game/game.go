@@ -14,8 +14,32 @@ const (
 	GAME_TEAMSPEAK3_BOT
 )
 
+type GameDefinition struct {
+	Id   uint
+	Name string
+}
+
+var Games = []GameDefinition{
+	{
+		Id:   GAME_SPIGOT,
+		Name: "Spigot",
+	},
+	{
+		Id:   GAME_BUNGEECORD,
+		Name: "BungeeCord",
+	},
+	{
+		Id:   GAME_TEAMSPEAK3,
+		Name: "TeamSpeak3",
+	},
+	{
+		Id:   GAME_TEAMSPEAK3_BOT,
+		Name: "Teamspeak3 Bot",
+	},
+}
+
 type Game struct {
-	Id int
+	Id uint
 
 	DownloadUrl string
 

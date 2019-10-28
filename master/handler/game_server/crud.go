@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 	"gitlab.com/systemz/aimpanel2/lib"
+	"gitlab.com/systemz/aimpanel2/lib/game"
 	"gitlab.com/systemz/aimpanel2/master/handler"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"net/http"
@@ -22,6 +23,13 @@ func Create(w http.ResponseWriter, r *http.Request) {
 			handler.JsonError{ErrorCode: 5022})
 		return
 	}
+
+	gameDef := game.Game{
+		Id: gameServer.GameId,
+	}
+
+	gameDefJson, _ := json.Marshal(gameDef)
+	gameServer.GameJson = string(gameDefJson)
 
 	//Check if host exist
 	host := model.GetHost(model.DB, hostId)
