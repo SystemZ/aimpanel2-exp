@@ -25,8 +25,10 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	gameDef := game.Game{
-		Id: gameServer.GameId,
+		Id:      gameServer.GameId,
+		Version: gameServer.GameVersion,
 	}
+	gameDef.SetDefaults()
 
 	gameDefJson, _ := json.Marshal(gameDef)
 	gameServer.GameJson = string(gameDefJson)

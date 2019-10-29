@@ -16,7 +16,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 	"time"
 )
 
@@ -112,38 +111,15 @@ func agent() {
 		case rabbit.GAME_INSTALL:
 			logrus.Info("INSTALL_GAME_SERVER")
 
-			logrus.Info("Creating gs dir")
-
-			//gameFile := task.msgBody.GameFile
-
 			gsPath := filepath.Clean(config.GS_DIR) + "/" + task.msgBody.GameServerID.String()
 			if _, err := os.Stat(gsPath); os.IsNotExist(err) {
+				//TODO: Set correct perms
 				_ = os.Mkdir(gsPath, 0777)
 			}
 
-			logrus.Info("Executing install commands")
-
-			cmds, err := task.msgBody.Game.GetInstallCmds()
+			err = task.msgBody.Game.Install(filepath.Clean(config.STORAGE_DIR), gsPath)
 			if err != nil {
 				logrus.Error(err)
-			}
-
-			for _, c := range cmds {
-				c = strings.Replace(c, "{storagePath}", config.STORAGE_DIR, -1)
-				c = strings.Replace(c, "{gsPath}", gsPath, -1)
-
-				command := strings.Split(c, " ")
-				logrus.Info("Executing")
-				logrus.Info(command)
-
-				cmd := exec.Command(command[0], command[1:]...)
-				cmd.Dir = gsPath
-
-				if err = cmd.Run(); err != nil {
-					logrus.Error(err)
-				}
-
-				cmd.Wait()
 			}
 
 			logrus.Info("Installation finished")
@@ -158,7 +134,7 @@ func agent() {
 			logrus.Info("START_WRAPPER")
 			cmd := exec.Command("slave", "wrapper", task.msgBody.GameServerID.String())
 
-			//FOR TESTING ONLY
+			//TODO: FOR TESTING ONLY
 			var stdBuffer bytes.Buffer
 			mw := io.MultiWriter(os.Stdout, &stdBuffer)
 			cmd.Stdout = mw

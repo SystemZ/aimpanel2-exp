@@ -41,15 +41,13 @@
                                                     label="Select game">
                                             </v-select>
                                         </v-flex>
-<!--                                        <v-flex xs12>-->
-<!--                                            <v-select-->
-<!--                                                    :items="gameVersions.filter((gv) => { return gv.game_id === createGameServer.game.game_id })"-->
-<!--                                                    item-text="name"-->
-<!--                                                    item-value="id"-->
-<!--                                                    v-model="createGameServer.game.game_version"-->
-<!--                                                    label="Select game version">-->
-<!--                                            </v-select>-->
-<!--                                        </v-flex>-->
+                                        <v-flex xs12>
+                                            <v-select
+                                                    :items="createGameServer.versions"
+                                                    v-model="createGameServer.game.game_version"
+                                                    label="Select game version">
+                                            </v-select>
+                                        </v-flex>
                                     </v-layout>
                                 </v-container>
 
@@ -145,9 +143,11 @@
                 dialog: false,
                 step: 0,
                 selectedHost: [],
+                versions: [],
                 game: {
                     name: "",
                     game_id: 0,
+                    game_version: ""
                 },
                 gameId: "",
             },
@@ -191,6 +191,7 @@
             createGameServerCancel() {
                 this.createGameServer.dialog = false;
                 this.createGameServer.step = 1;
+                this.finish()
             },
             finish() {
                 this.createGameServer = {
@@ -225,6 +226,12 @@
         },
         beforeDestroy() {
             clearInterval(this.timer)
+        },
+        watch: {
+            "createGameServer.game.game_id": function(val) {
+                console.log(val)
+                this.createGameServer.versions = this.games.filter((g) => { return g.id === val })[0].versions
+            }
         }
     });
 </script>

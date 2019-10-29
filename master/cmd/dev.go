@@ -21,13 +21,13 @@ var devCmd = &cobra.Command{
 			RamMinM:     1024,
 			RamMaxM:     2048,
 			JarFilename: "spigot.jar",
+			DownloadUrl: "https://cdn.getbukkit.org/spigot/spigot-1.14.4.jar",
 		}
 
 		c, err := g.GetCmd()
 		if err != nil {
 			logrus.Error(err)
 		}
-
 		logrus.Info(c)
 
 	},

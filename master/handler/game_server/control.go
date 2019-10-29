@@ -3,7 +3,6 @@ package game_server
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/master/gs"
 	"gitlab.com/systemz/aimpanel2/master/handler"
@@ -35,7 +34,6 @@ func Start(w http.ResponseWriter, r *http.Request) {
 
 func Install(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	logrus.Info("1")
 
 	gameServerId := params["server_id"]
 
