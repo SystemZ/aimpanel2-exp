@@ -85,6 +85,13 @@ var routes = Routes{
 		true,
 	},
 	Route{
+		"Remove host",
+		"DELETE",
+		"/host/{id}",
+		handler.RemoveHost,
+		true,
+	},
+	Route{
 		"Create host",
 		"POST",
 		"/host",

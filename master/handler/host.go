@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 	"gitlab.com/systemz/aimpanel2/lib"
+	"gitlab.com/systemz/aimpanel2/master/gs"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"net/http"
 )
@@ -88,6 +89,13 @@ func CreateHost(w http.ResponseWriter, r *http.Request) {
 	})
 
 	model.DB.Save(&model.Permission{
+		Name:     "Delete host",
+		Verb:     lib.GetVerbByName("DELETE"),
+		GroupId:  group.ID,
+		Endpoint: "/v1/host/" + host.ID.String(),
+	})
+
+	model.DB.Save(&model.Permission{
 		Name:     "Create game server",
 		Verb:     lib.GetVerbByName("POST"),
 		GroupId:  group.ID,
@@ -116,4 +124,27 @@ func GetHostMetric(w http.ResponseWriter, r *http.Request) {
 	model.DB.Order("created_at desc").Limit(1).First(&metric)
 
 	lib.MustEncode(json.NewEncoder(w), metric)
+}
+
+
+func RemoveHost(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+
+	var host model.Host
+	model.DB.Where("id = ?", params["id"]).First(&host)
+
+	gameServers := model.GetGameServersByHostId(model.DB, host.ID.String())
+	for _, gameServer := range *gameServers {
+		err := gs.Remove(gameServer.ID.String())
+		if err != nil {
+			lib.MustEncode(json.NewEncoder(w),
+				JsonError{ErrorCode: 3432})
+			return
+		}
+	}
+
+	model.DB.Where("endpoint LIKE ?", "/v1/host/" + host.ID.String() + "%").Delete(&model.Permission{})
+	model.DB.Delete(&host)
+
+	lib.MustEncode(json.NewEncoder(w), JsonSuccess{Message: "Removing host"})
 }

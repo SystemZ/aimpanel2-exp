@@ -33,7 +33,7 @@
                         </v-list-item>
                     </v-card-text>
                     <v-card-actions>
-                        <v-btn color="red darken-2 accent-4" text disabled>Remove host</v-btn>
+                        <v-btn color="red darken-2 accent-4" text @click="remove()">Remove host</v-btn>
                     </v-card-actions>
                 </v-card>
             </v-col>
@@ -147,6 +147,18 @@
 <!--                </v-row>-->
             </v-col>
         </v-row>
+        <v-snackbar
+                v-model="removeSnackbar"
+        >
+            Removing host...
+            <v-btn
+                    color="red"
+                    text
+                    @click="removeSnackbar = false"
+            >
+                Close
+            </v-btn>
+        </v-snackbar>
     </v-container>
 </template>
 
@@ -187,7 +199,8 @@
                         last_modification: '03.12.2018 12:13:41'
                     }
                 ]
-            }
+            },
+            removeSnackbar: false,
         }),
         mounted() {
             this.$http.get('/v1/host/' + this.$route.params.id).then(res => {
@@ -212,6 +225,15 @@
             }).catch(e => {
                 console.error(e)
             })
-        }
+        },
+        methods: {
+            remove() {
+                this.$http.delete('/v1/host/' + this.$route.params.id).then(res => {
+                    this.removeSnackbar = true;
+                    console.log(res);
+                    this.$router.push("/hosts");
+                });
+            }
+        },
     }
 </script>

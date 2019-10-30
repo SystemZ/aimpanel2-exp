@@ -184,6 +184,7 @@ func Remove(gsId string) error {
 		return &lib.Error{ErrorCode: 5101}
 	}
 
+	model.DB.Where("endpoint LIKE ?", "/v1/host/" + gameServer.HostId.String() + "/server/" + gsId + "%").Delete(&model.Permission{})
 	model.DB.Delete(&gameServer)
 
 	return nil

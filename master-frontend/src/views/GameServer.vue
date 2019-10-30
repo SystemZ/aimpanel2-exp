@@ -172,6 +172,7 @@
                 this.$http.delete(this.serverUrl).then(res => {
                     this.removeSnackbar = true;
                     console.log(res);
+                    this.$router.push("/game-servers");
                 });
             }
         },
