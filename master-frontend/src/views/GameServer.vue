@@ -122,7 +122,9 @@
                 })
             },
             stop() {
-                this.$http.put(this.serverUrl + '/stop').then(res => {
+                this.$http.put(this.serverUrl + '/stop', {
+                    type: 1
+                }).then(res => {
                     console.log(res);
                 }).catch(e => {
                     console.error(e)

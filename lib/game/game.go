@@ -42,7 +42,7 @@ var Games = []GameDefinition{
 		Id:   GAME_BUNGEECORD,
 		Name: "BungeeCord",
 		Versions: []string{
-			"1.0.0",
+			"1421", "1420",
 		},
 	},
 	{
@@ -78,6 +78,10 @@ func (game *Game) SetDefaults() {
 		game.RamMinM = 1024
 		game.RamMaxM = 2048
 		game.JarFilename = "spigot.jar"
+	case GAME_BUNGEECORD:
+		game.RamMinM = 1024
+		game.RamMaxM = 2048
+		game.JarFilename = "BungeeCord.jar"
 	}
 }
 
@@ -159,9 +163,6 @@ func (game *Game) GetCmd() (cmd string, err error) {
 func (game *Game) Install(storagePath string, gsPath string) (err error) {
 	switch game.Id {
 	case GAME_SPIGOT:
-		logrus.Info(storagePath)
-		logrus.Info(gsPath)
-
 		if _, err := os.Stat(storagePath + "/BuildTools/"); os.IsNotExist(err) {
 			_ = os.Mkdir(storagePath+"/BuildTools/", 0777)
 		}
@@ -188,6 +189,19 @@ func (game *Game) Install(storagePath string, gsPath string) (err error) {
 		}
 
 		err = lib.CopyFile(storagePath+"/spigot-"+game.Version+".jar", gsPath+"/"+game.JarFilename)
+		if err != nil {
+			return err
+		}
+
+	case GAME_BUNGEECORD:
+		if _, err := os.Stat(storagePath + "/BungeeCord-" + game.Version + ".jar"); os.IsNotExist(err) {
+			err = lib.DownloadFile(game.DownloadUrl, storagePath+"/BungeeCord-"+game.Version+".jar")
+			if err != nil {
+				return err
+			}
+		}
+
+		err = lib.CopyFile(storagePath+"/BungeeCord-"+game.Version+".jar", gsPath+"/"+game.JarFilename)
 		if err != nil {
 			return err
 		}

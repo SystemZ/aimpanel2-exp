@@ -71,7 +71,7 @@ func Install(gsId string) error {
 		return &lib.Error{ErrorCode: 5003}
 	}
 
-	gameFile := model.GetGameFileByGameId(model.DB, gameServer.GameId)
+	gameFile := model.GetGameFileByGameIdAndVersion(model.DB, gameServer.GameId, gameServer.GameVersion)
 	if gameFile == nil {
 		return &lib.Error{ErrorCode: 5009}
 	}

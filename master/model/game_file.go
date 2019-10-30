@@ -24,10 +24,10 @@ type GameFile struct {
 	DeletedAt *time.Time `json:"deleted_at"`
 }
 
-func GetGameFileByGameId(db *gorm.DB, gameId uint) *GameFile {
+func GetGameFileByGameIdAndVersion(db *gorm.DB, gameId uint, version string) *GameFile {
 	var gf GameFile
 
-	if db.Where("game_id = ?", gameId).First(&gf).RecordNotFound() {
+	if db.Where("game_id = ? and (game_version = ? OR game_version = '0')", gameId, version).First(&gf).RecordNotFound() {
 		return nil
 	}
 
