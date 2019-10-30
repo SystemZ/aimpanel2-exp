@@ -14,7 +14,7 @@ const (
 	GAME_BUNGEECORD
 
 	GAME_TEAMSPEAK3
-	GAME_TEAMSPEAK3_BOT
+	GAME_TS3AUDIOBOT
 )
 
 type GameDefinition struct {
@@ -52,10 +52,10 @@ var Games = []GameDefinition{
 		},
 	},
 	{
-		Id:   GAME_TEAMSPEAK3_BOT,
-		Name: "Teamspeak3 Bot",
+		Id:   GAME_TS3AUDIOBOT,
+		Name: "TS3AudioBot",
 		Versions: []string{
-			"1.0.0",
+			"master", "develop",
 		},
 	},
 }
@@ -149,10 +149,11 @@ func (game *Game) GetCmd() (cmd string, err error) {
 			"ts3server_minimal_runscript.sh",
 		}
 
-	case GAME_TEAMSPEAK3_BOT:
+	case GAME_TS3AUDIOBOT:
 		command = []string{
 			"mono",
 			"TS3AudioBot.exe",
+			"--non-interactive",
 		}
 	}
 
@@ -211,7 +212,6 @@ func (game *Game) Install(storagePath string, gsPath string) (err error) {
 		if err = cmd.Run(); err != nil {
 			return err
 		}
-
 		cmd.Wait()
 
 		licenseFile, err := os.Create(gsPath + "/.ts3server_license_accepted")
@@ -219,6 +219,15 @@ func (game *Game) Install(storagePath string, gsPath string) (err error) {
 			return err
 		}
 		licenseFile.Close()
+	case GAME_TS3AUDIOBOT:
+		storageFilePath := storagePath + "/ts3audiobot-" + game.Version + ".zip"
+		err = lib.DownloadFile(game.DownloadUrl, storageFilePath)
+
+		cmd := exec.Command("unzip", storageFilePath, "-d", gsPath)
+		if err = cmd.Run(); err != nil {
+			return err
+		}
+		cmd.Wait()
 	}
 	return nil
 }
