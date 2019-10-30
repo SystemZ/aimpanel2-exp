@@ -117,6 +117,13 @@ var routes = Routes{
 		true,
 	},
 	Route{
+		"Remove game server",
+		"DELETE",
+		"/host/{host_id}/server/{server_id}",
+		game_server.Remove,
+		true,
+	},
+	Route{
 		"Create game server",
 		"POST",
 		"/host/{host_id}/server",

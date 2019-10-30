@@ -166,6 +166,19 @@ func agent() {
 			})
 
 			msg.Ack(false)
+		case rabbit.AGENT_REMOVE_GS:
+			logrus.Info("AGENT_REMOVE_GS")
+
+			gsId := task.msgBody.GameServerID.String()
+			gsPath := filepath.Clean(config.GS_DIR) + "/" + gsId
+			gsTrashPath := filepath.Clean(config.TRASH_DIR) + "/" + gsId
+
+			err := os.Rename(gsPath, gsTrashPath)
+			if err != nil {
+				logrus.Error(err)
+			}
+
+			msg.Ack(false)
 		}
 	}
 }

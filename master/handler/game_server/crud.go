@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/mux"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/game"
+	"gitlab.com/systemz/aimpanel2/master/gs"
 	"gitlab.com/systemz/aimpanel2/master/handler"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"net/http"
@@ -60,6 +61,13 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	model.DB.Save(&model.Permission{
 		Name:     "Get game server",
 		Verb:     lib.GetVerbByName("GET"),
+		GroupId:  group.ID,
+		Endpoint: "/v1/host/" + host.ID.String() + "/server/" + gameServer.ID.String(),
+	})
+
+	model.DB.Save(&model.Permission{
+		Name:     "Delete game server",
+		Verb:     lib.GetVerbByName("DELETE"),
 		GroupId:  group.ID,
 		Endpoint: "/v1/host/" + host.ID.String() + "/server/" + gameServer.ID.String(),
 	})
@@ -165,4 +173,17 @@ func ConsoleLog(w http.ResponseWriter, r *http.Request) {
 	}
 
 	lib.MustEncode(json.NewEncoder(w), logs)
+}
+
+func Remove(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	gameServerId := params["server_id"]
+	err := gs.Remove(gameServerId)
+	if err != nil {
+		lib.MustEncode(json.NewEncoder(w),
+			handler.JsonError{ErrorCode: 5026})
+		return
+	}
+
+	lib.MustEncode(json.NewEncoder(w), handler.JsonSuccess{Message: "Removing game server"})
 }

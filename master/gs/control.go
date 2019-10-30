@@ -152,3 +152,39 @@ func Restart(gsId string, stopType uint) error {
 
 	return nil
 }
+
+func Remove(gsId string) error {
+	gameServer := model.GetGameServer(model.DB, gsId)
+	if gameServer == nil {
+		return &lib.Error{ErrorCode: 5014}
+	}
+
+	hostToken := model.GetHostToken(model.DB, gameServer.HostId.String())
+	if hostToken == "" {
+		return &lib.Error{ErrorCode: 5003}
+	}
+
+	if gameServer.State == 1 {
+		msg := rabbit.QueueMsg{
+			GameServerID: gameServer.ID,
+			TaskId:       rabbit.GAME_STOP_SIGKILL,
+		}
+
+		err := rabbitMaster.SendRpcMessage("wrapper_"+gameServer.ID.String(), msg)
+		if err != nil {
+			return &lib.Error{ErrorCode: 5100}
+		}
+	}
+
+	err := rabbitMaster.SendRpcMessage("agent_"+hostToken, rabbit.QueueMsg{
+		TaskId:       rabbit.AGENT_REMOVE_GS,
+		GameServerID: gameServer.ID,
+	})
+	if err != nil {
+		return &lib.Error{ErrorCode: 5101}
+	}
+
+	model.DB.Delete(&gameServer)
+
+	return nil
+}

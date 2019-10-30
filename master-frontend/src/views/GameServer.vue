@@ -45,7 +45,7 @@
                         </v-list-item>
                     </v-card-text>
                     <v-card-actions>
-                        <v-btn color="red darken-2 accent-4" text disabled>Remove game server</v-btn>
+                        <v-btn color="red darken-2 accent-4" text @click="remove()">Remove game server</v-btn>
                     </v-card-actions>
                 </v-card>
             </v-col>
@@ -81,6 +81,18 @@
                 Close
             </v-btn>
         </v-snackbar>
+        <v-snackbar
+                v-model="removeSnackbar"
+        >
+            Removing game server...
+            <v-btn
+                    color="red"
+                    text
+                    @click="removeSnackbar = false"
+            >
+                Close
+            </v-btn>
+        </v-snackbar>
     </v-container>
 </template>
 
@@ -96,6 +108,7 @@
             serverUrl: '',
             timer: '',
             installSnackbar: false,
+            removeSnackbar: false,
         }),
         mounted() {
             this.serverId = this.$route.params.server_id;
@@ -152,6 +165,12 @@
             install() {
                 this.$http.put(this.serverUrl + "/install").then(res => {
                     this.installSnackbar = true;
+                    console.log(res);
+                });
+            },
+            remove() {
+                this.$http.delete(this.serverUrl).then(res => {
+                    this.removeSnackbar = true;
                     console.log(res);
                 });
             }

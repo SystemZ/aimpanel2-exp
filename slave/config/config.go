@@ -12,6 +12,7 @@ var (
 	RABBITMQ_VHOST    string
 	GS_DIR            string
 	STORAGE_DIR       string
+	TRASH_DIR         string
 )
 
 func init() {
@@ -37,4 +38,7 @@ func init() {
 
 	viper.SetDefault("STORAGE_DIR", "/opt/aimpanel/storage/")
 	STORAGE_DIR = viper.GetString("STORAGE_DIR")
+
+	viper.SetDefault("TRASH_DIR", "/opt/aimpanel/trash/")
+	TRASH_DIR = viper.GetString("TRASH_DIR")
 }
