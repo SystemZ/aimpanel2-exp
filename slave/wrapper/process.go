@@ -42,7 +42,7 @@ type Process struct {
 
 func (p *Process) Run() {
 	p.Cmd = exec.Command(p.GameStartCommand[0], p.GameStartCommand[1:]...)
-	p.Cmd.Dir = config.GS_DIR + p.GameServerID
+	p.Cmd.Dir = config.GS_DIR + "/" + p.GameServerID
 
 	stdout, _ := p.Cmd.StdoutPipe()
 	stderr, _ := p.Cmd.StderrPipe()
@@ -212,7 +212,12 @@ func (p *Process) Rpc() {
 		case rabbit.GAME_START:
 			logrus.Info("Got GAME_START msg")
 
-			p.GameStartCommand = strings.Split(task.msgBody.GameStartCommand.Command, " ")
+			startCommand, err := task.msgBody.Game.GetCmd()
+			if err != nil {
+				logrus.Error(err)
+			}
+
+			p.GameStartCommand = strings.Split(startCommand, " ")
 
 			go p.Run()
 

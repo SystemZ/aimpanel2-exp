@@ -85,6 +85,13 @@ var routes = Routes{
 		true,
 	},
 	Route{
+		"Remove host",
+		"DELETE",
+		"/host/{id}",
+		handler.RemoveHost,
+		true,
+	},
+	Route{
 		"Create host",
 		"POST",
 		"/host",
@@ -114,6 +121,13 @@ var routes = Routes{
 		"GET",
 		"/host/{host_id}/server/{server_id}",
 		game_server.Get,
+		true,
+	},
+	Route{
+		"Remove game server",
+		"DELETE",
+		"/host/{host_id}/server/{server_id}",
+		game_server.Remove,
 		true,
 	},
 	Route{
@@ -202,13 +216,6 @@ var routes = Routes{
 		"GET",
 		"/game",
 		handler.ListGames,
-		true,
-	},
-	Route{
-		"List game versions",
-		"GET",
-		"/game/version",
-		handler.ListGameVersions,
 		true,
 	},
 }

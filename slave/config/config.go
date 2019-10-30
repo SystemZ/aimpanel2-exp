@@ -1,8 +1,6 @@
 package config
 
 import (
-	"fmt"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
@@ -14,16 +12,11 @@ var (
 	RABBITMQ_VHOST    string
 	GS_DIR            string
 	STORAGE_DIR       string
+	TRASH_DIR         string
 )
 
 func init() {
-	viper.SetConfigName("config")
-	viper.AddConfigPath(".")
-
-	err := viper.ReadInConfig()
-	if err != nil {
-		logrus.Error(fmt.Sprintf("Fatal error config file: %s", err))
-	}
+	viper.AutomaticEnv()
 
 	viper.SetDefault("RABBITMQ_HOST", "localhost")
 	RABBITMQ_HOST = viper.GetString("RABBITMQ_HOST")
@@ -45,4 +38,7 @@ func init() {
 
 	viper.SetDefault("STORAGE_DIR", "/opt/aimpanel/storage/")
 	STORAGE_DIR = viper.GetString("STORAGE_DIR")
+
+	viper.SetDefault("TRASH_DIR", "/opt/aimpanel/trash/")
+	TRASH_DIR = viper.GetString("TRASH_DIR")
 }

@@ -4,7 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	log "github.com/sirupsen/logrus"
+	"io"
+	"io/ioutil"
 	"math/rand"
+	"net/http"
+	"os"
 	"time"
 )
 
@@ -43,4 +47,42 @@ type Error struct {
 
 func (e *Error) Error() string {
 	return fmt.Sprintf("Error Code: %d", e.ErrorCode)
+}
+
+func DownloadFile(url string, filepath string) error {
+	// Create the file
+	out, err := os.Create(filepath)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	// Get the data
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	// Write the body to file
+	_, err = io.Copy(out, resp.Body)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func CopyFile(source string, destination string) error {
+	input, err := ioutil.ReadFile(source)
+	if err != nil {
+		return err
+	}
+
+	err = ioutil.WriteFile(destination, input, 0644)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

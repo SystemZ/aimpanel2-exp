@@ -1,7 +1,10 @@
 package gs
 
 import (
+	"encoding/json"
+	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
+	"gitlab.com/systemz/aimpanel2/lib/game"
 	"gitlab.com/systemz/aimpanel2/lib/rabbit"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	rabbitMaster "gitlab.com/systemz/aimpanel2/master/rabbit"
@@ -17,11 +20,6 @@ func Start(gsId string) error {
 	hostToken := model.GetHostToken(model.DB, gameServer.HostId.String())
 	if hostToken == "" {
 		return &lib.Error{ErrorCode: 5003}
-	}
-
-	startCommand := model.GetGameStartCommandByVersion(model.DB, gameServer.GameId, gameServer.GameVersion)
-	if startCommand == nil {
-		return &lib.Error{ErrorCode: 5004}
 	}
 
 	model.Redis.Set("gs_start_id_"+gameServer.ID.String(), 0, 1*time.Hour)
@@ -73,21 +71,22 @@ func Install(gsId string) error {
 		return &lib.Error{ErrorCode: 5003}
 	}
 
-	gameFile := model.GetGameInstallFileByVersion(model.DB, gameServer.GameId, gameServer.GameVersion)
+	gameFile := model.GetGameFileByGameIdAndVersion(model.DB, gameServer.GameId, gameServer.GameVersion)
 	if gameFile == nil {
 		return &lib.Error{ErrorCode: 5009}
 	}
 
-	installCommands := model.GetGameInstallCommandsByVersion(model.DB, gameServer.GameId, gameServer.GameVersion)
-	if installCommands == nil {
-		return &lib.Error{ErrorCode: 5010}
+	var g game.Game
+	err := json.Unmarshal([]byte(gameServer.GameJson), &g)
+	if err != nil {
+		logrus.Error(err)
 	}
+	g.DownloadUrl = gameFile.DownloadUrl
 
-	err := rabbitMaster.SendRpcMessage("agent_"+hostToken, rabbit.QueueMsg{
+	err = rabbitMaster.SendRpcMessage("agent_"+hostToken, rabbit.QueueMsg{
 		TaskId:       rabbit.GAME_INSTALL,
 		GameServerID: gameServer.ID,
-		GameFile:     gameFile,
-		GameCommands: installCommands,
+		Game:         g,
 	})
 	if err != nil {
 		return &lib.Error{ErrorCode: 5011}
@@ -150,6 +149,43 @@ func Restart(gsId string, stopType uint) error {
 			model.Redis.Set("gs_restart_id_"+gameServer.ID.String(), -1, 24*time.Hour)
 		}
 	}()
+
+	return nil
+}
+
+func Remove(gsId string) error {
+	gameServer := model.GetGameServer(model.DB, gsId)
+	if gameServer == nil {
+		return &lib.Error{ErrorCode: 5014}
+	}
+
+	hostToken := model.GetHostToken(model.DB, gameServer.HostId.String())
+	if hostToken == "" {
+		return &lib.Error{ErrorCode: 5003}
+	}
+
+	if gameServer.State == 1 {
+		msg := rabbit.QueueMsg{
+			GameServerID: gameServer.ID,
+			TaskId:       rabbit.GAME_STOP_SIGKILL,
+		}
+
+		err := rabbitMaster.SendRpcMessage("wrapper_"+gameServer.ID.String(), msg)
+		if err != nil {
+			return &lib.Error{ErrorCode: 5100}
+		}
+	}
+
+	err := rabbitMaster.SendRpcMessage("agent_"+hostToken, rabbit.QueueMsg{
+		TaskId:       rabbit.AGENT_REMOVE_GS,
+		GameServerID: gameServer.ID,
+	})
+	if err != nil {
+		return &lib.Error{ErrorCode: 5101}
+	}
+
+	model.DB.Where("endpoint LIKE ?", "/v1/host/" + gameServer.HostId.String() + "/server/" + gsId + "%").Delete(&model.Permission{})
+	model.DB.Delete(&gameServer)
 
 	return nil
 }

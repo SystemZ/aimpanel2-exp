@@ -6,6 +6,7 @@
                     <v-card-text>
                         <v-btn class="ma-2" color="green" dark @click="start()">Start</v-btn>
                         <v-btn class="ma-2" color="red" dark @click="stop()">Stop</v-btn>
+                        <v-btn class="ma-2" color="blue" dark @click="install()">Install</v-btn>
                     </v-card-text>
                 </v-card>
             </v-col>
@@ -44,7 +45,7 @@
                         </v-list-item>
                     </v-card-text>
                     <v-card-actions>
-                        <v-btn color="red darken-2 accent-4" text disabled>Remove game server</v-btn>
+                        <v-btn color="red darken-2 accent-4" text @click="remove()">Remove game server</v-btn>
                     </v-card-actions>
                 </v-card>
             </v-col>
@@ -68,6 +69,30 @@
                 </v-card>
             </v-col>
         </v-row>
+        <v-snackbar
+                v-model="installSnackbar"
+        >
+            Installing game server...
+            <v-btn
+                    color="red"
+                    text
+                    @click="installSnackbar = false"
+            >
+                Close
+            </v-btn>
+        </v-snackbar>
+        <v-snackbar
+                v-model="removeSnackbar"
+        >
+            Removing game server...
+            <v-btn
+                    color="red"
+                    text
+                    @click="removeSnackbar = false"
+            >
+                Close
+            </v-btn>
+        </v-snackbar>
     </v-container>
 </template>
 
@@ -82,6 +107,8 @@
             message: '',
             serverUrl: '',
             timer: '',
+            installSnackbar: false,
+            removeSnackbar: false,
         }),
         mounted() {
             this.serverId = this.$route.params.server_id;
@@ -108,7 +135,9 @@
                 })
             },
             stop() {
-                this.$http.put(this.serverUrl + '/stop').then(res => {
+                this.$http.put(this.serverUrl + '/stop', {
+                    type: 1
+                }).then(res => {
                     console.log(res);
                 }).catch(e => {
                     console.error(e)
@@ -132,6 +161,19 @@
                 }).catch(e => {
                     console.error(e)
                 })
+            },
+            install() {
+                this.$http.put(this.serverUrl + "/install").then(res => {
+                    this.installSnackbar = true;
+                    console.log(res);
+                });
+            },
+            remove() {
+                this.$http.delete(this.serverUrl).then(res => {
+                    this.removeSnackbar = true;
+                    console.log(res);
+                    this.$router.push("/game-servers");
+                });
             }
         },
         beforeDestroy() {

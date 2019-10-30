@@ -43,9 +43,7 @@
                                         </v-flex>
                                         <v-flex xs12>
                                             <v-select
-                                                    :items="gameVersions.filter((gv) => { return gv.game_id === createGameServer.game.game_id })"
-                                                    item-text="name"
-                                                    item-value="id"
+                                                    :items="createGameServer.versions"
                                                     v-model="createGameServer.game.game_version"
                                                     label="Select game version">
                                             </v-select>
@@ -108,7 +106,7 @@
     </v-container>
 </template>
 
-<script lang="ts">
+<script>
     import Vue from "vue";
 
     export default Vue.extend({
@@ -145,28 +143,23 @@
                 dialog: false,
                 step: 0,
                 selectedHost: [],
+                versions: [],
                 game: {
                     name: "",
                     game_id: 0,
-                    game_version: 0,
+                    game_version: ""
                 },
                 gameId: "",
-            }
+            },
+            timer: ''
         }),
         methods: {
-            goToGameServer(host_id: string, id: string) {
+            goToGameServer(host_id, id) {
                 this.$router.push('/host/' + host_id + '/server/' + id)
             },
             getGames() {
                 return this.$http.get("/v1/game").then(res => {
                     this.games = res.data;
-                }).catch(e => {
-                    console.error(e);
-                });
-            },
-            getGameVersions() {
-                return this.$http.get("/v1/game/version").then(res => {
-                    this.gameVersions = res.data;
                 }).catch(e => {
                     console.error(e);
                 });
@@ -198,6 +191,7 @@
             createGameServerCancel() {
                 this.createGameServer.dialog = false;
                 this.createGameServer.step = 1;
+                this.finish()
             },
             finish() {
                 this.createGameServer = {
@@ -221,14 +215,24 @@
         },
         mounted() {
             this.getGames().then(() => {
-                this.getGameVersions().then(() => {
-                    this.getHosts().then(() => {
-                        this.getGameServers();
-                    });
-                })
-
+                this.getHosts().then(() => {
+                    this.getGameServers();
+                });
             });
+
+            this.timer = setInterval(() => {
+                this.getGameServers()
+            }, 10 * 1000)
         },
+        beforeDestroy() {
+            clearInterval(this.timer)
+        },
+        watch: {
+            "createGameServer.game.game_id": function(val) {
+                console.log(val)
+                this.createGameServer.versions = this.games.filter((g) => { return g.id === val })[0].versions
+            }
+        }
     });
 </script>
 

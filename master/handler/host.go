@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 	"gitlab.com/systemz/aimpanel2/lib"
+	"gitlab.com/systemz/aimpanel2/master/gs"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"net/http"
 )
@@ -21,8 +22,10 @@ import (
 //TODO: find by current signed-in account
 func ListHosts(w http.ResponseWriter, r *http.Request) {
 	var hosts []model.Host
+	user := context.Get(r, "user").(model.User)
 
-	model.DB.Find(&hosts)
+	model.DB.Table("hosts").Where(
+		"hosts.user_id = ?", user.ID).Find(&hosts)
 
 	lib.MustEncode(json.NewEncoder(w), hosts)
 }
@@ -67,6 +70,8 @@ func CreateHost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	host.UserId = user.ID
+	host.MetricFrequency = 30
+
 	model.DB.Save(host)
 
 	group := model.GetGroup(model.DB, "USER-"+user.ID.String())
@@ -79,6 +84,13 @@ func CreateHost(w http.ResponseWriter, r *http.Request) {
 	model.DB.Save(&model.Permission{
 		Name:     "Get host",
 		Verb:     lib.GetVerbByName("GET"),
+		GroupId:  group.ID,
+		Endpoint: "/v1/host/" + host.ID.String(),
+	})
+
+	model.DB.Save(&model.Permission{
+		Name:     "Delete host",
+		Verb:     lib.GetVerbByName("DELETE"),
 		GroupId:  group.ID,
 		Endpoint: "/v1/host/" + host.ID.String(),
 	})
@@ -112,4 +124,27 @@ func GetHostMetric(w http.ResponseWriter, r *http.Request) {
 	model.DB.Order("created_at desc").Limit(1).First(&metric)
 
 	lib.MustEncode(json.NewEncoder(w), metric)
+}
+
+
+func RemoveHost(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+
+	var host model.Host
+	model.DB.Where("id = ?", params["id"]).First(&host)
+
+	gameServers := model.GetGameServersByHostId(model.DB, host.ID.String())
+	for _, gameServer := range *gameServers {
+		err := gs.Remove(gameServer.ID.String())
+		if err != nil {
+			lib.MustEncode(json.NewEncoder(w),
+				JsonError{ErrorCode: 3432})
+			return
+		}
+	}
+
+	model.DB.Where("endpoint LIKE ?", "/v1/host/" + host.ID.String() + "%").Delete(&model.Permission{})
+	model.DB.Delete(&host)
+
+	lib.MustEncode(json.NewEncoder(w), JsonSuccess{Message: "Removing host"})
 }

@@ -40,6 +40,16 @@ type GameServer struct {
 	// required: true
 	GameId uint `gorm:"column:game_id" json:"game_id"`
 
+	// Game Version
+	//
+	// required: true
+	GameVersion string `gorm:"column:game_version" json:"game_version"`
+
+	// Game
+	//
+	// required: true
+	GameJson string `gorm:"column:game_json" json:"game_json"`
+
 	// Metric Frequency
 	//
 	// required: true
@@ -49,11 +59,6 @@ type GameServer struct {
 	//
 	// required: true
 	StopTimeout int `gorm:"column:stop_timeout" json:"stop_timeout"`
-
-	// Game Version
-	//
-	// required: true
-	GameVersion uint `gorm:"column:game_version" json:"game_version"`
 
 	//Created at timestamp
 	CreatedAt time.Time `json:"created_at"`

@@ -2,33 +2,35 @@ package rabbit
 
 import (
 	"github.com/gofrs/uuid"
+	"gitlab.com/systemz/aimpanel2/lib/game"
 	"gitlab.com/systemz/aimpanel2/master/model"
 )
 
 const (
 	//WRAPPER
-	GAME_START        = iota
-	GAME_COMMAND      = iota
-	GAME_STOP_SIGKILL = iota
-	GAME_STOP_SIGTERM = iota
+	GAME_START = iota
+	GAME_COMMAND
+	GAME_STOP_SIGKILL
+	GAME_STOP_SIGTERM
 
 	//AGENT
-	WRAPPER_START = iota
-	GAME_INSTALL  = iota
+	WRAPPER_START
+	GAME_INSTALL
 
-	SERVER_LOG      = iota
-	WRAPPER_STARTED = iota
-	WRAPPER_EXITED  = iota
+	SERVER_LOG
+	WRAPPER_STARTED
+	WRAPPER_EXITED
 
-	WRAPPER_METRICS_FREQUENCY = iota
-	WRAPPER_METRICS           = iota
+	WRAPPER_METRICS_FREQUENCY
+	WRAPPER_METRICS
 
-	AGENT_METRICS_FREQUENCY = iota
-	AGENT_METRICS           = iota
-	AGENT_OS                = iota
+	AGENT_METRICS_FREQUENCY
+	AGENT_METRICS
+	AGENT_OS
+	AGENT_REMOVE_GS
 
-	AGENT_HEARTBEAT   = iota
-	WRAPPER_HEARTBEAT = iota
+	AGENT_HEARTBEAT
+	WRAPPER_HEARTBEAT
 )
 
 type QueueMsg struct {
@@ -36,12 +38,13 @@ type QueueMsg struct {
 	TaskId int `json:"task_id,omitempty"`
 
 	// task specific arguments
-	Game             string               `json:"game,omitempty"`
-	GameServerID     uuid.UUID            `json:"game_server_id,omitempty"`
-	Body             string               `json:"body,omitempty"`
-	GameFile         *model.GameFile      `json:"game_file,omitempty"`
-	GameCommands     *[]model.GameCommand `json:"game_commands,omitempty"`
-	GameStartCommand *model.GameCommand   `json:"game_start_command,omitempty"`
+	//Game             string               `json:"game,omitempty"`
+	Game         game.Game       `json:"game,omitempty"`
+	GameServerID uuid.UUID       `json:"game_server_id,omitempty"`
+	Body         string          `json:"body,omitempty"`
+	GameFile     *model.GameFile `json:"game_file,omitempty"`
+	//GameCommands     *[]model.GameCommand `json:"game_commands,omitempty"`
+	//GameStartCommand *model.GameCommand   `json:"game_start_command,omitempty"`
 
 	// task started
 	TaskStarted bool `json:"task_started,omitempty"`

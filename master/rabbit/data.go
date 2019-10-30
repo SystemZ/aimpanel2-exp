@@ -5,6 +5,7 @@ import (
 	"github.com/go-redis/redis"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
+	"gitlab.com/systemz/aimpanel2/lib/game"
 	"gitlab.com/systemz/aimpanel2/lib/rabbit"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"time"
@@ -69,16 +70,18 @@ func ListenWrapperData() {
 						break
 					}
 
-					var startCommand model.GameCommand
-					if model.DB.Where("game_id = ? and type = ?", gs.GameId, "start").
-						First(&startCommand).RecordNotFound() {
-						break
-					}
+					//var startCommand model.GameCommand
+					//if model.DB.Where("game_id = ? and type = ?", gs.GameId, "start").
+					//	First(&startCommand).RecordNotFound() {
+					//	break
+					//}
+					var gameDef game.Game
+					err = json.Unmarshal([]byte(gs.GameJson), &gameDef)
 
 					msg := rabbit.QueueMsg{
-						TaskId:           rabbit.GAME_START,
-						GameServerID:     gs.ID,
-						GameStartCommand: &startCommand,
+						TaskId:       rabbit.GAME_START,
+						GameServerID: gs.ID,
+						Game:         gameDef,
 					}
 
 					err := SendRpcMessage("wrapper_"+gs.ID.String(), msg)
@@ -97,16 +100,13 @@ func ListenWrapperData() {
 						break
 					}
 
-					var startCommand model.GameCommand
-					if model.DB.Where("game_id = ? and type = ?", gs.GameId, "start").
-						First(&startCommand).RecordNotFound() {
-						break
-					}
+					var gameDef game.Game
+					err = json.Unmarshal([]byte(gs.GameJson), &gameDef)
 
 					msg := rabbit.QueueMsg{
-						TaskId:           rabbit.GAME_START,
-						GameServerID:     gs.ID,
-						GameStartCommand: &startCommand,
+						TaskId:       rabbit.GAME_START,
+						GameServerID: gs.ID,
+						Game:         gameDef,
 					}
 
 					err := SendRpcMessage("wrapper_"+gs.ID.String(), msg)
