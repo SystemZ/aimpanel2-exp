@@ -1,7 +1,6 @@
 package game
 
 import (
-	"github.com/sirupsen/logrus"
 	"github.com/softbrewery/gojoi/pkg/joi"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"os"
@@ -49,7 +48,7 @@ var Games = []GameDefinition{
 		Id:   GAME_TEAMSPEAK3,
 		Name: "TeamSpeak3",
 		Versions: []string{
-			"1.0.0",
+			"3.9.1",
 		},
 	},
 	{
@@ -178,11 +177,8 @@ func (game *Game) Install(storagePath string, gsPath string) (err error) {
 			cmd := exec.Command("java", "-jar", "BuildTools.jar", "--output-dir="+storagePath, " --rev="+game.Version)
 			cmd.Dir = storagePath + "/BuildTools"
 
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
-
 			if err = cmd.Run(); err != nil {
-				logrus.Error(err)
+				return err
 			}
 
 			cmd.Wait()
@@ -205,6 +201,24 @@ func (game *Game) Install(storagePath string, gsPath string) (err error) {
 		if err != nil {
 			return err
 		}
+	case GAME_TEAMSPEAK3:
+		storageFilePath := storagePath + "/teamspeak3-server-" + game.Version + ".tar.bz2"
+		if _, err := os.Stat(storageFilePath); os.IsNotExist(err) {
+			err = lib.DownloadFile(game.DownloadUrl, storageFilePath)
+		}
+
+		cmd := exec.Command("tar", "xfvj", storageFilePath, "--strip-components=1", "--directory="+gsPath)
+		if err = cmd.Run(); err != nil {
+			return err
+		}
+
+		cmd.Wait()
+
+		licenseFile, err := os.Create(gsPath + "/.ts3server_license_accepted")
+		if err != nil {
+			return err
+		}
+		licenseFile.Close()
 	}
 	return nil
 }
