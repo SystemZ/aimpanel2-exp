@@ -52,6 +52,13 @@ var routes = Routes{
 		handler.SwaggerSpec,
 		false,
 	},
+	Route{
+		"Get rabbit credentials",
+		"GET",
+		"/rabbit/credentials/{token}",
+		handler.GetCredentials,
+		false,
+	},
 
 	//Auth
 	Route{

@@ -17,8 +17,10 @@ require (
 	github.com/jinzhu/gorm v1.9.11
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/magiconair/properties v1.8.1 // indirect
+	github.com/michaelklishin/rabbit-hole v1.5.0
 	github.com/pelletier/go-toml v1.4.0 // indirect
 	github.com/rs/cors v1.7.0
+	github.com/sethvargo/go-password v0.1.3
 	github.com/shirou/gopsutil v2.19.9+incompatible
 	github.com/shirou/w32 v0.0.0-20160930032740-bb4de0191aa4 // indirect
 	github.com/sirupsen/logrus v1.4.2

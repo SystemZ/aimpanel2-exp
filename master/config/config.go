@@ -14,6 +14,7 @@ var (
 	REDIS_HOST     string
 	REDIS_PASSWORD string
 
+	RABBITMQ_TLS      bool
 	RABBITMQ_HOST     string
 	RABBITMQ_PORT     string
 	RABBITMQ_USERNAME string
@@ -46,6 +47,9 @@ func init() {
 
 	viper.SetDefault("REDIS_PASSWORD", "")
 	REDIS_PASSWORD = viper.GetString("REDIS_PASSWORD")
+
+	viper.SetDefault("RABBITMQ_TLS", false)
+	RABBITMQ_TLS = viper.GetBool("RABBITMQ_TLS")
 
 	viper.SetDefault("RABBITMQ_HOST", "localhost")
 	RABBITMQ_HOST = viper.GetString("RABBITMQ_HOST")
