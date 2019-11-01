@@ -17,6 +17,7 @@ var (
 	RABBITMQ_TLS      bool
 	RABBITMQ_HOST     string
 	RABBITMQ_PORT     string
+	RABBITMQ_PORT_API string
 	RABBITMQ_USERNAME string
 	RABBITMQ_PASSWORD string
 	RABBITMQ_VHOST    string
@@ -56,6 +57,9 @@ func init() {
 
 	viper.SetDefault("RABBITMQ_PORT", "5672")
 	RABBITMQ_PORT = viper.GetString("RABBITMQ_PORT")
+
+	viper.SetDefault("RABBITMQ_PORT_API", "15672")
+	RABBITMQ_PORT_API = viper.GetString("RABBITMQ_PORT_API")
 
 	viper.SetDefault("RABBITMQ_USERNAME", "guest")
 	RABBITMQ_USERNAME = viper.GetString("RABBITMQ_USERNAME")

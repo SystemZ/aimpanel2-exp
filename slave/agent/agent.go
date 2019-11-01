@@ -13,6 +13,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib/rabbit"
 	"gitlab.com/systemz/aimpanel2/slave/config"
 	"io"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -37,7 +38,18 @@ func Start(t string) {
 	logrus.Info("Starting Agent")
 	token = t
 
-	conn, err := amqp.Dial("amqp://" + config.RABBITMQ_USERNAME + ":" + config.RABBITMQ_PASSWORD + "@" + config.RABBITMQ_HOST + ":" + config.RABBITMQ_PORT + config.RABBITMQ_VHOST)
+	resp, err := http.Get("http://localhost:9000/v1/rabbit/credentials/" + token)
+	if err != nil {
+		lib.FailOnError(err, "Failed to get rabbit credentials")
+	}
+
+	var creds rabbit.Credentials
+	err = json.NewDecoder(resp.Body).Decode(&creds)
+	if err != nil {
+		lib.FailOnError(err, "Failed to decode rabbit credentials json")
+	}
+
+	conn, err := amqp.Dial("amqp://" + creds.Username + ":" + creds.Password + "@" + creds.Host + ":" + creds.Port + creds.VHost)
 	lib.FailOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
 

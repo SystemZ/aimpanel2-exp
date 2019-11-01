@@ -31,8 +31,7 @@ func Listen() {
 }
 
 func SetupRabbitHole() {
-	//client, err := rabbithole.NewClient("http://" + config.RABBITMQ_HOST + ":" + config.RABBITMQ_PORT, config.RABBITMQ_USERNAME, config.RABBITMQ_PASSWORD)
-	client, err := rabbithole.NewClient("http://localhost:15672", "guest", "guest")
+	client, err := rabbithole.NewClient("http://"+config.RABBITMQ_HOST+":"+config.RABBITMQ_PORT_API, config.RABBITMQ_USERNAME, config.RABBITMQ_PASSWORD)
 	if err != nil {
 		lib.FailOnError(err, "Failed to connect to Rabbit API")
 	}

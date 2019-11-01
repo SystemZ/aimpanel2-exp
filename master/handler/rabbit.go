@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/mux"
 	rabbithole "github.com/michaelklishin/rabbit-hole"
 	"github.com/sethvargo/go-password/password"
+	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
 	rabbitLib "gitlab.com/systemz/aimpanel2/lib/rabbit"
 	"gitlab.com/systemz/aimpanel2/master/config"
@@ -25,7 +26,7 @@ func GetCredentials(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pwd, err := password.Generate(32, 10, 2, false, false)
+	pwd, err := password.Generate(32, 10, 0, false, false)
 	if err != nil {
 		lib.MustEncode(json.NewEncoder(w),
 			JsonError{ErrorCode: 1019})
@@ -42,6 +43,7 @@ func GetCredentials(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := rabbit.Client.PutUser(credentials.Username, rabbithole.UserSettings{Password: credentials.Password})
 	if err != nil {
+		logrus.Info(err)
 		lib.MustEncode(json.NewEncoder(w),
 			JsonError{ErrorCode: 1030})
 		return
