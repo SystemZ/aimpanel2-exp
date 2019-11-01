@@ -25,7 +25,7 @@ func GetCredentials(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	password, err := password.Generate(32, 10, 2, false, false)
+	pwd, err := password.Generate(32, 10, 2, false, false)
 	if err != nil {
 		lib.MustEncode(json.NewEncoder(w),
 			JsonError{ErrorCode: 1019})
@@ -36,11 +36,11 @@ func GetCredentials(w http.ResponseWriter, r *http.Request) {
 		Host:     config.RABBITMQ_HOST,
 		Port:     config.RABBITMQ_PORT,
 		Username: host.ID.String(),
-		Password: password,
+		Password: pwd,
 		VHost:    config.RABBITMQ_VHOST,
 	}
 
-	resp, err := rabbit.Client.PutUser(credentials.Username, rabbithole.UserSettings{Password: credentials.Password, Tags: "administrator"})
+	resp, err := rabbit.Client.PutUser(credentials.Username, rabbithole.UserSettings{Password: credentials.Password})
 	if err != nil {
 		lib.MustEncode(json.NewEncoder(w),
 			JsonError{ErrorCode: 1030})
