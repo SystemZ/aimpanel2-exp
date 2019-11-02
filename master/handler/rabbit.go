@@ -32,8 +32,8 @@ func GetHostCredentials(w http.ResponseWriter, r *http.Request) {
 	}
 
 	credentials := rabbitLib.Credentials{
-		Host:     config.RABBITMQ_HOST,
-		Port:     config.RABBITMQ_PORT,
+		Host:     config.RABBITMQ_HOST_EXTERNAL,
+		Port:     config.RABBITMQ_PORT_EXTERNAL,
 		Username: host.ID.String(),
 		Password: pwd,
 		VHost:    config.RABBITMQ_VHOST,
@@ -77,8 +77,8 @@ func GetGameServerCredentials(w http.ResponseWriter, r *http.Request) {
 	}
 
 	credentials := rabbitLib.Credentials{
-		Host:     config.RABBITMQ_HOST,
-		Port:     config.RABBITMQ_PORT,
+		Host:     config.RABBITMQ_HOST_EXTERNAL,
+		Port:     config.RABBITMQ_PORT_EXTERNAL,
 		Username: gameServer.ID.String(),
 		Password: pwd,
 		VHost:    config.RABBITMQ_VHOST,
