@@ -3,10 +3,12 @@ package rabbit
 import (
 	"encoding/json"
 	"github.com/michaelklishin/rabbit-hole"
+	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
 	"gitlab.com/systemz/aimpanel2/lib"
-	"gitlab.com/systemz/aimpanel2/lib/rabbit"
+	rabbitLib "gitlab.com/systemz/aimpanel2/lib/rabbit"
 	"gitlab.com/systemz/aimpanel2/master/config"
+	"net/http"
 )
 
 var (
@@ -44,7 +46,7 @@ func SetupRabbitAPI() {
 	Client = client
 }
 
-func SendRpcMessage(queue string, msg rabbit.QueueMsg) error {
+func SendRpcMessage(queue string, msg rabbitLib.QueueMsg) error {
 	body, err := json.Marshal(msg)
 
 	corrId := lib.RandomString(32)
@@ -61,6 +63,32 @@ func SendRpcMessage(queue string, msg rabbit.QueueMsg) error {
 		})
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func PutUser(credentials rabbitLib.Credentials) error {
+	resp, err := Client.PutUser(credentials.Username, rabbithole.UserSettings{Password: credentials.Password})
+	if err != nil {
+		return &lib.Error{ErrorCode: 1000}
+	}
+
+	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusNoContent {
+		return &lib.Error{ErrorCode: 1001}
+	}
+
+	resp, err = Client.UpdatePermissionsIn(credentials.VHost, credentials.Username, rabbithole.Permissions{
+		Configure: ".*",
+		Write:     ".*",
+		Read:      ".*",
+	})
+	if err != nil {
+		return &lib.Error{ErrorCode: 1002}
+	}
+
+	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusNoContent {
+		return &lib.Error{ErrorCode: 1003}
 	}
 
 	return nil

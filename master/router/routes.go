@@ -52,11 +52,12 @@ var routes = Routes{
 		handler.SwaggerSpec,
 		false,
 	},
+
 	Route{
-		"Get rabbit credentials",
+		"Get rabbit game server credentials",
 		"GET",
 		"/rabbit/credentials/{token}",
-		handler.GetCredentials,
+		handler.GetHostCredentials,
 		false,
 	},
 
@@ -83,6 +84,20 @@ var routes = Routes{
 		"/host",
 		handler.ListHosts,
 		true,
+	},
+	Route{
+		"Get rabbit host credentials",
+		"GET",
+		"/host/credentials/{token}",
+		handler.GetHostCredentials,
+		false,
+	},
+	Route{
+		"Get rabbit game server credentials",
+		"GET",
+		"/host/credentials/{token}/gs/{server_id}",
+		handler.GetGameServerCredentials,
+		false,
 	},
 	Route{
 		"Get host",
