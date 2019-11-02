@@ -38,7 +38,7 @@ func Start(t string) {
 	logrus.Info("Starting Agent")
 	token = t
 
-	resp, err := http.Get("http://localhost:9000/v1/rabbit/credentials/" + token)
+	resp, err := http.Get(config.API_URL + "/v1/host/credentials/" + token)
 	if err != nil {
 		lib.FailOnError(err, "Failed to get rabbit credentials")
 	}
@@ -145,6 +145,9 @@ func agent() {
 		case rabbit.WRAPPER_START:
 			logrus.Info("START_WRAPPER")
 			cmd := exec.Command("slave", "wrapper", task.msgBody.GameServerID.String())
+
+			cmd.Env = os.Environ()
+			cmd.Env = append(cmd.Env, "TOKEN="+token)
 
 			//TODO: FOR TESTING ONLY
 			var stdBuffer bytes.Buffer

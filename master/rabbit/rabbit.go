@@ -3,7 +3,6 @@ package rabbit
 import (
 	"encoding/json"
 	"github.com/michaelklishin/rabbit-hole"
-	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
 	"gitlab.com/systemz/aimpanel2/lib"
 	rabbitLib "gitlab.com/systemz/aimpanel2/lib/rabbit"
