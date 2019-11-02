@@ -33,6 +33,14 @@ const (
 	WRAPPER_HEARTBEAT
 )
 
+type Credentials struct {
+	Host     string `json:"host"`
+	Port     string `json:"port"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+	VHost    string `json:"vhost"`
+}
+
 type QueueMsg struct {
 	// task id
 	TaskId int `json:"task_id,omitempty"`

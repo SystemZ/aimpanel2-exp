@@ -14,11 +14,15 @@ var (
 	REDIS_HOST     string
 	REDIS_PASSWORD string
 
-	RABBITMQ_HOST     string
-	RABBITMQ_PORT     string
-	RABBITMQ_USERNAME string
-	RABBITMQ_PASSWORD string
-	RABBITMQ_VHOST    string
+	RABBITMQ_TLS           bool
+	RABBITMQ_HOST          string
+	RABBITMQ_HOST_EXTERNAL string
+	RABBITMQ_PORT          string
+	RABBITMQ_PORT_EXTERNAL string
+	RABBITMQ_PORT_API      string
+	RABBITMQ_USERNAME      string
+	RABBITMQ_PASSWORD      string
+	RABBITMQ_VHOST         string
 
 	LOG_DEV bool
 )
@@ -47,11 +51,23 @@ func init() {
 	viper.SetDefault("REDIS_PASSWORD", "")
 	REDIS_PASSWORD = viper.GetString("REDIS_PASSWORD")
 
+	viper.SetDefault("RABBITMQ_TLS", false)
+	RABBITMQ_TLS = viper.GetBool("RABBITMQ_TLS")
+
 	viper.SetDefault("RABBITMQ_HOST", "localhost")
 	RABBITMQ_HOST = viper.GetString("RABBITMQ_HOST")
 
+	viper.SetDefault("RABBITMQ_HOST_EXTERNAL", "localhost")
+	RABBITMQ_HOST_EXTERNAL = viper.GetString("RABBITMQ_HOST_EXTERNAL")
+
 	viper.SetDefault("RABBITMQ_PORT", "5672")
 	RABBITMQ_PORT = viper.GetString("RABBITMQ_PORT")
+
+	viper.SetDefault("RABBITMQ_PORT_EXTERNAL", "5672")
+	RABBITMQ_PORT_EXTERNAL = viper.GetString("RABBITMQ_PORT_EXTERNAL")
+
+	viper.SetDefault("RABBITMQ_PORT_API", "15672")
+	RABBITMQ_PORT_API = viper.GetString("RABBITMQ_PORT_API")
 
 	viper.SetDefault("RABBITMQ_USERNAME", "guest")
 	RABBITMQ_USERNAME = viper.GetString("RABBITMQ_USERNAME")

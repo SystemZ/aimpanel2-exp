@@ -1,11 +1,14 @@
 package wrapper
 
 import (
+	"encoding/json"
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/rabbit"
 	"gitlab.com/systemz/aimpanel2/slave/config"
+	"net/http"
+	"os"
 )
 
 var (
@@ -15,10 +18,20 @@ var (
 
 func Start(gameServerID string) {
 	logrus.Info("Starting wrapper")
-	//TODO: Make request to master to get creds to rabbit
 
-	// Defer can't be in init because this will be executed when the function return.
-	conn, err := amqp.Dial("amqp://" + config.RABBITMQ_USERNAME + ":" + config.RABBITMQ_PASSWORD + "@" + config.RABBITMQ_HOST + ":" + config.RABBITMQ_PORT + config.RABBITMQ_VHOST)
+	token := os.Getenv("TOKEN")
+	resp, err := http.Get(config.API_URL + "/v1/host/credentials/" + token + "/gs/" + gameServerID)
+	if err != nil {
+		lib.FailOnError(err, "Failed to get rabbit credentials")
+	}
+
+	var creds rabbit.Credentials
+	err = json.NewDecoder(resp.Body).Decode(&creds)
+	if err != nil {
+		lib.FailOnError(err, "Failed to decode rabbit credentials json")
+	}
+
+	conn, err := amqp.Dial("amqp://" + creds.Username + ":" + creds.Password + "@" + creds.Host + ":" + creds.Port + creds.VHost)
 	lib.FailOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
 

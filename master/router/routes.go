@@ -53,6 +53,14 @@ var routes = Routes{
 		false,
 	},
 
+	Route{
+		"Get rabbit game server credentials",
+		"GET",
+		"/rabbit/credentials/{token}",
+		handler.GetHostCredentials,
+		false,
+	},
+
 	//Auth
 	Route{
 		"Register",
@@ -76,6 +84,20 @@ var routes = Routes{
 		"/host",
 		handler.ListHosts,
 		true,
+	},
+	Route{
+		"Get rabbit host credentials",
+		"GET",
+		"/host/credentials/{token}",
+		handler.GetHostCredentials,
+		false,
+	},
+	Route{
+		"Get rabbit game server credentials",
+		"GET",
+		"/host/credentials/{token}/gs/{server_id}",
+		handler.GetGameServerCredentials,
+		false,
 	},
 	Route{
 		"Get host",
