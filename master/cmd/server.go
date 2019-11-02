@@ -28,7 +28,7 @@ var serverCmd = &cobra.Command{
 		rabbit.Listen()
 		rabbit.ListenWrapperData()
 		rabbit.ListenAgentData()
-		rabbit.SetupRabbitHole()
+		rabbit.SetupRabbitAPI()
 
 		go cron.CheckHostsHeartbeat()
 		go cron.CheckGSHeartbeat()

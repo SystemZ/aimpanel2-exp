@@ -30,8 +30,13 @@ func Listen() {
 	lib.FailOnError(err, "Failed to set QoS")
 }
 
-func SetupRabbitHole() {
-	client, err := rabbithole.NewClient("http://"+config.RABBITMQ_HOST+":"+config.RABBITMQ_PORT_API, config.RABBITMQ_USERNAME, config.RABBITMQ_PASSWORD)
+func SetupRabbitAPI() {
+	scheme := "http://"
+	if config.RABBITMQ_TLS {
+		scheme = "https://"
+	}
+
+	client, err := rabbithole.NewClient(scheme+config.RABBITMQ_HOST+":"+config.RABBITMQ_PORT_API, config.RABBITMQ_USERNAME, config.RABBITMQ_PASSWORD)
 	if err != nil {
 		lib.FailOnError(err, "Failed to connect to Rabbit API")
 	}
