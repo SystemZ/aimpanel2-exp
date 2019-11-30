@@ -4,6 +4,7 @@ import (
 	"github.com/gorilla/mux"
 	"gitlab.com/systemz/aimpanel2/master/handler"
 	"gitlab.com/systemz/aimpanel2/master/handler/game_server"
+	"gitlab.com/systemz/aimpanel2/master/sse"
 	"net/http"
 )
 
@@ -58,6 +59,14 @@ var routes = Routes{
 		"GET",
 		"/rabbit/credentials/{token}",
 		handler.GetHostCredentials,
+		false,
+	},
+
+	Route{
+		"SSE",
+		"GET",
+		"/console/{channel}",
+		sse.SSEHandler,
 		false,
 	},
 
