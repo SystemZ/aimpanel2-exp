@@ -54,7 +54,7 @@
                     <v-card-title>Console</v-card-title>
                     <v-card-text style="max-height: 250px" class="overflow-y-auto black--text">
                         <span v-for="item in logs" :key="item.id">
-                            {{item.log}}<br/>
+                            {{item}}<br/>
                         </span>
                     </v-card-text>
                     <v-card-actions>
@@ -121,10 +121,17 @@
                 console.error(e)
             });
 
+            let source = new EventSource(process.env.VUE_APP_API_URL + '/v1/console/' + this.serverId)
+            var self = this;
+            source.onmessage = function(event) {
+                let str = atob(event.data)
+                self.logs.push(str)
+            }
 
-            this.updateLogs();
-
-            this.timer = setInterval(() => { this.updateLogs() }, 10*1000)
+            //
+            // this.updateLogs();
+            //
+            // this.timer = setInterval(() => { this.updateLogs() }, 10*1000)
         },
         methods: {
             start() {

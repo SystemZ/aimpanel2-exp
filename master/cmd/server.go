@@ -8,6 +8,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"gitlab.com/systemz/aimpanel2/master/rabbit"
 	"gitlab.com/systemz/aimpanel2/master/router"
+	"gitlab.com/systemz/aimpanel2/master/sse"
 	"net/http"
 	"os"
 )
@@ -25,6 +26,8 @@ var serverCmd = &cobra.Command{
 		model.DB = model.InitMysql()
 		model.InitRedis()
 
+		sse.SSE = sse.InitSSE()
+
 		rabbit.Listen()
 		rabbit.ListenWrapperData()
 		rabbit.ListenAgentData()
@@ -35,6 +38,7 @@ var serverCmd = &cobra.Command{
 
 		logrus.Info("Starting API on port :" + args[0])
 		r := router.NewRouter()
+
 		logrus.Fatal(http.ListenAndServe(
 			":"+args[0],
 			router.CommonMiddleware(
