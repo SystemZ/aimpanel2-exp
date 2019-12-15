@@ -175,6 +175,10 @@ func ConsoleLog(w http.ResponseWriter, r *http.Request) {
 	lib.MustEncode(json.NewEncoder(w), logs)
 }
 
+func PutLogs(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(200)
+}
+
 func Remove(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	gameServerId := params["server_id"]

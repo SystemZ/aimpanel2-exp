@@ -19,7 +19,11 @@ func NewRouter() *mux.Router {
 		handler = route.HandlerFunc
 
 		if route.AuthRequired {
-			handler = AuthMiddleware(PermissionMiddleware(route.HandlerFunc))
+			if route.HostOnly {
+				handler = HostPermissionMiddleware(handler)
+			} else {
+				handler = AuthMiddleware(PermissionMiddleware(handler))
+			}
 		}
 
 		v1.Path(route.Pattern).Handler(handler).Name(route.Name).Methods(route.Method)
@@ -34,6 +38,7 @@ type Route struct {
 	Pattern      string
 	HandlerFunc  http.HandlerFunc
 	AuthRequired bool
+	HostOnly     bool
 }
 
 type Routes []Route
@@ -45,12 +50,14 @@ var routes = Routes{
 		"/",
 		handler.Index,
 		true,
+		false,
 	},
 	Route{
 		"SwaggerSpec",
 		"GET",
 		"/swagger.json",
 		handler.SwaggerSpec,
+		false,
 		false,
 	},
 
@@ -60,13 +67,15 @@ var routes = Routes{
 		"/rabbit/credentials/{token}",
 		handler.GetHostCredentials,
 		false,
+		false,
 	},
 
 	Route{
 		"SSE",
 		"GET",
-		"/console/{channel}",
+		"/events/{channel}",
 		sse.SSEHandler,
+		true,
 		false,
 	},
 
@@ -77,12 +86,14 @@ var routes = Routes{
 		"/auth/register",
 		handler.Register,
 		false,
+		false,
 	},
 	Route{
 		"Login",
 		"POST",
 		"/auth/login",
 		handler.Login,
+		false,
 		false,
 	},
 
@@ -93,12 +104,22 @@ var routes = Routes{
 		"/host",
 		handler.ListHosts,
 		true,
+		false,
 	},
 	Route{
 		"Get rabbit host credentials",
 		"GET",
 		"/host/credentials/{token}",
 		handler.GetHostCredentials,
+		false,
+		false,
+	},
+	Route{
+		"Host auth",
+		"GET",
+		"/host/auth/{token}",
+		handler.HostAuth,
+		false,
 		false,
 	},
 	Route{
@@ -107,6 +128,7 @@ var routes = Routes{
 		"/host/credentials/{token}/gs/{server_id}",
 		handler.GetGameServerCredentials,
 		false,
+		false,
 	},
 	Route{
 		"Get host",
@@ -114,6 +136,7 @@ var routes = Routes{
 		"/host/{id}",
 		handler.GetHost,
 		true,
+		false,
 	},
 	Route{
 		"Remove host",
@@ -121,6 +144,7 @@ var routes = Routes{
 		"/host/{id}",
 		handler.RemoveHost,
 		true,
+		false,
 	},
 	Route{
 		"Create host",
@@ -128,6 +152,7 @@ var routes = Routes{
 		"/host",
 		handler.CreateHost,
 		true,
+		false,
 	},
 	Route{
 		"Get host metric",
@@ -135,8 +160,8 @@ var routes = Routes{
 		"/host/{id}/metric",
 		handler.GetHostMetric,
 		true,
+		false,
 	},
-
 	//TODO add to swagger from here
 
 	//GameServers
@@ -146,6 +171,7 @@ var routes = Routes{
 		"/host/my/server",
 		game_server.ListByUser,
 		true,
+		false,
 	},
 	Route{
 		"Get game server",
@@ -153,6 +179,7 @@ var routes = Routes{
 		"/host/{host_id}/server/{server_id}",
 		game_server.Get,
 		true,
+		false,
 	},
 	Route{
 		"Remove game server",
@@ -160,6 +187,7 @@ var routes = Routes{
 		"/host/{host_id}/server/{server_id}",
 		game_server.Remove,
 		true,
+		false,
 	},
 	Route{
 		"Create game server",
@@ -167,6 +195,7 @@ var routes = Routes{
 		"/host/{host_id}/server",
 		game_server.Create,
 		true,
+		false,
 	},
 	Route{
 		"List game servers by host id",
@@ -174,6 +203,7 @@ var routes = Routes{
 		"/host/{id}/server",
 		game_server.ListByHostId,
 		true,
+		false,
 	},
 	Route{
 		"Install game server",
@@ -181,6 +211,7 @@ var routes = Routes{
 		"/host/{host_id}/server/{server_id}/install",
 		game_server.Install,
 		true,
+		false,
 	},
 	Route{
 		"Start game server",
@@ -188,6 +219,7 @@ var routes = Routes{
 		"/host/{host_id}/server/{server_id}/start",
 		game_server.Start,
 		true,
+		false,
 	},
 	Route{
 		"Restart game server",
@@ -195,6 +227,7 @@ var routes = Routes{
 		"/host/{host_id}/server/{server_id}/restart",
 		game_server.Restart,
 		true,
+		false,
 	},
 	Route{
 		"Stop game server",
@@ -202,6 +235,7 @@ var routes = Routes{
 		"/host/{host_id}/server/{server_id}/stop",
 		game_server.Stop,
 		true,
+		false,
 	},
 	Route{
 		"Send command to game server",
@@ -209,12 +243,22 @@ var routes = Routes{
 		"/host/{host_id}/server/{server_id}/command",
 		game_server.SendCommand,
 		true,
+		false,
 	},
 	Route{
 		"Game server logs",
-		"PUT",
+		"GET",
 		"/host/{host_id}/server/{server_id}/logs",
 		game_server.ConsoleLog,
+		true,
+		false,
+	},
+	Route{
+		"Game server logs",
+		"GET",
+		"/host/{host_id}/server/{server_id}/logs",
+		game_server.ConsoleLog,
+		true,
 		true,
 	},
 
@@ -225,6 +269,7 @@ var routes = Routes{
 		"/user/change_password",
 		handler.ChangePassword,
 		true,
+		false,
 	},
 	Route{
 		"Change email",
@@ -232,6 +277,7 @@ var routes = Routes{
 		"/user/change_email",
 		handler.ChangeEmail,
 		true,
+		false,
 	},
 	Route{
 		"User profile",
@@ -239,6 +285,7 @@ var routes = Routes{
 		"/user/profile",
 		handler.Profile,
 		true,
+		false,
 	},
 
 	//Games
@@ -248,5 +295,6 @@ var routes = Routes{
 		"/game",
 		handler.ListGames,
 		true,
+		false,
 	},
 }

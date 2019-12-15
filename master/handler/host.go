@@ -2,12 +2,15 @@ package handler
 
 import (
 	"encoding/json"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/master/gs"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"net/http"
+	"os"
+	"time"
 )
 
 // swagger:route GET /host Host List
@@ -126,7 +129,6 @@ func GetHostMetric(w http.ResponseWriter, r *http.Request) {
 	lib.MustEncode(json.NewEncoder(w), metric)
 }
 
-
 func RemoveHost(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
@@ -143,8 +145,36 @@ func RemoveHost(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	model.DB.Where("endpoint LIKE ?", "/v1/host/" + host.ID.String() + "%").Delete(&model.Permission{})
+	model.DB.Where("endpoint LIKE ?", "/v1/host/"+host.ID.String()+"%").Delete(&model.Permission{})
 	model.DB.Delete(&host)
 
 	lib.MustEncode(json.NewEncoder(w), JsonSuccess{Message: "Removing host"})
+}
+
+func HostAuth(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+
+	var host model.Host
+	model.DB.Where("token = ?", params["token"]).First(&host)
+
+	if &host == nil {
+		lib.MustEncode(json.NewEncoder(w),
+			JsonError{ErrorCode: 1017})
+		return
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"exp": time.Now().Add(time.Hour * 48).Unix(),
+		"uid": host.ID,
+	})
+	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+
+		lib.MustEncode(json.NewEncoder(w),
+			JsonError{ErrorCode: 1008})
+		return
+	}
+
+	lib.MustEncode(json.NewEncoder(w), TokenResponse{Token: tokenString})
 }
