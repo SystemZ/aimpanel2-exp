@@ -71,12 +71,12 @@ var routes = Routes{
 	},
 
 	Route{
-		"SSE",
+		"Host events",
 		"GET",
-		"/events/{channel}",
-		sse.SSEHandler,
+		"/events/{host_id}",
+		sse.Handler,
 		true,
-		false,
+		true,
 	},
 
 	//Auth

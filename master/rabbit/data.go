@@ -1,16 +1,13 @@
 package rabbit
 
 import (
-	"encoding/base64"
 	"encoding/json"
-	sse2 "github.com/alexandrevicenzi/go-sse"
 	"github.com/go-redis/redis"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/game"
 	"gitlab.com/systemz/aimpanel2/lib/rabbit"
 	"gitlab.com/systemz/aimpanel2/master/model"
-	"gitlab.com/systemz/aimpanel2/master/sse"
 	"time"
 )
 
@@ -59,8 +56,8 @@ func ListenWrapperData() {
 					gsLog.Type = model.STDERR
 				}
 
-				sse.SSE.SendMessage("/v1/console/" + gsLog.GameServerId.String(),
-					sse2.SimpleMessage(base64.StdEncoding.EncodeToString([]byte(gsLog.Log))))
+				//sse.SSE.SendMessage("/v1/console/" + gsLog.GameServerId.String(),
+				//	sse2.SimpleMessage(base64.StdEncoding.EncodeToString([]byte(gsLog.Log))))
 
 				err = model.DB.Save(&gsLog).Error
 				if err != nil {

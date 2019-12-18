@@ -165,7 +165,7 @@ func HostAuth(w http.ResponseWriter, r *http.Request) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"exp": time.Now().Add(time.Hour * 48).Unix(),
-		"uid": host.ID,
+		"uid": host.ID.String(),
 	})
 	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
 	if err != nil {
