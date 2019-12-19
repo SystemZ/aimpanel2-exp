@@ -6,6 +6,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/master/gs"
 	"gitlab.com/systemz/aimpanel2/master/handler"
+	"gitlab.com/systemz/aimpanel2/master/service/gameserver"
 	"net/http"
 )
 
@@ -22,7 +23,7 @@ func Start(w http.ResponseWriter, r *http.Request) {
 
 	gameServerId := params["server_id"]
 
-	if err, ok := gs.Start(gameServerId).(*lib.Error); ok {
+	if err, ok := gameserver.Start(gameServerId).(*lib.Error); ok {
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: err.ErrorCode})
 		return

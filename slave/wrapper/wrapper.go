@@ -19,7 +19,7 @@ var (
 func Start(gameServerID string) {
 	logrus.Info("Starting wrapper")
 
-	token := os.Getenv("TOKEN")
+	token := os.Getenv("HOST_TOKEN")
 	resp, err := http.Get(config.API_URL + "/v1/host/credentials/" + token + "/gs/" + gameServerID)
 	if err != nil {
 		lib.FailOnError(err, "Failed to get rabbit credentials")

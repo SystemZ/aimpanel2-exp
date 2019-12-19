@@ -28,6 +28,7 @@ func Start(gsId string) error {
 		TaskId:       rabbit.WRAPPER_START,
 		GameServerID: gameServer.ID,
 	})
+
 	if err != nil {
 		return &lib.Error{ErrorCode: 5005}
 	}
@@ -184,7 +185,7 @@ func Remove(gsId string) error {
 		return &lib.Error{ErrorCode: 5101}
 	}
 
-	model.DB.Where("endpoint LIKE ?", "/v1/host/" + gameServer.HostId.String() + "/server/" + gsId + "%").Delete(&model.Permission{})
+	model.DB.Where("endpoint LIKE ?", "/v1/host/"+gameServer.HostId.String()+"/server/"+gsId+"%").Delete(&model.Permission{})
 	model.DB.Delete(&gameServer)
 
 	return nil

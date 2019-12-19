@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 	"gitlab.com/systemz/aimpanel2/lib"
+	"gitlab.com/systemz/aimpanel2/lib/response"
 	"gitlab.com/systemz/aimpanel2/master/gs"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"net/http"
@@ -176,5 +177,5 @@ func HostAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	lib.MustEncode(json.NewEncoder(w), TokenResponse{Token: tokenString})
+	lib.MustEncode(json.NewEncoder(w), response.Token{Token: tokenString})
 }

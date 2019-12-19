@@ -1,4 +1,4 @@
-package sse
+package events
 
 import (
 	"github.com/alexandrevicenzi/go-sse"

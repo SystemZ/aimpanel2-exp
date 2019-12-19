@@ -2,9 +2,9 @@ package router
 
 import (
 	"github.com/gorilla/mux"
+	"gitlab.com/systemz/aimpanel2/master/events"
 	"gitlab.com/systemz/aimpanel2/master/handler"
 	"gitlab.com/systemz/aimpanel2/master/handler/game_server"
-	"gitlab.com/systemz/aimpanel2/master/sse"
 	"net/http"
 )
 
@@ -19,8 +19,8 @@ func NewRouter() *mux.Router {
 		handler = route.HandlerFunc
 
 		if route.AuthRequired {
-			if route.HostOnly {
-				handler = HostPermissionMiddleware(handler)
+			if route.SlaveOnly {
+				handler = SlavePermissionMiddleware(handler)
 			} else {
 				handler = AuthMiddleware(PermissionMiddleware(handler))
 			}
@@ -38,7 +38,7 @@ type Route struct {
 	Pattern      string
 	HandlerFunc  http.HandlerFunc
 	AuthRequired bool
-	HostOnly     bool
+	SlaveOnly    bool
 }
 
 type Routes []Route
@@ -73,8 +73,8 @@ var routes = Routes{
 	Route{
 		"Host events",
 		"GET",
-		"/events/{host_id}",
-		sse.Handler,
+		"/events/{host_token}",
+		events.Handler,
 		true,
 		true,
 	},

@@ -74,7 +74,7 @@ func PermissionMiddleware(handler http.Handler) http.Handler {
 	})
 }
 
-func HostPermissionMiddleware(handler http.Handler) http.Handler {
+func SlavePermissionMiddleware(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		tokenString := r.Header.Get("Authorization")
 		if len(tokenString) == 0 {
@@ -100,7 +100,7 @@ func HostPermissionMiddleware(handler http.Handler) http.Handler {
 		context.Set(r, "host", host)
 		params := mux.Vars(r)
 
-		if params["host_id"] != host.ID.String() {
+		if params["host_token"] != host.Token {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}

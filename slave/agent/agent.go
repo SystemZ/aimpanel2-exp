@@ -3,6 +3,7 @@ package agent
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/r3labs/sse"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/host"
@@ -11,17 +12,19 @@ import (
 	"github.com/streadway/amqp"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/rabbit"
+	"gitlab.com/systemz/aimpanel2/lib/response"
 	"gitlab.com/systemz/aimpanel2/slave/config"
 	"io"
 	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"time"
 )
 
 var (
-	token            string
+	hostToken        string
 	channel          *amqp.Channel
 	queue            amqp.Queue
 	queueData        amqp.Queue
@@ -36,15 +39,26 @@ type rabbitTask struct {
 
 func Start(t string) {
 	logrus.Info("Starting Agent")
-	token = t
+	hostToken = t
 
-	resp, err := http.Get(config.API_URL + "/v1/host/credentials/" + token)
+	resp, err := http.Get(config.API_URL + "/v1/host/credentials/" + hostToken)
 	if err != nil {
 		lib.FailOnError(err, "Failed to get rabbit credentials")
 	}
 
 	var creds rabbit.Credentials
 	err = json.NewDecoder(resp.Body).Decode(&creds)
+	if err != nil {
+		lib.FailOnError(err, "Failed to decode rabbit credentials json")
+	}
+
+	resp, err = http.Get(config.API_URL + "/v1/host/auth/" + hostToken)
+	if err != nil {
+		lib.FailOnError(err, "Failed to get host token")
+	}
+
+	var token response.Token
+	err = json.NewDecoder(resp.Body).Decode(&token)
 	if err != nil {
 		lib.FailOnError(err, "Failed to decode rabbit credentials json")
 	}
@@ -58,7 +72,7 @@ func Start(t string) {
 	defer channel.Close()
 
 	queue, err = channel.QueueDeclare(
-		"agent_"+token,
+		"agent_"+hostToken,
 		true,
 		false,
 		false,
@@ -82,18 +96,55 @@ func Start(t string) {
 	)
 	lib.FailOnError(err, "Failed to set QoS")
 
-	go agent()
+	go agent(token.Token)
 
-	sendToQueueData(rabbit.AGENT_METRICS_FREQUENCY)
+	//sendToQueueData(rabbit.AGENT_METRICS_FREQUENCY)
 
-	sendOSInfo()
+	//sendOSInfo()
 
-	go heartbeat()
+	//go heartbeat()
 
 	select {}
 }
 
-func agent() {
+func agent(token string) {
+	client := sse.NewClient(config.API_URL + "/v1/events/" + hostToken)
+	client.Headers = map[string]string{
+		"Authorization": "Bearer " + token,
+	}
+	err := client.SubscribeRaw(func(msg *sse.Event) {
+		logrus.Info(string(msg.ID))
+		logrus.Info(string(msg.Data))
+		logrus.Info(string(msg.Event))
+
+		gsId := string(msg.Data)
+		taskId, _ := strconv.Atoi(string(msg.Event))
+		switch taskId {
+		case rabbit.WRAPPER_START:
+			logrus.Info("START_WRAPPER")
+			cmd := exec.Command("slave", "wrapper", gsId)
+
+			cmd.Env = os.Environ()
+			cmd.Env = append(cmd.Env, "HOST_TOKEN="+hostToken)
+			cmd.Env = append(cmd.Env, "API_TOKEN="+token)
+
+			//TODO: FOR TESTING ONLY
+			var stdBuffer bytes.Buffer
+			mw := io.MultiWriter(os.Stdout, &stdBuffer)
+			cmd.Stdout = mw
+			cmd.Stderr = mw
+
+			if err := cmd.Start(); err != nil {
+				logrus.Error(err)
+			}
+
+			cmd.Process.Release()
+		}
+	})
+	if err != nil {
+		lib.FailOnError(err, "Failed to subscribe a channel")
+	}
+
 	msgs, err := channel.Consume(
 		queue.Name,
 		"",
@@ -142,32 +193,6 @@ func agent() {
 			})
 
 			msg.Ack(false)
-		case rabbit.WRAPPER_START:
-			logrus.Info("START_WRAPPER")
-			cmd := exec.Command("slave", "wrapper", task.msgBody.GameServerID.String())
-
-			cmd.Env = os.Environ()
-			cmd.Env = append(cmd.Env, "TOKEN="+token)
-
-			//TODO: FOR TESTING ONLY
-			var stdBuffer bytes.Buffer
-			mw := io.MultiWriter(os.Stdout, &stdBuffer)
-			cmd.Stdout = mw
-			cmd.Stderr = mw
-
-			if err := cmd.Start(); err != nil {
-				logrus.Error(err)
-			}
-
-			cmd.Process.Release()
-
-			rabbitRpcSimpleResponse(task, rabbit.QueueMsg{
-				TaskEnd: true,
-				TaskOk:  true,
-			})
-
-			msg.Ack(false)
-
 		case rabbit.AGENT_METRICS_FREQUENCY:
 			logrus.Info("AGENT_METRICS_FREQUENCY")
 
@@ -215,7 +240,7 @@ func metrics() {
 
 		msg := rabbit.QueueMsg{
 			TaskId:     rabbit.AGENT_METRICS,
-			AgentToken: token,
+			AgentToken: hostToken,
 			CpuUsage:   int(cpuPercent[0]),
 			RamFree:    int(ramFree),
 			RamTotal:   int(ramTotal),
@@ -259,7 +284,7 @@ func heartbeat() {
 
 		msg := rabbit.QueueMsg{
 			TaskId:     rabbit.AGENT_HEARTBEAT,
-			AgentToken: token,
+			AgentToken: hostToken,
 			Timestamp:  time.Now().Unix(),
 		}
 		msgJson, _ := json.Marshal(msg)
@@ -281,7 +306,7 @@ func heartbeat() {
 func sendToQueueData(taskId int) {
 	msg := rabbit.QueueMsg{
 		TaskId:     taskId,
-		AgentToken: token,
+		AgentToken: hostToken,
 	}
 
 	msgJson, _ := json.Marshal(msg)
@@ -305,7 +330,7 @@ func sendOSInfo() {
 
 	msg := rabbit.QueueMsg{
 		TaskId:     rabbit.AGENT_OS,
-		AgentToken: token,
+		AgentToken: hostToken,
 
 		OS:              h.OS,
 		Platform:        h.Platform,
