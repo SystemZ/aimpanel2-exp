@@ -13,6 +13,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/rabbit"
 	"gitlab.com/systemz/aimpanel2/lib/response"
+	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/slave/config"
 	"io"
 	"net/http"
@@ -113,12 +114,15 @@ func agent(token string) {
 		"Authorization": "Bearer " + token,
 	}
 	err := client.SubscribeRaw(func(msg *sse.Event) {
-		logrus.Info(string(msg.ID))
-		logrus.Info(string(msg.Data))
-		logrus.Info(string(msg.Event))
+		taskMsg := task.Message{}
+		err := taskMsg.Deserialize(string(msg.Data))
+		if err != nil {
+			logrus.Error(err)
+		}
 
 		gsId := string(msg.Data)
 		taskId, _ := strconv.Atoi(string(msg.Event))
+
 		switch taskId {
 		case rabbit.WRAPPER_START:
 			logrus.Info("START_WRAPPER")
@@ -139,8 +143,24 @@ func agent(token string) {
 			}
 
 			cmd.Process.Release()
+		case rabbit.GAME_INSTALL:
+			logrus.Info("INSTALL_GAME_SERVER")
+
+			gsPath := filepath.Clean(config.GS_DIR) + "/" + taskMsg.GameServerID.String()
+			if _, err := os.Stat(gsPath); os.IsNotExist(err) {
+				//TODO: Set correct perms
+				_ = os.Mkdir(gsPath, 0777)
+			}
+
+			err = taskMsg.Game.Install(filepath.Clean(config.STORAGE_DIR), gsPath)
+			if err != nil {
+				logrus.Error(err)
+			}
+
+			logrus.Info("Installation finished")
 		}
 	})
+
 	if err != nil {
 		lib.FailOnError(err, "Failed to subscribe a channel")
 	}
@@ -171,28 +191,6 @@ func agent(token string) {
 		}
 
 		switch msgBody.TaskId {
-		case rabbit.GAME_INSTALL:
-			logrus.Info("INSTALL_GAME_SERVER")
-
-			gsPath := filepath.Clean(config.GS_DIR) + "/" + task.msgBody.GameServerID.String()
-			if _, err := os.Stat(gsPath); os.IsNotExist(err) {
-				//TODO: Set correct perms
-				_ = os.Mkdir(gsPath, 0777)
-			}
-
-			err = task.msgBody.Game.Install(filepath.Clean(config.STORAGE_DIR), gsPath)
-			if err != nil {
-				logrus.Error(err)
-			}
-
-			logrus.Info("Installation finished")
-
-			rabbitRpcSimpleResponse(task, rabbit.QueueMsg{
-				TaskEnd: true,
-				TaskOk:  true,
-			})
-
-			msg.Ack(false)
 		case rabbit.AGENT_METRICS_FREQUENCY:
 			logrus.Info("AGENT_METRICS_FREQUENCY")
 

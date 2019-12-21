@@ -20,32 +20,30 @@ type GameServerSendCommandReq struct {
 
 func Start(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-
 	gameServerId := params["server_id"]
 
 	if err, ok := gameserver.Start(gameServerId).(*lib.Error); ok {
+		w.WriteHeader(http.StatusInternalServerError)
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: err.ErrorCode})
 		return
 	}
 
-	lib.MustEncode(json.NewEncoder(w),
-		handler.JsonSuccess{Message: "Game server is starting..."})
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func Install(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-
 	gameServerId := params["server_id"]
 
-	if err, ok := gs.Install(gameServerId).(*lib.Error); ok {
+	if err, ok := gameserver.Install(gameServerId).(*lib.Error); ok {
+		w.WriteHeader(http.StatusInternalServerError)
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: err.ErrorCode})
 		return
 	}
 
-	lib.MustEncode(json.NewEncoder(w),
-		handler.JsonSuccess{Message: "Game server is installing."})
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func Restart(w http.ResponseWriter, r *http.Request) {

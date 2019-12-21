@@ -1,6 +1,7 @@
 package task
 
 import (
+	"encoding/json"
 	"github.com/gofrs/uuid"
 	"gitlab.com/systemz/aimpanel2/lib/game"
 	"gitlab.com/systemz/aimpanel2/master/model"
@@ -43,4 +44,20 @@ type Message struct {
 	AgentToken   string          `json:"agent_token,omitempty"`
 
 	Timestamp int64 `json:"timestamp,omitempty"`
+}
+
+func (m *Message) Serialize() (string, error) {
+	data, err := json.Marshal(&m)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
+}
+
+func (m *Message) Deserialize(data string) error {
+	err := json.Unmarshal([]byte(data), &m)
+	if err != nil {
+		return err
+	}
+	return nil
 }
