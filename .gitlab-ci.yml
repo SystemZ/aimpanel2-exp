@@ -100,5 +100,5 @@ deploy:
     - apk add --no-cache curl git bash gawk
     - curl -X POST -F token=$INFRA_TOKEN -F "ref=master" -F "variables[SERVICE_NAME]=aimpanel-lab" -F "variables[SERVICE_VERSION]=pipeline-$CI_PIPELINE_ID" https://gitlab.com/api/v4/projects/6986946/trigger/pipeline
     - bash Taskfile.sh update-todo-issue
-    #only:
-    #- master
+    only:
+    - master
