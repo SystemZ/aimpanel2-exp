@@ -121,6 +121,13 @@ func CreateHost(w http.ResponseWriter, r *http.Request) {
 		Endpoint: "/v1/host/" + host.ID.String() + "/metric",
 	})
 
+	model.DB.Save(&model.Permission{
+		Name:     "Update host",
+		Verb:     lib.GetVerbByName("GET"),
+		GroupId:  group.ID,
+		Endpoint: "/v1/host/" + host.ID.String() + "/update",
+	})
+
 	lib.MustEncode(json.NewEncoder(w), host)
 }
 
