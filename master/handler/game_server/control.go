@@ -128,7 +128,7 @@ func Data(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = gameserver.HostData(hostToken)
+	err = gameserver.HostData(hostToken, data)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		lib.MustEncode(json.NewEncoder(w),

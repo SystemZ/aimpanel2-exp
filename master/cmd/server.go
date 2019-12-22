@@ -29,7 +29,6 @@ var serverCmd = &cobra.Command{
 		events.SSE = events.InitSSE()
 
 		rabbit.Listen()
-		rabbit.ListenAgentData()
 		rabbit.SetupRabbitAPI()
 
 		go cron.CheckHostsHeartbeat()
