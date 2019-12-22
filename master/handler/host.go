@@ -5,6 +5,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/response"
 	"gitlab.com/systemz/aimpanel2/master/model"
@@ -186,6 +187,8 @@ func Update(w http.ResponseWriter, r *http.Request) {
 
 	err := gameserver.Update(hostId)
 	if err != nil {
+		logrus.Error(err)
+
 		w.WriteHeader(http.StatusInternalServerError)
 		lib.MustEncode(json.NewEncoder(w),
 			JsonError{ErrorCode: 1234})

@@ -270,13 +270,13 @@ func Update(hostId string) error {
 		return errors.New("host is not turned on")
 	}
 
-	commit := model.Redis.Get("slave_commit").String()
-	if commit == "" {
+	commit, err := model.Redis.Get("slave_commit").Result()
+	if err != nil {
 		return errors.New("empty commit")
 	}
 
-	url := model.Redis.Get("slave_url").String()
-	if url == "" {
+	url, err := model.Redis.Get("slave_url").Result()
+	if err != nil {
 		return errors.New("empty url")
 	}
 
