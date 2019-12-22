@@ -272,12 +272,12 @@ func Update(hostId string) error {
 
 	commit, err := model.Redis.Get("slave_commit").Result()
 	if err != nil {
-		return errors.New("empty commit")
+		return err
 	}
 
 	url, err := model.Redis.Get("slave_url").Result()
 	if err != nil {
-		return errors.New("empty url")
+		return err
 	}
 
 	taskMsg := task.Message{
