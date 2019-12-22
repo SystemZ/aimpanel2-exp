@@ -17,6 +17,8 @@ var (
 	GIT_COMMIT string
 
 	LOG_DEV bool
+
+	UPDATE_TOKEN string
 )
 
 func init() {
@@ -45,4 +47,7 @@ func init() {
 
 	viper.SetDefault("LOG_DEV", false)
 	LOG_DEV = viper.GetBool("LOG_DEV")
+
+	viper.SetDefault("UPDATE_TOKEN", "")
+	UPDATE_TOKEN = viper.GetString("UPDATE_TOKEN")
 }
