@@ -22,6 +22,7 @@ require (
 	github.com/michaelklishin/rabbit-hole v1.5.0
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
 	github.com/pelletier/go-toml v1.4.0 // indirect
+	github.com/r3labs/sse v0.0.0-20191214223212-f0cc80f53f80
 	github.com/rs/cors v1.7.0
 	github.com/sethvargo/go-password v0.1.3
 	github.com/shirou/gopsutil v2.19.9+incompatible
@@ -33,8 +34,6 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/viper v1.4.0
 	github.com/streadway/amqp v0.0.0-20190827072141-edfb9018d271
-	github.com/stretchr/testify v1.4.0 // indirect
 	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550
-	golang.org/x/net v0.0.0-20190813141303-74dc4d7220e7 // indirect
 	golang.org/x/sys v0.0.0-20190813064441-fde4db37ae7a // indirect
 )

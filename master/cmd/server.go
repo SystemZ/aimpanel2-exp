@@ -5,10 +5,9 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"gitlab.com/systemz/aimpanel2/master/cron"
+	"gitlab.com/systemz/aimpanel2/master/events"
 	"gitlab.com/systemz/aimpanel2/master/model"
-	"gitlab.com/systemz/aimpanel2/master/rabbit"
 	"gitlab.com/systemz/aimpanel2/master/router"
-	"gitlab.com/systemz/aimpanel2/master/sse"
 	"net/http"
 	"os"
 )
@@ -25,13 +24,7 @@ var serverCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		model.DB = model.InitMysql()
 		model.InitRedis()
-
-		sse.SSE = sse.InitSSE()
-
-		rabbit.Listen()
-		rabbit.ListenWrapperData()
-		rabbit.ListenAgentData()
-		rabbit.SetupRabbitAPI()
+		events.SSE = events.InitSSE()
 
 		go cron.CheckHostsHeartbeat()
 		go cron.CheckGSHeartbeat()

@@ -3,6 +3,7 @@ package router
 import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/context"
+	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
@@ -67,6 +68,49 @@ func PermissionMiddleware(handler http.Handler) http.Handler {
 			logrus.Info("Access denied")
 			w.WriteHeader(http.StatusUnauthorized)
 			return
+		}
+
+		handler.ServeHTTP(w, r)
+	})
+}
+
+func SlavePermissionMiddleware(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		tokenString := r.Header.Get("Authorization")
+		if len(tokenString) == 0 {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		tokenString = strings.Replace(tokenString, "Bearer ", "", 1)
+
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+			//TODO: move to config package instead of jwt_secret
+			return []byte(os.Getenv("JWT_SECRET")), nil
+		})
+		if err != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		var host model.Host
+		if model.DB.Where("id = ?", token.Claims.(jwt.MapClaims)["uid"].(string)).First(&host).RecordNotFound() {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		params := mux.Vars(r)
+		if params["host_token"] != host.Token {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		gsId, ok := params["server_id"]
+		if ok {
+			var gs model.GameServer
+			if model.DB.Where("id = ?", gsId).First(&gs).RecordNotFound() {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
 		}
 
 		handler.ServeHTTP(w, r)

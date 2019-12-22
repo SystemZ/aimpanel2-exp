@@ -86,3 +86,11 @@ func GetHostToken(db *gorm.DB, hostId string) string {
 
 	return host.Token
 }
+
+func GetHostByToken(db *gorm.DB, token string) *Host {
+	var host Host
+	if db.Where("token = ?", token).First(&host).RecordNotFound() {
+		return nil
+	}
+	return &host
+}

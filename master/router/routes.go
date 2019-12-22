@@ -2,9 +2,9 @@ package router
 
 import (
 	"github.com/gorilla/mux"
+	"gitlab.com/systemz/aimpanel2/master/events"
 	"gitlab.com/systemz/aimpanel2/master/handler"
 	"gitlab.com/systemz/aimpanel2/master/handler/game_server"
-	"gitlab.com/systemz/aimpanel2/master/sse"
 	"net/http"
 )
 
@@ -19,7 +19,11 @@ func NewRouter() *mux.Router {
 		handler = route.HandlerFunc
 
 		if route.AuthRequired {
-			handler = AuthMiddleware(PermissionMiddleware(route.HandlerFunc))
+			if route.SlaveOnly {
+				handler = SlavePermissionMiddleware(handler)
+			} else {
+				handler = AuthMiddleware(PermissionMiddleware(handler))
+			}
 		}
 
 		v1.Path(route.Pattern).Handler(handler).Name(route.Name).Methods(route.Method)
@@ -34,6 +38,7 @@ type Route struct {
 	Pattern      string
 	HandlerFunc  http.HandlerFunc
 	AuthRequired bool
+	SlaveOnly    bool
 }
 
 type Routes []Route
@@ -45,6 +50,7 @@ var routes = Routes{
 		"/",
 		handler.Index,
 		true,
+		false,
 	},
 	Route{
 		"SwaggerSpec",
@@ -52,22 +58,40 @@ var routes = Routes{
 		"/swagger.json",
 		handler.SwaggerSpec,
 		false,
-	},
-
-	Route{
-		"Get rabbit game server credentials",
-		"GET",
-		"/rabbit/credentials/{token}",
-		handler.GetHostCredentials,
 		false,
 	},
 
 	Route{
-		"SSE",
+		"Host events",
 		"GET",
-		"/console/{channel}",
-		sse.SSEHandler,
-		false,
+		"/events/{host_token}",
+		events.Handler,
+		true,
+		true,
+	},
+	Route{
+		"Game server events",
+		"GET",
+		"/events/{host_token}/{server_id}",
+		events.Handler,
+		true,
+		true,
+	},
+	Route{
+		"Host data",
+		"POST",
+		"/events/{host_token}",
+		game_server.Data,
+		true,
+		true,
+	},
+	Route{
+		"Game server data",
+		"POST",
+		"/events/{host_token}/{server_id}",
+		game_server.Data,
+		true,
+		true,
 	},
 
 	//Auth
@@ -77,12 +101,14 @@ var routes = Routes{
 		"/auth/register",
 		handler.Register,
 		false,
+		false,
 	},
 	Route{
 		"Login",
 		"POST",
 		"/auth/login",
 		handler.Login,
+		false,
 		false,
 	},
 
@@ -93,19 +119,14 @@ var routes = Routes{
 		"/host",
 		handler.ListHosts,
 		true,
-	},
-	Route{
-		"Get rabbit host credentials",
-		"GET",
-		"/host/credentials/{token}",
-		handler.GetHostCredentials,
 		false,
 	},
 	Route{
-		"Get rabbit game server credentials",
+		"Host auth",
 		"GET",
-		"/host/credentials/{token}/gs/{server_id}",
-		handler.GetGameServerCredentials,
+		"/host/auth/{token}",
+		handler.HostAuth,
+		false,
 		false,
 	},
 	Route{
@@ -114,6 +135,7 @@ var routes = Routes{
 		"/host/{id}",
 		handler.GetHost,
 		true,
+		false,
 	},
 	Route{
 		"Remove host",
@@ -121,6 +143,7 @@ var routes = Routes{
 		"/host/{id}",
 		handler.RemoveHost,
 		true,
+		false,
 	},
 	Route{
 		"Create host",
@@ -128,6 +151,7 @@ var routes = Routes{
 		"/host",
 		handler.CreateHost,
 		true,
+		false,
 	},
 	Route{
 		"Get host metric",
@@ -135,8 +159,8 @@ var routes = Routes{
 		"/host/{id}/metric",
 		handler.GetHostMetric,
 		true,
+		false,
 	},
-
 	//TODO add to swagger from here
 
 	//GameServers
@@ -146,6 +170,7 @@ var routes = Routes{
 		"/host/my/server",
 		game_server.ListByUser,
 		true,
+		false,
 	},
 	Route{
 		"Get game server",
@@ -153,6 +178,7 @@ var routes = Routes{
 		"/host/{host_id}/server/{server_id}",
 		game_server.Get,
 		true,
+		false,
 	},
 	Route{
 		"Remove game server",
@@ -160,6 +186,7 @@ var routes = Routes{
 		"/host/{host_id}/server/{server_id}",
 		game_server.Remove,
 		true,
+		false,
 	},
 	Route{
 		"Create game server",
@@ -167,6 +194,7 @@ var routes = Routes{
 		"/host/{host_id}/server",
 		game_server.Create,
 		true,
+		false,
 	},
 	Route{
 		"List game servers by host id",
@@ -174,6 +202,7 @@ var routes = Routes{
 		"/host/{id}/server",
 		game_server.ListByHostId,
 		true,
+		false,
 	},
 	Route{
 		"Install game server",
@@ -181,6 +210,7 @@ var routes = Routes{
 		"/host/{host_id}/server/{server_id}/install",
 		game_server.Install,
 		true,
+		false,
 	},
 	Route{
 		"Start game server",
@@ -188,6 +218,7 @@ var routes = Routes{
 		"/host/{host_id}/server/{server_id}/start",
 		game_server.Start,
 		true,
+		false,
 	},
 	Route{
 		"Restart game server",
@@ -195,6 +226,7 @@ var routes = Routes{
 		"/host/{host_id}/server/{server_id}/restart",
 		game_server.Restart,
 		true,
+		false,
 	},
 	Route{
 		"Stop game server",
@@ -202,6 +234,7 @@ var routes = Routes{
 		"/host/{host_id}/server/{server_id}/stop",
 		game_server.Stop,
 		true,
+		false,
 	},
 	Route{
 		"Send command to game server",
@@ -209,12 +242,22 @@ var routes = Routes{
 		"/host/{host_id}/server/{server_id}/command",
 		game_server.SendCommand,
 		true,
+		false,
 	},
 	Route{
 		"Game server logs",
-		"PUT",
+		"GET",
 		"/host/{host_id}/server/{server_id}/logs",
 		game_server.ConsoleLog,
+		true,
+		false,
+	},
+	Route{
+		"Game server logs",
+		"GET",
+		"/host/{host_id}/server/{server_id}/logs",
+		game_server.ConsoleLog,
+		true,
 		true,
 	},
 
@@ -225,6 +268,7 @@ var routes = Routes{
 		"/user/change_password",
 		handler.ChangePassword,
 		true,
+		false,
 	},
 	Route{
 		"Change email",
@@ -232,6 +276,7 @@ var routes = Routes{
 		"/user/change_email",
 		handler.ChangeEmail,
 		true,
+		false,
 	},
 	Route{
 		"User profile",
@@ -239,6 +284,7 @@ var routes = Routes{
 		"/user/profile",
 		handler.Profile,
 		true,
+		false,
 	},
 
 	//Games
@@ -248,5 +294,6 @@ var routes = Routes{
 		"/game",
 		handler.ListGames,
 		true,
+		false,
 	},
 }

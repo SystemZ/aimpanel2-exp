@@ -3,14 +3,10 @@ package handler
 import (
 	"encoding/json"
 	"gitlab.com/systemz/aimpanel2/lib"
+	"gitlab.com/systemz/aimpanel2/lib/response"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"net/http"
 )
-
-//swagger:response tokenResponse
-type TokenResponse struct {
-	Token string `json:"token"`
-}
 
 //swagger:parameters Authentication register
 type AuthRegisterReq struct {
@@ -164,7 +160,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		Endpoint: "/v1/game",
 	})
 
-	lib.MustEncode(json.NewEncoder(w), TokenResponse{Token: token})
+	lib.MustEncode(json.NewEncoder(w), response.Token{Token: token})
 }
 
 // swagger:route POST /auth/login Auth Login
@@ -201,7 +197,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		lib.MustEncode(json.NewEncoder(w), TokenResponse{Token: token})
+		lib.MustEncode(json.NewEncoder(w), response.Token{Token: token})
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
 

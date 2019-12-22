@@ -2,18 +2,17 @@ package wrapper
 
 import (
 	"bufio"
-	"encoding/json"
-	"github.com/gofrs/uuid"
+	"github.com/r3labs/sse"
 	proc "github.com/shirou/gopsutil/process"
 	"github.com/sirupsen/logrus"
-	"github.com/streadway/amqp"
 	"gitlab.com/systemz/aimpanel2/lib"
-	"gitlab.com/systemz/aimpanel2/lib/rabbit"
+	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/slave/config"
 	"io"
 	"log"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"sync"
 	"syscall"
@@ -27,14 +26,6 @@ type Process struct {
 	Output chan string
 	Input  chan string
 
-	//amqp
-	Channel             *amqp.Channel
-	Queue               amqp.Queue
-	QueueData           amqp.Queue
-	ClientCorrelationId string
-	ReplyTo             string
-
-	//
 	GameServerID     string
 	GameStartCommand []string
 	MetricFrequency  int
@@ -114,10 +105,35 @@ func (p *Process) Run() {
 				}
 			}
 			logrus.Errorf("cmd.Wait: %v", err)
-			p.SendToQueueData(rabbit.WRAPPER_EXITED)
+
+			taskMsg := task.Message{
+				TaskId: task.WRAPPER_EXITED,
+			}
+
+			jsonStr, err := taskMsg.Serialize()
+			if err != nil {
+				logrus.Error(err)
+			}
+			//TODO: do something with status code
+			_, err = lib.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN+"/"+p.GameServerID, config.API_TOKEN, jsonStr)
+			if err != nil {
+				logrus.Error(err)
+			}
 			os.Exit(0)
 		} else {
-			p.SendToQueueData(rabbit.WRAPPER_EXITED)
+			taskMsg := task.Message{
+				TaskId: task.WRAPPER_EXITED,
+			}
+
+			jsonStr, err := taskMsg.Serialize()
+			if err != nil {
+				logrus.Error(err)
+			}
+			//TODO: do something with status code
+			_, err = lib.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN+"/"+p.GameServerID, config.API_TOKEN, jsonStr)
+			if err != nil {
+				logrus.Error(err)
+			}
 			os.Exit(0)
 		}
 	}()
@@ -127,51 +143,39 @@ func (p *Process) Run() {
 }
 
 func (p *Process) LogStdout(msg string) {
-	logMessage := rabbit.QueueMsg{
-		TaskId:       rabbit.SERVER_LOG,
+	taskMsg := task.Message{
+		TaskId:       task.SERVER_LOG,
+		GameServerID: p.GameServerID,
 		Stdout:       msg,
-		GameServerID: uuid.FromStringOrNil(p.GameServerID),
 	}
 
-	logMessageJson, _ := json.Marshal(logMessage)
-
-	err := p.Channel.Publish(
-		"",
-		p.QueueData.Name,
-		false,
-		false,
-		amqp.Publishing{
-			ContentType:   "application/json",
-			CorrelationId: p.ClientCorrelationId,
-			Body:          logMessageJson,
-		})
-
-	lib.FailOnError(err, "Publish error")
+	jsonStr, err := taskMsg.Serialize()
+	if err != nil {
+		logrus.Error(err)
+	}
+	//TODO: do something with status code
+	_, err = lib.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN+"/"+p.GameServerID, config.API_TOKEN, jsonStr)
+	if err != nil {
+		logrus.Error(err)
+	}
 }
 
 func (p *Process) LogStderr(msg string) {
-	logMessage := rabbit.QueueMsg{
-		TaskId:       rabbit.SERVER_LOG,
+	taskMsg := task.Message{
+		TaskId:       task.SERVER_LOG,
+		GameServerID: p.GameServerID,
 		Stderr:       msg,
-		GameServerID: uuid.FromStringOrNil(p.GameServerID),
 	}
 
-	logMessageJson, _ := json.Marshal(logMessage)
-
-	logrus.Info(logMessage)
-
-	err := p.Channel.Publish(
-		"",
-		p.QueueData.Name,
-		false,
-		false,
-		amqp.Publishing{
-			ContentType:   "application/json",
-			CorrelationId: p.ClientCorrelationId,
-			Body:          logMessageJson,
-		})
-
-	lib.FailOnError(err, "Publish error")
+	jsonStr, err := taskMsg.Serialize()
+	if err != nil {
+		logrus.Error(err)
+	}
+	//TODO: do something with status code
+	_, err = lib.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN+"/"+p.GameServerID, config.API_TOKEN, jsonStr)
+	if err != nil {
+		logrus.Error(err)
+	}
 }
 
 func (p *Process) Kill(signal syscall.Signal) {
@@ -183,36 +187,29 @@ func (p *Process) Kill(signal syscall.Signal) {
 
 }
 
-type rabbitTask struct {
-	msg     amqp.Delivery
-	msgBody rabbit.QueueMsg
-	ch      *amqp.Channel
-}
-
 func (p *Process) Rpc() {
-	msgs, err := p.Channel.Consume(p.Queue.Name, "", false, false, false, false, nil)
-	lib.FailOnError(err, "Failed to register a consumer")
+	client := sse.NewClient(config.API_URL + "/v1/events/" + config.HOST_TOKEN + "/" + p.GameServerID)
+	client.Headers = map[string]string{
+		"Authorization": "Bearer " + config.API_TOKEN,
+	}
+	err := client.SubscribeRaw(func(msg *sse.Event) {
+		logrus.Info(msg.ID)
+		logrus.Info(string(msg.Data))
+		logrus.Info(string(msg.Event))
 
-	for msg := range msgs {
-		logrus.Info("Received a task")
-
-		var msgBody rabbit.QueueMsg
-		err := json.Unmarshal(msg.Body, &msgBody)
+		taskMsg := task.Message{}
+		err := taskMsg.Deserialize(string(msg.Data))
 		if err != nil {
-			logrus.Warn(err)
+			logrus.Error(err)
 		}
 
-		task := rabbitTask{
-			msg:     msg,
-			ch:      p.Channel,
-			msgBody: msgBody,
-		}
+		taskId, _ := strconv.Atoi(string(msg.Event))
 
-		switch msgBody.TaskId {
-		case rabbit.GAME_START:
+		switch taskId {
+		case task.GAME_START:
 			logrus.Info("Got GAME_START msg")
 
-			startCommand, err := task.msgBody.Game.GetCmd()
+			startCommand, err := taskMsg.Game.GetCmd()
 			if err != nil {
 				logrus.Error(err)
 			}
@@ -220,93 +217,24 @@ func (p *Process) Rpc() {
 			p.GameStartCommand = strings.Split(startCommand, " ")
 
 			go p.Run()
-
-			err = p.Channel.Publish("", msg.ReplyTo, false, false, amqp.Publishing{
-				ContentType:   "application/json",
-				CorrelationId: p.ClientCorrelationId,
-				Body:          []byte(""),
-			})
-			lib.FailOnError(err, "Failed to publish a message")
-
-			msg.Ack(false)
-		case rabbit.GAME_COMMAND:
+		case task.GAME_COMMAND:
 			logrus.Info("Got GAME_COMMAND msg")
-
-			go func() { p.Input <- string(msgBody.Body) }()
-
-			err = p.Channel.Publish("", msg.ReplyTo, false, false, amqp.Publishing{
-				ContentType:   "application/json",
-				CorrelationId: p.ClientCorrelationId,
-				Body:          []byte(""),
-			})
-			lib.FailOnError(err, "Failed to publish a message")
-
-			msg.Ack(false)
-		case rabbit.GAME_STOP_SIGKILL:
+			go func() { p.Input <- taskMsg.Body }()
+		case task.GAME_STOP_SIGKILL:
 			logrus.Info("Got GAME_STOP_SIGKILL msg")
-
 			p.Kill(syscall.SIGKILL)
-
-			err = p.Channel.Publish("", msg.ReplyTo, false, false, amqp.Publishing{
-				ContentType:   "application/json",
-				CorrelationId: p.ClientCorrelationId,
-				Body:          []byte(""),
-			})
-			lib.FailOnError(err, "Failed to publish a message")
-
-			msg.Ack(false)
-		case rabbit.GAME_STOP_SIGTERM:
+		case task.GAME_STOP_SIGTERM:
 			logrus.Info("Got GAME_STOP_SIGTERM msg")
-
 			p.Kill(syscall.SIGTERM)
-
-			err = p.Channel.Publish("", msg.ReplyTo, false, false, amqp.Publishing{
-				ContentType:   "application/json",
-				CorrelationId: p.ClientCorrelationId,
-				Body:          []byte(""),
-			})
-			lib.FailOnError(err, "Failed to publish a message")
-
-			msg.Ack(false)
-		case rabbit.WRAPPER_METRICS_FREQUENCY:
+		case task.WRAPPER_METRICS_FREQUENCY:
 			logrus.Info("Got WRAPPER_METRICS_FREQUENCY msg")
-
-			p.MetricFrequency = msgBody.MetricFrequency
-
+			p.MetricFrequency = taskMsg.MetricFrequency
 			go p.Metrics()
-
-			err = p.Channel.Publish("", msg.ReplyTo, false, false, amqp.Publishing{
-				ContentType:   "application/json",
-				CorrelationId: p.ClientCorrelationId,
-				Body:          []byte(""),
-			})
-			lib.FailOnError(err, "Failed to publish a message")
-
-			msg.Ack(false)
 		}
+	})
+	if err != nil {
+		lib.FailOnError(err, "Can't connect to event channel")
 	}
-}
-
-func (p *Process) SendToQueueData(taskId int) {
-	msg := rabbit.QueueMsg{
-		TaskId:       taskId,
-		GameServerID: uuid.FromStringOrNil(p.GameServerID),
-	}
-
-	msgJson, _ := json.Marshal(msg)
-
-	err := p.Channel.Publish(
-		"",
-		p.QueueData.Name,
-		false,
-		false,
-		amqp.Publishing{
-			ContentType:   "application/json",
-			CorrelationId: p.ClientCorrelationId,
-			Body:          msgJson,
-		})
-
-	lib.FailOnError(err, "Publish error")
 }
 
 func (p *Process) Metrics() {
@@ -331,27 +259,22 @@ func (p *Process) Metrics() {
 
 			rss := memoryInfoStat.RSS / 1024 / 1024
 
-			msg := rabbit.QueueMsg{
-				TaskId:       rabbit.WRAPPER_METRICS,
-				GameServerID: uuid.FromStringOrNil(p.GameServerID),
+			taskMsg := task.Message{
+				TaskId:       task.WRAPPER_METRICS,
+				GameServerID: p.GameServerID,
 				CpuUsage:     int(cpuPercent),
 				RamUsage:     int(rss),
 			}
 
-			msgJson, _ := json.Marshal(msg)
-
-			err = p.Channel.Publish(
-				"",
-				p.QueueData.Name,
-				false,
-				false,
-				amqp.Publishing{
-					ContentType:   "application/json",
-					CorrelationId: p.ClientCorrelationId,
-					Body:          msgJson,
-				})
-
-			lib.FailOnError(err, "Publish error")
+			jsonStr, err := taskMsg.Serialize()
+			if err != nil {
+				logrus.Error(err)
+			}
+			//TODO: do something with status code
+			_, err = lib.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN+"/"+p.GameServerID, config.API_TOKEN, jsonStr)
+			if err != nil {
+				logrus.Error(err)
+			}
 		}
 
 	}
@@ -363,23 +286,20 @@ func (p *Process) Heartbeat() {
 
 		logrus.Info("Sending heartbeat")
 
-		msg := rabbit.QueueMsg{
-			TaskId:       rabbit.WRAPPER_HEARTBEAT,
-			GameServerID: uuid.FromStringOrNil(p.GameServerID),
+		taskMsg := task.Message{
+			TaskId:       task.WRAPPER_HEARTBEAT,
+			GameServerID: p.GameServerID,
 			Timestamp:    time.Now().Unix(),
 		}
-		msgJson, _ := json.Marshal(msg)
 
-		err := channel.Publish(
-			"",
-			p.QueueData.Name,
-			false,
-			false,
-			amqp.Publishing{
-				ContentType:   "application/json",
-				CorrelationId: lib.RandomString(32),
-				Body:          msgJson,
-			})
-		lib.FailOnError(err, "Publish error")
+		jsonStr, err := taskMsg.Serialize()
+		if err != nil {
+			logrus.Error(err)
+		}
+		//TODO: do something with status code
+		_, err = lib.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN+"/"+p.GameServerID, config.API_TOKEN, jsonStr)
+		if err != nil {
+			logrus.Error(err)
+		}
 	}
 }
