@@ -5,7 +5,6 @@ import (
 	"github.com/go-redis/redis"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
-	"gitlab.com/systemz/aimpanel2/lib/game"
 	"gitlab.com/systemz/aimpanel2/lib/rabbit"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"time"
@@ -63,64 +62,6 @@ func ListenWrapperData() {
 				if err != nil {
 					logrus.Warn(err)
 				}
-			case rabbit.WRAPPER_STARTED:
-				logrus.Info("WRAPPER_STARTED")
-				gameServerId := msgBody.GameServerID
-				_, err := model.Redis.Get("gs_restart_id_" + gameServerId.String()).Int64()
-				if err == nil {
-					var gs model.GameServer
-					if model.DB.Where("id = ?", gameServerId).First(&gs).RecordNotFound() {
-						break
-					}
-
-					//var startCommand model.GameCommand
-					//if model.DB.Where("game_id = ? and type = ?", gs.GameId, "start").
-					//	First(&startCommand).RecordNotFound() {
-					//	break
-					//}
-					var gameDef game.Game
-					err = json.Unmarshal([]byte(gs.GameJson), &gameDef)
-
-					msg := rabbit.QueueMsg{
-						TaskId:       rabbit.GAME_START,
-						GameServerID: gs.ID,
-						Game:         gameDef,
-					}
-
-					err := SendRpcMessage("wrapper_"+gs.ID.String(), msg)
-					if err != nil {
-						logrus.Error(err.Error())
-						break
-					}
-
-					model.Redis.Del("gs_restart_id_" + gs.ID.String())
-				}
-
-				_, err = model.Redis.Get("gs_start_id_" + gameServerId.String()).Int64()
-				if err == nil {
-					var gs model.GameServer
-					if model.DB.Where("id = ?", gameServerId).First(&gs).RecordNotFound() {
-						break
-					}
-
-					var gameDef game.Game
-					err = json.Unmarshal([]byte(gs.GameJson), &gameDef)
-
-					msg := rabbit.QueueMsg{
-						TaskId:       rabbit.GAME_START,
-						GameServerID: gs.ID,
-						Game:         gameDef,
-					}
-
-					err := SendRpcMessage("wrapper_"+gs.ID.String(), msg)
-					if err != nil {
-						logrus.Error(err.Error())
-						break
-					}
-
-					model.Redis.Del("gs_start_id_" + gs.ID.String())
-				}
-
 			case rabbit.WRAPPER_EXITED:
 				logrus.Info("WRAPPER_EXITED")
 				gameServerId := msgBody.GameServerID

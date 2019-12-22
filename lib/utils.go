@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	log "github.com/sirupsen/logrus"
@@ -85,4 +86,22 @@ func CopyFile(source string, destination string) error {
 	}
 
 	return nil
+}
+
+func SendTaskData(url string, token string, jsonStr string) (int, error) {
+	req, err := http.NewRequest("POST", url, bytes.NewBufferString(jsonStr))
+	if err != nil {
+		return 0, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+token)
+
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		return 0, err
+	}
+	defer res.Body.Close()
+
+	return res.StatusCode, nil
 }

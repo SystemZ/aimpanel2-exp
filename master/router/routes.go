@@ -78,6 +78,30 @@ var routes = Routes{
 		true,
 		true,
 	},
+	Route{
+		"Game server events",
+		"GET",
+		"/events/{host_token}/{server_id}",
+		events.Handler,
+		true,
+		true,
+	},
+	Route{
+		"Host data",
+		"POST",
+		"/events/{host_token}",
+		game_server.Data,
+		true,
+		true,
+	},
+	Route{
+		"Game server data",
+		"POST",
+		"/events/{host_token}/{server_id}",
+		game_server.Data,
+		true,
+		true,
+	},
 
 	//Auth
 	Route{

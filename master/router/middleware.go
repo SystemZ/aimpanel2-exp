@@ -84,6 +84,7 @@ func SlavePermissionMiddleware(handler http.Handler) http.Handler {
 		tokenString = strings.Replace(tokenString, "Bearer ", "", 1)
 
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+			//TODO: move to config package instead of jwt_secret
 			return []byte(os.Getenv("JWT_SECRET")), nil
 		})
 		if err != nil {
@@ -97,12 +98,19 @@ func SlavePermissionMiddleware(handler http.Handler) http.Handler {
 			return
 		}
 
-		context.Set(r, "host", host)
 		params := mux.Vars(r)
-
 		if params["host_token"] != host.Token {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
+		}
+
+		gsId, ok := params["server_id"]
+		if ok {
+			var gs model.GameServer
+			if model.DB.Where("id = ?", gsId).First(&gs).RecordNotFound() {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
 		}
 
 		handler.ServeHTTP(w, r)

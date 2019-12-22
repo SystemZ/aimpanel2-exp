@@ -4,16 +4,19 @@ import (
 	"bufio"
 	"encoding/json"
 	"github.com/gofrs/uuid"
+	"github.com/r3labs/sse"
 	proc "github.com/shirou/gopsutil/process"
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/rabbit"
+	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/slave/config"
 	"io"
 	"log"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"sync"
 	"syscall"
@@ -190,6 +193,38 @@ type rabbitTask struct {
 }
 
 func (p *Process) Rpc() {
+	client := sse.NewClient(config.API_URL + "/v1/events/" + config.HOST_TOKEN + "/" + p.GameServerID)
+	client.Headers = map[string]string{
+		"Authorization": "Bearer " + config.API_TOKEN,
+	}
+	err := client.SubscribeRaw(func(msg *sse.Event) {
+		logrus.Info(msg.ID)
+		logrus.Info(string(msg.Data))
+		logrus.Info(string(msg.Event))
+
+		taskMsg := task.Message{}
+		err := taskMsg.Deserialize(string(msg.Data))
+		if err != nil {
+			logrus.Error(err)
+		}
+
+		taskId, _ := strconv.Atoi(string(msg.Event))
+
+		switch taskId {
+		case task.GAME_START:
+			logrus.Info("Got GAME_START msg")
+
+			startCommand, err := taskMsg.Game.GetCmd()
+			if err != nil {
+				logrus.Error(err)
+			}
+
+			p.GameStartCommand = strings.Split(startCommand, " ")
+
+			go p.Run()
+		}
+	})
+
 	msgs, err := p.Channel.Consume(p.Queue.Name, "", false, false, false, false, nil)
 	lib.FailOnError(err, "Failed to register a consumer")
 
@@ -202,33 +237,13 @@ func (p *Process) Rpc() {
 			logrus.Warn(err)
 		}
 
-		task := rabbitTask{
-			msg:     msg,
-			ch:      p.Channel,
-			msgBody: msgBody,
-		}
+		//task := rabbitTask{
+		//	msg:     msg,
+		//	ch:      p.Channel,
+		//	msgBody: msgBody,
+		//}
 
 		switch msgBody.TaskId {
-		case rabbit.GAME_START:
-			logrus.Info("Got GAME_START msg")
-
-			startCommand, err := task.msgBody.Game.GetCmd()
-			if err != nil {
-				logrus.Error(err)
-			}
-
-			p.GameStartCommand = strings.Split(startCommand, " ")
-
-			go p.Run()
-
-			err = p.Channel.Publish("", msg.ReplyTo, false, false, amqp.Publishing{
-				ContentType:   "application/json",
-				CorrelationId: p.ClientCorrelationId,
-				Body:          []byte(""),
-			})
-			lib.FailOnError(err, "Failed to publish a message")
-
-			msg.Ack(false)
 		case rabbit.GAME_COMMAND:
 			logrus.Info("Got GAME_COMMAND msg")
 

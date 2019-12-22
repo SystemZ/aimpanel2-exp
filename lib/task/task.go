@@ -2,14 +2,13 @@ package task
 
 import (
 	"encoding/json"
-	"github.com/gofrs/uuid"
 	"gitlab.com/systemz/aimpanel2/lib/game"
 	"gitlab.com/systemz/aimpanel2/master/model"
 )
 
 const (
 	//WRAPPER
-	GAME_START = iota
+	GAME_START = iota + 1
 	GAME_COMMAND
 	GAME_STOP_SIGKILL
 	GAME_STOP_SIGTERM
@@ -38,7 +37,7 @@ type Message struct {
 	// task id
 	TaskId       int             `json:"task_id,omitempty"`
 	Game         game.Game       `json:"game,omitempty"`
-	GameServerID uuid.UUID       `json:"game_server_id,omitempty"`
+	GameServerID string          `json:"game_server_id,omitempty"`
 	Body         string          `json:"body,omitempty"`
 	GameFile     *model.GameFile `json:"game_file,omitempty"`
 	AgentToken   string          `json:"agent_token,omitempty"`

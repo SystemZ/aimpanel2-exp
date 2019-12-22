@@ -114,19 +114,22 @@ func agent(token string) {
 		"Authorization": "Bearer " + token,
 	}
 	err := client.SubscribeRaw(func(msg *sse.Event) {
+		logrus.Info(msg.ID)
+		logrus.Info(string(msg.Data))
+		logrus.Info(string(msg.Event))
+
 		taskMsg := task.Message{}
 		err := taskMsg.Deserialize(string(msg.Data))
 		if err != nil {
 			logrus.Error(err)
 		}
-
-		gsId := string(msg.Data)
 		taskId, _ := strconv.Atoi(string(msg.Event))
 
 		switch taskId {
-		case rabbit.WRAPPER_START:
+		case task.WRAPPER_START:
 			logrus.Info("START_WRAPPER")
-			cmd := exec.Command("slave", "wrapper", gsId)
+			//TODO: move gsID to env variable
+			cmd := exec.Command("slave", "wrapper", taskMsg.GameServerID)
 
 			cmd.Env = os.Environ()
 			cmd.Env = append(cmd.Env, "HOST_TOKEN="+hostToken)
@@ -143,10 +146,10 @@ func agent(token string) {
 			}
 
 			cmd.Process.Release()
-		case rabbit.GAME_INSTALL:
+		case task.GAME_INSTALL:
 			logrus.Info("INSTALL_GAME_SERVER")
 
-			gsPath := filepath.Clean(config.GS_DIR) + "/" + taskMsg.GameServerID.String()
+			gsPath := filepath.Clean(config.GS_DIR) + "/" + taskMsg.GameServerID
 			if _, err := os.Stat(gsPath); os.IsNotExist(err) {
 				//TODO: Set correct perms
 				_ = os.Mkdir(gsPath, 0777)

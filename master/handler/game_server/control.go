@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"gitlab.com/systemz/aimpanel2/lib"
+	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/master/gs"
 	"gitlab.com/systemz/aimpanel2/master/handler"
 	"gitlab.com/systemz/aimpanel2/master/service/gameserver"
@@ -112,4 +113,39 @@ func SendCommand(w http.ResponseWriter, r *http.Request) {
 	}
 
 	lib.MustEncode(json.NewEncoder(w), handler.JsonSuccess{Message: "Sending command to game server"})
+}
+
+func Data(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	hostToken := params["host_token"]
+
+	data := &task.Message{}
+	err := json.NewDecoder(r.Body).Decode(data)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		lib.MustEncode(json.NewEncoder(w),
+			handler.JsonError{ErrorCode: 1234})
+		return
+	}
+
+	err = gameserver.HostData(hostToken)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		lib.MustEncode(json.NewEncoder(w),
+			handler.JsonError{ErrorCode: 1234})
+		return
+	}
+
+	gsId, ok := params["server_id"]
+	if ok {
+		err = gameserver.GsData(hostToken, gsId, data)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			lib.MustEncode(json.NewEncoder(w),
+				handler.JsonError{ErrorCode: 1234})
+			return
+		}
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }

@@ -31,7 +31,7 @@ func Start(gsId string) error {
 
 	taskMsg := task.Message{
 		TaskId:       task.GAME_INSTALL,
-		GameServerID: gameServer.ID,
+		GameServerID: gsId,
 	}
 
 	taskMsgStr, err := taskMsg.Serialize()
@@ -77,7 +77,7 @@ func Install(gsId string) error {
 	taskMsg := task.Message{
 		TaskId:       task.GAME_INSTALL,
 		Game:         g,
-		GameServerID: gameServer.ID,
+		GameServerID: gsId,
 	}
 
 	taskMsgStr, err := taskMsg.Serialize()
