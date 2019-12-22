@@ -62,6 +62,15 @@ var routes = Routes{
 	},
 
 	Route{
+		"New version",
+		"POST",
+		"/version",
+		handler.NewVersion,
+		false,
+		false,
+	},
+
+	Route{
 		"Host events",
 		"GET",
 		"/events/{host_token}",
@@ -150,6 +159,14 @@ var routes = Routes{
 		"POST",
 		"/host",
 		handler.CreateHost,
+		true,
+		false,
+	},
+	Route{
+		"Update slave",
+		"GET",
+		"/host/{id}/update",
+		handler.Update,
 		true,
 		false,
 	},

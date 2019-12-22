@@ -8,7 +8,7 @@ import (
 )
 
 func Start(gameServerID string) {
-	logrus.Info("Starting wrapper")
+	logrus.Info("Starting Wrapper Version. " + config.GIT_COMMIT)
 
 	output := make(chan string)
 	input := make(chan string)

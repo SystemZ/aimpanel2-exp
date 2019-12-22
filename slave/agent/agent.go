@@ -3,6 +3,7 @@ package agent
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/inconshreveable/go-update"
 	"github.com/r3labs/sse"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/disk"
@@ -27,7 +28,7 @@ var (
 )
 
 func Start(hostToken string) {
-	logrus.Info("Starting Agent")
+	logrus.Info("Starting Agent Version." + config.GIT_COMMIT)
 	config.HOST_TOKEN = hostToken
 
 	resp, err := http.Get(config.API_URL + "/v1/host/auth/" + config.HOST_TOKEN)
@@ -44,12 +45,27 @@ func Start(hostToken string) {
 
 	go agent()
 
-	logrus.Info("Send AGENT_METRICS_FREQUENCY")
+	logrus.Info("Send AGENT_STARTED")
 	taskMsg := task.Message{
-		TaskId: task.AGENT_METRICS_FREQUENCY,
+		TaskId: task.AGENT_STARTED,
 	}
 
 	jsonStr, err := taskMsg.Serialize()
+	if err != nil {
+		logrus.Error(err)
+	}
+	//TODO: do something with status code
+	_, err = lib.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, jsonStr)
+	if err != nil {
+		logrus.Error(err)
+	}
+
+	logrus.Info("Send AGENT_METRICS_FREQUENCY")
+	taskMsg = task.Message{
+		TaskId: task.AGENT_METRICS_FREQUENCY,
+	}
+
+	jsonStr, err = taskMsg.Serialize()
 	if err != nil {
 		logrus.Error(err)
 	}
@@ -135,8 +151,33 @@ func agent() {
 			if err != nil {
 				logrus.Error(err)
 			}
-		}
+		case task.SLAVE_UPDATE:
+			if config.GIT_COMMIT == taskMsg.Commit {
+				return
+			}
 
+			resp, err := http.Get(taskMsg.Url)
+			if err != nil {
+				logrus.Error(err)
+			}
+			defer resp.Body.Close()
+
+			err = update.Apply(resp.Body, update.Options{
+				TargetPath:  "",
+				TargetMode:  0,
+				Checksum:    nil,
+				PublicKey:   nil,
+				Signature:   nil,
+				Verifier:    nil,
+				Hash:        0,
+				Patcher:     nil,
+				OldSavePath: "",
+			})
+			if err != nil {
+				logrus.Error(err)
+			}
+			os.Exit(0)
+		}
 	})
 	if err != nil {
 		lib.FailOnError(err, "Failed to subscribe a channel")

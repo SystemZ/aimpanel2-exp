@@ -258,3 +258,40 @@ func Remove(gsId string) error {
 
 	return nil
 }
+
+func Update(hostId string) error {
+	hostToken := model.GetHostToken(model.DB, hostId)
+	if hostToken == "" {
+		return errors.New("error when getting host token from db")
+	}
+
+	channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken)
+	if !ok {
+		return errors.New("host is not turned on")
+	}
+
+	commit, err := model.Redis.Get("slave_commit").Result()
+	if err != nil {
+		return err
+	}
+
+	url, err := model.Redis.Get("slave_url").Result()
+	if err != nil {
+		return err
+	}
+
+	taskMsg := task.Message{
+		TaskId: task.SLAVE_UPDATE,
+		Commit: commit,
+		Url:    url,
+	}
+
+	taskMsgStr, err := taskMsg.Serialize()
+	if err != nil {
+		return err
+	}
+
+	channel.SendMessage(sse.NewMessage("", taskMsgStr, strconv.Itoa(taskMsg.TaskId)))
+
+	return nil
+}

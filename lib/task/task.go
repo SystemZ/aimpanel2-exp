@@ -13,6 +13,8 @@ const (
 	GAME_STOP_SIGKILL
 	GAME_STOP_SIGTERM
 
+	SLAVE_UPDATE
+
 	//AGENT
 	WRAPPER_START
 	GAME_INSTALL
@@ -24,6 +26,7 @@ const (
 	WRAPPER_METRICS_FREQUENCY
 	WRAPPER_METRICS
 
+	AGENT_STARTED
 	AGENT_METRICS_FREQUENCY
 	AGENT_METRICS
 	AGENT_OS
@@ -71,6 +74,9 @@ type Message struct {
 	PlatformVersion string `json:"platform_version,omitempty"`
 	KernelVersion   string `json:"kernel_version,omitempty"`
 	KernelArch      string `json:"kernel_arch,omitempty"`
+
+	Commit string `json:"commit,omitempty"`
+	Url    string `json:"url,omitempty"`
 
 	Timestamp int64 `json:"timestamp,omitempty"`
 }

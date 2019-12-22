@@ -20,7 +20,7 @@ services:
       - PMA_USER=dev
       - PMA_PASSWORD=dev
   redis:
-    image: 'redis:5'
+    image: 'redis:5-alpine'
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
       - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL

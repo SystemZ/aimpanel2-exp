@@ -5,6 +5,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/response"
 	"gitlab.com/systemz/aimpanel2/master/model"
@@ -120,6 +121,13 @@ func CreateHost(w http.ResponseWriter, r *http.Request) {
 		Endpoint: "/v1/host/" + host.ID.String() + "/metric",
 	})
 
+	model.DB.Save(&model.Permission{
+		Name:     "Update host",
+		Verb:     lib.GetVerbByName("GET"),
+		GroupId:  group.ID,
+		Endpoint: "/v1/host/" + host.ID.String() + "/update",
+	})
+
 	lib.MustEncode(json.NewEncoder(w), host)
 }
 
@@ -178,4 +186,21 @@ func HostAuth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	lib.MustEncode(json.NewEncoder(w), response.Token{Token: tokenString})
+}
+
+func Update(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	hostId := params["id"]
+
+	err := gameserver.Update(hostId)
+	if err != nil {
+		logrus.Error(err)
+
+		w.WriteHeader(http.StatusInternalServerError)
+		lib.MustEncode(json.NewEncoder(w),
+			JsonError{ErrorCode: 1234})
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }

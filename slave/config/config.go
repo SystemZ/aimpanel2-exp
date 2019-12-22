@@ -11,6 +11,7 @@ var (
 	TRASH_DIR   string
 	HOST_TOKEN  string
 	API_TOKEN   string
+	GIT_COMMIT  string
 )
 
 func init() {
