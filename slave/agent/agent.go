@@ -9,9 +9,7 @@ import (
 	"github.com/shirou/gopsutil/host"
 	"github.com/shirou/gopsutil/mem"
 	"github.com/sirupsen/logrus"
-	"github.com/streadway/amqp"
 	"gitlab.com/systemz/aimpanel2/lib"
-	"gitlab.com/systemz/aimpanel2/lib/rabbit"
 	"gitlab.com/systemz/aimpanel2/lib/response"
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/slave/config"
@@ -25,35 +23,14 @@ import (
 )
 
 var (
-	hostToken        string
-	channel          *amqp.Channel
-	queue            amqp.Queue
-	queueData        amqp.Queue
 	metricsFrequency int
 )
 
-type rabbitTask struct {
-	msg     amqp.Delivery
-	msgBody rabbit.QueueMsg
-	ch      *amqp.Channel
-}
-
-func Start(t string) {
+func Start(hostToken string) {
 	logrus.Info("Starting Agent")
-	hostToken = t
+	config.HOST_TOKEN = hostToken
 
-	resp, err := http.Get(config.API_URL + "/v1/host/credentials/" + hostToken)
-	if err != nil {
-		lib.FailOnError(err, "Failed to get rabbit credentials")
-	}
-
-	var creds rabbit.Credentials
-	err = json.NewDecoder(resp.Body).Decode(&creds)
-	if err != nil {
-		lib.FailOnError(err, "Failed to decode rabbit credentials json")
-	}
-
-	resp, err = http.Get(config.API_URL + "/v1/host/auth/" + hostToken)
+	resp, err := http.Get(config.API_URL + "/v1/host/auth/" + config.HOST_TOKEN)
 	if err != nil {
 		lib.FailOnError(err, "Failed to get host token")
 	}
@@ -61,57 +38,38 @@ func Start(t string) {
 	var token response.Token
 	err = json.NewDecoder(resp.Body).Decode(&token)
 	if err != nil {
-		lib.FailOnError(err, "Failed to decode rabbit credentials json")
+		lib.FailOnError(err, "Failed to decode credentials json")
+	}
+	config.API_TOKEN = token.Token
+
+	go agent()
+
+	logrus.Info("Send AGENT_METRICS_FREQUENCY")
+	taskMsg := task.Message{
+		TaskId: task.AGENT_METRICS_FREQUENCY,
 	}
 
-	conn, err := amqp.Dial("amqp://" + creds.Username + ":" + creds.Password + "@" + creds.Host + ":" + creds.Port + creds.VHost)
-	lib.FailOnError(err, "Failed to connect to RabbitMQ")
-	defer conn.Close()
+	jsonStr, err := taskMsg.Serialize()
+	if err != nil {
+		logrus.Error(err)
+	}
+	//TODO: do something with status code
+	_, err = lib.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, jsonStr)
+	if err != nil {
+		logrus.Error(err)
+	}
 
-	channel, err = conn.Channel()
-	lib.FailOnError(err, "Failed to open a channel")
-	defer channel.Close()
+	sendOSInfo()
 
-	queue, err = channel.QueueDeclare(
-		"agent_"+hostToken,
-		true,
-		false,
-		false,
-		false,
-		nil)
-	lib.FailOnError(err, "Failed to declare a queue")
-
-	queueData, err = channel.QueueDeclare(
-		"agent_data",
-		true,
-		false,
-		false,
-		false,
-		nil)
-	lib.FailOnError(err, "Failed to declare a queue")
-
-	err = channel.Qos(
-		1,
-		0,
-		false,
-	)
-	lib.FailOnError(err, "Failed to set QoS")
-
-	go agent(token.Token)
-
-	//sendToQueueData(rabbit.AGENT_METRICS_FREQUENCY)
-
-	//sendOSInfo()
-
-	//go heartbeat()
+	go heartbeat()
 
 	select {}
 }
 
-func agent(token string) {
-	client := sse.NewClient(config.API_URL + "/v1/events/" + hostToken)
+func agent() {
+	client := sse.NewClient(config.API_URL + "/v1/events/" + config.HOST_TOKEN)
 	client.Headers = map[string]string{
-		"Authorization": "Bearer " + token,
+		"Authorization": "Bearer " + config.API_TOKEN,
 	}
 	err := client.SubscribeRaw(func(msg *sse.Event) {
 		logrus.Info(msg.ID)
@@ -132,8 +90,8 @@ func agent(token string) {
 			cmd := exec.Command("slave", "wrapper", taskMsg.GameServerID)
 
 			cmd.Env = os.Environ()
-			cmd.Env = append(cmd.Env, "HOST_TOKEN="+hostToken)
-			cmd.Env = append(cmd.Env, "API_TOKEN="+token)
+			cmd.Env = append(cmd.Env, "HOST_TOKEN="+config.HOST_TOKEN)
+			cmd.Env = append(cmd.Env, "API_TOKEN="+config.API_TOKEN)
 
 			//TODO: FOR TESTING ONLY
 			var stdBuffer bytes.Buffer
@@ -161,56 +119,16 @@ func agent(token string) {
 			}
 
 			logrus.Info("Installation finished")
-		}
-	})
-
-	if err != nil {
-		lib.FailOnError(err, "Failed to subscribe a channel")
-	}
-
-	msgs, err := channel.Consume(
-		queue.Name,
-		"",
-		false,
-		false,
-		false,
-		false,
-		nil,
-	)
-	lib.FailOnError(err, "Failed to register a consumer")
-
-	for msg := range msgs {
-		logrus.Println("Received a task")
-		var msgBody rabbit.QueueMsg
-		err = json.Unmarshal(msg.Body, &msgBody)
-		if err != nil {
-			logrus.Warn(err)
-		}
-
-		task := rabbitTask{
-			msg:     msg,
-			ch:      channel,
-			msgBody: msgBody,
-		}
-
-		switch msgBody.TaskId {
-		case rabbit.AGENT_METRICS_FREQUENCY:
+		case task.AGENT_METRICS_FREQUENCY:
 			logrus.Info("AGENT_METRICS_FREQUENCY")
 
-			metricsFrequency = msgBody.MetricFrequency
+			metricsFrequency = taskMsg.MetricFrequency
 
 			go metrics()
-
-			rabbitRpcSimpleResponse(task, rabbit.QueueMsg{
-				TaskEnd: true,
-				TaskOk:  true,
-			})
-
-			msg.Ack(false)
-		case rabbit.AGENT_REMOVE_GS:
+		case task.AGENT_REMOVE_GS:
 			logrus.Info("AGENT_REMOVE_GS")
 
-			gsId := task.msgBody.GameServerID.String()
+			gsId := taskMsg.GameServerID
 			gsPath := filepath.Clean(config.GS_DIR) + "/" + gsId
 			gsTrashPath := filepath.Clean(config.TRASH_DIR) + "/" + gsId
 
@@ -218,9 +136,11 @@ func agent(token string) {
 			if err != nil {
 				logrus.Error(err)
 			}
-
-			msg.Ack(false)
 		}
+
+	})
+	if err != nil {
+		lib.FailOnError(err, "Failed to subscribe a channel")
 	}
 }
 
@@ -239,9 +159,9 @@ func metrics() {
 		diskTotal := diskUsage.Total / 1024 / 1024
 		diskUsed := diskUsage.Used / 1024 / 1024
 
-		msg := rabbit.QueueMsg{
-			TaskId:     rabbit.AGENT_METRICS,
-			AgentToken: hostToken,
+		taskMsg := task.Message{
+			TaskId:     task.AGENT_METRICS,
+			AgentToken: config.HOST_TOKEN,
 			CpuUsage:   int(cpuPercent[0]),
 			RamFree:    int(ramFree),
 			RamTotal:   int(ramTotal),
@@ -260,20 +180,15 @@ func metrics() {
 			GuestNice:  int(cpuTimes[0].GuestNice),
 		}
 
-		msgJson, _ := json.Marshal(msg)
-
-		err := channel.Publish(
-			"",
-			queueData.Name,
-			false,
-			false,
-			amqp.Publishing{
-				ContentType:   "application/json",
-				CorrelationId: lib.RandomString(32),
-				Body:          msgJson,
-			})
-
-		lib.FailOnError(err, "Publish error")
+		jsonStr, err := taskMsg.Serialize()
+		if err != nil {
+			logrus.Error(err)
+		}
+		//TODO: do something with status code
+		_, err = lib.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, jsonStr)
+		if err != nil {
+			logrus.Error(err)
+		}
 	}
 }
 
@@ -283,55 +198,30 @@ func heartbeat() {
 
 		logrus.Info("Sending heartbeat")
 
-		msg := rabbit.QueueMsg{
-			TaskId:     rabbit.AGENT_HEARTBEAT,
-			AgentToken: hostToken,
+		taskMsg := task.Message{
+			TaskId:     task.AGENT_HEARTBEAT,
+			AgentToken: config.HOST_TOKEN,
 			Timestamp:  time.Now().Unix(),
 		}
-		msgJson, _ := json.Marshal(msg)
 
-		err := channel.Publish(
-			"",
-			queueData.Name,
-			false,
-			false,
-			amqp.Publishing{
-				ContentType:   "application/json",
-				CorrelationId: lib.RandomString(32),
-				Body:          msgJson,
-			})
-		lib.FailOnError(err, "Publish error")
+		jsonStr, err := taskMsg.Serialize()
+		if err != nil {
+			logrus.Error(err)
+		}
+		//TODO: do something with status code
+		_, err = lib.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, jsonStr)
+		if err != nil {
+			logrus.Error(err)
+		}
 	}
-}
-
-func sendToQueueData(taskId int) {
-	msg := rabbit.QueueMsg{
-		TaskId:     taskId,
-		AgentToken: hostToken,
-	}
-
-	msgJson, _ := json.Marshal(msg)
-
-	err := channel.Publish(
-		"",
-		queueData.Name,
-		false,
-		false,
-		amqp.Publishing{
-			ContentType:   "application/json",
-			CorrelationId: lib.RandomString(32),
-			Body:          msgJson,
-		})
-
-	lib.FailOnError(err, "Publish error")
 }
 
 func sendOSInfo() {
 	h, _ := host.Info()
 
-	msg := rabbit.QueueMsg{
-		TaskId:     rabbit.AGENT_OS,
-		AgentToken: hostToken,
+	taskMsg := task.Message{
+		TaskId:     task.AGENT_OS,
+		AgentToken: config.HOST_TOKEN,
 
 		OS:              h.OS,
 		Platform:        h.Platform,
@@ -341,36 +231,13 @@ func sendOSInfo() {
 		KernelArch:      h.KernelArch,
 	}
 
-	msgJson, _ := json.Marshal(msg)
-
-	err := channel.Publish(
-		"",
-		queueData.Name,
-		false,
-		false,
-		amqp.Publishing{
-			ContentType:   "application/json",
-			CorrelationId: lib.RandomString(32),
-			Body:          msgJson,
-		})
-
-	lib.FailOnError(err, "Publish error")
-}
-
-func rabbitRpcSimpleResponse(task rabbitTask, msg rabbit.QueueMsg) {
-	body, err := json.Marshal(msg)
-	err = task.ch.Publish(
-		"",
-		task.msg.ReplyTo,
-		false,
-		false,
-		amqp.Publishing{
-			ContentType:   "application/json",
-			CorrelationId: task.msg.CorrelationId,
-			Body:          body,
-		})
+	jsonStr, err := taskMsg.Serialize()
 	if err != nil {
-		logrus.Errorf("Failed to respond: %v", err.Error())
-		return
+		logrus.Error(err)
+	}
+	//TODO: do something with status code
+	_, err = lib.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, jsonStr)
+	if err != nil {
+		logrus.Error(err)
 	}
 }
