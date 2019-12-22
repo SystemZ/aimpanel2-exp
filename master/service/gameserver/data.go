@@ -8,6 +8,7 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib/game"
+	"gitlab.com/systemz/aimpanel2/lib/rabbit"
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/master/events"
 	"gitlab.com/systemz/aimpanel2/master/model"
@@ -15,11 +16,82 @@ import (
 	"time"
 )
 
-func HostData(hostToken string) error {
+func HostData(hostToken string, taskMsg *task.Message) error {
 	host := model.GetHostByToken(model.DB, hostToken)
 	if host == nil {
 		return errors.New("error when getting host from db")
 	}
+
+	switch taskMsg.TaskId {
+	case rabbit.AGENT_METRICS_FREQUENCY:
+		agentToken := taskMsg.AgentToken
+
+		var host model.Host
+		if model.DB.Where("token = ?", agentToken).First(&host).RecordNotFound() {
+			break
+		}
+
+		channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken)
+		if !ok {
+			return errors.New("game server is not turned on")
+		}
+
+		taskMsg := task.Message{
+			TaskId:          task.AGENT_METRICS_FREQUENCY,
+			MetricFrequency: host.MetricFrequency,
+		}
+
+		taskMsgStr, err := taskMsg.Serialize()
+		if err != nil {
+			return err
+		}
+
+		channel.SendMessage(sse.NewMessage("", taskMsgStr, strconv.Itoa(task.AGENT_METRICS_FREQUENCY)))
+	case rabbit.AGENT_METRICS:
+		var host model.Host
+		if model.DB.Where("token = ?", taskMsg.AgentToken).First(&host).RecordNotFound() {
+			break
+		}
+
+		metric := &model.MetricHost{
+			HostId:    host.ID,
+			CpuUsage:  taskMsg.CpuUsage,
+			RamFree:   taskMsg.RamFree,
+			RamTotal:  taskMsg.RamTotal,
+			DiskFree:  taskMsg.DiskFree,
+			DiskUsed:  taskMsg.DiskUsed,
+			DiskTotal: taskMsg.DiskTotal,
+			User:      taskMsg.User,
+			System:    taskMsg.System,
+			Idle:      taskMsg.Idle,
+			Nice:      taskMsg.Nice,
+			Iowait:    taskMsg.Iowait,
+			Irq:       taskMsg.Irq,
+			Softirq:   taskMsg.Softirq,
+			Steal:     taskMsg.Steal,
+			Guest:     taskMsg.Guest,
+			GuestNice: taskMsg.GuestNice,
+		}
+		model.DB.Save(metric)
+	case rabbit.AGENT_OS:
+		var host model.Host
+		if model.DB.Where("token = ?", taskMsg.AgentToken).First(&host).RecordNotFound() {
+			break
+		}
+
+		host.OS = taskMsg.OS
+		host.Platform = taskMsg.Platform
+		host.PlatformFamily = taskMsg.PlatformFamily
+		host.PlatformVersion = taskMsg.PlatformVersion
+		host.KernelVersion = taskMsg.KernelVersion
+		host.KernelArch = taskMsg.KernelArch
+
+		model.DB.Save(&host)
+
+	case rabbit.AGENT_HEARTBEAT:
+		model.Redis.Set("agent_heartbeat_token_"+taskMsg.AgentToken, taskMsg.Timestamp, 24*time.Hour)
+	}
+
 	return nil
 }
 
