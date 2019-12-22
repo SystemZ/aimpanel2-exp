@@ -23,6 +23,11 @@ func HostData(hostToken string, taskMsg *task.Message) error {
 	}
 
 	switch taskMsg.TaskId {
+	case task.AGENT_STARTED:
+		err := Update(host.ID.String())
+		if err != nil {
+			logrus.Error(err)
+		}
 	case task.AGENT_METRICS_FREQUENCY:
 		logrus.Info("AGENT_METRICS_FREQUENCY")
 

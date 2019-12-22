@@ -6,6 +6,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/master/config"
 	"gitlab.com/systemz/aimpanel2/master/model"
+	"gitlab.com/systemz/aimpanel2/master/service/gameserver"
 	"net/http"
 )
 
@@ -38,6 +39,19 @@ func NewVersion(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logrus.Error(err)
 	}
+
+	//TODO: Find better way to update all hosts
+	var hosts []model.Host
+	model.DB.Find(&hosts)
+
+	go func() {
+		for _, host := range hosts {
+			err := gameserver.Update(host.ID.String())
+			if err != nil {
+				logrus.Error(err)
+			}
+		}
+	}()
 
 	w.WriteHeader(http.StatusNoContent)
 }
