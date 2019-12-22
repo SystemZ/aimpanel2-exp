@@ -8,7 +8,6 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib/game"
-	"gitlab.com/systemz/aimpanel2/lib/rabbit"
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/master/events"
 	"gitlab.com/systemz/aimpanel2/master/model"
@@ -17,23 +16,24 @@ import (
 )
 
 func HostData(hostToken string, taskMsg *task.Message) error {
+	logrus.Info("HostData")
 	host := model.GetHostByToken(model.DB, hostToken)
 	if host == nil {
 		return errors.New("error when getting host from db")
 	}
 
 	switch taskMsg.TaskId {
-	case rabbit.AGENT_METRICS_FREQUENCY:
-		agentToken := taskMsg.AgentToken
+	case task.AGENT_METRICS_FREQUENCY:
+		logrus.Info("AGENT_METRICS_FREQUENCY")
 
 		var host model.Host
-		if model.DB.Where("token = ?", agentToken).First(&host).RecordNotFound() {
+		if model.DB.Where("token = ?", hostToken).First(&host).RecordNotFound() {
 			break
 		}
 
 		channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken)
 		if !ok {
-			return errors.New("game server is not turned on")
+			return errors.New("host is not turned on")
 		}
 
 		taskMsg := task.Message{
@@ -46,10 +46,10 @@ func HostData(hostToken string, taskMsg *task.Message) error {
 			return err
 		}
 
-		channel.SendMessage(sse.NewMessage("", taskMsgStr, strconv.Itoa(task.AGENT_METRICS_FREQUENCY)))
-	case rabbit.AGENT_METRICS:
+		channel.SendMessage(sse.NewMessage("", taskMsgStr, strconv.Itoa(taskMsg.TaskId)))
+	case task.AGENT_METRICS:
 		var host model.Host
-		if model.DB.Where("token = ?", taskMsg.AgentToken).First(&host).RecordNotFound() {
+		if model.DB.Where("token = ?", hostToken).First(&host).RecordNotFound() {
 			break
 		}
 
@@ -73,9 +73,9 @@ func HostData(hostToken string, taskMsg *task.Message) error {
 			GuestNice: taskMsg.GuestNice,
 		}
 		model.DB.Save(metric)
-	case rabbit.AGENT_OS:
+	case task.AGENT_OS:
 		var host model.Host
-		if model.DB.Where("token = ?", taskMsg.AgentToken).First(&host).RecordNotFound() {
+		if model.DB.Where("token = ?", hostToken).First(&host).RecordNotFound() {
 			break
 		}
 
@@ -88,8 +88,8 @@ func HostData(hostToken string, taskMsg *task.Message) error {
 
 		model.DB.Save(&host)
 
-	case rabbit.AGENT_HEARTBEAT:
-		model.Redis.Set("agent_heartbeat_token_"+taskMsg.AgentToken, taskMsg.Timestamp, 24*time.Hour)
+	case task.AGENT_HEARTBEAT:
+		model.Redis.Set("agent_heartbeat_token_"+hostToken, taskMsg.Timestamp, 24*time.Hour)
 	}
 
 	return nil

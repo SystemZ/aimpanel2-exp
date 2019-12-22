@@ -5,7 +5,6 @@ import (
 	"github.com/gorilla/mux"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/task"
-	"gitlab.com/systemz/aimpanel2/master/gs"
 	"gitlab.com/systemz/aimpanel2/master/handler"
 	"gitlab.com/systemz/aimpanel2/master/service/gameserver"
 	"net/http"
@@ -21,12 +20,13 @@ type GameServerSendCommandReq struct {
 
 func Start(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	gameServerId := params["server_id"]
+	gsId := params["server_id"]
 
-	if err, ok := gameserver.Start(gameServerId).(*lib.Error); ok {
+	err := gameserver.Start(gsId)
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: err.ErrorCode})
+			handler.JsonError{ErrorCode: 1234})
 		return
 	}
 
@@ -35,12 +35,13 @@ func Start(w http.ResponseWriter, r *http.Request) {
 
 func Install(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	gameServerId := params["server_id"]
+	gsId := params["server_id"]
 
-	if err, ok := gameserver.Install(gameServerId).(*lib.Error); ok {
+	err := gameserver.Install(gsId)
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: err.ErrorCode})
+			handler.JsonError{ErrorCode: 1234})
 		return
 	}
 
@@ -49,70 +50,74 @@ func Install(w http.ResponseWriter, r *http.Request) {
 
 func Restart(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
+	gsId := params["server_id"]
 
-	gameServerId := params["server_id"]
-
-	stopReq := &GameServerStopReq{}
-
-	err := json.NewDecoder(r.Body).Decode(stopReq)
+	data := &GameServerStopReq{}
+	err := json.NewDecoder(r.Body).Decode(data)
 	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: 5012})
 		return
 	}
 
-	if err2, ok := gs.Restart(gameServerId, stopReq.Type).(*lib.Error); ok {
+	err = gameserver.Restart(gsId, data.Type)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: err2.ErrorCode})
+			handler.JsonError{ErrorCode: 1234})
 		return
 	}
 
-	lib.MustEncode(json.NewEncoder(w), handler.JsonSuccess{Message: "Restarting the game server."})
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func Stop(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
+	gsId := params["server_id"]
 
-	gameServerId := params["server_id"]
-
-	stopReq := &GameServerStopReq{}
-
-	err := json.NewDecoder(r.Body).Decode(stopReq)
+	data := &GameServerStopReq{}
+	err := json.NewDecoder(r.Body).Decode(data)
 	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: 5017})
 		return
 	}
 
-	if err2, ok := gs.Stop(gameServerId, stopReq.Type).(*lib.Error); ok {
+	err = gameserver.Stop(gsId, data.Type)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: err2.ErrorCode})
+			handler.JsonError{ErrorCode: 1234})
 		return
 	}
 
-	lib.MustEncode(json.NewEncoder(w), handler.JsonSuccess{Message: "Stopping the game server."})
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func SendCommand(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
+	gsId := params["server_id"]
 
-	gameServerId := params["server_id"]
-
-	cmdReq := &GameServerSendCommandReq{}
-	err := json.NewDecoder(r.Body).Decode(cmdReq)
+	data := &GameServerSendCommandReq{}
+	err := json.NewDecoder(r.Body).Decode(data)
 	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: 5026})
 		return
 	}
 
-	if err2, ok := gs.SendCommand(gameServerId, cmdReq.Command).(*lib.Error); ok {
+	err = gameserver.SendCommand(gsId, data.Command)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: err2.ErrorCode})
+			handler.JsonError{ErrorCode: 1234})
 		return
 	}
 
-	lib.MustEncode(json.NewEncoder(w), handler.JsonSuccess{Message: "Sending command to game server"})
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func Data(w http.ResponseWriter, r *http.Request) {
@@ -122,7 +127,7 @@ func Data(w http.ResponseWriter, r *http.Request) {
 	data := &task.Message{}
 	err := json.NewDecoder(r.Body).Decode(data)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: 1234})
 		return

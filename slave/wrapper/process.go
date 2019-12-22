@@ -5,9 +5,7 @@ import (
 	"github.com/r3labs/sse"
 	proc "github.com/shirou/gopsutil/process"
 	"github.com/sirupsen/logrus"
-	"github.com/streadway/amqp"
 	"gitlab.com/systemz/aimpanel2/lib"
-	"gitlab.com/systemz/aimpanel2/lib/rabbit"
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/slave/config"
 	"io"
@@ -187,12 +185,6 @@ func (p *Process) Kill(signal syscall.Signal) {
 		p.Running = false
 	}
 
-}
-
-type rabbitTask struct {
-	msg     amqp.Delivery
-	msgBody rabbit.QueueMsg
-	ch      *amqp.Channel
 }
 
 func (p *Process) Rpc() {

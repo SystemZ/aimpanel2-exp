@@ -60,7 +60,6 @@ func Start(hostToken string) {
 	}
 
 	sendOSInfo()
-
 	go heartbeat()
 
 	select {}
@@ -160,24 +159,23 @@ func metrics() {
 		diskUsed := diskUsage.Used / 1024 / 1024
 
 		taskMsg := task.Message{
-			TaskId:     task.AGENT_METRICS,
-			AgentToken: config.HOST_TOKEN,
-			CpuUsage:   int(cpuPercent[0]),
-			RamFree:    int(ramFree),
-			RamTotal:   int(ramTotal),
-			DiskFree:   int(diskFree),
-			DiskTotal:  int(diskTotal),
-			DiskUsed:   int(diskUsed),
-			User:       int(cpuTimes[0].User),
-			System:     int(cpuTimes[0].System),
-			Idle:       int(cpuTimes[0].Idle),
-			Nice:       int(cpuTimes[0].Nice),
-			Iowait:     int(cpuTimes[0].Iowait),
-			Irq:        int(cpuTimes[0].Irq),
-			Softirq:    int(cpuTimes[0].Softirq),
-			Steal:      int(cpuTimes[0].Steal),
-			Guest:      int(cpuTimes[0].Guest),
-			GuestNice:  int(cpuTimes[0].GuestNice),
+			TaskId:    task.AGENT_METRICS,
+			CpuUsage:  int(cpuPercent[0]),
+			RamFree:   int(ramFree),
+			RamTotal:  int(ramTotal),
+			DiskFree:  int(diskFree),
+			DiskTotal: int(diskTotal),
+			DiskUsed:  int(diskUsed),
+			User:      int(cpuTimes[0].User),
+			System:    int(cpuTimes[0].System),
+			Idle:      int(cpuTimes[0].Idle),
+			Nice:      int(cpuTimes[0].Nice),
+			Iowait:    int(cpuTimes[0].Iowait),
+			Irq:       int(cpuTimes[0].Irq),
+			Softirq:   int(cpuTimes[0].Softirq),
+			Steal:     int(cpuTimes[0].Steal),
+			Guest:     int(cpuTimes[0].Guest),
+			GuestNice: int(cpuTimes[0].GuestNice),
 		}
 
 		jsonStr, err := taskMsg.Serialize()
@@ -199,9 +197,8 @@ func heartbeat() {
 		logrus.Info("Sending heartbeat")
 
 		taskMsg := task.Message{
-			TaskId:     task.AGENT_HEARTBEAT,
-			AgentToken: config.HOST_TOKEN,
-			Timestamp:  time.Now().Unix(),
+			TaskId:    task.AGENT_HEARTBEAT,
+			Timestamp: time.Now().Unix(),
 		}
 
 		jsonStr, err := taskMsg.Serialize()
@@ -220,8 +217,7 @@ func sendOSInfo() {
 	h, _ := host.Info()
 
 	taskMsg := task.Message{
-		TaskId:     task.AGENT_OS,
-		AgentToken: config.HOST_TOKEN,
+		TaskId: task.AGENT_OS,
 
 		OS:              h.OS,
 		Platform:        h.Platform,

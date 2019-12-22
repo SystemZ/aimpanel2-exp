@@ -6,9 +6,9 @@ import (
 	"github.com/gorilla/mux"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/game"
-	"gitlab.com/systemz/aimpanel2/master/gs"
 	"gitlab.com/systemz/aimpanel2/master/handler"
 	"gitlab.com/systemz/aimpanel2/master/model"
+	"gitlab.com/systemz/aimpanel2/master/service/gameserver"
 	"net/http"
 )
 
@@ -182,7 +182,7 @@ func PutLogs(w http.ResponseWriter, r *http.Request) {
 func Remove(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	gameServerId := params["server_id"]
-	err := gs.Remove(gameServerId)
+	err := gameserver.Remove(gameServerId)
 	if err != nil {
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: 5026})

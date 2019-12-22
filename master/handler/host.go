@@ -7,8 +7,8 @@ import (
 	"github.com/gorilla/mux"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/response"
-	"gitlab.com/systemz/aimpanel2/master/gs"
 	"gitlab.com/systemz/aimpanel2/master/model"
+	"gitlab.com/systemz/aimpanel2/master/service/gameserver"
 	"net/http"
 	"os"
 	"time"
@@ -138,7 +138,7 @@ func RemoveHost(w http.ResponseWriter, r *http.Request) {
 
 	gameServers := model.GetGameServersByHostId(model.DB, host.ID.String())
 	for _, gameServer := range *gameServers {
-		err := gs.Remove(gameServer.ID.String())
+		err := gameserver.Remove(gameServer.ID.String())
 		if err != nil {
 			lib.MustEncode(json.NewEncoder(w),
 				JsonError{ErrorCode: 3432})

@@ -7,7 +7,6 @@ import (
 	"gitlab.com/systemz/aimpanel2/master/cron"
 	"gitlab.com/systemz/aimpanel2/master/events"
 	"gitlab.com/systemz/aimpanel2/master/model"
-	"gitlab.com/systemz/aimpanel2/master/rabbit"
 	"gitlab.com/systemz/aimpanel2/master/router"
 	"net/http"
 	"os"
@@ -25,11 +24,7 @@ var serverCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		model.DB = model.InitMysql()
 		model.InitRedis()
-
 		events.SSE = events.InitSSE()
-
-		rabbit.Listen()
-		rabbit.SetupRabbitAPI()
 
 		go cron.CheckHostsHeartbeat()
 		go cron.CheckGSHeartbeat()

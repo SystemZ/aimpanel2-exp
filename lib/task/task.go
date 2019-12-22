@@ -40,7 +40,6 @@ type Message struct {
 	GameServerID string          `json:"game_server_id,omitempty"`
 	Body         string          `json:"body,omitempty"`
 	GameFile     *model.GameFile `json:"game_file,omitempty"`
-	AgentToken   string          `json:"agent_token,omitempty"`
 
 	// task progress
 	Stdout string `json:"stdout,omitempty"`

@@ -19,11 +19,6 @@ services:
       - PMA_HOST=database
       - PMA_USER=dev
       - PMA_PASSWORD=dev
-  rabbitmq:
-    image: rabbitmq:3-management
-    ports:
-      - 15672:15672
-      - 5672:5672
   redis:
     image: 'redis:5'
     environment:
