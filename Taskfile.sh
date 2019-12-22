@@ -37,6 +37,7 @@ function upload-slave-binary {
     dpkg -i rclone-current-linux-amd64.deb
     echo "$RCLONE_CONF" | base64 -d > rclone.conf
     rclone -v --stats-one-line-date --config rclone.conf copyto aimpanel-slave ovh-bucket:aimpanel-updates/$CI_COMMIT_SHA
+    rclone -v --stats-one-line-date --config rclone.conf copyto aimpanel-slave ovh-bucket:aimpanel-updates/latest
     curl -XPOST -H "Token: $AIMPANEL_UPDATE_TOKEN" -H "Content-type: application/json" -d "{\"commit\": \"$CI_COMMIT_SHA\", \"url\": \"https://storage.gra.cloud.ovh.net/v1/AUTH_23b9e96be2fc431d93deedba1b8c87d2/aimpanel-updates/$CI_COMMIT_SHA\"" 'https://api-lab.aimpanel.pro/v1/version'
 }
 
