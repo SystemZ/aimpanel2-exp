@@ -1,5 +1,14 @@
 <template>
     <v-container grid-list-md>
+        <v-row class="mb-6">
+            <v-col>
+                <v-card>
+                    <v-card-text>
+                        <v-btn class="ma-2" color="green" dark @click="update()">Update</v-btn>
+                    </v-card-text>
+                </v-card>
+            </v-col>
+        </v-row>
         <v-row>
             <v-col xs6>
                 <v-card>
@@ -233,6 +242,11 @@
                     console.log(res);
                     this.$router.push("/hosts");
                 });
+            },
+            update() {
+                this.$http.get('/v1/host/' + this.$route.params.id + '/update').then(res => {
+                    console.log(res);
+                })
             }
         },
     }
