@@ -33,11 +33,11 @@ function update-todo-issue {
 }
 
 function upload-slave-binary {
-    apt-get update
-    apt-get install -y rclone
+    wget https://downloads.rclone.org/rclone-current-linux-amd64.deb
+    dpkg -i rclone-current-linux-amd64.deb
     echo "$RCLONE_CONF" > rclone.conf
     rclone -v --stats-one-line-date --config rclone.conf copyto aimpanel-slave ovh-bucket:aimpanel-updates/$CI_COMMIT_SHA
-    curl -XPOST -H "Token: $AIMPANEL_UPDATE_TOKEN" -H "Content-type: application/json" -d "{\"commit\": \"$CI_COMMIT_SHA\", \"url\": \"https://storage.gra.cloud.ovh.net/v1/AUTH_23b9e96be2fc431d93deedba1b8c87d2/aimpanel-updates/$CI_COMMIT_SHA\"" 'http://my-lab.aimpanel.pro/v1/version'
+    curl -XPOST -H "Token: $AIMPANEL_UPDATE_TOKEN" -H "Content-type: application/json" -d "{\"commit\": \"$CI_COMMIT_SHA\", \"url\": \"https://storage.gra.cloud.ovh.net/v1/AUTH_23b9e96be2fc431d93deedba1b8c87d2/aimpanel-updates/$CI_COMMIT_SHA\"" 'https://api-lab.aimpanel.pro/v1/version'
 }
 
 function default {
