@@ -3,6 +3,7 @@ package agent
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/inconshreveable/go-update"
 	"github.com/r3labs/sse"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/disk"
@@ -135,8 +136,23 @@ func agent() {
 			if err != nil {
 				logrus.Error(err)
 			}
-		}
+		case task.SLAVE_UPDATE:
+			if config.GIT_COMMIT == taskMsg.Commit {
+				return
+			}
 
+			resp, err := http.Get(taskMsg.Url)
+			if err != nil {
+				logrus.Error(err)
+			}
+			defer resp.Body.Close()
+
+			err = update.Apply(resp.Body, update.Options{})
+			if err != nil {
+				logrus.Error(err)
+			}
+			os.Exit(0)
+		}
 	})
 	if err != nil {
 		lib.FailOnError(err, "Failed to subscribe a channel")
