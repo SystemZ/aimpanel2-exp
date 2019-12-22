@@ -14,6 +14,8 @@ var (
 	REDIS_HOST     string
 	REDIS_PASSWORD string
 
+	GIT_COMMIT string
+
 	LOG_DEV bool
 )
 
