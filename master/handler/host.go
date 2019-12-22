@@ -179,3 +179,18 @@ func HostAuth(w http.ResponseWriter, r *http.Request) {
 
 	lib.MustEncode(json.NewEncoder(w), response.Token{Token: tokenString})
 }
+
+func Update(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	hostId := params["id"]
+
+	err := gameserver.Update(hostId)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		lib.MustEncode(json.NewEncoder(w),
+			JsonError{ErrorCode: 1234})
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}

@@ -163,6 +163,14 @@ var routes = Routes{
 		false,
 	},
 	Route{
+		"Update slave",
+		"GET",
+		"/host/{id}/update",
+		handler.GetHost,
+		true,
+		false,
+	},
+	Route{
 		"Get host metric",
 		"GET",
 		"/host/{id}/metric",
