@@ -29,7 +29,6 @@ var serverCmd = &cobra.Command{
 		events.SSE = events.InitSSE()
 
 		rabbit.Listen()
-		rabbit.ListenWrapperData()
 		rabbit.ListenAgentData()
 		rabbit.SetupRabbitAPI()
 
