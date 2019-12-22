@@ -166,7 +166,7 @@ var routes = Routes{
 		"Update slave",
 		"GET",
 		"/host/{id}/update",
-		handler.GetHost,
+		handler.Update,
 		true,
 		false,
 	},
