@@ -13,6 +13,15 @@ function up {
     npm run serve
 }
 
+function frontend {
+    cd master-frontend
+    VUE_APP_API_URL=http://localhost:3000 npm run serve
+}
+
+function up-slave {
+    vagrant up
+}
+
 function stop {
     docker-compose stop
 }

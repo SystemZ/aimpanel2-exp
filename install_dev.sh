@@ -1,14 +1,14 @@
 #!/bin/bash
 # this script can be run multiple times without damage to OS
-[ -z "$1" ] && echo "Provide token as 1st argument" >&2 && exit 1
-TOKEN=$1
+#[ -z "$1" ] && echo "Provide token as 1st argument" >&2 && exit 1
+TOKEN="CHANGE_ME"
 
 # debug output
 #set -x
 
 # variables
 REPO_URL="https://storage.gra.cloud.ovh.net/v1/AUTH_23b9e96be2fc431d93deedba1b8c87d2/aimpanel-updates"
-API_URL="https://api-lab.aimpanel.pro"
+API_URL="http://192.168.122.1:3000"
 AIMPANEL_BINARY_NAME=slave
 AIMPANEL_BINARY_DIR=/opt/aimpanel
 AIMPANEL_DIR=/opt/aimpanel
