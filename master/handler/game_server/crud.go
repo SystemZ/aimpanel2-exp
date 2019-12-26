@@ -58,61 +58,8 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	model.DB.Save(&model.Permission{
-		Name:     "Get game server",
-		Verb:     lib.GetVerbByName("GET"),
-		GroupId:  group.ID,
-		Endpoint: "/v1/host/" + host.ID.String() + "/server/" + gameServer.ID.String(),
-	})
-
-	model.DB.Save(&model.Permission{
-		Name:     "Delete game server",
-		Verb:     lib.GetVerbByName("DELETE"),
-		GroupId:  group.ID,
-		Endpoint: "/v1/host/" + host.ID.String() + "/server/" + gameServer.ID.String(),
-	})
-
-	model.DB.Save(&model.Permission{
-		Name:     "Install game server",
-		Verb:     lib.GetVerbByName("PUT"),
-		GroupId:  group.ID,
-		Endpoint: "/v1/host/" + host.ID.String() + "/server/" + gameServer.ID.String() + "/install",
-	})
-
-	model.DB.Save(&model.Permission{
-		Name:     "Start game server",
-		Verb:     lib.GetVerbByName("PUT"),
-		GroupId:  group.ID,
-		Endpoint: "/v1/host/" + host.ID.String() + "/server/" + gameServer.ID.String() + "/start",
-	})
-
-	model.DB.Save(&model.Permission{
-		Name:     "Restart game server",
-		Verb:     lib.GetVerbByName("PUT"),
-		GroupId:  group.ID,
-		Endpoint: "/v1/host/" + host.ID.String() + "/server/" + gameServer.ID.String() + "/restart",
-	})
-
-	model.DB.Save(&model.Permission{
-		Name:     "Stop game server",
-		Verb:     lib.GetVerbByName("PUT"),
-		GroupId:  group.ID,
-		Endpoint: "/v1/host/" + host.ID.String() + "/server/" + gameServer.ID.String() + "/stop",
-	})
-
-	model.DB.Save(&model.Permission{
-		Name:     "Send command to game server",
-		Verb:     lib.GetVerbByName("PUT"),
-		GroupId:  group.ID,
-		Endpoint: "/v1/host/" + host.ID.String() + "/server/" + gameServer.ID.String() + "/command",
-	})
-
-	model.DB.Save(&model.Permission{
-		Name:     "Get logs from game server",
-		Verb:     lib.GetVerbByName("PUT"),
-		GroupId:  group.ID,
-		Endpoint: "/v1/host/" + host.ID.String() + "/server/" + gameServer.ID.String() + "/logs",
-	})
+	// FIXME handle errors
+	model.CreatePermissionsForNewGameServer(group.ID, host.ID.String(), gameServer.ID.String())
 
 	lib.MustEncode(json.NewEncoder(w),
 		gameServer)

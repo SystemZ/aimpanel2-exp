@@ -86,48 +86,8 @@ func CreateHost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	model.DB.Save(&model.Permission{
-		Name:     "Get host",
-		Verb:     lib.GetVerbByName("GET"),
-		GroupId:  group.ID,
-		Endpoint: "/v1/host/" + host.ID.String(),
-	})
-
-	model.DB.Save(&model.Permission{
-		Name:     "Delete host",
-		Verb:     lib.GetVerbByName("DELETE"),
-		GroupId:  group.ID,
-		Endpoint: "/v1/host/" + host.ID.String(),
-	})
-
-	model.DB.Save(&model.Permission{
-		Name:     "Create game server",
-		Verb:     lib.GetVerbByName("POST"),
-		GroupId:  group.ID,
-		Endpoint: "/v1/host/" + host.ID.String() + "/server",
-	})
-
-	model.DB.Save(&model.Permission{
-		Name:     "List game servers by host id",
-		Verb:     lib.GetVerbByName("GET"),
-		GroupId:  group.ID,
-		Endpoint: "/v1/host/" + host.ID.String() + "/server",
-	})
-
-	model.DB.Save(&model.Permission{
-		Name:     "Get host metric",
-		Verb:     lib.GetVerbByName("GET"),
-		GroupId:  group.ID,
-		Endpoint: "/v1/host/" + host.ID.String() + "/metric",
-	})
-
-	model.DB.Save(&model.Permission{
-		Name:     "Update host",
-		Verb:     lib.GetVerbByName("GET"),
-		GroupId:  group.ID,
-		Endpoint: "/v1/host/" + host.ID.String() + "/update",
-	})
-
+	// FIXME handle errors
+	model.CreatePermissionsForNewHost(group.ID, host.ID.String())
 	lib.MustEncode(json.NewEncoder(w), host)
 }
 
