@@ -74,6 +74,23 @@ backend:
     tags:
     - docker
 
+redis:
+  stage: compile
+  image: ubuntu:18.04
+  variables:
+    REDIS_VERSION: "5.0.7"
+    REDIS_DOWNLOAD_URL: "http://download.redis.io/releases/redis-5.0.7.tar.gz"
+    REDIS_DOWNLOAD_SHA: "61db74eabf6801f057fd24b590232f2f337d422280fd19486eca03be87d3a82b"
+  script:
+    - bash Taskfile.sh ci-redis-compile
+    - bash Taskfile.sh ci-redis-upload
+  artifacts:
+    paths:
+      - redis-server
+  tags:
+    - docker
+  when: manual
+
 docker-images:
     stage: build
     image: docker:stable

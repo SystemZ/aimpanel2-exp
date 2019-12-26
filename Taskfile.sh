@@ -41,6 +41,23 @@ function upload-slave-binary {
     curl -XPOST -H "Token: $AIMPANEL_UPDATE_TOKEN" -H "Content-type: application/json" -d "{\"commit\": \"$CI_COMMIT_SHA\", \"url\": \"https://storage.gra.cloud.ovh.net/v1/AUTH_23b9e96be2fc431d93deedba1b8c87d2/aimpanel-updates/$CI_COMMIT_SHA\"}" 'https://api-lab.aimpanel.pro/v1/version'
 }
 
+function ci-redis-compile {
+    # based on https://github.com/docker-library/redis/blob/d42494ab2d96070c8d83f37a7542fbbffd999988/5.0/Dockerfile
+    apt-get update
+    apt-get install -y --no-install-recommends ca-certificates wget gcc libc6-dev make rclone
+    wget -O redis.tar.gz "$REDIS_DOWNLOAD_URL"
+    echo "$REDIS_DOWNLOAD_SHA *redis.tar.gz" | sha256sum -c -
+    mkdir -p /usr/src/redis
+    tar -xzf redis.tar.gz -C /usr/src/redis --strip-components=1
+    make -C /usr/src/redis -j "$(nproc)"
+    cp /usr/src/redis/src/redis-server redis-server
+}
+
+function ci-redis-upload {
+    echo "$RCLONE_CONF" | base64 -d > rclone.conf
+    rclone -v --stats-one-line-date --config rclone.conf copyto redis-server ovh-bucket:aimpanel-updates/redis/$REDIS_VERSION-redis-server-linux-amd64
+}
+
 function default {
     help
 }
