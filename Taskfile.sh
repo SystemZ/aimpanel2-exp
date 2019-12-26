@@ -44,7 +44,7 @@ function upload-slave-binary {
 function ci-redis-compile {
     # based on https://github.com/docker-library/redis/blob/d42494ab2d96070c8d83f37a7542fbbffd999988/5.0/Dockerfile
     apt-get update
-    apt-get install -y --no-install-recommends ca-certificates wget gcc libc6-dev make rclone
+    apt-get install -y --no-install-recommends ca-certificates wget gcc libc6-dev make
     wget -O redis.tar.gz "$REDIS_DOWNLOAD_URL"
     echo "$REDIS_DOWNLOAD_SHA *redis.tar.gz" | sha256sum -c -
     mkdir -p /usr/src/redis
@@ -54,6 +54,8 @@ function ci-redis-compile {
 }
 
 function ci-redis-upload {
+    wget https://downloads.rclone.org/rclone-current-linux-amd64.deb
+    dpkg -i rclone-current-linux-amd64.deb
     echo "$RCLONE_CONF" | base64 -d > rclone.conf
     rclone -v --stats-one-line-date --config rclone.conf copyto redis-server ovh-bucket:aimpanel-updates/redis/$REDIS_VERSION-redis-server-linux-amd64
 }
