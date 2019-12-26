@@ -18,8 +18,31 @@ function frontend {
     VUE_APP_API_URL=http://localhost:3000 npm run serve
 }
 
+# launch this first
 function up-slave {
     vagrant up
+    vagrant ssh-config > vagrant.slave.ssh.config
+}
+
+# should be called by IDE or script after file save in slave codebase
+function sync-slave {
+    go build -o ./vagrant.slave.bin gitlab.com/systemz/aimpanel2/slave &
+    ssh -F vagrant.slave.ssh.config default 'sudo /bin/bash -c "service aimpanel stop"'
+    wait
+    rsync -e "ssh -F vagrant.slave.ssh.config" --rsync-path="sudo rsync" vagrant.slave.bin default:/opt/aimpanel/slave
+    ssh -F vagrant.slave.ssh.config default 'sudo /bin/bash -c "systemctl start aimpanel"'
+}
+
+# automatically rebuilds slave and copies binary to VM when slave code changes
+# sudo apt-get install -y inotify-tools
+function auto-slave {
+    inotifywait -e close_write,moved_to,create -r -m ./slave/ |
+    while read -r directory events filename; do
+      SECONDS=0
+      echo -n "syncing..."
+      sync-slave
+      echo " done in $SECONDS s"
+    done
 }
 
 function stop {
