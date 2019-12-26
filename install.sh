@@ -73,6 +73,8 @@ Restart=always
 systemctl daemon-reload
 # start service
 systemctl restart aimpanel-redis
+# enable autostart
+systemctl enable aimpanel-redis
 # show status to user
 systemctl status --no-pager aimpanel-redis.service
 
@@ -102,5 +104,7 @@ Environment="API_URL=https://api-lab.aimpanel.pro"
 systemctl daemon-reload
 # start service
 systemctl restart aimpanel
+# enable autostart
+systemctl enable aimpanel
 # show status to user
 systemctl status --no-pager aimpanel.service
