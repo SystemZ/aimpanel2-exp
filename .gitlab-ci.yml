@@ -52,8 +52,12 @@ backend:
     # tests at the end to still allow artifacts uploading
     - go fmt $(go list ./... | grep -v /src/) || true
     - go vet $(go list ./... | grep -v /src/)
+    # install and configure rclone
+    - bash Taskfile.sh ci-install-rclone-latest
     # binaries ok, upload slave binary for auto updates
-    - bash Taskfile.sh upload-slave-binary
+    - bash Taskfile.sh ci-slave-binary-upload
+    # update slave install script
+    - bash Taskfile.sh ci-slave-installscript-upload
   cache:
     key: "$CI_JOB_NAME-src"
     paths:
@@ -65,6 +69,7 @@ backend:
     paths:
       - aimpanel-master
       - aimpanel-slave
+      - install.sh
       - swagger.json
       - report.xml
     when: always
