@@ -24,3 +24,11 @@ This will serve UI for generated swagger spec
 ```bash
 ./Taskfile.sh swagger-serve
 ```
+
+## Slave
+
+### Diagnostics
+
+```bash
+ldd --version | grep ldd --color=never
+```
