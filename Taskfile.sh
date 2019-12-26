@@ -39,7 +39,7 @@ function ci-install-rclone-latest {
 }
 
 function ci-slave-installscript-upload {
-    rclone -v --stats-one-line-date --config rclone.conf copyto aimpanel-slave ovh-bucket:aimpanel-updates/install.sh
+    rclone -v --stats-one-line-date --config rclone.conf copyto install.sh ovh-bucket:aimpanel-updates/install.sh
 }
 
 function ci-slave-binary-upload {
