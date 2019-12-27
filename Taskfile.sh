@@ -60,8 +60,17 @@ function swagger-serve {
 }
 
 function update-todo-issue {
-    ISSUE_CONTENT=$(git grep -n  TODO | awk -F':' '{ print "https://gitlab.com/SystemZ/aimpanel2/tree/master/"$1"#L"$2; $1=$2=""; print $0; print "" }' | sed -e 's/^[ \t]*//')
-    curl -X PUT -H "PRIVATE-TOKEN: $GITLAB_PRIVATE_TOKEN" -F "description=$ISSUE_CONTENT" https://gitlab.com/api/v4/projects/7001381/issues/157
+    TODO_CONTENT=$(git grep -n TODO | awk -F':' '{ print "https://gitlab.com/SystemZ/aimpanel2/tree/master/"$1"#L"$2; $1=$2=""; print $0; print "" }' | sed -e 's/^[ \t]*//' | grep -v "Taskfile.sh")
+    FIXME_CONTENT=$(git grep -n FIXME | awk -F':' '{ print "https://gitlab.com/SystemZ/aimpanel2/tree/master/"$1"#L"$2; $1=$2=""; print $0; print "" }' | sed -e 's/^[ \t]*//' | grep -v "Taskfile.sh")
+
+    ISSUE_CONTENT="
+    ## FIXME
+    $FIXME_CONTENT
+    ## TODO
+    $TODO_CONTENT
+    "
+
+    curl -s -o /dev/null -X PUT -H "PRIVATE-TOKEN: $GITLAB_PRIVATE_TOKEN" -F "description=$ISSUE_CONTENT" https://gitlab.com/api/v4/projects/7001381/issues/157
 }
 
 function ci-install-rclone-latest {
