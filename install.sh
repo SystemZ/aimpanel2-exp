@@ -26,7 +26,8 @@ mkdir -p $AIMPANEL_DIR/gs
 mkdir -p $AIMPANEL_DIR/trash
 # install redis
 mkdir -p $REDIS_DIR
-wget "$REPO_URL/redis/$REDIS_VERSION-redis-server-linux-amd64" -O $REDIS_DIR/$REDIS_BINARY_NAME
+echo "Downloading redis..."
+wget -q "$REPO_URL/redis/$REDIS_VERSION-redis-server-linux-amd64" -O $REDIS_DIR/$REDIS_BINARY_NAME
 # configure redis
 echo "
 supervised systemd
@@ -48,12 +49,16 @@ chmod +x $REDIS_DIR/$REDIS_BINARY_NAME
 # apply permissions
 chmod -R 770 $AIMPANEL_DIR/
 chown -R aimpanel:root $AIMPANEL_DIR/
-wget $REPO_URL/latest -O $AIMPANEL_BINARY_DIR/$AIMPANEL_BINARY_NAME
+echo "Downloading agent..."
+wget -q $REPO_URL/latest -O $AIMPANEL_BINARY_DIR/$AIMPANEL_BINARY_NAME
 chmod +x $AIMPANEL_BINARY_DIR/$AIMPANEL_BINARY_NAME
 # for launching wrapper
 ln -s /opt/aimpanel/slave /usr/local/bin/slave
 # optitonal java for MC
-apt-get install -y openjdk-11-jre-headless
+echo "Updating OS packages..."
+apt-get update -q
+echo "Installing OpenJDK 11 JRE..."
+apt-get install -q -y openjdk-11-jre-headless
 # create service for redis
 echo "
 [Unit]
@@ -78,7 +83,7 @@ systemctl restart aimpanel-redis
 # enable autostart
 systemctl enable aimpanel-redis
 # show status to user
-systemctl status --no-pager aimpanel-redis.service
+#systemctl status --no-pager aimpanel-redis.service
 
 # install service to run aimpanel agent
 echo "
@@ -110,4 +115,4 @@ systemctl restart aimpanel
 # enable autostart
 systemctl enable aimpanel
 # show status to user
-systemctl status --no-pager aimpanel.service
+#systemctl status --no-pager aimpanel.service
