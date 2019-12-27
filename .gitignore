@@ -6,3 +6,4 @@ slave/.idea
 slave/slave
 swagger.json
 report.xml
+.vagrant
