@@ -51,7 +51,7 @@ function stop {
 
 function swagger-gen {
     cd master
-    swagger generate spec -o swagger.json
+    swagger generate spec -o -m ../swagger.json
     cd ../
 }
 

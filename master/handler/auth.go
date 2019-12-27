@@ -4,13 +4,12 @@ import (
 	"encoding/json"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/ecode"
-	"gitlab.com/systemz/aimpanel2/lib/response"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"net/http"
 )
 
-//swagger:parameters Authentication register
-type AuthRegisterReq struct {
+//swagger:model registerRequest
+type AuthRegisterRequest struct {
 	// required: true
 	Username string `json:"username"`
 	// required: true
@@ -23,10 +22,25 @@ type AuthRegisterReq struct {
 	EmailRepeat string `json:"email_repeat"`
 }
 
-//swagger:parameters Authentication login
-type AuthLoginReq struct {
+//swagger:parameters Auth Login
+type AuthLoginRequest struct {
+	// User name
+	//
+	// in: body
+	// required: true
 	Username string `json:"username"`
+
+	// User password
+	//
+	// in: body
+	// required: true
 	Password string `json:"password"`
+}
+
+//swagger:model Token
+type Token struct {
+	// JWT token
+	Token string `json:"token"`
 }
 
 // swagger:route POST /auth/register Auth Register
@@ -36,11 +50,11 @@ type AuthLoginReq struct {
 //Responses:
 //	default: jsonError
 //  400: jsonError
-//	200:
+//	200: Token
 
 func Register(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
-	var registerRequest AuthRegisterReq
+	var registerRequest AuthRegisterRequest
 	err := decoder.Decode(&registerRequest)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -114,7 +128,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	model.DB.Save(groupUser)
 	model.CreatePermissionsForNewUser(group.ID)
 
-	lib.MustEncode(json.NewEncoder(w), response.Token{Token: token})
+	lib.MustEncode(json.NewEncoder(w), Token{Token: token})
 }
 
 // swagger:route POST /auth/login Auth Login
@@ -124,11 +138,11 @@ func Register(w http.ResponseWriter, r *http.Request) {
 //Responses:
 //	default: jsonError
 //  400: jsonError
-//	200:
+//	200: Token
 
 func Login(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
-	var loginRequest AuthLoginReq
+	var loginRequest AuthLoginRequest
 	err := decoder.Decode(&loginRequest)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -152,7 +166,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		lib.MustEncode(json.NewEncoder(w), response.Token{Token: token})
+		lib.MustEncode(json.NewEncoder(w), Token{Token: token})
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
 

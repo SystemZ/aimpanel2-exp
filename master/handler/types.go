@@ -7,6 +7,8 @@ type JsonError struct {
 	Message   string `json:"message"`
 }
 
+// A JsonSuccess is the default success message that is generated.
+//swagger:response jsonSuccess
 type JsonSuccess struct {
 	Message string `json:"message"`
 }

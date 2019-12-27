@@ -23,7 +23,7 @@ import (
 //Responses:
 //	default: jsonError
 //  400: jsonError
-//	200:
+//	200: []Host
 
 //TODO: find by current signed-in account
 func ListHosts(w http.ResponseWriter, r *http.Request) {
@@ -43,7 +43,7 @@ func ListHosts(w http.ResponseWriter, r *http.Request) {
 //Responses:
 //	default: jsonError
 //  400: jsonError
-//	200:
+//	200: Host
 
 func GetHost(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
@@ -62,7 +62,7 @@ func GetHost(w http.ResponseWriter, r *http.Request) {
 //Responses:
 //	default: jsonError
 //  400: jsonError
-//	200:
+//	200: Host
 
 func CreateHost(w http.ResponseWriter, r *http.Request) {
 	user := context.Get(r, "user").(model.User)
@@ -92,6 +92,14 @@ func CreateHost(w http.ResponseWriter, r *http.Request) {
 	lib.MustEncode(json.NewEncoder(w), host)
 }
 
+// swagger:route GET /host/{id}/metric Host Metric
+//
+// Returns last metric
+//
+//Responses:
+//	default: jsonError
+//  400: jsonError
+//	200: MetricHost
 func GetHostMetric(w http.ResponseWriter, r *http.Request) {
 	var metric model.MetricHost
 	model.DB.Order("created_at desc").Limit(1).First(&metric)
@@ -99,6 +107,14 @@ func GetHostMetric(w http.ResponseWriter, r *http.Request) {
 	lib.MustEncode(json.NewEncoder(w), metric)
 }
 
+// swagger:route DELETE /host/{id} Host Remove
+//
+// Removes host and all his game servers
+//
+// Responses:
+//	default: jsonError
+//  400: jsonError
+//	200: jsonSuccess
 func RemoveHost(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
@@ -164,4 +180,14 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+// Host ID parameter model
+//
+// swagger:parameters Metric Remove
+type HostID struct {
+	// ID of the host
+	// in: path
+	// required: true
+	ID string `json:"id"`
 }
