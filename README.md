@@ -33,6 +33,9 @@ vagrant up
 # Access via SSH
 vagrant ssh
 
+# Apply changes to install.sh (token change etc)
+vagrant provision
+
 # Destroy VM
 vagrant destroy -f
 ```
