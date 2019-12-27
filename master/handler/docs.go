@@ -1,12 +1,10 @@
 package handler
 
 import (
-	"github.com/sirupsen/logrus"
 	"net/http"
 )
 
 func GetSpec(w http.ResponseWriter, r *http.Request) {
-	logrus.Info("helo")
 	http.ServeFile(w, r, "swagger.json")
 }
 
