@@ -14,6 +14,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib/response"
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/slave/config"
+	"gitlab.com/systemz/aimpanel2/slave/model"
 	"io"
 	"net/http"
 	"os"
@@ -28,6 +29,8 @@ var (
 )
 
 func Start(hostToken string) {
+	model.InitRedis()
+
 	logrus.Info("Starting Agent Version." + config.GIT_COMMIT)
 	config.HOST_TOKEN = hostToken
 
