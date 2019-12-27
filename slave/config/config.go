@@ -12,6 +12,7 @@ var (
 	HOST_TOKEN  string
 	API_TOKEN   string
 	GIT_COMMIT  string
+	REDIS_HOST  string
 )
 
 func init() {
@@ -34,4 +35,7 @@ func init() {
 
 	viper.SetDefault("API_TOKEN", "")
 	API_TOKEN = viper.GetString("API_TOKEN")
+
+	viper.SetDefault("REDIS_HOST", "/opt/aimpanel/redis/redis.sock")
+	REDIS_HOST = viper.GetString("REDIS_HOST")
 }
