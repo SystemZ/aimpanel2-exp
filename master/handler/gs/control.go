@@ -47,7 +47,7 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	gsId := params["server_id"]
 
-	data := &request.GameServerStopRequest{}
+	data := &request.GameServerStop{}
 	err := json.NewDecoder(r.Body).Decode(data)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -72,7 +72,7 @@ func Stop(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	gsId := params["server_id"]
 
-	data := &request.GameServerStopRequest{}
+	data := &request.GameServerStop{}
 	err := json.NewDecoder(r.Body).Decode(data)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -97,7 +97,7 @@ func SendCommand(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	gsId := params["server_id"]
 
-	data := &request.GameServerSendCommandRequest{}
+	data := &request.GameServerSendCommand{}
 	err := json.NewDecoder(r.Body).Decode(data)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)

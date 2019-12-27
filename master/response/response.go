@@ -43,7 +43,17 @@ type HostList struct {
 	Hosts []model.Host `json:"hosts"`
 }
 
-type HostMetric struct {
+type HostMetrics struct {
 	//Metric info
-	Metric model.MetricHost `json:"metric"`
+	Metrics []model.MetricHost `json:"metrics"`
+}
+
+type GameServerList struct {
+	//List of game servers
+	GameServers []model.GameServer `json:"game_servers"`
+}
+
+type GameServer struct {
+	//Game server details
+	GameServer model.GameServer `json:"game_server"`
 }

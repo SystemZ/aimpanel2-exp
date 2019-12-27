@@ -205,7 +205,7 @@ var routes = Routes{
 
 	//GameServers
 	Route{
-		"List game servers by user id",
+		"GameServer ListByUser",
 		"GET",
 		"/host/my/server",
 		gs.ListByUser,
@@ -213,7 +213,7 @@ var routes = Routes{
 		false,
 	},
 	Route{
-		"Get game server",
+		"GameServer Details",
 		"GET",
 		"/host/{host_id}/server/{server_id}",
 		gs.Get,
@@ -221,7 +221,7 @@ var routes = Routes{
 		false,
 	},
 	Route{
-		"Remove game server",
+		"GameServer Remove",
 		"DELETE",
 		"/host/{host_id}/server/{server_id}",
 		gs.Remove,
@@ -229,7 +229,7 @@ var routes = Routes{
 		false,
 	},
 	Route{
-		"Create game server",
+		"GameServer Create",
 		"POST",
 		"/host/{host_id}/server",
 		gs.Create,

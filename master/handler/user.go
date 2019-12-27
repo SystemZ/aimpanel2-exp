@@ -106,6 +106,7 @@ func UserChangeEmail(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} response.UserProfile
 // @Failure 400 {object} JsonError
 // @Router /me [get]
+// @Security ApiKey
 func UserProfile(w http.ResponseWriter, r *http.Request) {
 	user := context.Get(r, "user").(model.User)
 

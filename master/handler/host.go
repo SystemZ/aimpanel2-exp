@@ -62,15 +62,14 @@ func HostDetails(w http.ResponseWriter, r *http.Request) {
 // @Description Create new Host linked to the current signed-in account
 // @Accept json
 // @Produce json
-// @Param host body request.HostCreateRequest true " "
+// @Param host body request.HostCreate true " "
 // @Success 200 {object} response.Token
 // @Failure 400 {object} JsonError
 // @Security ApiKey
-//TODO Create struct to isolate from gorm model
 func HostCreate(w http.ResponseWriter, r *http.Request) {
 	user := context.Get(r, "user").(model.User)
 
-	data := &request.HostCreateRequest{}
+	data := &request.HostCreate{}
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
 		lib.MustEncode(json.NewEncoder(w),
@@ -106,14 +105,14 @@ func HostCreate(w http.ResponseWriter, r *http.Request) {
 // @Accept json
 // @Produce json
 // @Param id path string true "Host ID"
-// @Success 200 {object} response.HostMetric
+// @Success 200 {object} response.HostMetrics
 // @Failure 400 {object} JsonError
 // @Security ApiKey
 func HostMetric(w http.ResponseWriter, r *http.Request) {
-	var metric model.MetricHost
-	model.DB.Order("created_at desc").Limit(1).First(&metric)
+	var metrics []model.MetricHost
+	model.DB.Order("created_at desc").Limit(1).Find(&metrics)
 
-	lib.MustEncode(json.NewEncoder(w), response.HostMetric{Metric: metric})
+	lib.MustEncode(json.NewEncoder(w), response.HostMetrics{Metrics: metrics})
 }
 
 // @Router /host/{id} [delete]

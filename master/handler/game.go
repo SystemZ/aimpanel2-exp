@@ -15,6 +15,7 @@ import (
 // @Success 200 {array} response.Game
 // @Failure 400 {object} JsonError
 // @Router /game [get]
+// @Security ApiKey
 func ListGames(w http.ResponseWriter, r *http.Request) {
 	lib.MustEncode(json.NewEncoder(w), game.Games)
 }

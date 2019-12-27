@@ -7,19 +7,31 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/ecode"
 	"gitlab.com/systemz/aimpanel2/lib/game"
+	"gitlab.com/systemz/aimpanel2/lib/request"
 	"gitlab.com/systemz/aimpanel2/master/handler"
 	"gitlab.com/systemz/aimpanel2/master/model"
+	"gitlab.com/systemz/aimpanel2/master/response"
 	"gitlab.com/systemz/aimpanel2/master/service/gameserver"
 	"net/http"
 )
 
+// @Router /host/{id}/server [post]
+// @Summary Create
+// @Tags Game Server
+// @Description Create new game server linked to the selected host
+// @Accept json
+// @Produce json
+// @Param host body request.GameServerCreate true " "
+// @Success 200 {object} handler.JsonSuccess
+// @Failure 400 {object} handler.JsonError
+// @Security ApiKey
 func Create(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	hostId := params["host_id"]
 
 	//Decode json
-	gameServer := &model.GameServer{}
-	err := json.NewDecoder(r.Body).Decode(gameServer)
+	data := &request.GameServerCreate{}
+	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: ecode.JsonDecode})
@@ -27,13 +39,12 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	gameDef := game.Game{
-		Id:      gameServer.GameId,
-		Version: gameServer.GameVersion,
+		Id:      data.GameId,
+		Version: data.GameVersion,
 	}
 	gameDef.SetDefaults()
-
 	gameDefJson, _ := json.Marshal(gameDef)
-	gameServer.GameJson = string(gameDefJson)
+	//gameServer.GameJson = string(gameDefJson)
 
 	//Check if host exist
 	host := model.GetHost(model.DB, hostId)
@@ -43,12 +54,18 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	gameServer.HostId = host.ID
-	gameServer.MetricFrequency = 30
-	gameServer.StopTimeout = 30
+	gameServer := &model.GameServer{
+		Name:            data.Name,
+		GameId:          data.GameId,
+		GameVersion:     data.GameVersion,
+		HostId:          host.ID,
+		MetricFrequency: 30,
+		StopTimeout:     30,
+		GameJson:        string(gameDefJson),
+	}
 
 	//Save game server to db
-	model.DB.Save(gameServer)
+	model.DB.Save(&gameServer)
 
 	//TODO: create array of permissions?
 	user := context.Get(r, "user").(model.User)
@@ -63,9 +80,18 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	model.CreatePermissionsForNewGameServer(group.ID, host.ID.String(), gameServer.ID.String())
 
 	lib.MustEncode(json.NewEncoder(w),
-		gameServer)
+		handler.JsonSuccess{Message: "Created game server successfully."})
 }
 
+// @Router /host/{id}/server [get]
+// @Summary Game server list by Host ID
+// @Tags Game Server
+// @Description List game servers linked to selected host
+// @Accept json
+// @Produce json
+// @Success 200 {object} response.GameServerList
+// @Failure 400 {object} handler.JsonError
+// @Security ApiKey
 func ListByHostId(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	hostId := params["id"]
@@ -85,9 +111,18 @@ func ListByHostId(w http.ResponseWriter, r *http.Request) {
 	}
 
 	lib.MustEncode(json.NewEncoder(w),
-		gameServers)
+		response.GameServerList{GameServers: *gameServers})
 }
 
+// @Router /host/my/server [get]
+// @Summary User game servers
+// @Tags Game Server
+// @Description List game servers linked to the current signed-in account
+// @Accept json
+// @Produce json
+// @Success 200 {object} response.GameServerList
+// @Failure 400 {object} handler.JsonError
+// @Security ApiKey
 func ListByUser(w http.ResponseWriter, r *http.Request) {
 	user := context.Get(r, "user").(model.User)
 
@@ -96,17 +131,27 @@ func ListByUser(w http.ResponseWriter, r *http.Request) {
 		"LEFT JOIN hosts ON game_servers.host_id = hosts.id").Where(
 		"hosts.user_id = ?", user.ID).Find(&gameServers)
 
-	lib.MustEncode(json.NewEncoder(w), gameServers)
+	lib.MustEncode(json.NewEncoder(w), response.GameServerList{GameServers: gameServers})
 }
 
+// @Router /host/{host_id}/server/{server_id} [get]
+// @Summary Details
+// @Tags Game Server
+// @Description Get details about Game server with selected ID linked to the current signed-in account
+// @Accept json
+// @Produce json
+// @Param host_id path string true "Host ID"
+// @Param server_id path string true "Game Server ID"
+// @Success 200 {object} response.GameServer
+// @Failure 400 {object} handler.JsonError
+// @Security ApiKey
 func Get(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
 	var gs model.GameServer
-
 	model.DB.Where("id = ? and host_id = ?", params["server_id"], params["host_id"]).First(&gs)
 
-	lib.MustEncode(json.NewEncoder(w), gs)
+	lib.MustEncode(json.NewEncoder(w), response.GameServer{GameServer: gs})
 }
 
 func ConsoleLog(w http.ResponseWriter, r *http.Request) {
@@ -127,6 +172,17 @@ func PutLogs(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 }
 
+// @Router /host/{host_id}/server/{server_id} [delete]
+// @Summary Remove
+// @Tags Game Server
+// @Description Removes game server
+// @Accept json
+// @Produce json
+// @Param host_id path string true "Host ID"
+// @Param server_id path string true "Game Server ID"
+// @Success 200 {object} handler.JsonSuccess
+// @Failure 400 {object} handler.JsonError
+// @Security ApiKey
 func Remove(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	gameServerId := params["server_id"]
