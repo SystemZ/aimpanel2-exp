@@ -20,7 +20,6 @@ func Start(gameServerID string) {
 	}
 
 	go p.Rpc()
-	go p.Heartbeat()
 
 	logrus.Info("Send WRAPPER_STARTED")
 	taskMsg := task.Message{

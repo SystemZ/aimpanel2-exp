@@ -279,27 +279,3 @@ func (p *Process) Metrics() {
 
 	}
 }
-
-func (p *Process) Heartbeat() {
-	for {
-		<-time.After(5 * time.Second)
-
-		logrus.Info("Sending heartbeat")
-
-		taskMsg := task.Message{
-			TaskId:       task.WRAPPER_HEARTBEAT,
-			GameServerID: p.GameServerID,
-			Timestamp:    time.Now().Unix(),
-		}
-
-		jsonStr, err := taskMsg.Serialize()
-		if err != nil {
-			logrus.Error(err)
-		}
-		//TODO: do something with status code
-		_, err = lib.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN+"/"+p.GameServerID, config.API_TOKEN, jsonStr)
-		if err != nil {
-			logrus.Error(err)
-		}
-	}
-}
