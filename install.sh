@@ -1,20 +1,49 @@
 #!/bin/bash
-# this script can be run multiple times without damage to OS
-[ -z "$1" ] && echo "Provide token as 1st argument" >&2 && exit 1
-TOKEN=$1
-
-# debug output
-#set -x
+# this script can be run multiple times without any problems to OS or panel
+# you can use this to repair or upgrade too :)
 
 # variables
-REPO_URL="https://storage.gra.cloud.ovh.net/v1/AUTH_23b9e96be2fc431d93deedba1b8c87d2/aimpanel-updates"
+TOKEN="CHANGE_ME"
 API_URL="https://api-lab.aimpanel.pro"
+REPO_URL="https://storage.gra.cloud.ovh.net/v1/AUTH_23b9e96be2fc431d93deedba1b8c87d2/aimpanel-updates"
 AIMPANEL_BINARY_NAME=slave
 AIMPANEL_BINARY_DIR=/opt/aimpanel
 AIMPANEL_DIR=/opt/aimpanel
 REDIS_VERSION="5.0.7"
 REDIS_BINARY_NAME=redis-server
 REDIS_DIR=/opt/aimpanel/redis
+
+# init
+d_flag=''
+verbose='false'
+print_usage() {
+  printf "Usage: -d (dev)"
+}
+while getopts ':dv' flag; do
+  case "${flag}" in
+    d) d_flag='true' ;;
+    v) verbose='true' ;;
+    *) print_usage
+       exit 1 ;;
+  esac
+done
+# mode of install
+if [ -z "$d_flag" ]
+then
+  # standard mode
+  [ -z "$1" ] && echo "Provide token as 1st argument" >&2 && exit 1
+  TOKEN=$1
+else
+  # developer mode
+  echo "Dev mode.."
+  # overwrite default API_URL with local one
+  API_URL="http://192.168.122.1:3000"
+fi
+# debug output
+if [ -z "$verbose" ]
+then
+  set -x
+fi
 
 # for security we use separate user to run aimpanel and all games
 #adduser --system --no-create-home aimpanel

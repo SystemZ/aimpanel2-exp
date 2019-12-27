@@ -1,18 +1,11 @@
-$script = <<-SCRIPT
-Done!
-SCRIPT
-
 Vagrant.configure("2") do |config|
   config.vm.box = "generic/ubuntu1804"
   config.vm.box_check_update = false
   config.vm.provision "shell" do |s|
-      s.path = "install_dev.sh"
-      # uncomment this for lab connection
-      #s.path = "install.sh"
-      # then uncomment this and replace token
-      #s.args = ["CHANGE_TO_TOKEN_FROM_MASTER"]
+      # remember to change token in install.sh
+      s.path = "install.sh"
+      s.args = ["-d"]
   end
-  config.vm.provision "shell", inline: $script
   config.vm.provider :libvirt do |libvirt|
     libvirt.cpus = 4
     libvirt.memory = 2048
