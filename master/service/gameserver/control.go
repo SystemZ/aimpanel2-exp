@@ -32,7 +32,7 @@ func Start(gsId string) error {
 	}
 
 	taskMsg := task.Message{
-		TaskId:       task.GAME_INSTALL,
+		TaskId:       task.WRAPPER_START,
 		GameServerID: gsId,
 	}
 
