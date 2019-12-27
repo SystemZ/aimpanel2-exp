@@ -72,6 +72,12 @@ This will serve UI for generated swagger spec
 
 ## Slave
 
+### Redis debug
+
+```bash
+redis-cli -s /opt/aimpanel/redis/redis.sock
+```
+
 ### Diagnostics
 
 ```bash
