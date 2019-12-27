@@ -10,13 +10,13 @@ import (
 
 func NewRouter() *mux.Router {
 	router := mux.NewRouter()
-	router.StrictSlash(true)
+	//router.StrictSlash(true)
 
 	v1 := router.PathPrefix("/v1").Subrouter()
 
 	for _, route := range routes {
 		var handler http.Handler
-		handler = route.HandlerFunc
+		handler = CommonMiddleware(route.HandlerFunc)
 
 		if route.AuthRequired {
 			if route.SlaveOnly {
@@ -56,7 +56,31 @@ var routes = Routes{
 		"SwaggerSpec",
 		"GET",
 		"/swagger.json",
-		handler.SwaggerSpec,
+		handler.GetSpec,
+		false,
+		false,
+	},
+	Route{
+		"SwaggerUi",
+		"GET",
+		"/swagger",
+		handler.GetSwaggerUi,
+		false,
+		false,
+	},
+	Route{
+		"SwaggerDocsRedirect",
+		"GET",
+		"/docs",
+		handler.GetDocsRedirect,
+		false,
+		false,
+	},
+	Route{
+		"SwaggerDocs",
+		"GET",
+		"/docs/",
+		handler.GetDocs,
 		false,
 		false,
 	},
