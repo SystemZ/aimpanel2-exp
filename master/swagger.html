@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Swagger UI</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://unpkg.com/swagger-ui-dist@3.24.3/swagger-ui.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+<div id="swagger-ui"></div>
+<script src="https://unpkg.com/swagger-ui-dist@3/swagger-ui-bundle.js"></script>
+<script>
+    // var SwaggerUIBundle = require('swagger-ui-dist').SwaggerUIBundle
+    const ui = SwaggerUIBundle({
+        url: '/v4/swagger.json',
+        dom_id: '#swagger-ui',
+        // presets: [
+        //   SwaggerUIBundle.presets.apis,
+        // SwaggerUIBundle.SwaggerUIStandalonePreset
+        // ],
+        // layout: 'StandaloneLayout'
+    })
+</script>
+</body>
+</html>

@@ -49,9 +49,12 @@ function stop {
     docker-compose stop
 }
 
-function swagger-gen {
+function swagger-gen-dev {
     cd master
-    swagger generate spec -m -o ../swagger.json
+    #swagger generate spec -m -o ../swagger.json
+    swag init
+    mv docs/swagger.json .
+    rm -rf docs
     cd ../
 }
 
@@ -107,6 +110,16 @@ function ci-redis-upload {
     echo "$RCLONE_CONF" | base64 -d > rclone.conf
     rclone -v --stats-one-line-date --config rclone.conf copyto redis-server ovh-bucket:aimpanel-updates/redis/$REDIS_VERSION-redis-server-linux-amd64
 }
+
+function ci-swagger-gen {
+    cd master
+    #swagger generate spec -m -o ../swagger.json
+    swag init
+    mv docs/swagger.json ../
+    rm -rf docs
+    cd ../
+}
+
 
 function default {
     help

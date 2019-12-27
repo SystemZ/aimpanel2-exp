@@ -16,16 +16,14 @@ import (
 	"time"
 )
 
-// swagger:route GET /host Host List
-//
-// List Hosts linked to the current signed-in account
-//
-//Responses:
-//	default: jsonError
-//  400: jsonError
-//	200: []Host
-
-//TODO: find by current signed-in account
+// @Summary List
+// @Tags Host
+// @Description List Hosts linked to the current signed-in account
+// @Accept json
+// @Produce json
+// @Success 200 {array} model.Host
+// @Failure 400 {object} JsonError
+// @Router /host [get]
 func ListHosts(w http.ResponseWriter, r *http.Request) {
 	var hosts []model.Host
 	user := context.Get(r, "user").(model.User)
@@ -36,15 +34,15 @@ func ListHosts(w http.ResponseWriter, r *http.Request) {
 	lib.MustEncode(json.NewEncoder(w), hosts)
 }
 
-// swagger:route GET /host/{id} Host Get
-//
-// Get info about Host with selected ID linked to the current signed-in account
-//
-//Responses:
-//	default: jsonError
-//  400: jsonError
-//	200: Host
-
+// @Summary Get
+// @Tags Host
+// @Description Get info about Host with selected ID linked to the current signed-in account
+// @Accept json
+// @Produce json
+// @Param id path string true "Host ID"
+// @Success 200 {object} model.Host
+// @Failure 400 {object} JsonError
+// @Router /host/{id} [get]
 func GetHost(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
@@ -55,15 +53,16 @@ func GetHost(w http.ResponseWriter, r *http.Request) {
 	lib.MustEncode(json.NewEncoder(w), host)
 }
 
-// swagger:route POST /host Host Create
-//
-// Create new Host linked to the current signed-in account
-//
-//Responses:
-//	default: jsonError
-//  400: jsonError
-//	200: Host
-
+// @Summary Create
+// @Tags Host
+// @Description Create new Host linked to the current signed-in account
+// @Accept json
+// @Produce json
+// @Param host body model.Host true " "
+// @Success 200 {object} model.Host
+// @Failure 400 {object} JsonError
+// @Router /host [post]
+//TODO Create struct to isolate from gorm model
 func CreateHost(w http.ResponseWriter, r *http.Request) {
 	user := context.Get(r, "user").(model.User)
 
@@ -92,14 +91,15 @@ func CreateHost(w http.ResponseWriter, r *http.Request) {
 	lib.MustEncode(json.NewEncoder(w), host)
 }
 
-// swagger:route GET /host/{id}/metric Host Metric
-//
-// Returns last metric
-//
-//Responses:
-//	default: jsonError
-//  400: jsonError
-//	200: MetricHost
+// @Summary Metric
+// @Tags Host
+// @Description Get last host metric with selected ID linked to the current signed-in account
+// @Accept json
+// @Produce json
+// @Param id path string true "Host ID"
+// @Success 200 {object} model.MetricHost
+// @Failure 400 {object} JsonError
+// @Router /host/{id}/metric [get]
 func GetHostMetric(w http.ResponseWriter, r *http.Request) {
 	var metric model.MetricHost
 	model.DB.Order("created_at desc").Limit(1).First(&metric)
@@ -107,14 +107,15 @@ func GetHostMetric(w http.ResponseWriter, r *http.Request) {
 	lib.MustEncode(json.NewEncoder(w), metric)
 }
 
-// swagger:route DELETE /host/{id} Host Remove
-//
-// Removes host and all his game servers
-//
-// Responses:
-//	default: jsonError
-//  400: jsonError
-//	200: jsonSuccess
+// @Summary Remove
+// @Tags Host
+// @Description Removes host with all linked game servers
+// @Accept json
+// @Produce json
+// @Param id path string true "Host ID"
+// @Success 200 {object} JsonSuccess
+// @Failure 400 {object} JsonError
+// @Router /host/{id} [delete]
 func RemoveHost(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
@@ -180,14 +181,4 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusNoContent)
-}
-
-// Host ID parameter model
-//
-// swagger:parameters Metric Remove
-type HostID struct {
-	// ID of the host
-	// in: path
-	// required: true
-	ID string `json:"id"`
 }

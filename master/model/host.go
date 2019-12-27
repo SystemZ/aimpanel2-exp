@@ -8,69 +8,52 @@ import (
 	"time"
 )
 
-// Single host
-// swagger:model Host
 type Host struct {
 	// ID of the host
-	// Example: 100112233-4455-6677-8899-aabbccddeeff
-	ID uuid.UUID `json:"id" gorm:"primary_key;type:varchar(36)" json:"id"`
+	ID uuid.UUID `json:"id" gorm:"primary_key;type:varchar(36)" json:"id" example:"100112233-4455-6677-8899-aabbccddeeff"`
 
 	// User assigned name
-	// Example: My Great Linux server
-	Name string `gorm:"column:name" json:"name"`
+	Name string `gorm:"column:name" json:"name" example:"My Great Linux server"`
 
 	// User ID
-	UserId uuid.UUID `gorm:"column:user_id" json:"user_id"`
+	UserId uuid.UUID `gorm:"column:user_id" json:"user_id" example:"100112233-4455-6677-8899-aabbccddeeff"`
 
 	// User assigned host ip
-	// Example: 192.51.100.128
-	Ip string `gorm:"column:ip" json:"ip"`
+	Ip string `gorm:"column:ip" json:"ip" example:"192.51.100.128"`
 
 	// Generated token for host
-	Token string `gorm:"column:token" json:"token"`
+	Token string `gorm:"column:token" json:"token" example:"VRAKKUBHNIMKLXSXLWTQAOFGOMSSCXOO"`
 
 	// Metric frequency
-	// Example: 30
-	MetricFrequency int `gorm:"column:metric_frequency" json:"metric_frequency"`
+	MetricFrequency int `gorm:"column:metric_frequency" json:"metric_frequency" example:"30"`
 
 	// Host OS
-	// Example: linux
-	OS string `gorm:"column:os" json:"os"`
+	OS string `gorm:"column:os" json:"os" example:"linux"`
 
 	// Host platform
-	// Example: ubuntu
-	Platform string `gorm:"column:platform" json:"platform"`
+	Platform string `gorm:"column:platform" json:"platform" example:"ubuntu"`
 
 	// Host platform family
-	// Example: debian
-	PlatformFamily string `gorm:"column:platform_family" json:"platform_family"`
+	PlatformFamily string `gorm:"column:platform_family" json:"platform_family" example:"debian"`
 
 	// Host platform version
-	// Example: 18.04
-	PlatformVersion string `gorm:"column:platform_version" json:"platform_version"`
+	PlatformVersion string `gorm:"column:platform_version" json:"platform_version" example:"18.04"`
 
 	// Host kernel version
-	// Example: 5.3.0-1-generic
-	KernelVersion string `gorm:"column:kernel_version" json:"kernel_version"`
+	KernelVersion string `gorm:"column:kernel_version" json:"kernel_version" example:"5.3.0-1-generic"`
 
 	// Host arch
-	// Example: x86_64
-	KernelArch string `gorm:"column:kernel_arch" json:"kernel_arch"`
+	KernelArch string `gorm:"column:kernel_arch" json:"kernel_arch" example:"x86_64"`
 
 	// State
 	// 0 off, 1 running
-	// Example: 1
-	// required: false
-	State uint `gorm:"column:state" json:"state"`
+	State uint `gorm:"column:state" json:"state" example:"1"`
 
 	// Date of host creation
-	// Example: 2019-09-29T03:16:27+02:00
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt time.Time `json:"created_at" example:"2019-09-29T03:16:27+02:00"`
 
-	//swagger:ignore
 	UpdatedAt time.Time `json:"-"`
 
-	//swagger:ignore
 	DeletedAt *time.Time `json:"-"`
 }
 
