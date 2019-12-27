@@ -65,7 +65,7 @@ function update-todo-issue {
 }
 
 function ci-install-rclone-latest {
-    wget https://downloads.rclone.org/rclone-current-linux-amd64.deb
+    wget -q https://downloads.rclone.org/rclone-current-linux-amd64.deb
     dpkg -i rclone-current-linux-amd64.deb
     echo "$RCLONE_CONF" | base64 -d > rclone.conf
 }

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/gorilla/context"
 	"gitlab.com/systemz/aimpanel2/lib"
+	"gitlab.com/systemz/aimpanel2/lib/ecode"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"net/http"
 )
@@ -32,7 +33,7 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: 2001})
+			JsonError{ErrorCode: ecode.JsonDecode})
 		return
 	}
 
@@ -47,14 +48,14 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 
 			lib.MustEncode(json.NewEncoder(w),
-				JsonError{ErrorCode: 2002})
+				JsonError{ErrorCode: ecode.PasswordsDoNotMatch})
 			return
 		}
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: 2003})
+			JsonError{ErrorCode: ecode.WrongPassword})
 		return
 	}
 }
@@ -69,7 +70,7 @@ func ChangeEmail(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: 2004})
+			JsonError{ErrorCode: ecode.JsonDecode})
 		return
 	}
 
@@ -84,14 +85,14 @@ func ChangeEmail(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 
 			lib.MustEncode(json.NewEncoder(w),
-				JsonError{ErrorCode: 2005})
+				JsonError{ErrorCode: ecode.EmailsDoNotMatch})
 			return
 		}
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: 2006})
+			JsonError{ErrorCode: ecode.WrongEmail})
 		return
 	}
 }

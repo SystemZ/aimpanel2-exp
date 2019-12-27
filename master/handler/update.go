@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
+	"gitlab.com/systemz/aimpanel2/lib/ecode"
 	"gitlab.com/systemz/aimpanel2/master/config"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"gitlab.com/systemz/aimpanel2/master/service/gameserver"
@@ -26,7 +27,7 @@ func NewVersion(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: 1234})
+			JsonError{ErrorCode: ecode.JsonDecode})
 		return
 	}
 

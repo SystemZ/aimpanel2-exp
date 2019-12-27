@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	log "github.com/sirupsen/logrus"
+	"gitlab.com/systemz/aimpanel2/lib/ecode"
 	"io"
 	"io/ioutil"
 	"math/rand"
@@ -38,6 +39,8 @@ func RandInt(min int, max int) int {
 func MustEncode(enc *json.Encoder, v interface{}) {
 	err := enc.Encode(v)
 	if err != nil {
+		log.Printf("ecode: %v", ecode.JsonEncode)
+		// FIXME this should not panic
 		panic(err)
 	}
 }
