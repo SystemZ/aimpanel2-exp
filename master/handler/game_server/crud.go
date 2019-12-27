@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 	"gitlab.com/systemz/aimpanel2/lib"
+	"gitlab.com/systemz/aimpanel2/lib/ecode"
 	"gitlab.com/systemz/aimpanel2/lib/game"
 	"gitlab.com/systemz/aimpanel2/master/handler"
 	"gitlab.com/systemz/aimpanel2/master/model"
@@ -21,7 +22,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(gameServer)
 	if err != nil {
 		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: 5022})
+			handler.JsonError{ErrorCode: ecode.JsonDecode})
 		return
 	}
 
@@ -38,7 +39,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	host := model.GetHost(model.DB, hostId)
 	if host == nil {
 		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: 5023})
+			handler.JsonError{ErrorCode: ecode.HostNotFound})
 		return
 	}
 
@@ -54,7 +55,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	group := model.GetGroup(model.DB, "USER-"+user.ID.String())
 	if group == nil {
 		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: 3002})
+			handler.JsonError{ErrorCode: ecode.GroupNotFound})
 		return
 	}
 
@@ -72,14 +73,14 @@ func ListByHostId(w http.ResponseWriter, r *http.Request) {
 	host := model.GetHost(model.DB, hostId)
 	if host == nil {
 		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: 5024})
+			handler.JsonError{ErrorCode: ecode.HostNotFound})
 		return
 	}
 
 	gameServers := model.GetGameServersByHostId(model.DB, host.ID.String())
 	if gameServers == nil {
 		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: 5025})
+			handler.JsonError{ErrorCode: ecode.GsNotFound})
 		return
 	}
 
@@ -115,7 +116,7 @@ func ConsoleLog(w http.ResponseWriter, r *http.Request) {
 	logs := model.GetLogsByGameServer(model.DB, gameServerId, 20)
 	if logs == nil {
 		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: 5030})
+			handler.JsonError{ErrorCode: ecode.GsNoLogs})
 		return
 	}
 
@@ -132,7 +133,7 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 	err := gameserver.Remove(gameServerId)
 	if err != nil {
 		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: 5026})
+			handler.JsonError{ErrorCode: ecode.GsRemove})
 		return
 	}
 

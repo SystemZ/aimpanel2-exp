@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"gitlab.com/systemz/aimpanel2/lib"
+	"gitlab.com/systemz/aimpanel2/lib/ecode"
 	"gitlab.com/systemz/aimpanel2/lib/response"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"net/http"
@@ -45,7 +46,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: 1001})
+			JsonError{ErrorCode: ecode.JsonDecode})
 		return
 	}
 
@@ -53,7 +54,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: 1002})
+			JsonError{ErrorCode: ecode.WrongPassword})
 		return
 	}
 
@@ -61,7 +62,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: 1003})
+			JsonError{ErrorCode: ecode.WrongEmail})
 		return
 	}
 
@@ -71,7 +72,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: 1004})
+			JsonError{ErrorCode: ecode.DuplicateUsername})
 		return
 	}
 
@@ -85,7 +86,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: 1005})
+			JsonError{ErrorCode: ecode.DbSave})
 		return
 	}
 
@@ -94,7 +95,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: 1006})
+			JsonError{ErrorCode: ecode.JwtGenerate})
 		return
 	}
 
@@ -133,20 +134,21 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: 1007})
+			JsonError{ErrorCode: ecode.JsonDecode})
 		return
 	}
 
 	var user model.User
 	model.DB.Where("username = ?", loginRequest.Username).Find(&user)
 
+	// TODO maybe IsPasswordOk would be more semantic?
 	if user.CheckPassword(loginRequest.Password) {
 		token, err := user.GenerateJWT()
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 
 			lib.MustEncode(json.NewEncoder(w),
-				JsonError{ErrorCode: 1008})
+				JsonError{ErrorCode: ecode.JwtGenerate})
 			return
 		}
 
@@ -155,7 +157,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: 1009})
+			JsonError{ErrorCode: ecode.WrongUsernameOrPassword})
 		return
 	}
 }

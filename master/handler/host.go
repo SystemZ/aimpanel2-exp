@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
+	"gitlab.com/systemz/aimpanel2/lib/ecode"
 	"gitlab.com/systemz/aimpanel2/lib/response"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"gitlab.com/systemz/aimpanel2/master/service/gameserver"
@@ -70,7 +71,7 @@ func CreateHost(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(host)
 	if err != nil {
 		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: 3001, Message: "Invalid body."})
+			JsonError{ErrorCode: ecode.JsonDecode})
 		return
 	}
 
@@ -82,7 +83,7 @@ func CreateHost(w http.ResponseWriter, r *http.Request) {
 	group := model.GetGroup(model.DB, "USER-"+user.ID.String())
 	if group == nil {
 		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: 3002})
+			JsonError{ErrorCode: ecode.GroupNotFound})
 		return
 	}
 
@@ -109,7 +110,7 @@ func RemoveHost(w http.ResponseWriter, r *http.Request) {
 		err := gameserver.Remove(gameServer.ID.String())
 		if err != nil {
 			lib.MustEncode(json.NewEncoder(w),
-				JsonError{ErrorCode: 3432})
+				JsonError{ErrorCode: ecode.GsRemove})
 			return
 		}
 	}
@@ -128,7 +129,7 @@ func HostAuth(w http.ResponseWriter, r *http.Request) {
 
 	if &host == nil {
 		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: 1017})
+			JsonError{ErrorCode: ecode.HostNotFound})
 		return
 	}
 
@@ -141,7 +142,7 @@ func HostAuth(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 
 		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: 1008})
+			JsonError{ErrorCode: ecode.Unknown})
 		return
 	}
 
@@ -158,7 +159,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 
 		w.WriteHeader(http.StatusInternalServerError)
 		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: 1234})
+			JsonError{ErrorCode: ecode.GsUpdate})
 		return
 	}
 

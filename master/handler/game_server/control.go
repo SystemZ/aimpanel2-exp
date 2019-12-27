@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"gitlab.com/systemz/aimpanel2/lib"
+	"gitlab.com/systemz/aimpanel2/lib/ecode"
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/master/handler"
 	"gitlab.com/systemz/aimpanel2/master/service/gameserver"
+	"log"
 	"net/http"
 )
 
@@ -26,7 +28,7 @@ func Start(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: 1234})
+			handler.JsonError{ErrorCode: ecode.GsStart})
 		return
 	}
 
@@ -41,7 +43,7 @@ func Install(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: 1234})
+			handler.JsonError{ErrorCode: ecode.GsInstall})
 		return
 	}
 
@@ -57,15 +59,16 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: 5012})
+			handler.JsonError{ErrorCode: ecode.JsonDecode})
 		return
 	}
 
 	err = gameserver.Restart(gsId, data.Type)
 	if err != nil {
+		log.Printf("fail restarting GS: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: 1234})
+			handler.JsonError{ErrorCode: ecode.GsRestart})
 		return
 	}
 
@@ -81,15 +84,16 @@ func Stop(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: 5017})
+			handler.JsonError{ErrorCode: ecode.JsonDecode})
 		return
 	}
 
 	err = gameserver.Stop(gsId, data.Type)
 	if err != nil {
+		log.Printf("fail stopping GS: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: 1234})
+			handler.JsonError{ErrorCode: ecode.GsStop})
 		return
 	}
 
@@ -105,7 +109,7 @@ func SendCommand(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: 5026})
+			handler.JsonError{ErrorCode: ecode.JsonDecode})
 		return
 	}
 
@@ -113,7 +117,7 @@ func SendCommand(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: 1234})
+			handler.JsonError{ErrorCode: ecode.GsCmd})
 		return
 	}
 
@@ -129,7 +133,7 @@ func Data(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: 1234})
+			handler.JsonError{ErrorCode: ecode.JsonDecode})
 		return
 	}
 
@@ -137,7 +141,7 @@ func Data(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: 1234})
+			handler.JsonError{ErrorCode: ecode.HostData})
 		return
 	}
 
@@ -147,7 +151,7 @@ func Data(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			lib.MustEncode(json.NewEncoder(w),
-				handler.JsonError{ErrorCode: 1234})
+				handler.JsonError{ErrorCode: ecode.GsData})
 			return
 		}
 	}

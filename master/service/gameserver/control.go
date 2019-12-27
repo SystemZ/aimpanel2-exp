@@ -6,6 +6,7 @@ import (
 	"github.com/alexandrevicenzi/go-sse"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
+	"gitlab.com/systemz/aimpanel2/lib/ecode"
 	"gitlab.com/systemz/aimpanel2/lib/game"
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/master/events"
@@ -17,12 +18,12 @@ import (
 func Start(gsId string) error {
 	gameServer := model.GetGameServer(model.DB, gsId)
 	if gameServer == nil {
-		return errors.New("error when getting game server from db")
+		return errors.New("getting game server from db failed")
 	}
 
 	hostToken := model.GetHostToken(model.DB, gameServer.HostId.String())
 	if hostToken == "" {
-		return errors.New("error when getting host token from db")
+		return errors.New("getting host token from db failed")
 	}
 
 	channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken)
@@ -129,7 +130,7 @@ func Install(gsId string) error {
 func SendCommand(gsId string, command string) error {
 	gameServer := model.GetGameServer(model.DB, gsId)
 	if gameServer == nil {
-		return &lib.Error{ErrorCode: 5028}
+		return &lib.Error{ErrorCode: ecode.GsNotFound}
 	}
 
 	hostToken := model.GetHostToken(model.DB, gameServer.HostId.String())
@@ -161,7 +162,7 @@ func SendCommand(gsId string, command string) error {
 func Restart(gsId string, stopType uint) error {
 	gameServer := model.GetGameServer(model.DB, gsId)
 	if gameServer == nil {
-		return &lib.Error{ErrorCode: 5014}
+		return &lib.Error{ErrorCode: ecode.GsNotFound}
 	}
 
 	hostToken := model.GetHostToken(model.DB, gameServer.HostId.String())
@@ -213,12 +214,12 @@ func Restart(gsId string, stopType uint) error {
 func Remove(gsId string) error {
 	gameServer := model.GetGameServer(model.DB, gsId)
 	if gameServer == nil {
-		return &lib.Error{ErrorCode: 5014}
+		return &lib.Error{ErrorCode: ecode.GsNotFound}
 	}
 
 	hostToken := model.GetHostToken(model.DB, gameServer.HostId.String())
 	if hostToken == "" {
-		return &lib.Error{ErrorCode: 5003}
+		return &lib.Error{ErrorCode: ecode.GameNotFound}
 	}
 
 	if gameServer.State == 1 {
