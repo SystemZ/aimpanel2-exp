@@ -79,7 +79,6 @@ func Start(hostToken string) {
 	}
 
 	sendOSInfo()
-	go heartbeat()
 
 	select {}
 }
@@ -220,29 +219,6 @@ func metrics() {
 			Steal:     int(cpuTimes[0].Steal),
 			Guest:     int(cpuTimes[0].Guest),
 			GuestNice: int(cpuTimes[0].GuestNice),
-		}
-
-		jsonStr, err := taskMsg.Serialize()
-		if err != nil {
-			logrus.Error(err)
-		}
-		//TODO: do something with status code
-		_, err = lib.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, jsonStr)
-		if err != nil {
-			logrus.Error(err)
-		}
-	}
-}
-
-func heartbeat() {
-	for {
-		<-time.After(5 * time.Second)
-
-		logrus.Info("Sending heartbeat")
-
-		taskMsg := task.Message{
-			TaskId:    task.AGENT_HEARTBEAT,
-			Timestamp: time.Now().Unix(),
 		}
 
 		jsonStr, err := taskMsg.Serialize()
