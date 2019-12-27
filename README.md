@@ -40,6 +40,12 @@ vagrant provision
 vagrant destroy -f
 ```
 
+## Git tips
+
+Clean old and removed remote branches in local repo
+```
+git remote prune origin
+```
 
 ## Swagger
 
