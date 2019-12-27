@@ -8,76 +8,83 @@ import (
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/ecode"
-	"gitlab.com/systemz/aimpanel2/lib/response"
+	"gitlab.com/systemz/aimpanel2/lib/request"
 	"gitlab.com/systemz/aimpanel2/master/model"
+	"gitlab.com/systemz/aimpanel2/master/response"
 	"gitlab.com/systemz/aimpanel2/master/service/gameserver"
 	"net/http"
 	"os"
 	"time"
 )
 
+// @Router /host [get]
 // @Summary List
 // @Tags Host
 // @Description List Hosts linked to the current signed-in account
 // @Accept json
 // @Produce json
-// @Success 200 {array} model.Host
+// @Success 200 {object} response.HostList
 // @Failure 400 {object} JsonError
-// @Router /host [get]
-func ListHosts(w http.ResponseWriter, r *http.Request) {
+// @Security ApiKey
+func HostList(w http.ResponseWriter, r *http.Request) {
 	var hosts []model.Host
 	user := context.Get(r, "user").(model.User)
 
 	model.DB.Table("hosts").Where(
 		"hosts.user_id = ?", user.ID).Find(&hosts)
 
-	lib.MustEncode(json.NewEncoder(w), hosts)
+	lib.MustEncode(json.NewEncoder(w), response.HostList{Hosts: hosts})
 }
 
-// @Summary Get
+// @Router /host/{id} [get]
+// @Summary Details
 // @Tags Host
-// @Description Get info about Host with selected ID linked to the current signed-in account
+// @Description Get details about Host with selected ID linked to the current signed-in account
 // @Accept json
 // @Produce json
 // @Param id path string true "Host ID"
-// @Success 200 {object} model.Host
+// @Success 200 {object} response.Host
 // @Failure 400 {object} JsonError
-// @Router /host/{id} [get]
-func GetHost(w http.ResponseWriter, r *http.Request) {
+// @Security ApiKey
+func HostDetails(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
 	var host model.Host
 
 	model.DB.Where("id = ?", params["id"]).First(&host)
 
-	lib.MustEncode(json.NewEncoder(w), host)
+	lib.MustEncode(json.NewEncoder(w), response.Host{Host: host})
 }
 
+// @Router /host [post]
 // @Summary Create
 // @Tags Host
 // @Description Create new Host linked to the current signed-in account
 // @Accept json
 // @Produce json
-// @Param host body model.Host true " "
-// @Success 200 {object} model.Host
+// @Param host body request.HostCreateRequest true " "
+// @Success 200 {object} response.Token
 // @Failure 400 {object} JsonError
-// @Router /host [post]
+// @Security ApiKey
 //TODO Create struct to isolate from gorm model
-func CreateHost(w http.ResponseWriter, r *http.Request) {
+func HostCreate(w http.ResponseWriter, r *http.Request) {
 	user := context.Get(r, "user").(model.User)
 
-	host := &model.Host{}
-	err := json.NewDecoder(r.Body).Decode(host)
+	data := &request.HostCreateRequest{}
+	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
 		lib.MustEncode(json.NewEncoder(w),
 			JsonError{ErrorCode: ecode.JsonDecode})
 		return
 	}
 
-	host.UserId = user.ID
-	host.MetricFrequency = 30
-
-	model.DB.Save(host)
+	host := &model.Host{
+		Name:            data.Name,
+		Ip:              data.Ip,
+		UserId:          user.ID,
+		MetricFrequency: 30,
+	}
+	model.DB.Save(&host)
 
 	group := model.GetGroup(model.DB, "USER-"+user.ID.String())
 	if group == nil {
@@ -88,25 +95,28 @@ func CreateHost(w http.ResponseWriter, r *http.Request) {
 
 	// FIXME handle errors
 	model.CreatePermissionsForNewHost(group.ID, host.ID.String())
-	lib.MustEncode(json.NewEncoder(w), host)
+
+	lib.MustEncode(json.NewEncoder(w), response.Token{Token: host.Token})
 }
 
+// @Router /host/{id}/metric [get]
 // @Summary Metric
 // @Tags Host
 // @Description Get last host metric with selected ID linked to the current signed-in account
 // @Accept json
 // @Produce json
 // @Param id path string true "Host ID"
-// @Success 200 {object} model.MetricHost
+// @Success 200 {object} response.HostMetric
 // @Failure 400 {object} JsonError
-// @Router /host/{id}/metric [get]
-func GetHostMetric(w http.ResponseWriter, r *http.Request) {
+// @Security ApiKey
+func HostMetric(w http.ResponseWriter, r *http.Request) {
 	var metric model.MetricHost
 	model.DB.Order("created_at desc").Limit(1).First(&metric)
 
-	lib.MustEncode(json.NewEncoder(w), metric)
+	lib.MustEncode(json.NewEncoder(w), response.HostMetric{Metric: metric})
 }
 
+// @Router /host/{id} [delete]
 // @Summary Remove
 // @Tags Host
 // @Description Removes host with all linked game servers
@@ -115,8 +125,8 @@ func GetHostMetric(w http.ResponseWriter, r *http.Request) {
 // @Param id path string true "Host ID"
 // @Success 200 {object} JsonSuccess
 // @Failure 400 {object} JsonError
-// @Router /host/{id} [delete]
-func RemoveHost(w http.ResponseWriter, r *http.Request) {
+// @Security ApiKey
+func HostRemove(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
 	var host model.Host
@@ -166,7 +176,8 @@ func HostAuth(w http.ResponseWriter, r *http.Request) {
 	lib.MustEncode(json.NewEncoder(w), response.Token{Token: tokenString})
 }
 
-func Update(w http.ResponseWriter, r *http.Request) {
+//TODO: Available for users?
+func HostUpdate(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	hostId := params["id"]
 

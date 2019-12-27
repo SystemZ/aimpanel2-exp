@@ -1,24 +1,17 @@
-package game_server
+package gs
 
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/ecode"
+	"gitlab.com/systemz/aimpanel2/lib/request"
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/master/handler"
 	"gitlab.com/systemz/aimpanel2/master/service/gameserver"
 	"log"
 	"net/http"
 )
-
-type GameServerStopReq struct {
-	Type uint `json:"type"`
-}
-
-type GameServerSendCommandReq struct {
-	Command string `json:"command"`
-}
 
 func Start(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
@@ -54,7 +47,7 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	gsId := params["server_id"]
 
-	data := &GameServerStopReq{}
+	data := &request.GameServerStopRequest{}
 	err := json.NewDecoder(r.Body).Decode(data)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -79,7 +72,7 @@ func Stop(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	gsId := params["server_id"]
 
-	data := &GameServerStopReq{}
+	data := &request.GameServerStopRequest{}
 	err := json.NewDecoder(r.Body).Decode(data)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -104,7 +97,7 @@ func SendCommand(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	gsId := params["server_id"]
 
-	data := &GameServerSendCommandReq{}
+	data := &request.GameServerSendCommandRequest{}
 	err := json.NewDecoder(r.Body).Decode(data)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)

@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/ecode"
-	"gitlab.com/systemz/aimpanel2/lib/response"
 	"gitlab.com/systemz/aimpanel2/master/model"
+	"gitlab.com/systemz/aimpanel2/master/response"
 	"net/http"
 )
 

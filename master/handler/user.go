@@ -6,6 +6,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/ecode"
 	"gitlab.com/systemz/aimpanel2/master/model"
+	"gitlab.com/systemz/aimpanel2/master/response"
 	"net/http"
 )
 
@@ -23,7 +24,7 @@ type UserChangeEmailReq struct {
 	NewEmailRepeat string `json:"new_email_repeat"`
 }
 
-func ChangePassword(w http.ResponseWriter, r *http.Request) {
+func UserChangePassword(w http.ResponseWriter, r *http.Request) {
 	user := context.Get(r, "user").(model.User)
 
 	decoder := json.NewDecoder(r.Body)
@@ -60,7 +61,7 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func ChangeEmail(w http.ResponseWriter, r *http.Request) {
+func UserChangeEmail(w http.ResponseWriter, r *http.Request) {
 	user := context.Get(r, "user").(model.User)
 
 	decoder := json.NewDecoder(r.Body)
@@ -97,7 +98,24 @@ func ChangeEmail(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func Profile(w http.ResponseWriter, r *http.Request) {
+// @Summary Profile Info
+// @Tags User
+// @Description Show currently logged in user details
+// @Accept json
+// @Produce json
+// @Success 200 {object} response.UserProfile
+// @Failure 400 {object} JsonError
+// @Router /me [get]
+func UserProfile(w http.ResponseWriter, r *http.Request) {
 	user := context.Get(r, "user").(model.User)
-	lib.MustEncode(json.NewEncoder(w), user)
+
+	userProfile := response.UserProfileResponse{
+		User: response.UserProfile{
+			ID:       user.ID,
+			Username: user.Username,
+			Email:    user.Email,
+		},
+	}
+
+	lib.MustEncode(json.NewEncoder(w), userProfile)
 }

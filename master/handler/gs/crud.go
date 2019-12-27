@@ -1,4 +1,4 @@
-package game_server
+package gs
 
 import (
 	"encoding/json"

@@ -18,7 +18,7 @@ type Host struct {
 	// User ID
 	UserId uuid.UUID `gorm:"column:user_id" json:"user_id" example:"100112233-4455-6677-8899-aabbccddeeff"`
 
-	// User assigned host ip
+	// User assigned ip
 	Ip string `gorm:"column:ip" json:"ip" example:"192.51.100.128"`
 
 	// Generated token for host
