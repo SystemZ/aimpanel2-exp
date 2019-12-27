@@ -57,3 +57,7 @@ type GameServer struct {
 	//Game server details
 	GameServer model.GameServer `json:"game_server"`
 }
+
+type ID struct {
+	ID string `json:"id"`
+}

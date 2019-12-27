@@ -22,7 +22,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param host body request.GameServerCreate true " "
-// @Success 200 {object} handler.JsonSuccess
+// @Success 200 {object} response.ID
 // @Failure 400 {object} handler.JsonError
 // @Security ApiKey
 func Create(w http.ResponseWriter, r *http.Request) {
@@ -80,7 +80,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	model.CreatePermissionsForNewGameServer(group.ID, host.ID.String(), gameServer.ID.String())
 
 	lib.MustEncode(json.NewEncoder(w),
-		handler.JsonSuccess{Message: "Created game server successfully."})
+		response.ID{ID: gameServer.ID.String()})
 }
 
 // @Router /host/{id}/server [get]

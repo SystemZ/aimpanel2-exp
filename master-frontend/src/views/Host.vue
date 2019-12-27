@@ -213,14 +213,14 @@
         }),
         mounted() {
             this.$http.get('/v1/host/' + this.$route.params.id).then(res => {
-                this.host = res.data
+                this.host = res.data.host
                 console.log(this.host)
             }).catch(e => {
                 console.error(e)
             });
 
             this.$http.get('/v1/host/' + this.$route.params.id + '/metric').then(res => {
-                this.metric = res.data;
+                this.metric = res.data.metrics[0];
 
                 this.metric.disk_free = (this.metric.disk_free / 1024).toFixed(0);
                 this.metric.disk_total = (this.metric.disk_total / 1024).toFixed(0);

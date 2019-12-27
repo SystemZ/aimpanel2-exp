@@ -237,7 +237,7 @@ var routes = Routes{
 		false,
 	},
 	Route{
-		"List game servers by host id",
+		"GameServer ListByHostId",
 		"GET",
 		"/host/{id}/server",
 		gs.ListByHostId,
@@ -245,7 +245,7 @@ var routes = Routes{
 		false,
 	},
 	Route{
-		"Install game server",
+		"GameServer Install",
 		"PUT",
 		"/host/{host_id}/server/{server_id}/install",
 		gs.Install,
@@ -253,7 +253,7 @@ var routes = Routes{
 		false,
 	},
 	Route{
-		"Start game server",
+		"GameServer Start",
 		"PUT",
 		"/host/{host_id}/server/{server_id}/start",
 		gs.Start,
@@ -261,7 +261,7 @@ var routes = Routes{
 		false,
 	},
 	Route{
-		"Restart game server",
+		"GameServer Restart",
 		"PUT",
 		"/host/{host_id}/server/{server_id}/restart",
 		gs.Restart,
@@ -269,7 +269,7 @@ var routes = Routes{
 		false,
 	},
 	Route{
-		"Stop game server",
+		"GameServer Stop",
 		"PUT",
 		"/host/{host_id}/server/{server_id}/stop",
 		gs.Stop,
@@ -277,7 +277,7 @@ var routes = Routes{
 		false,
 	},
 	Route{
-		"Send command to game server",
+		"GameServer Send Command",
 		"PUT",
 		"/host/{host_id}/server/{server_id}/command",
 		gs.SendCommand,
@@ -285,7 +285,7 @@ var routes = Routes{
 		false,
 	},
 	Route{
-		"Game server logs",
+		"GameServer Console Log",
 		"GET",
 		"/host/{host_id}/server/{server_id}/logs",
 		gs.ConsoleLog,
@@ -293,10 +293,10 @@ var routes = Routes{
 		false,
 	},
 	Route{
-		"Game server logs",
-		"GET",
+		"GameServer Put Logs",
+		"PUT",
 		"/host/{host_id}/server/{server_id}/logs",
-		gs.ConsoleLog,
+		gs.PutLogs,
 		true,
 		true,
 	},
