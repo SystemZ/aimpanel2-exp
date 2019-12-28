@@ -7,67 +7,48 @@ import (
 	"time"
 )
 
-// Game Server represents the game server of the host
-// swagger:model game_server
 type GameServer struct {
 	// ID of the game server
-	//
-	// required: true
-	ID uuid.UUID `json:"id" gorm:"primary_key;type:varchar(36)" json:"id"`
+	ID uuid.UUID `json:"id" gorm:"primary_key;type:varchar(36)" json:"id" example:"100112233-4455-6677-8899-aabbccddeeff"`
 
-	// Name
-	//
-	// required: true
-	Name string `gorm:"column:name" json:"name"`
+	// User assigned name
+	Name string `gorm:"column:name" json:"name" example:"Ultra MC Server"`
 
 	// Host ID
 	//
 	// required: true
-	HostId uuid.UUID `gorm:"column:host_id" json:"host_id"`
+	HostId uuid.UUID `gorm:"column:host_id" json:"host_id" example:"100112233-4455-6677-8899-aabbccddeeff"`
 
 	// State
 	// 0 off, 1 running
-	// required: false
-	State uint `gorm:"column:state" json:"state"`
+	State uint `gorm:"column:state" json:"state" example:"0"`
 
 	// State Last Changed
-	//
-	// required: false
-	StateLastChanged time.Time `gorm:"default:CURRENT_TIMESTAMP;column:state_last_changed" json:"state_last_changed"`
+	StateLastChanged time.Time `gorm:"default:CURRENT_TIMESTAMP;column:state_last_changed" json:"state_last_changed" example:"2019-09-29T03:16:27+02:00"`
 
 	// Game ID
-	//
-	// required: true
-	GameId uint `gorm:"column:game_id" json:"game_id"`
+	GameId uint `gorm:"column:game_id" json:"game_id" example:"1"`
 
 	// Game Version
-	//
-	// required: true
-	GameVersion string `gorm:"column:game_version" json:"game_version"`
+	GameVersion string `gorm:"column:game_version" json:"game_version" example:"1.14.2"`
 
 	// Game
-	//
-	// required: true
-	GameJson string `gorm:"column:game_json" json:"game_json"`
+	GameJson string `gorm:"column:game_json" json:"-"`
 
 	// Metric Frequency
-	//
-	// required: true
-	MetricFrequency int `gorm:"column:metric_frequency" json:"metric_frequency"`
+	MetricFrequency int `gorm:"column:metric_frequency" json:"metric_frequency" example:"30"`
 
 	// Stop Timeout
-	//
-	// required: true
-	StopTimeout int `gorm:"column:stop_timeout" json:"stop_timeout"`
+	StopTimeout int `gorm:"column:stop_timeout" json:"stop_timeout" example:"30"`
 
-	//Created at timestamp
-	CreatedAt time.Time `json:"created_at"`
+	// Date of game server creation
+	CreatedAt time.Time `json:"created_at" example:"2019-09-29T03:16:27+02:00"`
 
 	//Updated at timestamp
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt time.Time `json:"-"`
 
 	//Deleted at timestamp
-	DeletedAt *time.Time `json:"deleted_at"`
+	DeletedAt *time.Time `json:"-"`
 }
 
 func (gs *GameServer) BeforeCreate(scope *gorm.Scope) error {

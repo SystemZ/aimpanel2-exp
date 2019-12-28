@@ -166,7 +166,7 @@
             },
             getGameServers() {
                 return this.$http.get("/v1/host/my/server").then(res => {
-                    this.gameServers = res.data;
+                    this.gameServers = res.data.game_servers;
                     console.log(this.gameServers)
                 }).catch(e => {
                     console.error(e);
@@ -174,7 +174,7 @@
             },
             getHosts() {
                 return this.$http.get("/v1/host").then(res => {
-                    this.hosts = res.data;
+                    this.hosts = res.data.hosts;
                 }).catch(e => {
                     console.error(e);
                 });

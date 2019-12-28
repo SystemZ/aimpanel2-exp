@@ -8,54 +8,53 @@ import (
 	"time"
 )
 
-// Host represents the host for this application
-// swagger:model host
 type Host struct {
 	// ID of the host
-	//
-	// required: true
-	ID uuid.UUID `json:"id" gorm:"primary_key;type:varchar(36)" json:"id"`
+	ID uuid.UUID `json:"id" gorm:"primary_key;type:varchar(36)" json:"id" example:"100112233-4455-6677-8899-aabbccddeeff"`
 
-	// Name
-	//
-	// required: true
-	Name string `gorm:"column:name" json:"name"`
+	// User assigned name
+	Name string `gorm:"column:name" json:"name" example:"My Great Linux server"`
 
 	// User ID
-	//
-	// required: true
-	UserId uuid.UUID `gorm:"column:user_id" json:"user_id"`
+	UserId uuid.UUID `gorm:"column:user_id" json:"user_id" example:"100112233-4455-6677-8899-aabbccddeeff"`
 
-	// Host IP address
-	//
-	// required: true
-	Ip string `gorm:"column:ip" json:"ip"`
+	// User assigned ip
+	Ip string `gorm:"column:ip" json:"ip" example:"192.51.100.128"`
 
-	// Token
-	Token string `gorm:"column:token" json:"token"`
+	// Generated token for host
+	Token string `gorm:"column:token" json:"token" example:"VRAKKUBHNIMKLXSXLWTQAOFGOMSSCXOO"`
 
-	MetricFrequency int `gorm:"column:metric_frequency" json:"metric_frequency"`
+	// Metric frequency
+	MetricFrequency int `gorm:"column:metric_frequency" json:"metric_frequency" example:"30"`
 
-	OS              string `gorm:"column:os" json:"os"`
-	Platform        string `gorm:"column:platform" json:"platform"`
-	PlatformFamily  string `gorm:"column:platform_family" json:"platform_family"`
-	PlatformVersion string `gorm:"column:platform_version" json:"platform_version"`
-	KernelVersion   string `gorm:"column:kernel_version" json:"kernel_version"`
-	KernelArch      string `gorm:"column:kernel_arch" json:"kernel_arch"`
+	// Host OS
+	OS string `gorm:"column:os" json:"os" example:"linux"`
+
+	// Host platform
+	Platform string `gorm:"column:platform" json:"platform" example:"ubuntu"`
+
+	// Host platform family
+	PlatformFamily string `gorm:"column:platform_family" json:"platform_family" example:"debian"`
+
+	// Host platform version
+	PlatformVersion string `gorm:"column:platform_version" json:"platform_version" example:"18.04"`
+
+	// Host kernel version
+	KernelVersion string `gorm:"column:kernel_version" json:"kernel_version" example:"5.3.0-1-generic"`
+
+	// Host arch
+	KernelArch string `gorm:"column:kernel_arch" json:"kernel_arch" example:"x86_64"`
 
 	// State
 	// 0 off, 1 running
-	// required: false
-	State uint `gorm:"column:state" json:"state"`
+	State uint `gorm:"column:state" json:"state" example:"1"`
 
-	//Created at timestamp
-	CreatedAt time.Time `json:"created_at"`
+	// Date of host creation
+	CreatedAt time.Time `json:"created_at" example:"2019-09-29T03:16:27+02:00"`
 
-	//Updated at timestamp
-	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedAt time.Time `json:"-"`
 
-	//Deleted at timestamp
-	DeletedAt *time.Time `json:"deleted_at"`
+	DeletedAt *time.Time `json:"-"`
 }
 
 func (h *Host) BeforeCreate(scope *gorm.Scope) error {

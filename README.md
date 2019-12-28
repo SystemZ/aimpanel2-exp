@@ -49,17 +49,20 @@ git remote prune origin
 
 ## Swagger
 
-* https://github.com/go-swagger/go-swagger
+* https://github.com/swaggo/swag/cmd/swag
 
 Swagger allow us to automatically build API docs and client SDK in the future, 
 all this without much work from devs
 
-### Generate
+```bash
+go get -u github.com/swaggo/swag/cmd/swag
+```
+### Generate for local purpose
 
 This will generate .json file with swagger spec
 
 ```bash
-./Taskfile.sh swagger-gen
+./Taskfile.sh swagger-gen-dev
 ```
 
 ### Serve

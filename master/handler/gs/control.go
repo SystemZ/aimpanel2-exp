@@ -1,10 +1,11 @@
-package game_server
+package gs
 
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/ecode"
+	"gitlab.com/systemz/aimpanel2/lib/request"
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/master/handler"
 	"gitlab.com/systemz/aimpanel2/master/service/gameserver"
@@ -12,14 +13,17 @@ import (
 	"net/http"
 )
 
-type GameServerStopReq struct {
-	Type uint `json:"type"`
-}
-
-type GameServerSendCommandReq struct {
-	Command string `json:"command"`
-}
-
+// @Router /host/{host_id}/server/{server_id}/start [put]
+// @Summary Start
+// @Tags Game Server
+// @Description Start selected game server
+// @Accept json
+// @Produce json
+// @Param host_id path string true "Host ID"
+// @Param server_id path string true "Game Server ID"
+// @Success 204 ""
+// @Failure 400 {object} handler.JsonError
+// @Security ApiKey
 func Start(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	gsId := params["server_id"]
@@ -35,6 +39,17 @@ func Start(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// @Router /host/{host_id}/server/{server_id}/install [put]
+// @Summary Install
+// @Tags Game Server
+// @Description Install selected game server
+// @Accept json
+// @Produce json
+// @Param host_id path string true "Host ID"
+// @Param server_id path string true "Game Server ID"
+// @Success 204 ""
+// @Failure 400 {object} handler.JsonError
+// @Security ApiKey
 func Install(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	gsId := params["server_id"]
@@ -50,11 +65,22 @@ func Install(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// @Router /host/{host_id}/server/{server_id}/restart [put]
+// @Summary Restart
+// @Tags Game Server
+// @Description Restart selected game server
+// @Accept json
+// @Produce json
+// @Param host_id path string true "Host ID"
+// @Param server_id path string true "Game Server ID"
+// @Success 204 ""
+// @Failure 400 {object} handler.JsonError
+// @Security ApiKey
 func Restart(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	gsId := params["server_id"]
 
-	data := &GameServerStopReq{}
+	data := &request.GameServerStop{}
 	err := json.NewDecoder(r.Body).Decode(data)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -75,11 +101,22 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// @Router /host/{host_id}/server/{server_id}/stop [put]
+// @Summary Stop
+// @Tags Game Server
+// @Description Stop selected game server
+// @Accept json
+// @Produce json
+// @Param host_id path string true "Host ID"
+// @Param server_id path string true "Game Server ID"
+// @Success 204 ""
+// @Failure 400 {object} handler.JsonError
+// @Security ApiKey
 func Stop(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	gsId := params["server_id"]
 
-	data := &GameServerStopReq{}
+	data := &request.GameServerStop{}
 	err := json.NewDecoder(r.Body).Decode(data)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -100,11 +137,23 @@ func Stop(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// @Router /host/{host_id}/server/{server_id}/command [put]
+// @Summary Send command
+// @Tags Game Server
+// @Description Send command to selected game server
+// @Accept json
+// @Produce json
+// @Param host_id path string true "Host ID"
+// @Param server_id path string true "Game Server ID"
+// @Param host body request.GameServerSendCommand true " "
+// @Success 204 ""
+// @Failure 400 {object} handler.JsonError
+// @Security ApiKey
 func SendCommand(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	gsId := params["server_id"]
 
-	data := &GameServerSendCommandReq{}
+	data := &request.GameServerSendCommand{}
 	err := json.NewDecoder(r.Body).Decode(data)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)

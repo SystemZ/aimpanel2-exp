@@ -4,43 +4,27 @@ import (
 	"encoding/json"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/ecode"
-	"gitlab.com/systemz/aimpanel2/lib/response"
 	"gitlab.com/systemz/aimpanel2/master/model"
+	"gitlab.com/systemz/aimpanel2/master/response"
 	"net/http"
 )
 
-//swagger:parameters Authentication register
-type AuthRegisterReq struct {
-	// required: true
-	Username string `json:"username"`
-	// required: true
-	Password string `json:"password"`
-	// required: true
+type AuthRegisterRequest struct {
+	Username       string `json:"username"`
+	Password       string `json:"password"`
 	PasswordRepeat string `json:"password_repeat"`
-	// required: true
-	Email string `json:"email"`
-	// required: true
-	EmailRepeat string `json:"email_repeat"`
+	Email          string `json:"email"`
+	EmailRepeat    string `json:"email_repeat"`
 }
 
-//swagger:parameters Authentication login
-type AuthLoginReq struct {
+type AuthLoginRequest struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
-
-// swagger:route POST /auth/register Auth Register
-//
-// Create new account
-//
-//Responses:
-//	default: jsonError
-//  400: jsonError
-//	200:
 
 func Register(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
-	var registerRequest AuthRegisterReq
+	var registerRequest AuthRegisterRequest
 	err := decoder.Decode(&registerRequest)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -117,18 +101,9 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	lib.MustEncode(json.NewEncoder(w), response.Token{Token: token})
 }
 
-// swagger:route POST /auth/login Auth Login
-//
-// Get session token
-//
-//Responses:
-//	default: jsonError
-//  400: jsonError
-//	200:
-
 func Login(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
-	var loginRequest AuthLoginReq
+	var loginRequest AuthLoginRequest
 	err := decoder.Decode(&loginRequest)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)

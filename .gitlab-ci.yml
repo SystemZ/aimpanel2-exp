@@ -43,8 +43,8 @@ backend:
     - CGO_ENABLED=0 go build -ldflags "-X gitlab.com/systemz/aimpanel2/master/config.GIT_COMMIT=$CI_COMMIT_SHA" -o $CI_PROJECT_DIR/aimpanel-master gitlab.com/systemz/aimpanel2/master
     - CGO_ENABLED=0 go build -ldflags "-X gitlab.com/systemz/aimpanel2/slave/config.GIT_COMMIT=$CI_COMMIT_SHA" -o $CI_PROJECT_DIR/aimpanel-slave gitlab.com/systemz/aimpanel2/slave
     # generate RESTful API spec
-    - go get github.com/go-swagger/go-swagger/cmd/swagger
-    - bash Taskfile.sh swagger-gen
+    - go get github.com/swaggo/swag/cmd/swag
+    - bash Taskfile.sh ci-swagger-gen
     # generate code report
     - go get github.com/jstemmer/go-junit-report
     - go test -v $(go list ./... | grep -v /src/)

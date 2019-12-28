@@ -1,19 +1,11 @@
-//go:generate swagger generate spec
-
-// Package classification Aimpanel Master API
-//
-// Schemes: http, https
-// Host: localhost:8000
-// BasePath: /v1
-// Version: 0.0.1
-//
-// Consumes:
-// 	- application/json
-//
-// Produces:
-// 	- application/json
-//
-// swagger:meta
+// @title Aimpanel Master API
+// @version 0.0.1
+// @host localhost:8000
+// @BasePath /v1
+// @termsOfService http://swagger.io/terms/
+// @securityDefinitions.apikey ApiKey
+// @in header
+// @name Authorization
 package main
 
 import (

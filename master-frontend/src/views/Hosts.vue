@@ -128,7 +128,7 @@
             },
             getHosts() {
                 this.$http.get("/v1/host").then(res => {
-                    this.hosts = res.data;
+                    this.hosts = res.data.hosts;
                 }).catch(e => {
                     console.error(e);
                 });

@@ -116,7 +116,7 @@
             this.serverUrl = '/v1/host/' + this.hostId + '/server/' + this.serverId;
 
             this.$http.get(this.serverUrl).then(res => {
-                this.game_server = res.data;
+                this.game_server = res.data.game_server;
             }).catch(e => {
                 console.error(e)
             });

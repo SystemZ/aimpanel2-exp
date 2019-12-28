@@ -10,36 +10,17 @@ import (
 	"time"
 )
 
-// User represents the user for this application
-// swagger:model user
 type User struct {
-	// ID of the user
-	//
-	// required: true
 	ID uuid.UUID `json:"id" gorm:"primary_key;type:varchar(36)"`
 
-	// Username of the user
-	//
-	// required: true
 	Username string `gorm:"column:username" json:"username"`
 
-	// Password of the user
-	//
-	// required: true
 	PasswordHash string `gorm:"column:password_hash" json:"-"`
 
-	// Email of the user
-	//
-	// required: true
 	Email string `gorm:"column:email" json:"email"`
 
-	// Created at timestamp
-	CreatedAt time.Time `json:"created_at"`
-
-	// Updated at timestamp
-	UpdatedAt time.Time `json:"-"`
-
-	// Deleted at timestamp
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt time.Time  `json:"-"`
 	DeletedAt *time.Time `json:"-"`
 
 	//TODO: plan_id
