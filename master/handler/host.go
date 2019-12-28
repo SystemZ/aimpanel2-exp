@@ -109,8 +109,10 @@ func HostCreate(w http.ResponseWriter, r *http.Request) {
 // @Failure 400 {object} JsonError
 // @Security ApiKey
 func HostMetric(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+
 	var metrics []model.MetricHost
-	model.DB.Order("created_at desc").Limit(1).Find(&metrics)
+	model.DB.Where("host_id = ?", params["id"]).Order("created_at desc").Limit(1).Find(&metrics)
 
 	lib.MustEncode(json.NewEncoder(w), response.HostMetrics{Metrics: metrics})
 }
