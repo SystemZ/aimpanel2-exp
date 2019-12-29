@@ -6,6 +6,10 @@ package ecode
 
 // all codes have implied fail or error
 // it makes no sense to write this in error package ¯\_(ツ)_/¯
+
+///go:generate stringer -type=ErrorCode
+//type ErrorCode int
+
 const (
 	/// master
 	// generic
