@@ -1,5 +1,5 @@
 <template xmlns:v-slot="http://www.w3.org/1999/XSL/Transform">
-    <v-container fluid>
+    <v-container>
         <v-row>
             <v-col xs12>
                 <v-dialog v-model="createGameServer.dialog" persistent max-width="600px">
