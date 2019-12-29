@@ -34,6 +34,7 @@ func Start(hostToken string) {
 	config.API_TOKEN = token.Token
 
 	go listenerSse()
+	go listenerRedis()
 
 	logrus.Info("Send AGENT_STARTED")
 	taskMsg := task.Message{
