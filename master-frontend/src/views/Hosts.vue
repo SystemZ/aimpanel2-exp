@@ -12,7 +12,8 @@
                     <v-stepper v-model="createHost.step">
                         <v-stepper-header>
                             <v-stepper-step :complete="createHost.step > 1" step="1">Details</v-stepper-step>
-                            <v-divider></v-divider>
+                            <v-divider>
+                            </v-divider>
                             <v-stepper-step :complete="createHost.step > 2" step="2">Setup host</v-stepper-step>
                         </v-stepper-header>
                         <v-stepper-items>
@@ -21,11 +22,13 @@
                                     <v-layout wrap>
                                         <v-flex xs12>
                                             <v-text-field label="Name" required
-                                                          v-model="createHost.host.name"></v-text-field>
+                                                          v-model="createHost.host.name">
+                                            </v-text-field>
                                         </v-flex>
                                         <v-flex xs12>
                                             <v-text-field label="IP" required
-                                                          v-model="createHost.host.ip"></v-text-field>
+                                                          v-model="createHost.host.ip">
+                                            </v-text-field>
                                         </v-flex>
                                     </v-layout>
                                 </v-container>
@@ -81,8 +84,9 @@
     </v-container>
 </template>
 
-<script>
+<script lang="ts">
     import Vue from "vue";
+    import {Host} from "@/types/api";
 
     export default Vue.extend({
         name: "Hosts",
@@ -110,7 +114,7 @@
                     value: "state"
                 }
             ],
-            hosts: [],
+            hosts: [] as Host[],
             createHost: {
                 dialog: false,
                 step: 0,
@@ -120,24 +124,24 @@
                 },
                 token: ""
             },
-            timer: '',
+            timer: 0,
         }),
         methods: {
-            goToHost(id) {
+            goToHost(id: string): void {
                 this.$router.push("/host/" + id);
             },
-            getHosts() {
+            getHosts(): void {
                 this.$http.get("/v1/host").then(res => {
                     this.hosts = res.data.hosts;
                 }).catch(e => {
                     console.error(e);
                 });
             },
-            createHostCancel() {
+            createHostCancel(): void {
                 this.createHost.dialog = false;
                 this.createHost.step = 1;
             },
-            addHost() {
+            addHost(): void {
                 this.$http.post("/v1/host", this.createHost.host).then(res => {
                     this.createHost.token = res.data.token;
                     this.createHost.step = 2;
@@ -145,7 +149,7 @@
                     console.error(e);
                 });
             },
-            finish() {
+            finish(): void {
                 this.createHost = {
                     dialog: false,
                     step: 0,
@@ -158,11 +162,11 @@
                 this.getHosts();
             }
         },
-        mounted() {
+        mounted(): void {
             this.getHosts();
             this.timer = setInterval(() => { this.getHosts() }, 10*1000)
         },
-        beforeDestroy() {
+        beforeDestroy(): void {
             clearInterval(this.timer)
         }
     });

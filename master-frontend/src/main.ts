@@ -13,15 +13,11 @@ Vue.config.productionTip = false;
 axios.defaults.baseURL = process.env.VUE_APP_API_URL;
 
 Vue.prototype.$http = axios;
+Vue.prototype.$auth = auth;
+
 declare module  'vue/types/vue' {
   interface Vue {
     $http: AxiosStatic;
-  }
-}
-
-Vue.prototype.$auth = auth;
-declare module 'vue/types/vue' {
-  interface Vue {
     $auth: AuthInterface;
   }
 }
