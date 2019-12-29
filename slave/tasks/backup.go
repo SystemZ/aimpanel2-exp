@@ -2,7 +2,7 @@ package tasks
 
 import (
 	"archive/tar"
-	"compress/gzip"
+	gzip "github.com/klauspost/pgzip"
 	"github.com/sirupsen/logrus"
 	"io"
 	"os"

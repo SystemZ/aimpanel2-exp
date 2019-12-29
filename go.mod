@@ -16,6 +16,8 @@ require (
 	github.com/gorilla/mux v1.7.3
 	github.com/inconshreveable/go-update v0.0.0-20160112193335-8152e7eb6ccf
 	github.com/jinzhu/gorm v1.9.11
+	github.com/klauspost/compress v1.9.4 // indirect
+	github.com/klauspost/pgzip v1.2.1
 	github.com/r3labs/sse v0.0.0-20191214223212-f0cc80f53f80
 	github.com/rs/cors v1.7.0
 	github.com/shirou/gopsutil v2.19.11+incompatible
