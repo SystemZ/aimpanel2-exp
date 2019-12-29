@@ -132,6 +132,7 @@ ExecStart=$AIMPANEL_BINARY_DIR/$AIMPANEL_BINARY_NAME agent $TOKEN
 WorkingDirectory=/opt/aimpanel/
 Restart=always
 RestartSec=10
+ExecStop=$AIMPANEL_BINARY_DIR/$AIMPANEL_BINARY_NAME shutdown
 Environment="GS_DIR=$AIMPANEL_DIR/gs/"
 Environment="STORAGE_DIR=$AIMPANEL_DIR/storage/"
 Environment="TRASH_DIR=$AIMPANEL_DIR/trash/"
