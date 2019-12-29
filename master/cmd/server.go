@@ -4,6 +4,7 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"gitlab.com/systemz/aimpanel2/master/config"
 	"gitlab.com/systemz/aimpanel2/master/cron"
 	"gitlab.com/systemz/aimpanel2/master/events"
 	"gitlab.com/systemz/aimpanel2/master/model"
@@ -32,11 +33,19 @@ var serverCmd = &cobra.Command{
 		logrus.Info("Starting API on port :" + args[0])
 		r := router.NewRouter()
 
-		logrus.Fatal(http.ListenAndServe(
-			":"+args[0],
-			router.CorsMiddleware(
+		// enable CORS only in dev mode
+		if config.DEV_MODE {
+			logrus.Fatal(http.ListenAndServe(
+				":"+args[0],
+				router.CorsMiddleware(
+					handlers.LoggingHandler(os.Stdout, r),
+				),
+			))
+		} else {
+			logrus.Fatal(http.ListenAndServe(
+				":"+args[0],
 				handlers.LoggingHandler(os.Stdout, r),
-			),
-		))
+			))
+		}
 	},
 }

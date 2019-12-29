@@ -16,7 +16,7 @@ var (
 
 	GIT_COMMIT string
 
-	LOG_DEV bool
+	DEV_MODE bool
 
 	UPDATE_TOKEN string
 )
@@ -45,8 +45,8 @@ func init() {
 	viper.SetDefault("REDIS_PASSWORD", "")
 	REDIS_PASSWORD = viper.GetString("REDIS_PASSWORD")
 
-	viper.SetDefault("LOG_DEV", false)
-	LOG_DEV = viper.GetBool("LOG_DEV")
+	viper.SetDefault("DEV_MODE", false)
+	DEV_MODE = viper.GetBool("DEV_MODE")
 
 	viper.SetDefault("UPDATE_TOKEN", "")
 	UPDATE_TOKEN = viper.GetString("UPDATE_TOKEN")

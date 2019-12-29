@@ -28,7 +28,7 @@ func InitMysql() *gorm.DB {
 
 	//https://github.com/go-sql-driver/mysql/issues/257
 	db.DB().SetMaxIdleConns(0)
-	db.LogMode(config.LOG_DEV)
+	db.LogMode(config.DEV_MODE)
 
 	db.AutoMigrate(&User{})
 	db.AutoMigrate(&Host{})
