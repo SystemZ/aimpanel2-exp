@@ -1,7 +1,7 @@
 <template>
-    <v-container fluid fill-height>
-        <v-row align-center justify-center>
-            <v-col xs12 sm8 md6>
+    <v-container class="fill-height" fluid>
+        <v-row align="center" justify="center">
+            <v-col cols="12" sm="8" md="4">
                 <v-card class="elevation-12">
                     <v-tabs
                             v-model="active"
@@ -98,41 +98,41 @@
 </template>
 
 <script lang="ts">
-    import Vue from "vue";
+    import Vue from 'vue';
 
     export default Vue.extend({
-        name: "Login",
+        name: 'Login',
         data: () => ({
             loginForm: {
-                username: "",
-                password: ""
+                username: '',
+                password: ''
             },
 
             registerForm: {
-                username: "",
-                password: "",
-                password_repeat: "",
-                email: "",
-                email_repeat: "",
+                username: '',
+                password: '',
+                password_repeat: '',
+                email: '',
+                email_repeat: '',
             },
             rules: {
                 username: [
-                    (v: string) => !!v || "Username is required",
-                    (v: string) => v.length >= 3 || "Username must be of minimum 3 characters"
+                    (v: string) => !!v || 'Username is required',
+                    (v: string) => v.length >= 3 || 'Username must be of minimum 3 characters'
                 ],
                 password: [
-                    (v: string) => !!v || "Password is required",
-                    (v: string) => v.length >= 5 || "Password must be of minimum 5 characters"
+                    (v: string) => !!v || 'Password is required',
+                    (v: string) => v.length >= 5 || 'Password must be of minimum 5 characters'
                 ],
                 email: [
-                    (v: string) => !!v || "Email is required",
-                    (v: string) => /.+@.+/.test(v) || "Email must be valid"
+                    (v: string) => !!v || 'Email is required',
+                    (v: string) => /.+@.+/.test(v) || 'Email must be valid'
                 ],
             },
 
             confirmation: {
-                passwordConfirmation: "",
-                emailConfirmation: "",
+                passwordConfirmation: '',
+                emailConfirmation: '',
             },
 
             registerError: null,
@@ -146,26 +146,26 @@
         methods: {
             login() {
                 this.loginError = null;
-                this.$auth.login(this, this.loginForm, "hosts");
+                this.$auth.login(this, this.loginForm, 'hosts');
             },
             register() {
                 this.registerError = null;
-                this.$auth.register(this, this.registerForm, "hosts");
+                this.$auth.register(this, this.registerForm, 'hosts');
             }
         },
         watch: {
-            "registerForm.password_repeat": function() {
+            'registerForm.password_repeat': function() {
                 if (this.registerForm.password !== this.registerForm.password_repeat) {
-                    this.confirmation.passwordConfirmation = "Passwords do not match";
+                    this.confirmation.passwordConfirmation = 'Passwords do not match';
                 } else {
-                    this.confirmation.passwordConfirmation = "";
+                    this.confirmation.passwordConfirmation = '';
                 }
             },
-            "registerForm.email_repeat": function() {
+            'registerForm.email_repeat': function() {
                 if (this.registerForm.email !== this.registerForm.email_repeat) {
-                    this.confirmation.emailConfirmation = "Emails do not match";
+                    this.confirmation.emailConfirmation = 'Emails do not match';
                 } else {
-                    this.confirmation.emailConfirmation = "";
+                    this.confirmation.emailConfirmation = '';
                 }
             }
         }

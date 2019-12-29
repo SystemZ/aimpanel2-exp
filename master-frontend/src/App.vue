@@ -1,13 +1,13 @@
 <template xmlns:v-slot="http://www.w3.org/1999/XSL/Transform">
-    <v-app>
+    <v-app :style="{background: $vuetify.theme.themes['dark'].background}">
         <v-navigation-drawer v-model="drawer" app>
             <v-list-item>
                 <v-list-item-content>
                     <v-list-item-title class="title">
-                        Aimpanel
+                        Aimpanel v2
                     </v-list-item-title>
                     <v-list-item-subtitle>
-                        v2.0.0
+                        Pre-alpha
                     </v-list-item-subtitle>
                 </v-list-item-content>
             </v-list-item>
@@ -41,7 +41,7 @@
             </v-list>
         </v-navigation-drawer>
 
-        <v-app-bar color="red darken-1" dark app>
+        <v-app-bar color="red darken-2" app>
             <v-toolbar-title>
                 {{$route.meta.title}}
             </v-toolbar-title>
@@ -72,48 +72,56 @@
 </template>
 
 <script lang="ts">
-    import Vue from "vue";
+    import Vue from 'vue';
 
     export default Vue.extend({
-        name: "App",
+        name: 'App',
         computed: {
             loggedIn() {
                 return this.$auth.logged;
             },
         },
+        created() {
+            this.$root.$on('sessionExpired', this.$auth.logout);
+        },
+        destroyed() {
+            this.$root.$off('sessionExpired', this.$auth.logout);
+        },
         data: () => ({
             drawer: null,
             menu: [
                 {
-                    title: "Home",
-                    icon: "fa-home",
-                    path: "/",
+                    title: 'Home',
+                    icon: 'fa-home',
+                    path: '/',
                     authRequired: false
                 },
                 {
-                    title: "Hosts",
-                    icon: "fa-server",
-                    path: "/hosts",
+                    title: 'Hosts',
+                    icon: 'fa-server',
+                    path: '/hosts',
                     authRequired: true
                 },
                 {
-                    title: "Game servers",
-                    icon: "fa-gamepad",
-                    path: "/game-servers",
+                    title: 'Game servers',
+                    icon: 'fa-gamepad',
+                    path: '/game-servers',
                     authRequired: true
                 },
+                /*
                 {
-                    title: "License",
-                    icon: "fa-certificate",
-                    path: "/license",
+                    title: 'License',
+                    icon: 'fa-certificate',
+                    path: '/license',
                     authRequired: false
                 },
                 {
-                    title: "Help",
-                    icon: "fa-question",
-                    path: "/help",
+                    title: 'Help',
+                    icon: 'fa-question',
+                    path: '/help',
                     authRequired: false
                 }
+                */
             ]
         }),
     });

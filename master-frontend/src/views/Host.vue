@@ -69,7 +69,7 @@
                                         :rotate="-90"
                                         :value="(metric.ram_used/metric.ram_total) * 100"
                                         color="primary">
-                                     {{metric.ram_used }}/{{metric.ram_total }} GB
+                                    {{metric.ram_used }}/{{metric.ram_total }} GB
                                 </v-progress-circular>
                                 <div class="text-xs-center">RAM</div>
                             </v-col>
@@ -94,66 +94,66 @@
 
             </v-col>
             <v-col xs6>
-<!--                <br>-->
-<!--                <div class="display-1 grey&#45;&#45;text text&#45;&#45;darken-1">File Manager</div>-->
-<!--                <br>-->
-<!--                <v-row>-->
-<!--                    <v-col xs12>-->
-<!--                        <v-card>-->
-<!--                            <v-list two-line subheader>-->
-<!--                                <v-subheader inset>Current directory {{ fileManager.current_dir }}</v-subheader>-->
-<!--                                <v-subheader inset>Directories</v-subheader>-->
+                <!--                <br>-->
+                <!--                <div class="display-1 grey&#45;&#45;text text&#45;&#45;darken-1">File Manager</div>-->
+                <!--                <br>-->
+                <!--                <v-row>-->
+                <!--                    <v-col xs12>-->
+                <!--                        <v-card>-->
+                <!--                            <v-list two-line subheader>-->
+                <!--                                <v-subheader inset>Current directory {{ fileManager.current_dir }}</v-subheader>-->
+                <!--                                <v-subheader inset>Directories</v-subheader>-->
 
-<!--                                <v-list-item-->
-<!--                                        v-for="dir in fileManager.directories"-->
-<!--                                        :key="dir.title"-->
-<!--                                        avatar-->
-<!--                                        @click="">-->
-<!--                                    <v-list-item-avatar>-->
-<!--                                        <v-icon>{{ dir.icon }}</v-icon>-->
-<!--                                    </v-list-item-avatar>-->
+                <!--                                <v-list-item-->
+                <!--                                        v-for="dir in fileManager.directories"-->
+                <!--                                        :key="dir.title"-->
+                <!--                                        avatar-->
+                <!--                                        @click="">-->
+                <!--                                    <v-list-item-avatar>-->
+                <!--                                        <v-icon>{{ dir.icon }}</v-icon>-->
+                <!--                                    </v-list-item-avatar>-->
 
-<!--                                    <v-list-item-content>-->
-<!--                                        <v-list-item-title>{{ dir.title }}</v-list-item-title>-->
-<!--                                        <v-list-item-sub-title>{{ dir.last_modification }}</v-list-item-sub-title>-->
-<!--                                    </v-list-item-content>-->
+                <!--                                    <v-list-item-content>-->
+                <!--                                        <v-list-item-title>{{ dir.title }}</v-list-item-title>-->
+                <!--                                        <v-list-item-sub-title>{{ dir.last_modification }}</v-list-item-sub-title>-->
+                <!--                                    </v-list-item-content>-->
 
-<!--                                    <v-list-item-action>-->
-<!--                                        <v-btn icon ripple>-->
-<!--                                            <v-icon color="red lighten-1">fa-trash-o</v-icon>-->
-<!--                                        </v-btn>-->
-<!--                                    </v-list-item-action>-->
-<!--                                </v-list-item>-->
+                <!--                                    <v-list-item-action>-->
+                <!--                                        <v-btn icon ripple>-->
+                <!--                                            <v-icon color="red lighten-1">fa-trash-o</v-icon>-->
+                <!--                                        </v-btn>-->
+                <!--                                    </v-list-item-action>-->
+                <!--                                </v-list-item>-->
 
-<!--                                <v-divider inset></v-divider>-->
+                <!--                                <v-divider inset></v-divider>-->
 
-<!--                                <v-subheader inset>Files</v-subheader>-->
+                <!--                                <v-subheader inset>Files</v-subheader>-->
 
-<!--                                <v-list-item-->
-<!--                                        v-for="file in fileManager.files"-->
-<!--                                        :key="file.title"-->
-<!--                                        avatar-->
-<!--                                        @click=""-->
-<!--                                >-->
-<!--                                    <v-list-item-avatar>-->
-<!--                                        <v-icon>{{ file.icon }}</v-icon>-->
-<!--                                    </v-list-item-avatar>-->
+                <!--                                <v-list-item-->
+                <!--                                        v-for="file in fileManager.files"-->
+                <!--                                        :key="file.title"-->
+                <!--                                        avatar-->
+                <!--                                        @click=""-->
+                <!--                                >-->
+                <!--                                    <v-list-item-avatar>-->
+                <!--                                        <v-icon>{{ file.icon }}</v-icon>-->
+                <!--                                    </v-list-item-avatar>-->
 
-<!--                                    <v-list-item-content>-->
-<!--                                        <v-list-item-title>{{ file.title }}</v-list-item-title>-->
-<!--                                        <v-list-item-sub-title>{{ file.last_modification }}</v-list-item-sub-title>-->
-<!--                                    </v-list-item-content>-->
+                <!--                                    <v-list-item-content>-->
+                <!--                                        <v-list-item-title>{{ file.title }}</v-list-item-title>-->
+                <!--                                        <v-list-item-sub-title>{{ file.last_modification }}</v-list-item-sub-title>-->
+                <!--                                    </v-list-item-content>-->
 
-<!--                                    <v-list-item-action>-->
-<!--                                        <v-btn icon ripple>-->
-<!--                                            <v-icon color="red lighten-1">fa-trash-o</v-icon>-->
-<!--                                        </v-btn>-->
-<!--                                    </v-list-item-action>-->
-<!--                                </v-list-item>-->
-<!--                            </v-list>-->
-<!--                        </v-card>-->
-<!--                    </v-col>-->
-<!--                </v-row>-->
+                <!--                                    <v-list-item-action>-->
+                <!--                                        <v-btn icon ripple>-->
+                <!--                                            <v-icon color="red lighten-1">fa-trash-o</v-icon>-->
+                <!--                                        </v-btn>-->
+                <!--                                    </v-list-item-action>-->
+                <!--                                </v-list-item>-->
+                <!--                            </v-list>-->
+                <!--                        </v-card>-->
+                <!--                    </v-col>-->
+                <!--                </v-row>-->
             </v-col>
         </v-row>
         <v-snackbar
@@ -173,7 +173,7 @@
 
 <script lang="ts">
     import Vue from 'vue';
-    import {Host, Metric} from "@/types/api";
+    import {Host, Metric} from '@/types/api';
 
     export default Vue.extend({
         name: 'host',
@@ -218,7 +218,7 @@
             this.$http.get('/v1/host/' + this.$route.params.id).then((res) => {
                 this.host = res.data.host;
             }).catch(e => {
-                console.error(e)
+                this.$auth.checkResponse(e.response.status);
             });
 
             this.$http.get('/v1/host/' + this.$route.params.id + '/metric').then((res) => {
@@ -232,21 +232,25 @@
                 this.metric.ram_free = +(this.metric.ram_free / 1024).toFixed(1);
                 this.metric.ram_used = +(this.metric.ram_total - this.metric.ram_free).toFixed(1);
             }).catch(e => {
-                console.error(e)
-            })
+                this.$auth.checkResponse(e.response.status);
+            });
         },
         methods: {
             remove(): void {
                 this.$http.delete('/v1/host/' + this.$route.params.id).then(res => {
                     this.removeSnackbar = true;
                     console.log(res);
-                    this.$router.push("/hosts");
+                    this.$router.push('/hosts');
+                }).catch(e => {
+                    this.$auth.checkResponse(e.response.status);
                 });
             },
             update(): void {
                 this.$http.get('/v1/host/' + this.$route.params.id + '/update').then(res => {
                     console.log(res);
-                })
+                }).catch(e => {
+                    this.$auth.checkResponse(e.response.status);
+                });
             }
         },
     });

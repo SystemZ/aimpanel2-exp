@@ -1,5 +1,5 @@
 <template xmlns:v-slot="http://www.w3.org/1999/XSL/Transform">
-    <v-container fluid>
+    <v-container>
         <v-row>
             <v-col xs12>
                 <v-dialog v-model="createGameServer.dialog" persistent max-width="600px">
@@ -161,7 +161,7 @@
                 return this.$http.get("/v1/game").then(res => {
                     this.games = res.data;
                 }).catch(e => {
-                    console.error(e);
+                    this.$auth.checkResponse(e.response.status)
                 });
             },
             getGameServers() {
@@ -169,14 +169,14 @@
                     this.gameServers = res.data.game_servers;
                     console.log(this.gameServers)
                 }).catch(e => {
-                    console.error(e);
+                    this.$auth.checkResponse(e.response.status)
                 });
             },
             getHosts() {
                 return this.$http.get("/v1/host").then(res => {
                     this.hosts = res.data.hosts;
                 }).catch(e => {
-                    console.error(e);
+                    this.$auth.checkResponse(e.response.status)
                 });
             },
             addGameServer() {
@@ -228,9 +228,11 @@
             clearInterval(this.timer)
         },
         watch: {
-            "createGameServer.game.game_id": function(val) {
+            "createGameServer.game.game_id": function (val) {
                 console.log(val)
-                this.createGameServer.versions = this.games.filter((g) => { return g.id === val })[0].versions
+                this.createGameServer.versions = this.games.filter((g) => {
+                    return g.id === val
+                })[0].versions
             }
         }
     });
