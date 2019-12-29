@@ -59,7 +59,7 @@ func Stop(gsId string, stopType uint) error {
 		return errors.New("error when getting host token from db")
 	}
 
-	channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken + "/" + gsId)
+	channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken)
 	if !ok {
 		return errors.New("host is not turned on")
 	}
