@@ -19,7 +19,7 @@ func InitSSE() *sse.Server {
 		},
 	}
 
-	if config.LOG_DEV {
+	if config.DEV_MODE {
 		options.Logger = log.New(os.Stdout, "go-sse: ", log.Ldate|log.Ltime|log.Lshortfile)
 	}
 

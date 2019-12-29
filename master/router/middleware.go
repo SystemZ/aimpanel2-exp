@@ -7,7 +7,6 @@ import (
 	"github.com/rs/cors"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
-	"gitlab.com/systemz/aimpanel2/master/config"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"log"
 	"net/http"
@@ -123,7 +122,7 @@ func CorsMiddleware(handler http.Handler) http.Handler {
 		AllowedOrigins: []string{"*"},
 		AllowedHeaders: []string{"Authorization", "Content-Type", "Accept", "Content-Length", "X-Requested-With", "Origin"},
 		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"},
-		Debug:          config.LOG_DEV,
+		Debug:          true,
 	})
 	return c.Handler(handler)
 }
