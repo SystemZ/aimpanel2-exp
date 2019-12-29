@@ -9,6 +9,7 @@ var (
 	GS_DIR           string
 	STORAGE_DIR      string
 	TRASH_DIR        string
+	BACKUP_DIR       string
 	HOST_TOKEN       string
 	API_TOKEN        string
 	GIT_COMMIT       string
@@ -30,6 +31,9 @@ func init() {
 
 	viper.SetDefault("TRASH_DIR", "/opt/aimpanel/trash/")
 	TRASH_DIR = viper.GetString("TRASH_DIR")
+
+	viper.SetDefault("BACKUP_DIR", "/opt/aimpanel/backups/")
+	BACKUP_DIR = viper.GetString("BACKUP_DIR")
 
 	viper.SetDefault("HOST_TOKEN", "")
 	HOST_TOKEN = viper.GetString("HOST_TOKEN")
