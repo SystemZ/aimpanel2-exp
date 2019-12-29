@@ -123,7 +123,7 @@
 
             let source = new EventSource(process.env.VUE_APP_API_URL + '/v1/console/' + this.serverId)
             var self = this;
-            source.onmessage = function(event) {
+            source.onmessage = function (event) {
                 let str = atob(event.data)
                 self.logs.push(str)
             }

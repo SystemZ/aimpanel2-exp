@@ -7,10 +7,15 @@ export interface AuthInterface {
     email: string;
     username: string;
     logged: boolean;
-    login(context: any , data: any, redirect: any): any;
-    register(context: any , data: any, redirect: any): any;
+
+    login(context: any, data: any, redirect: any): any;
+
+    register(context: any, data: any, redirect: any): any;
+
     logout(): any;
+
     checkAuthentication(): any;
+
     getAuthorizationHeader(): any;
 }
 
@@ -22,7 +27,7 @@ export default new Vue({
     },
 
     methods: {
-        login(context: any , data: any, redirect: any) {
+        login(context: any, data: any, redirect: any) {
             this.$http.post('/v1/auth/login', data).then((res: any) => {
                 if (res.data.token) {
                     const decoded: any = jwt_decode(res.data.token);
@@ -39,7 +44,7 @@ export default new Vue({
                     }
                 }
             }).catch((e: any) => {
-                if(!e.response) {
+                if (!e.response) {
                     context.loginError = 'Network error';
                 } else {
                     context.loginError = e.response.data.message;

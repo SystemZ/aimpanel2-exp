@@ -6,6 +6,6 @@
     export default Vue.extend({
         name: 'help',
         data: () => ({})
-    })
+    });
 
 </script>

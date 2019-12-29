@@ -228,9 +228,11 @@
             clearInterval(this.timer)
         },
         watch: {
-            "createGameServer.game.game_id": function(val) {
+            "createGameServer.game.game_id": function (val) {
                 console.log(val)
-                this.createGameServer.versions = this.games.filter((g) => { return g.id === val })[0].versions
+                this.createGameServer.versions = this.games.filter((g) => {
+                    return g.id === val
+                })[0].versions
             }
         }
     });

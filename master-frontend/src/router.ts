@@ -1,15 +1,15 @@
-import Vue from 'vue'
-import Router from 'vue-router'
-import Home from './views/Home.vue'
-import Login from './views/Login.vue'
-import Host from "@/views/Host.vue";
-import Hosts from "@/views/Hosts.vue";
-import License from "@/views/License.vue";
-import Profile from "@/views/Profile.vue";
-import GameServer from "@/views/GameServer.vue";
-import GameServers from "@/views/GameServers.vue";
-import Help from "@/views/Help.vue";
-import NotFound from "@/views/404.vue";
+import Vue from 'vue';
+import Router from 'vue-router';
+import Home from './views/Home.vue';
+import Login from './views/Login.vue';
+import Host from '@/views/Host.vue';
+import Hosts from '@/views/Hosts.vue';
+import License from '@/views/License.vue';
+import Profile from '@/views/Profile.vue';
+import GameServer from '@/views/GameServer.vue';
+import GameServers from '@/views/GameServers.vue';
+import Help from '@/views/Help.vue';
+import NotFound from '@/views/404.vue';
 
 Vue.use(Router);
 

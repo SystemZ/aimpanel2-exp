@@ -85,33 +85,33 @@
 </template>
 
 <script lang="ts">
-    import Vue from "vue";
-    import {Host} from "@/types/api";
+    import Vue from 'vue';
+    import {Host} from '@/types/api';
 
     export default Vue.extend({
-        name: "Hosts",
+        name: 'Hosts',
         data: () => ({
             headers: [
                 {
-                    text: "Name",
-                    align: "left",
+                    text: 'Name',
+                    align: 'left',
                     sortable: true,
-                    value: "name"
+                    value: 'name'
                 },
                 {
-                    text: "IP",
-                    align: "right",
-                    value: "ip"
+                    text: 'IP',
+                    align: 'right',
+                    value: 'ip'
                 },
                 {
-                    text: "Game servers",
-                    align: "right",
-                    value: "gs"
+                    text: 'Game servers',
+                    align: 'right',
+                    value: 'gs'
                 },
                 {
-                    text: "State",
-                    align: "right",
-                    value: "state"
+                    text: 'State',
+                    align: 'right',
+                    value: 'state'
                 }
             ],
             hosts: [] as Host[],
@@ -119,19 +119,19 @@
                 dialog: false,
                 step: 0,
                 host: {
-                    name: "",
-                    ip: "",
+                    name: '',
+                    ip: '',
                 },
-                token: ""
+                token: ''
             },
             timer: 0,
         }),
         methods: {
             goToHost(id: string): void {
-                this.$router.push("/host/" + id);
+                this.$router.push('/host/' + id);
             },
             getHosts(): void {
-                this.$http.get("/v1/host").then(res => {
+                this.$http.get('/v1/host').then(res => {
                     this.hosts = res.data.hosts;
                 }).catch(e => {
                     console.error(e);
@@ -142,7 +142,7 @@
                 this.createHost.step = 1;
             },
             addHost(): void {
-                this.$http.post("/v1/host", this.createHost.host).then(res => {
+                this.$http.post('/v1/host', this.createHost.host).then(res => {
                     this.createHost.token = res.data.token;
                     this.createHost.step = 2;
                 }).catch(e => {
@@ -154,20 +154,22 @@
                     dialog: false,
                     step: 0,
                     host: {
-                        name: "",
-                        ip: "",
+                        name: '',
+                        ip: '',
                     },
-                    token: ""
+                    token: ''
                 };
                 this.getHosts();
             }
         },
         mounted(): void {
             this.getHosts();
-            this.timer = setInterval(() => { this.getHosts() }, 10*1000)
+            this.timer = setInterval(() => {
+                this.getHosts();
+            }, 10 * 1000);
         },
         beforeDestroy(): void {
-            clearInterval(this.timer)
+            clearInterval(this.timer);
         }
     });
 </script>

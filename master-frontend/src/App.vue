@@ -72,49 +72,49 @@
 </template>
 
 <script lang="ts">
-  import Vue from 'vue';
+    import Vue from 'vue';
 
-  export default Vue.extend({
-    name: 'App',
-    computed: {
-      loggedIn() {
-        return this.$auth.logged;
-      },
-    },
-    data: () => ({
-      drawer: null,
-      menu: [
-        {
-          title: 'Home',
-          icon: 'fa-home',
-          path: '/',
-          authRequired: false
+    export default Vue.extend({
+        name: 'App',
+        computed: {
+            loggedIn() {
+                return this.$auth.logged;
+            },
         },
-        {
-          title: 'Hosts',
-          icon: 'fa-server',
-          path: '/hosts',
-          authRequired: true
-        },
-        {
-          title: 'Game servers',
-          icon: 'fa-gamepad',
-          path: '/game-servers',
-          authRequired: true
-        },
-        {
-          title: 'License',
-          icon: 'fa-certificate',
-          path: '/license',
-          authRequired: false
-        },
-        {
-          title: 'Help',
-          icon: 'fa-question',
-          path: '/help',
-          authRequired: false
-        }
-      ]
-    }),
-  });
+        data: () => ({
+            drawer: null,
+            menu: [
+                {
+                    title: 'Home',
+                    icon: 'fa-home',
+                    path: '/',
+                    authRequired: false
+                },
+                {
+                    title: 'Hosts',
+                    icon: 'fa-server',
+                    path: '/hosts',
+                    authRequired: true
+                },
+                {
+                    title: 'Game servers',
+                    icon: 'fa-gamepad',
+                    path: '/game-servers',
+                    authRequired: true
+                },
+                {
+                    title: 'License',
+                    icon: 'fa-certificate',
+                    path: '/license',
+                    authRequired: false
+                },
+                {
+                    title: 'Help',
+                    icon: 'fa-question',
+                    path: '/help',
+                    authRequired: false
+                }
+            ]
+        }),
+    });
 </script>
