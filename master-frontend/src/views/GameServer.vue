@@ -1,19 +1,16 @@
 <template>
     <v-container>
         <v-row class="mb-6">
-            <v-col>
+            <v-col cols="3" md="3" sm="12" xs="12">
                 <v-card>
+                    <v-card-title>Actions</v-card-title>
                     <v-card-text>
                         <v-btn class="ma-2" color="green" dark @click="start()">Start</v-btn>
                         <v-btn class="ma-2" color="red" dark @click="stop()">Stop</v-btn>
                         <v-btn class="ma-2" color="blue" dark @click="install()">Install</v-btn>
                     </v-card-text>
                 </v-card>
-            </v-col>
-        </v-row>
-        <v-row class="mb-6">
-            <v-col cols="3">
-                <v-card>
+                <v-card class="mt-5">
                     <v-card-title>Details</v-card-title>
                     <v-card-text>
                         <v-list-item two-line>
@@ -25,7 +22,8 @@
 
                         <v-list-item two-line>
                             <v-list-item-content>
-                                <v-list-item-title>{{game_server.state == 1 ? 'Active' : 'Locked'}}</v-list-item-title>
+                                <v-list-item-title>{{game_server.state == 1 ? 'Active' : 'Locked'}}
+                                </v-list-item-title>
                                 <v-list-item-subtitle>Status</v-list-item-subtitle>
                             </v-list-item-content>
                         </v-list-item>
@@ -45,18 +43,19 @@
                         </v-list-item>
                     </v-card-text>
                     <v-card-actions>
-                        <v-btn color="red darken-2 accent-4" text @click="remove()">Remove game server</v-btn>
+                        <v-btn color="red darken-3" @click="remove()">
+                            <v-icon class="mr-2">fa-trash</v-icon>
+                            Remove game server
+                        </v-btn>
                     </v-card-actions>
                 </v-card>
             </v-col>
-            <v-col cols="9">
+            <v-col cols="9" md="9" sm="12" xs="12">
                 <v-card>
                     <v-card-title>Console</v-card-title>
-                    <v-card-text style="max-height: 250px" class="overflow-y-auto black--text">
-                        <span v-for="item in logs" :key="item.id">
-                            {{item}}<br/>
-                        </span>
-                    </v-card-text>
+                    <v-card class="pa-5">
+                        <span v-for="item in logs" :key="item.id">{{item.log}}<br/></span>
+                    </v-card>
                     <v-card-actions>
                         <v-text-field full-width
                                       label="Type some message here"
@@ -67,6 +66,11 @@
                         </v-text-field>
                     </v-card-actions>
                 </v-card>
+            </v-col>
+        </v-row>
+        <v-row class="mb-6">
+            <v-col cols="3">
+
             </v-col>
         </v-row>
         <v-snackbar
@@ -128,10 +132,10 @@
                 self.logs.push(str)
             }
 
-            //
-            // this.updateLogs();
-            //
-            // this.timer = setInterval(() => { this.updateLogs() }, 10*1000)
+            this.updateLogs();
+            this.timer = setInterval(() => {
+                this.updateLogs()
+            }, 3 * 1000)
         },
         methods: {
             start() {
@@ -151,8 +155,7 @@
                 })
             },
             updateLogs() {
-                console.log('updateLogs');
-                this.$http.put(this.serverUrl + '/logs').then(res => {
+                this.$http.get(this.serverUrl + '/logs').then(res => {
                     this.logs = res.data.reverse();
                 }).catch(e => {
                     this.$auth.checkResponse(e.response.status)
