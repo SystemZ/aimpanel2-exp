@@ -34,6 +34,8 @@ const (
 
 	AGENT_HEARTBEAT
 	WRAPPER_HEARTBEAT
+
+	GAME_MAKE_BACKUP
 )
 
 type Message struct {

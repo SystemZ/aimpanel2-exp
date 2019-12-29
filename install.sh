@@ -52,6 +52,7 @@ adduser --system aimpanel
 # create misc dirs
 mkdir -p $AIMPANEL_DIR/storage
 mkdir -p $AIMPANEL_DIR/gs
+mkdir -p $AIMPANEL_DIR/backups
 mkdir -p $AIMPANEL_DIR/trash
 # install redis
 mkdir -p $REDIS_DIR
