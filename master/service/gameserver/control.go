@@ -172,7 +172,7 @@ func Restart(gsId string, stopType uint) error {
 
 	model.Redis.Set("gs_restart_id_"+gameServer.ID.String(), 0, 24*time.Hour)
 
-	channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken + "/" + gsId)
+	channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken)
 	if !ok {
 		return errors.New("game server is not turned on")
 	}
