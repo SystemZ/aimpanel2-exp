@@ -70,7 +70,7 @@ export default new Vue({
         logout() {
             this.logged = false;
             localStorage.removeItem('token');
-            router.push('/');
+            router.push({name: 'login'});
         },
         checkAuthentication() {
             const token = localStorage.getItem('token');
