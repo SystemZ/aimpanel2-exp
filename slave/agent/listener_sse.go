@@ -63,6 +63,11 @@ func agent() {
 			logrus.Info("agent sigkill requested")
 			tasks.GsKill(taskMsg.GameServerID)
 			logrus.Info("agent sigkill finished")
+		case task.GAME_COMMAND:
+			// relayed to wrapper
+			logrus.Info("agent gs cmd requested")
+			tasks.GsCmd(taskMsg.GameServerID, taskMsg.Body)
+			logrus.Info("agent gs cmd finished")
 		}
 	})
 	if err != nil {

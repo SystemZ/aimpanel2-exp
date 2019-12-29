@@ -138,7 +138,7 @@ func SendCommand(gsId string, command string) error {
 		return errors.New("error when getting host token from db")
 	}
 
-	channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken + "/" + gsId)
+	channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken)
 	if !ok {
 		return errors.New("game server is not turned on")
 	}
