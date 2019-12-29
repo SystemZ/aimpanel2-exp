@@ -13,6 +13,24 @@ func GsStart() {
 
 }
 
+func GsCmd(gsId string, cmdStr string) {
+	taskMsg := task.Message{
+		TaskId:       task.GAME_COMMAND,
+		GameServerID: gsId,
+		Body:         cmdStr,
+	}
+	taskMsgStr, err := taskMsg.Serialize()
+	if err != nil {
+		logrus.Printf("Something went wrong when sending msg: %v", err)
+		return
+	}
+	res, err := model.Redis.Publish(config.REDIS_PUB_SUB_CH, taskMsgStr).Result()
+	if err != nil {
+		logrus.Printf("%v", err)
+	}
+	logrus.Infof("Task sent to %v procs", res)
+}
+
 func GsStop(gsId string) {
 	taskMsg := task.Message{
 		// FIXME other task IDs for user CLI actions
