@@ -81,6 +81,12 @@
                 return this.$auth.logged;
             },
         },
+        created() {
+            this.$root.$on('sessionExpired', this.$auth.logout());
+        },
+        destroyed() {
+            this.$root.$off('sessionExpired', this.$auth.logout());
+        },
         data: () => ({
             drawer: null,
             menu: [
