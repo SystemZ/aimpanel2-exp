@@ -12,7 +12,9 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
+	"time"
 )
 
 // tasks below will be eventually finished by agent
@@ -111,8 +113,17 @@ func GsBackupTrigger(gsId string) {
 
 func GsBackup(gsId string) {
 	logrus.Infof("Backup for GS ID %v started", gsId)
-	targetFilePath := config.BACKUP_DIR + gsId + ".tar.gz"
+
+	// prepare destination name and path for backup
+	unixTimestamp := strconv.Itoa(int(time.Now().Unix()))
+	// FIXME add human readable UTC date at the end
+	backupFilename := unixTimestamp + "_" + gsId + ".tar.gz"
+	backupPath := config.BACKUP_DIR + backupFilename
 	inputDirPath := strings.TrimRight(config.GS_DIR+gsId, "/")
-	TarGz(targetFilePath, inputDirPath, true)
+
+	// create backup
+	TarGz(backupPath, inputDirPath, true)
+
+	// all done!
 	logrus.Infof("Backup for GS ID %v finished", gsId)
 }
