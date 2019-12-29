@@ -135,7 +135,7 @@ func CreatePermissionsForNewGameServer(groupId int, hostId string, gameServerId 
 
 	DB.Save(&Permission{
 		Name:     "Get logs from game server",
-		Verb:     lib.GetVerbByName("PUT"),
+		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
 		Endpoint: "/v1/host/" + hostId + "/server/" + gameServerId + "/logs",
 	})
