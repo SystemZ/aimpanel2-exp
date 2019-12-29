@@ -14,6 +14,8 @@ export interface AuthInterface {
 
     logout(): any;
 
+    checkResponse(httpCode: number): void;
+
     checkAuthentication(): any;
 
     getAuthorizationHeader(): any;
@@ -71,6 +73,11 @@ export default new Vue({
             this.logged = false;
             localStorage.removeItem('token');
             router.push({name: 'login'});
+        },
+        checkResponse(httpCode: number) {
+            if (httpCode === 401) {
+                this.logout();
+            }
         },
         checkAuthentication() {
             const token = localStorage.getItem('token');

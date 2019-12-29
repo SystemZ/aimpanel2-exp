@@ -218,7 +218,7 @@
             this.$http.get('/v1/host/' + this.$route.params.id).then((res) => {
                 this.host = res.data.host;
             }).catch(e => {
-                console.error(e);
+                this.$auth.checkResponse(e.response.status);
             });
 
             this.$http.get('/v1/host/' + this.$route.params.id + '/metric').then((res) => {
@@ -232,7 +232,7 @@
                 this.metric.ram_free = +(this.metric.ram_free / 1024).toFixed(1);
                 this.metric.ram_used = +(this.metric.ram_total - this.metric.ram_free).toFixed(1);
             }).catch(e => {
-                console.error(e);
+                this.$auth.checkResponse(e.response.status);
             });
         },
         methods: {
@@ -241,11 +241,15 @@
                     this.removeSnackbar = true;
                     console.log(res);
                     this.$router.push('/hosts');
+                }).catch(e => {
+                    this.$auth.checkResponse(e.response.status);
                 });
             },
             update(): void {
                 this.$http.get('/v1/host/' + this.$route.params.id + '/update').then(res => {
                     console.log(res);
+                }).catch(e => {
+                    this.$auth.checkResponse(e.response.status);
                 });
             }
         },

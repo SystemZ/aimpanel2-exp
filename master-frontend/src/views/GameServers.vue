@@ -161,7 +161,7 @@
                 return this.$http.get("/v1/game").then(res => {
                     this.games = res.data;
                 }).catch(e => {
-                    console.error(e);
+                    this.$auth.checkResponse(e.response.status)
                 });
             },
             getGameServers() {
@@ -169,16 +169,14 @@
                     this.gameServers = res.data.game_servers;
                     console.log(this.gameServers)
                 }).catch(e => {
-                    if (e.response.status === 401) {
-                        this.$root.$emit("sessionExpired")
-                    }
+                    this.$auth.checkResponse(e.response.status)
                 });
             },
             getHosts() {
                 return this.$http.get("/v1/host").then(res => {
                     this.hosts = res.data.hosts;
                 }).catch(e => {
-                    console.error(e);
+                    this.$auth.checkResponse(e.response.status)
                 });
             },
             addGameServer() {

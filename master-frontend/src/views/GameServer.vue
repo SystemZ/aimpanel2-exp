@@ -118,7 +118,7 @@
             this.$http.get(this.serverUrl).then(res => {
                 this.game_server = res.data.game_server;
             }).catch(e => {
-                console.error(e)
+                this.$auth.checkResponse(e.response.status)
             });
 
             let source = new EventSource(process.env.VUE_APP_API_URL + '/v1/console/' + this.serverId)
@@ -138,7 +138,7 @@
                 this.$http.put(this.serverUrl + '/start').then(res => {
                     console.log(res);
                 }).catch(e => {
-                    console.error(e)
+                    this.$auth.checkResponse(e.response.status)
                 })
             },
             stop() {
@@ -147,16 +147,15 @@
                 }).then(res => {
                     console.log(res);
                 }).catch(e => {
-                    console.error(e)
+                    this.$auth.checkResponse(e.response.status)
                 })
             },
             updateLogs() {
                 console.log('updateLogs');
-
                 this.$http.put(this.serverUrl + '/logs').then(res => {
                     this.logs = res.data.reverse();
                 }).catch(e => {
-                    console.error(e)
+                    this.$auth.checkResponse(e.response.status)
                 })
             },
             sendMessage() {
@@ -166,13 +165,14 @@
                     console.log(res);
                     this.message = '';
                 }).catch(e => {
-                    console.error(e)
+                    this.$auth.checkResponse(e.response.status)
                 })
             },
             install() {
                 this.$http.put(this.serverUrl + "/install").then(res => {
                     this.installSnackbar = true;
-                    console.log(res);
+                }).catch(e => {
+                    this.$auth.checkResponse(e.response.status)
                 });
             },
             remove() {
@@ -180,6 +180,8 @@
                     this.removeSnackbar = true;
                     console.log(res);
                     this.$router.push("/game-servers");
+                }).catch(e => {
+                    this.$auth.checkResponse(e.response.status)
                 });
             }
         },
