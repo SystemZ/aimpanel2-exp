@@ -10,7 +10,7 @@ import (
 	"strconv"
 )
 
-func agent() {
+func listenerSse() {
 	client := sse.NewClient(config.API_URL + "/v1/events/" + config.HOST_TOKEN)
 	client.Headers = map[string]string{
 		"Authorization": "Bearer " + config.API_TOKEN,

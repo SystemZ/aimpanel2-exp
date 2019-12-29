@@ -33,7 +33,7 @@ func Start(hostToken string) {
 	}
 	config.API_TOKEN = token.Token
 
-	go agent()
+	go listenerSse()
 
 	logrus.Info("Send AGENT_STARTED")
 	taskMsg := task.Message{
