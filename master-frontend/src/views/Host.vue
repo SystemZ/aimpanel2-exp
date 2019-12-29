@@ -171,12 +171,15 @@
     </v-container>
 </template>
 
-<script>
-    export default {
+<script lang="ts">
+    import Vue from 'vue';
+    import {Host, Metric} from "@/types/api";
+
+    export default Vue.extend({
         name: 'host',
         data: () => ({
-            host: {},
-            metric: {},
+            host: {} as Host,
+            metric: {} as Metric,
             fileManager: {
                 current_dir: '/home/test',
                 directories: [
@@ -211,43 +214,40 @@
             },
             removeSnackbar: false,
         }),
-        mounted() {
-            this.$http.get('/v1/host/' + this.$route.params.id).then(res => {
-                this.host = res.data.host
-                console.log(this.host)
+        mounted(): void {
+            this.$http.get('/v1/host/' + this.$route.params.id).then((res) => {
+                this.host = res.data.host;
             }).catch(e => {
                 console.error(e)
             });
 
-            this.$http.get('/v1/host/' + this.$route.params.id + '/metric').then(res => {
+            this.$http.get('/v1/host/' + this.$route.params.id + '/metric').then((res) => {
                 this.metric = res.data.metrics[0];
 
-                this.metric.disk_free = (this.metric.disk_free / 1024).toFixed(0);
-                this.metric.disk_total = (this.metric.disk_total / 1024).toFixed(0);
+                this.metric.disk_free = +(this.metric.disk_free as number / 1024).toFixed(0);
+                this.metric.disk_total = +(this.metric.disk_total / 1024).toFixed(0);
                 this.metric.disk_used = this.metric.disk_total - this.metric.disk_free;
 
-                this.metric.ram_total = (this.metric.ram_total / 1024).toFixed(1);
-                this.metric.ram_free = (this.metric.ram_free / 1024).toFixed(1);
-                this.metric.ram_used = (this.metric.ram_total - this.metric.ram_free).toFixed(1);
-
-                console.log(this.metric)
+                this.metric.ram_total = +(this.metric.ram_total / 1024).toFixed(1);
+                this.metric.ram_free = +(this.metric.ram_free / 1024).toFixed(1);
+                this.metric.ram_used = +(this.metric.ram_total - this.metric.ram_free).toFixed(1);
             }).catch(e => {
                 console.error(e)
             })
         },
         methods: {
-            remove() {
+            remove(): void {
                 this.$http.delete('/v1/host/' + this.$route.params.id).then(res => {
                     this.removeSnackbar = true;
                     console.log(res);
                     this.$router.push("/hosts");
                 });
             },
-            update() {
+            update(): void {
                 this.$http.get('/v1/host/' + this.$route.params.id + '/update').then(res => {
                     console.log(res);
                 })
             }
         },
-    }
+    });
 </script>
