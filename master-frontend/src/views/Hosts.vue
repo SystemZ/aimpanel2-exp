@@ -134,7 +134,9 @@
                 this.$http.get('/v1/host').then(res => {
                     this.hosts = res.data.hosts;
                 }).catch(e => {
-                    console.error(e);
+                    if (e.response.status === 401) {
+                        this.$root.$emit('sessionExpired');
+                    }
                 });
             },
             createHostCancel(): void {

@@ -169,7 +169,9 @@
                     this.gameServers = res.data.game_servers;
                     console.log(this.gameServers)
                 }).catch(e => {
-                    console.error(e);
+                    if (e.response.status === 401) {
+                        this.$root.$emit("sessionExpired")
+                    }
                 });
             },
             getHosts() {
