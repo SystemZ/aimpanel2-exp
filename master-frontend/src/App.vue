@@ -1,5 +1,5 @@
 <template xmlns:v-slot="http://www.w3.org/1999/XSL/Transform">
-    <v-app>
+    <v-app :style="{background: $vuetify.theme.themes['dark'].background}">
         <v-navigation-drawer v-model="drawer" app>
             <v-list-item>
                 <v-list-item-content>
