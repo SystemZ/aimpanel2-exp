@@ -1,6 +1,15 @@
-import Vue from 'vue';
-import Router from 'vue-router';
-import Home from './views/Home.vue';
+import Vue from 'vue'
+import Router from 'vue-router'
+import Home from './views/Home.vue'
+import Login from './views/Login.vue'
+import Host from "@/views/Host.vue";
+import Hosts from "@/views/Hosts.vue";
+import License from "@/views/License.vue";
+import Profile from "@/views/Profile.vue";
+import GameServer from "@/views/GameServer.vue";
+import GameServers from "@/views/GameServers.vue";
+import Help from "@/views/Help.vue";
+import NotFound from "@/views/404.vue";
 
 Vue.use(Router);
 
@@ -20,7 +29,7 @@ export default new Router({
             meta: {
                 title: 'Login',
             },
-            component: () => import(/* webpackChunkName: "login" */ './views/Login.vue'),
+            component: Login,
         },
         {
             path: '/license',
@@ -28,7 +37,7 @@ export default new Router({
             meta: {
                 title: 'License',
             },
-            component: () => import(/* webpackChunkName: "license" */ './views/License.vue'),
+            component: License,
         },
         {
             path: '/help',
@@ -36,7 +45,7 @@ export default new Router({
             meta: {
                 title: 'Help',
             },
-            component: () => import(/* webpackChunkName: "help" */ './views/Help.vue'),
+            component: Help,
         },
         {
             path: '/profile',
@@ -45,7 +54,7 @@ export default new Router({
                 title: 'Profile',
                 authRequired: true,
             },
-            component: () => import(/* webpackChunkName: "profile" */ './views/Profile.vue'),
+            component: Profile,
         },
         {
             path: '/hosts',
@@ -54,7 +63,7 @@ export default new Router({
                 title: 'Hosts',
                 authRequired: true,
             },
-            component: () => import(/* webpackChunkName: "hosts" */ './views/Hosts.vue'),
+            component: Hosts,
         },
         {
             path: '/host/:id',
@@ -63,7 +72,7 @@ export default new Router({
                 title: 'Host',
                 authRequired: true,
             },
-            component: () => import(/* webpackChunkName: "host" */ './views/Host.vue'),
+            component: Host,
         },
         {
             path: '/host/:id/server/:server_id',
@@ -72,7 +81,7 @@ export default new Router({
                 title: 'Game Server',
                 authRequired: true,
             },
-            component: () => import(/* webpackChunkName: "game_server" */ './views/GameServer.vue'),
+            component: GameServer,
         },
         {
             path: '/game-servers',
@@ -81,7 +90,7 @@ export default new Router({
                 title: 'Game Servers',
                 authRequired: true,
             },
-            component: () => import(/* webpackChunkName: "game-servers" */ './views/GameServers.vue'),
+            component: GameServers,
         },
         {
             path: '*',
@@ -89,7 +98,7 @@ export default new Router({
             meta: {
                 title: '404 - Page Not Found'
             },
-            component: () => import(/* webpackChunkName: "404" */ './views/404.vue'),
+            component: NotFound,
         },
     ],
 });
