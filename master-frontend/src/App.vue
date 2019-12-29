@@ -108,6 +108,7 @@
                     path: '/game-servers',
                     authRequired: true
                 },
+                /*
                 {
                     title: 'License',
                     icon: 'fa-certificate',
@@ -120,6 +121,7 @@
                     path: '/help',
                     authRequired: false
                 }
+                */
             ]
         }),
     });
