@@ -20,5 +20,5 @@ func InitRedis() {
 		logrus.Error(err.Error())
 		logrus.Panic("Ping to Redis failed")
 	}
-	logrus.Info("Connection to Redis seems OK!")
+	logrus.Info("Connected to DB")
 }

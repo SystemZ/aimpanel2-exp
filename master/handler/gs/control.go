@@ -3,13 +3,13 @@ package gs
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
+	log "github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/ecode"
 	"gitlab.com/systemz/aimpanel2/lib/request"
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/master/handler"
 	"gitlab.com/systemz/aimpanel2/master/service/gameserver"
-	"log"
 	"net/http"
 )
 
@@ -30,6 +30,7 @@ func Start(w http.ResponseWriter, r *http.Request) {
 
 	err := gameserver.Start(gsId)
 	if err != nil {
+		log.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: ecode.GsStart})
@@ -56,6 +57,7 @@ func Install(w http.ResponseWriter, r *http.Request) {
 
 	err := gameserver.Install(gsId)
 	if err != nil {
+		log.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: ecode.GsInstall})
@@ -91,7 +93,7 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 
 	err = gameserver.Restart(gsId, data.Type)
 	if err != nil {
-		log.Printf("fail restarting GS: %v", err)
+		log.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: ecode.GsRestart})
@@ -127,7 +129,7 @@ func Stop(w http.ResponseWriter, r *http.Request) {
 
 	err = gameserver.Stop(gsId, data.Type)
 	if err != nil {
-		log.Printf("fail stopping GS: %v", err)
+		log.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: ecode.GsStop})
@@ -164,6 +166,7 @@ func SendCommand(w http.ResponseWriter, r *http.Request) {
 
 	err = gameserver.SendCommand(gsId, data.Command)
 	if err != nil {
+		log.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: ecode.GsCmd})
@@ -180,6 +183,7 @@ func Data(w http.ResponseWriter, r *http.Request) {
 	data := &task.Message{}
 	err := json.NewDecoder(r.Body).Decode(data)
 	if err != nil {
+		log.Error(err)
 		w.WriteHeader(http.StatusBadRequest)
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: ecode.JsonDecode})
@@ -188,6 +192,7 @@ func Data(w http.ResponseWriter, r *http.Request) {
 
 	err = gameserver.HostData(hostToken, data)
 	if err != nil {
+		log.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		lib.MustEncode(json.NewEncoder(w),
 			handler.JsonError{ErrorCode: ecode.HostData})
@@ -198,6 +203,7 @@ func Data(w http.ResponseWriter, r *http.Request) {
 	if ok {
 		err = gameserver.GsData(hostToken, gsId, data)
 		if err != nil {
+			log.Error(err)
 			w.WriteHeader(http.StatusInternalServerError)
 			lib.MustEncode(json.NewEncoder(w),
 				handler.JsonError{ErrorCode: ecode.GsData})

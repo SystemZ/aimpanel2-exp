@@ -3,11 +3,11 @@ package wrapper
 import (
 	"bufio"
 	"github.com/r3labs/sse"
-	proc "github.com/shirou/gopsutil/process"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/slave/config"
+	"gitlab.com/systemz/aimpanel2/slave/model"
 	"io"
 	"log"
 	"os"
@@ -16,7 +16,6 @@ import (
 	"strings"
 	"sync"
 	"syscall"
-	"time"
 )
 
 type Process struct {
@@ -142,42 +141,6 @@ func (p *Process) Run() {
 	logrus.Info("WG Done")
 }
 
-func (p *Process) LogStdout(msg string) {
-	taskMsg := task.Message{
-		TaskId:       task.SERVER_LOG,
-		GameServerID: p.GameServerID,
-		Stdout:       msg,
-	}
-
-	jsonStr, err := taskMsg.Serialize()
-	if err != nil {
-		logrus.Error(err)
-	}
-	//TODO: do something with status code
-	_, err = lib.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN+"/"+p.GameServerID, config.API_TOKEN, jsonStr)
-	if err != nil {
-		logrus.Error(err)
-	}
-}
-
-func (p *Process) LogStderr(msg string) {
-	taskMsg := task.Message{
-		TaskId:       task.SERVER_LOG,
-		GameServerID: p.GameServerID,
-		Stderr:       msg,
-	}
-
-	jsonStr, err := taskMsg.Serialize()
-	if err != nil {
-		logrus.Error(err)
-	}
-	//TODO: do something with status code
-	_, err = lib.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN+"/"+p.GameServerID, config.API_TOKEN, jsonStr)
-	if err != nil {
-		logrus.Error(err)
-	}
-}
-
 func (p *Process) Kill(signal syscall.Signal) {
 	logrus.Info("Kill" + signal.String())
 	if p.Running {
@@ -187,7 +150,7 @@ func (p *Process) Kill(signal syscall.Signal) {
 
 }
 
-func (p *Process) Rpc() {
+func (p *Process) SseListener() {
 	client := sse.NewClient(config.API_URL + "/v1/events/" + config.HOST_TOKEN + "/" + p.GameServerID)
 	client.Headers = map[string]string{
 		"Authorization": "Bearer " + config.API_TOKEN,
@@ -217,15 +180,6 @@ func (p *Process) Rpc() {
 			p.GameStartCommand = strings.Split(startCommand, " ")
 
 			go p.Run()
-		case task.GAME_COMMAND:
-			logrus.Info("Got GAME_COMMAND msg")
-			go func() { p.Input <- taskMsg.Body }()
-		case task.GAME_STOP_SIGKILL:
-			logrus.Info("Got GAME_STOP_SIGKILL msg")
-			p.Kill(syscall.SIGKILL)
-		case task.GAME_STOP_SIGTERM:
-			logrus.Info("Got GAME_STOP_SIGTERM msg")
-			p.Kill(syscall.SIGTERM)
 		case task.WRAPPER_METRICS_FREQUENCY:
 			logrus.Info("Got WRAPPER_METRICS_FREQUENCY msg")
 			p.MetricFrequency = taskMsg.MetricFrequency
@@ -237,69 +191,74 @@ func (p *Process) Rpc() {
 	}
 }
 
-func (p *Process) Metrics() {
-	for {
-		<-time.After(time.Duration(p.MetricFrequency) * time.Second)
+func (p *Process) RedisListener() {
+	// start connection to redis
+	model.InitRedis()
 
-		if p.Running {
-			process, err := proc.NewProcess(int32(p.Cmd.Process.Pid))
-			if err != nil {
-				logrus.Error(err.Error())
-			}
+	// subscribe tasks
+	// https://godoc.org/github.com/go-redis/redis#PubSub
+	pubsub := model.Redis.Subscribe(config.REDIS_PUB_SUB_CH)
 
-			memoryInfoStat, err := process.MemoryInfo()
-			if err != nil {
-				logrus.Error(err.Error())
-			}
-
-			cpuPercent, err := process.CPUPercent()
-			if err != nil {
-				logrus.Error(err.Error())
-			}
-
-			rss := memoryInfoStat.RSS / 1024 / 1024
-
-			taskMsg := task.Message{
-				TaskId:       task.WRAPPER_METRICS,
-				GameServerID: p.GameServerID,
-				CpuUsage:     int(cpuPercent),
-				RamUsage:     int(rss),
-			}
-
-			jsonStr, err := taskMsg.Serialize()
-			if err != nil {
-				logrus.Error(err)
-			}
-			//TODO: do something with status code
-			_, err = lib.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN+"/"+p.GameServerID, config.API_TOKEN, jsonStr)
-			if err != nil {
-				logrus.Error(err)
-			}
-		}
-
+	// Wait for confirmation that subscription is created before publishing anything.
+	_, err := pubsub.Receive()
+	if err != nil {
+		// FIXME don't panic on redis pub/sub error
+		panic(err)
 	}
+	defer pubsub.Close()
+
+	// Go channel which receives messages.
+	ch := pubsub.Channel()
+
+	// Consume messages.
+	for msg := range ch {
+		p.RedisTaskHandler(msg.Channel, msg.Payload)
+	}
+
 }
 
-func (p *Process) Heartbeat() {
-	for {
-		<-time.After(5 * time.Second)
+func (p *Process) RedisTaskHandler(taskCh string, taskBody string) {
+	taskMsg := task.Message{}
+	err := taskMsg.Deserialize(taskBody)
+	if err != nil {
+		logrus.Error(err)
+	}
 
-		logrus.Info("Sending heartbeat")
+	// accept message only for our game servers or all on host
+	if taskMsg.GameServerID != p.GameServerID && taskMsg.GameServerID != "all" {
+		log.Printf("wrapper task is not for me, ignoring...")
+		return
+	}
 
-		taskMsg := task.Message{
-			TaskId:       task.WRAPPER_HEARTBEAT,
-			GameServerID: p.GameServerID,
-			Timestamp:    time.Now().Unix(),
-		}
+	switch taskMsg.TaskId {
 
-		jsonStr, err := taskMsg.Serialize()
-		if err != nil {
-			logrus.Error(err)
-		}
-		//TODO: do something with status code
-		_, err = lib.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN+"/"+p.GameServerID, config.API_TOKEN, jsonStr)
-		if err != nil {
-			logrus.Error(err)
-		}
+	case task.GAME_STOP_SIGTERM:
+		logrus.Info("Got GAME_STOP_SIGTERM msg")
+		p.Kill(syscall.SIGTERM)
+	case task.GAME_STOP_SIGKILL:
+		logrus.Info("Got GAME_STOP_SIGKILL msg")
+		p.Kill(syscall.SIGKILL)
+	case task.GAME_COMMAND:
+		logrus.Info("Got GAME_COMMAND msg")
+		go func() { p.Input <- taskMsg.Body }()
+	//case task.GAME_START:
+	//	logrus.Info("Got GAME_START msg")
+	//
+	//	startCommand, err := taskMsg.Game.GetCmd()
+	//	if err != nil {
+	//		logrus.Error(err)
+	//	}
+	//
+	//	p.GameStartCommand = strings.Split(startCommand, " ")
+	//
+	//	go p.Run()
+	//case task.WRAPPER_METRICS_FREQUENCY:
+	//	logrus.Info("Got WRAPPER_METRICS_FREQUENCY msg")
+	//	p.MetricFrequency = taskMsg.MetricFrequency
+	//	go p.Metrics()
+	default:
+		logrus.Warning("Unhandled task!")
+		// report this to master
+
 	}
 }

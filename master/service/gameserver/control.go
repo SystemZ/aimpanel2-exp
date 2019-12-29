@@ -32,7 +32,7 @@ func Start(gsId string) error {
 	}
 
 	taskMsg := task.Message{
-		TaskId:       task.GAME_INSTALL,
+		TaskId:       task.WRAPPER_START,
 		GameServerID: gsId,
 	}
 
@@ -59,7 +59,7 @@ func Stop(gsId string, stopType uint) error {
 		return errors.New("error when getting host token from db")
 	}
 
-	channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken + "/" + gsId)
+	channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken)
 	if !ok {
 		return errors.New("host is not turned on")
 	}
@@ -138,7 +138,7 @@ func SendCommand(gsId string, command string) error {
 		return errors.New("error when getting host token from db")
 	}
 
-	channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken + "/" + gsId)
+	channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken)
 	if !ok {
 		return errors.New("game server is not turned on")
 	}
@@ -172,7 +172,7 @@ func Restart(gsId string, stopType uint) error {
 
 	model.Redis.Set("gs_restart_id_"+gameServer.ID.String(), 0, 24*time.Hour)
 
-	channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken + "/" + gsId)
+	channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken)
 	if !ok {
 		return errors.New("game server is not turned on")
 	}
