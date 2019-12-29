@@ -6,11 +6,13 @@ import (
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/slave/config"
+	"gitlab.com/systemz/aimpanel2/slave/model"
 	"io"
 	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 )
 
 // tasks below will be eventually finished by agent
@@ -87,4 +89,30 @@ func SelfUpdate(taskMsg task.Message) {
 	}
 	logrus.Info("shutting down agent to apply update")
 	os.Exit(0)
+}
+
+func GsBackupTrigger(gsId string) {
+	taskMsg := task.Message{
+		// FIXME other task IDs for user CLI actions
+		TaskId:       task.GAME_MAKE_BACKUP,
+		GameServerID: gsId,
+	}
+	taskMsgStr, err := taskMsg.Serialize()
+	if err != nil {
+		logrus.Errorf("preparing msg failed: %v", err)
+		return
+	}
+	res, err := model.Redis.Publish(config.REDIS_PUB_SUB_CH, taskMsgStr).Result()
+	if err != nil {
+		logrus.Errorf("sending msg failed: %v", err)
+	}
+	logrus.Infof("Task sent to %v processes", res)
+}
+
+func GsBackup(gsId string) {
+	logrus.Infof("Backup for GS ID %v started", gsId)
+	targetFilePath := config.BACKUP_DIR + gsId + ".tar.gz"
+	inputDirPath := config.GS_DIR + gsId + "/"
+	TarGz(targetFilePath, strings.TrimRight(inputDirPath, "/"))
+	logrus.Infof("Backup for GS ID %v finished", gsId)
 }

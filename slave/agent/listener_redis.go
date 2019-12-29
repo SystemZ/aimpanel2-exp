@@ -5,6 +5,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/slave/config"
 	"gitlab.com/systemz/aimpanel2/slave/model"
+	"gitlab.com/systemz/aimpanel2/slave/tasks"
 )
 
 func listenerRedis() {
@@ -47,6 +48,9 @@ func redisTaskHandler(taskCh string, taskBody string) {
 		logrus.Info("agent got GAME_STOP_SIGKILL msg")
 	case task.GAME_COMMAND:
 		logrus.Info("agent got GAME_COMMAND msg")
+	case task.GAME_MAKE_BACKUP:
+		logrus.Info("agent got GAME_MAKE_BACKUP msg")
+		go tasks.GsBackup(taskMsg.GameServerID)
 	default:
 		logrus.Warning("Unhandled task!")
 	}
