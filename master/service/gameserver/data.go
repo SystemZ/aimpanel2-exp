@@ -7,6 +7,7 @@ import (
 	"github.com/go-redis/redis"
 	"github.com/gofrs/uuid"
 	"github.com/sirupsen/logrus"
+	"gitlab.com/systemz/aimpanel2/lib/event"
 	"gitlab.com/systemz/aimpanel2/lib/game"
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/master/events"
@@ -24,6 +25,11 @@ func HostData(hostToken string, taskMsg *task.Message) error {
 
 	switch taskMsg.TaskId {
 	case task.AGENT_STARTED:
+		model.DB.Save(&model.Event{
+			EventId: event.AGENT_START,
+			HostId:  host.ID,
+		})
+
 		err := Update(host.ID.String())
 		if err != nil {
 			logrus.Error(err)
@@ -95,6 +101,11 @@ func HostData(hostToken string, taskMsg *task.Message) error {
 
 	case task.AGENT_HEARTBEAT:
 		model.Redis.Set("agent_heartbeat_token_"+hostToken, taskMsg.Timestamp, 24*time.Hour)
+	case task.AGENT_SHUTDOWN:
+		model.DB.Save(&model.Event{
+			EventId: event.AGENT_SHUTDOWN,
+			HostId:  host.ID,
+		})
 	}
 
 	return nil

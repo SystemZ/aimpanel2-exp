@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"github.com/inconshreveable/go-update"
 	"github.com/sirupsen/logrus"
+	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/slave/config"
 	"gitlab.com/systemz/aimpanel2/slave/model"
@@ -68,6 +69,9 @@ func SelfUpdate(taskMsg task.Message) {
 	if config.GIT_COMMIT == taskMsg.Commit {
 		return
 	}
+	if config.GIT_COMMIT == "" {
+		return
+	}
 
 	resp, err := http.Get(taskMsg.Url)
 	if err != nil {
@@ -126,4 +130,45 @@ func GsBackup(gsId string) {
 
 	// all done!
 	logrus.Infof("Backup for GS ID %v finished", gsId)
+}
+
+func AgentShutdown() {
+	logrus.Info("Send AGENT_SHUTDOWN")
+	taskMsg := task.Message{
+		TaskId: task.AGENT_SHUTDOWN,
+	}
+
+	jsonStr, err := taskMsg.Serialize()
+	if err != nil {
+		logrus.Error(err)
+	}
+	//TODO: do something with status code
+	_, err = lib.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, jsonStr)
+	if err != nil {
+		logrus.Error(err)
+	}
+
+	GsStop("all")
+
+	<-time.After(5 * time.Second)
+
+	os.Exit(1)
+}
+
+func AgentShutdownTrigger() {
+	taskMsg := task.Message{
+		// FIXME other task IDs for user CLI actions
+		TaskId: task.AGENT_SHUTDOWN,
+	}
+	taskMsgStr, err := taskMsg.Serialize()
+	if err != nil {
+		logrus.Errorf("preparing msg failed: %v", err)
+		return
+	}
+
+	res, err := model.Redis.Publish(config.REDIS_PUB_SUB_CH, taskMsgStr).Result()
+	if err != nil {
+		logrus.Errorf("sending msg failed: %v", err)
+	}
+	logrus.Infof("Task sent to %v processes", res)
 }

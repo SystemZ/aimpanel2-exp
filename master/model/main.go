@@ -46,6 +46,8 @@ func InitMysql() *gorm.DB {
 
 	db.AutoMigrate(&Permission{})
 
+	db.AutoMigrate(&Event{})
+
 	logrus.Info("Connection to database seems OK!")
 
 	return db

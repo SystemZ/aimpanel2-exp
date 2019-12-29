@@ -51,6 +51,9 @@ func redisTaskHandler(taskCh string, taskBody string) {
 	case task.GAME_MAKE_BACKUP:
 		logrus.Info("agent got GAME_MAKE_BACKUP msg")
 		go tasks.GsBackup(taskMsg.GameServerID)
+	case task.AGENT_SHUTDOWN:
+		logrus.Info("agent got AGENT_SHUTDOWN msg")
+		tasks.AgentShutdown()
 	default:
 		logrus.Warning("Unhandled task!")
 	}

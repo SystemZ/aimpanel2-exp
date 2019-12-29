@@ -36,6 +36,8 @@ const (
 	WRAPPER_HEARTBEAT
 
 	GAME_MAKE_BACKUP
+
+	AGENT_SHUTDOWN
 )
 
 type Message struct {
