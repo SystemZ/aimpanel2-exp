@@ -4,10 +4,10 @@
             <v-list-item>
                 <v-list-item-content>
                     <v-list-item-title class="title">
-                        Aimpanel
+                        Aimpanel v2
                     </v-list-item-title>
                     <v-list-item-subtitle>
-                        v2.0.0
+                        Pre-alpha
                     </v-list-item-subtitle>
                 </v-list-item-content>
             </v-list-item>
