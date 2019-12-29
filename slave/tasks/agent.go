@@ -112,7 +112,7 @@ func GsBackupTrigger(gsId string) {
 func GsBackup(gsId string) {
 	logrus.Infof("Backup for GS ID %v started", gsId)
 	targetFilePath := config.BACKUP_DIR + gsId + ".tar.gz"
-	inputDirPath := config.GS_DIR + gsId + "/"
-	TarGz(targetFilePath, strings.TrimRight(inputDirPath, "/"))
+	inputDirPath := strings.TrimRight(config.GS_DIR+gsId, "/")
+	TarGz(targetFilePath, inputDirPath, true)
 	logrus.Infof("Backup for GS ID %v finished", gsId)
 }

@@ -3,22 +3,32 @@ package tasks
 import (
 	"archive/tar"
 	"compress/gzip"
-	"fmt"
+	"github.com/sirupsen/logrus"
 	"io"
 	"os"
+	"strings"
 )
 
 // https://stackoverflow.com/q/13611100/1351857
 
-func TarGzWrite(_path string, tw *tar.Writer, fi os.FileInfo) {
+func TarGzWrite(_path string, tw *tar.Writer, fi os.FileInfo, filter bool, filterPath string) {
 	fr, err := os.Open(_path)
 	handleBackupError(err)
 	defer fr.Close()
 
 	h := new(tar.Header)
-	// we use preserve whole path instead of just filename
+
+	// this is ok for flat tar
 	//h.Name = fi.Name()
-	h.Name = _path
+
+	if filter {
+		// normally whole absolute path is in tar like provided what to backup
+		// we should use filter this out for more flexibility while restoring
+		h.Name = "files" + strings.TrimPrefix(_path, filterPath)
+	} else {
+		// we use preserve whole path instead of just filename
+		h.Name = _path
+	}
 
 	h.Size = fi.Size()
 	h.Mode = int64(fi.Mode())
@@ -31,7 +41,7 @@ func TarGzWrite(_path string, tw *tar.Writer, fi os.FileInfo) {
 	handleBackupError(err)
 }
 
-func IterDirectory(dirPath string, tw *tar.Writer) {
+func IterDirectory(dirPath string, tw *tar.Writer, filter bool, filterPath string) {
 	dir, err := os.Open(dirPath)
 	handleBackupError(err)
 	defer dir.Close()
@@ -41,15 +51,15 @@ func IterDirectory(dirPath string, tw *tar.Writer) {
 		curPath := dirPath + "/" + fi.Name()
 		if fi.IsDir() {
 			//TarGzWrite( curPath, tw, fi )
-			IterDirectory(curPath, tw)
+			IterDirectory(curPath, tw, filter, filterPath)
 		} else {
-			fmt.Printf("adding... %s\n", curPath)
-			TarGzWrite(curPath, tw, fi)
+			logrus.Debugf("Adding to tar: %s", curPath)
+			TarGzWrite(curPath, tw, fi, filter, filterPath)
 		}
 	}
 }
 
-func TarGz(outFilePath string, inPath string) {
+func TarGz(outFilePath string, inPath string, filterAbsolutePath bool) {
 	// file write
 	fw, err := os.Create(outFilePath)
 	handleBackupError(err)
@@ -63,13 +73,13 @@ func TarGz(outFilePath string, inPath string) {
 	tw := tar.NewWriter(gw)
 	defer tw.Close()
 
-	IterDirectory(inPath, tw)
-
-	fmt.Println("tar.gz ok")
+	IterDirectory(inPath, tw, filterAbsolutePath, inPath)
+	logrus.Info("Completed .tar.gz creation")
 }
 
 func handleBackupError(err error) {
 	if err != nil {
-		panic("oh no")
+		// FIXME handle errors for backups earlier, remove this func
+		panic("Something went wrong with backup")
 	}
 }
