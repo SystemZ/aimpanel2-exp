@@ -41,7 +41,7 @@
             </v-list>
         </v-navigation-drawer>
 
-        <v-app-bar color="red darken-1" dark app>
+        <v-app-bar color="red darken-2" app>
             <v-toolbar-title>
                 {{$route.meta.title}}
             </v-toolbar-title>
