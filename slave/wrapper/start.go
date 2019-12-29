@@ -19,7 +19,8 @@ func Start(gameServerID string) {
 		GameServerID: gameServerID,
 	}
 
-	go p.Rpc()
+	go p.SseListener()
+	go p.RedisListener()
 
 	logrus.Info("Send WRAPPER_STARTED")
 	taskMsg := task.Message{
