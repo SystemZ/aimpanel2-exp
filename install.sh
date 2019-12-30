@@ -80,7 +80,7 @@ chmod +x $REDIS_DIR/$REDIS_BINARY_NAME
 chmod -R 770 $AIMPANEL_DIR/
 chown -R aimpanel:root $AIMPANEL_DIR/
 echo "Downloading agent..."
-wget -q $REPO_URL/latest -O $AIMPANEL_BINARY_DIR/$AIMPANEL_BINARY_NAME
+wget -q $REPO_URL/aimpanel/latest -O $AIMPANEL_BINARY_DIR/$AIMPANEL_BINARY_NAME
 chmod +x $AIMPANEL_BINARY_DIR/$AIMPANEL_BINARY_NAME
 # for launching wrapper
 ln -s /opt/aimpanel/slave /usr/local/bin/slave

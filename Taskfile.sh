@@ -82,14 +82,37 @@ function ci-install-rclone-latest {
     echo "$RCLONE_CONF" | base64 -d > rclone.conf
 }
 
-function ci-slave-installscript-upload {
-    rclone -v --stats-one-line-date --config rclone.conf copyto install.sh ovh-bucket:aimpanel-updates/install.sh
-}
+function ci-slave-upload {
+    # we want only production grade stuff available to customers
+    if git branch | grep \* | cut -d ' ' -f2 | grep -q master; then
+      echo "Master branch detected, deploying files to bucket..."
+    else
+      echo "Not a master branch, skipping upload to bucket..."
+      exit 0
+    fi
 
-function ci-slave-binary-upload {
-    rclone -v --stats-one-line-date --config rclone.conf copyto aimpanel-slave ovh-bucket:aimpanel-updates/$CI_COMMIT_SHA
-    rclone -v --stats-one-line-date --config rclone.conf copyto aimpanel-slave ovh-bucket:aimpanel-updates/latest
-    curl -XPOST -H "Token: $AIMPANEL_UPDATE_TOKEN" -H "Content-type: application/json" -d "{\"commit\": \"$CI_COMMIT_SHA\", \"url\": \"https://storage.gra.cloud.ovh.net/v1/AUTH_23b9e96be2fc431d93deedba1b8c87d2/aimpanel-updates/$CI_COMMIT_SHA\"}" 'https://api-lab.aimpanel.pro/v1/version'
+    ci-install-rclone-latest
+
+    # install.sh is in customer's docs how to install aimpanel
+    echo "Uploading install script"
+    rclone -v --stats-one-line-date --config rclone.conf copyto install.sh ovh-bucket:aimpanel-updates/install.sh
+
+    # upload as stable link for install.sh
+    echo "Uploading binary with \"latest\" name"
+    rclone -v --stats-one-line-date --config rclone.conf copyto aimpanel-slave ovh-bucket:aimpanel-updates/aimpanel/latest
+
+    # upload as unique link for slave updates, this prevents cache
+    echo "Uploading binary with SHA1 name"
+    rclone -v --stats-one-line-date --config rclone.conf copyto aimpanel-slave ovh-bucket:aimpanel-updates/aimpanel/$CI_COMMIT_SHA
+
+    # we don't need older versions that 1h
+    echo "Cleaning binaries older than 1h"
+    rclone -v --stats-one-line-date --config rclone.conf delete --min-age 1h ovh-bucket:aimpanel-updates/aimpanel/
+
+    # notify master about new slave version
+    # starts all slaves update procedure to be compatible with new master
+    # new master will be deployed few minutes after that
+    curl -XPOST -H "Token: $AIMPANEL_UPDATE_TOKEN" -H "Content-type: application/json" -d "{\"commit\": \"$CI_COMMIT_SHA\", \"url\": \"https://storage.gra.cloud.ovh.net/v1/AUTH_23b9e96be2fc431d93deedba1b8c87d2/aimpanel-updates/aimpanel/$CI_COMMIT_SHA\"}" 'https://api-lab.aimpanel.pro/v1/version'
 }
 
 function ci-redis-compile {
@@ -105,9 +128,7 @@ function ci-redis-compile {
 }
 
 function ci-redis-upload {
-    wget https://downloads.rclone.org/rclone-current-linux-amd64.deb
-    dpkg -i rclone-current-linux-amd64.deb
-    echo "$RCLONE_CONF" | base64 -d > rclone.conf
+    ci-install-rclone-latest
     rclone -v --stats-one-line-date --config rclone.conf copyto redis-server ovh-bucket:aimpanel-updates/redis/$REDIS_VERSION-redis-server-linux-amd64
 }
 
