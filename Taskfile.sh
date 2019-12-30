@@ -84,7 +84,7 @@ function ci-install-rclone-latest {
 
 function ci-slave-upload {
     # we want only production grade stuff available to customers
-    if git branch | grep \* | cut -d ' ' -f2 | grep -q master; then
+    if [[ "$CI_COMMIT_REF_NAME" == "master" ]]; then
       echo "Master branch detected, deploying files to bucket..."
     else
       echo "Not a master branch, skipping upload to bucket..."
