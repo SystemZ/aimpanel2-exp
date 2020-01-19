@@ -93,3 +93,15 @@ func GetHostByToken(db *gorm.DB, token string) *Host {
 	}
 	return &host
 }
+
+func GetHostsByUserId(db *gorm.DB, userId uuid.UUID) []Host {
+	var hosts []Host
+	db.Table("hosts").Where("hosts.user_id = ?", userId).Find(&hosts)
+	return hosts
+}
+
+func GetHostMetrics(db *gorm.DB, hostId string, limit int) []MetricHost {
+	var metrics []MetricHost
+	db.Where("host_id = ?", hostId).Order("created_at desc").Limit(limit).Find(&metrics)
+	return metrics
+}

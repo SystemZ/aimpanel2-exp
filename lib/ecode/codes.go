@@ -7,9 +7,10 @@ package ecode
 // all codes have implied fail or error
 // it makes no sense to write this in error package ¯\_(ツ)_/¯
 const (
+	NoError = iota
 	/// master
 	// generic
-	Unknown = iota // FIXME not my code, not sure, please check it
+	Unknown // FIXME not my code, not sure, please check it
 	JsonDecode
 	JsonEncode
 	DbSave
