@@ -15,7 +15,7 @@ import (
 func UserChangePassword(w http.ResponseWriter, r *http.Request) {
 	user := context.Get(r, "user").(model.User)
 
-	data := &request.UserChangePasswordReq{}
+	data := &request.UserChangePassword{}
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
 		lib.MustEncode(json.NewEncoder(w),
@@ -36,7 +36,7 @@ func UserChangePassword(w http.ResponseWriter, r *http.Request) {
 func UserChangeEmail(w http.ResponseWriter, r *http.Request) {
 	user := context.Get(r, "user").(model.User)
 
-	data := &request.UserChangeEmailReq{}
+	data := &request.UserChangeEmail{}
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
 		lib.MustEncode(json.NewEncoder(w),
