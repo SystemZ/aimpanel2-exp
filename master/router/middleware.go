@@ -7,6 +7,7 @@ import (
 	"github.com/rs/cors"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
+	"gitlab.com/systemz/aimpanel2/master/exit"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"log"
 	"net/http"
@@ -125,4 +126,15 @@ func CorsMiddleware(handler http.Handler) http.Handler {
 		Debug:          true,
 	})
 	return c.Handler(handler)
+}
+
+func ExitMiddleware(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if exit.EXIT {
+			w.WriteHeader(http.StatusServiceUnavailable)
+			return
+		}
+
+		handler.ServeHTTP(w, r)
+	})
 }
