@@ -71,6 +71,16 @@ func GetGameServer(db *gorm.DB, gsId string) *GameServer {
 	return &gs
 }
 
+func GetGameServerByGsIdAndHostId(db *gorm.DB, serverId string, hostId string) *GameServer {
+	var gs GameServer
+
+	if db.Where("id = ? and host_id = ?", serverId, hostId).First(&gs).RecordNotFound() {
+		return nil
+	}
+
+	return &gs
+}
+
 func GetGameServersByHostId(db *gorm.DB, hostId string) *[]GameServer {
 	var gs []GameServer
 
@@ -79,4 +89,16 @@ func GetGameServersByHostId(db *gorm.DB, hostId string) *[]GameServer {
 	}
 
 	return &gs
+}
+
+func GetUserGameServers(db *gorm.DB, userId string) *[]GameServer {
+	var gameServers []GameServer
+
+	if db.Table("game_servers").Select("game_servers.*").Joins(
+		"LEFT JOIN hosts ON game_servers.host_id = hosts.id").Where(
+		"hosts.user_id = ?", userId).Find(&gameServers).RecordNotFound() {
+		return nil
+	}
+
+	return &gameServers
 }

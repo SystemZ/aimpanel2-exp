@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
@@ -12,9 +11,8 @@ import (
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"gitlab.com/systemz/aimpanel2/master/response"
 	"gitlab.com/systemz/aimpanel2/master/service/gameserver"
+	"gitlab.com/systemz/aimpanel2/master/service/host"
 	"net/http"
-	"os"
-	"time"
 )
 
 // @Router /host [get]
@@ -27,12 +25,8 @@ import (
 // @Failure 400 {object} JsonError
 // @Security ApiKey
 func HostList(w http.ResponseWriter, r *http.Request) {
-	var hosts []model.Host
 	user := context.Get(r, "user").(model.User)
-
-	model.DB.Table("hosts").Where(
-		"hosts.user_id = ?", user.ID).Find(&hosts)
-
+	hosts := model.GetHostsByUserId(model.DB, user.ID)
 	lib.MustEncode(json.NewEncoder(w), response.HostList{Hosts: hosts})
 }
 
@@ -49,11 +43,15 @@ func HostList(w http.ResponseWriter, r *http.Request) {
 func HostDetails(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
-	var host model.Host
+	h := model.GetHost(model.DB, params["id"])
+	if h == nil {
+		w.WriteHeader(http.StatusBadRequest)
+		lib.MustEncode(json.NewEncoder(w),
+			JsonError{ErrorCode: ecode.HostNotFound})
+		return
+	}
 
-	model.DB.Where("id = ?", params["id"]).First(&host)
-
-	lib.MustEncode(json.NewEncoder(w), response.Host{Host: host})
+	lib.MustEncode(json.NewEncoder(w), response.Host{Host: *h})
 }
 
 // @Router /host [post]
@@ -77,25 +75,14 @@ func HostCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	host := &model.Host{
-		Name:            data.Name,
-		Ip:              data.Ip,
-		UserId:          user.ID,
-		MetricFrequency: 30,
-	}
-	model.DB.Save(&host)
-
-	group := model.GetGroup(model.DB, "USER-"+user.ID.String())
-	if group == nil {
+	h, errCode := host.Create(data, user.ID)
+	if errCode != ecode.NoError {
 		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: ecode.GroupNotFound})
+			JsonError{ErrorCode: errCode})
 		return
 	}
 
-	// FIXME handle errors
-	model.CreatePermissionsForNewHost(group.ID, host.ID.String())
-
-	lib.MustEncode(json.NewEncoder(w), response.Token{Token: host.Token})
+	lib.MustEncode(json.NewEncoder(w), response.Token{Token: h.Token})
 }
 
 // @Router /host/{id}/metric [get]
@@ -110,10 +97,7 @@ func HostCreate(w http.ResponseWriter, r *http.Request) {
 // @Security ApiKey
 func HostMetric(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-
-	var metrics []model.MetricHost
-	model.DB.Where("host_id = ?", params["id"]).Order("created_at desc").Limit(1).Find(&metrics)
-
+	metrics := model.GetHostMetrics(model.DB, params["id"], 1)
 	lib.MustEncode(json.NewEncoder(w), response.HostMetrics{Metrics: metrics})
 }
 
@@ -130,51 +114,29 @@ func HostMetric(w http.ResponseWriter, r *http.Request) {
 func HostRemove(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
-	var host model.Host
-	model.DB.Where("id = ?", params["id"]).First(&host)
-
-	gameServers := model.GetGameServersByHostId(model.DB, host.ID.String())
-	for _, gameServer := range *gameServers {
-		err := gameserver.Remove(gameServer.ID.String())
-		if err != nil {
-			lib.MustEncode(json.NewEncoder(w),
-				JsonError{ErrorCode: ecode.GsRemove})
-			return
-		}
+	errCode := host.Remove(params["id"])
+	if errCode != ecode.NoError {
+		w.WriteHeader(http.StatusBadRequest)
+		lib.MustEncode(json.NewEncoder(w),
+			JsonError{ErrorCode: errCode})
+		return
 	}
 
-	model.DB.Where("endpoint LIKE ?", "/v1/host/"+host.ID.String()+"%").Delete(&model.Permission{})
-	model.DB.Delete(&host)
-
-	lib.MustEncode(json.NewEncoder(w), JsonSuccess{Message: "Removing host"})
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func HostAuth(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
-	var host model.Host
-	model.DB.Where("token = ?", params["token"]).First(&host)
-
-	if &host == nil {
-		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: ecode.HostNotFound})
-		return
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"exp": time.Now().Add(time.Hour * 48).Unix(),
-		"uid": host.ID.String(),
-	})
-	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
-	if err != nil {
+	token, errCode := host.Auth(params["token"])
+	if errCode != ecode.NoError {
 		w.WriteHeader(http.StatusBadRequest)
-
 		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: ecode.Unknown})
+			JsonError{ErrorCode: errCode})
 		return
 	}
 
-	lib.MustEncode(json.NewEncoder(w), response.Token{Token: tokenString})
+	lib.MustEncode(json.NewEncoder(w), response.Token{Token: token})
 }
 
 //TODO: Available for users?

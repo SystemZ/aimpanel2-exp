@@ -126,12 +126,9 @@ func ListByHostId(w http.ResponseWriter, r *http.Request) {
 func ListByUser(w http.ResponseWriter, r *http.Request) {
 	user := context.Get(r, "user").(model.User)
 
-	var gameServers []model.GameServer
-	model.DB.Table("game_servers").Select("game_servers.*").Joins(
-		"LEFT JOIN hosts ON game_servers.host_id = hosts.id").Where(
-		"hosts.user_id = ?", user.ID).Find(&gameServers)
+	gameServers := model.GetUserGameServers(model.DB, user.ID.String())
 
-	lib.MustEncode(json.NewEncoder(w), response.GameServerList{GameServers: gameServers})
+	lib.MustEncode(json.NewEncoder(w), response.GameServerList{GameServers: *gameServers})
 }
 
 // @Router /host/{host_id}/server/{server_id} [get]
@@ -147,11 +144,8 @@ func ListByUser(w http.ResponseWriter, r *http.Request) {
 // @Security ApiKey
 func Get(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-
-	var gs model.GameServer
-	model.DB.Where("id = ? and host_id = ?", params["server_id"], params["host_id"]).First(&gs)
-
-	lib.MustEncode(json.NewEncoder(w), response.GameServer{GameServer: gs})
+	gameServer := model.GetGameServerByGsIdAndHostId(model.DB, params["server_id"], params["host_id"])
+	lib.MustEncode(json.NewEncoder(w), response.GameServer{GameServer: *gameServer})
 }
 
 func ConsoleLog(w http.ResponseWriter, r *http.Request) {

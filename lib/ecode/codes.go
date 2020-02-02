@@ -11,9 +11,10 @@ package ecode
 //type ErrorCode int
 
 const (
+	NoError = iota
 	/// master
 	// generic
-	Unknown = iota // FIXME not my code, not sure, please check it
+	Unknown // FIXME not my code, not sure, please check it
 	JsonDecode
 	JsonEncode
 	DbSave

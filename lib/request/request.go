@@ -26,3 +26,30 @@ type GameServerStop struct {
 type GameServerSendCommand struct {
 	Command string `json:"command" example:"say Hello!"`
 }
+
+//swagger:parameters User changePassword
+type UserChangePassword struct {
+	Password          string `json:"password"`
+	NewPassword       string `json:"new_password"`
+	NewPasswordRepeat string `json:"new_password_repeat"`
+}
+
+//swagger:parameters User changeEmail
+type UserChangeEmail struct {
+	Email          string `json:"email"`
+	NewEmail       string `json:"new_email"`
+	NewEmailRepeat string `json:"new_email_repeat"`
+}
+
+type AuthRegister struct {
+	Username       string `json:"username"`
+	Password       string `json:"password"`
+	PasswordRepeat string `json:"password_repeat"`
+	Email          string `json:"email"`
+	EmailRepeat    string `json:"email_repeat"`
+}
+
+type AuthLogin struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
