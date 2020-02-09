@@ -1,6 +1,7 @@
 package exit
 
 import (
+	"gitlab.com/systemz/aimpanel2/master/events"
 	"os"
 	"os/signal"
 	"syscall"
@@ -16,10 +17,9 @@ func CheckForExitSignal() {
 	go func() {
 		_ = <-sigc
 
-		//Check how it works :)
-		//events.SSE.Shutdown()
-
+		events.SSE.Shutdown()
 		EXIT = true
+
 		os.Exit(1)
 	}()
 }

@@ -49,7 +49,7 @@ var routes = Routes{
 		"GET",
 		"/",
 		handler.Index,
-		true,
+		false,
 		false,
 	},
 	Route{
