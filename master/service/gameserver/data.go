@@ -1,8 +1,10 @@
 package gameserver
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/alexandrevicenzi/go-sse"
 	"github.com/go-redis/redis"
 	"github.com/gofrs/uuid"
@@ -193,8 +195,11 @@ func GsData(hostToken string, gsId string, taskMsg *task.Message) error {
 			gsLog.Type = model.STDERR
 		}
 
-		//sse.SSE.SendMessage("/v1/console/" + gsLog.GameServerId.String(),
-		//	sse2.SimpleMessage(base64.StdEncoding.EncodeToString([]byte(gsLog.Log))))
+		host := model.GetHostByToken(model.DB, hostToken)
+		events.SSE.SendMessage(fmt.Sprintf("/v1/host/%s/server/%s/console",
+			host.ID.String(),
+			gsLog.GameServerId.String()),
+			sse.SimpleMessage(base64.StdEncoding.EncodeToString([]byte(gsLog.Log))))
 
 		err := model.DB.Save(&gsLog).Error
 		if err != nil {

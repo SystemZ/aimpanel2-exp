@@ -8,17 +8,24 @@ import '@babel/polyfill';
 import axios, {AxiosStatic} from 'axios';
 import auth, {AuthInterface} from './auth';
 
+// @ts-ignore
+import { EventSourcePolyfill } from 'event-source-polyfill';
+
 Vue.config.productionTip = false;
 
 axios.defaults.baseURL = process.env.VUE_APP_API_URL;
 
 Vue.prototype.$http = axios;
 Vue.prototype.$auth = auth;
+Vue.prototype.$eventSource = EventSourcePolyfill;
+Vue.prototype.$apiUrl = process.env.VUE_APP_API_URL;
 
 declare module 'vue/types/vue' {
     interface Vue {
         $http: AxiosStatic;
         $auth: AuthInterface;
+        $eventSource: any;
+        $apiUrl: string;
     }
 }
 
