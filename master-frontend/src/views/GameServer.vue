@@ -54,7 +54,7 @@
                 <v-card>
                     <v-card-title>Console</v-card-title>
                     <v-card class="pa-5">
-                        <span v-for="item in logs" :key="item.id">{{item.log}}<br/></span>
+                        <span v-for="item in logs" :key="item">{{item}}<br/></span>
                     </v-card>
                     <v-card-actions>
                         <v-text-field full-width
@@ -100,19 +100,22 @@
     </v-container>
 </template>
 
-<script>
-    export default {
+<script lang="ts">
+    import Vue from 'vue';
+
+    export default Vue.extend({
         name: 'game_server',
         data: () => ({
             game_server: {},
             serverId: '',
             hostId: '',
-            logs: [],
+            logs: [] as string[],
             message: '',
             serverUrl: '',
             timer: '',
             installSnackbar: false,
             removeSnackbar: false,
+            stream: '' as any,
         }),
         mounted() {
             this.serverId = this.$route.params.server_id;
@@ -125,17 +128,21 @@
                 this.$auth.checkResponse(e.response.status)
             });
 
-            let source = new EventSource(process.env.VUE_APP_API_URL + '/v1/console/' + this.serverId)
-            var self = this;
-            source.onmessage = function (event) {
-                let str = atob(event.data)
-                self.logs.push(str)
+            if(this.stream === '' || this.stream === undefined) {
+                this.setupStream()
             }
 
-            this.updateLogs();
-            this.timer = setInterval(() => {
-                this.updateLogs()
-            }, 3 * 1000)
+            // let source = new EventSource(process.env.VUE_APP_API_URL + this.serverUrl + '/console');
+            // var self = this;
+            // source.onmessage = function (event) {
+            //     let str = atob(event.data);
+            //     self.logs.push(str)
+            // }
+            //
+            // this.updateLogs();
+            // this.timer = setInterval(() => {
+            //     this.updateLogs()
+            // }, 3 * 1000)
         },
         methods: {
             start() {
@@ -154,13 +161,13 @@
                     this.$auth.checkResponse(e.response.status)
                 })
             },
-            updateLogs() {
-                this.$http.get(this.serverUrl + '/logs').then(res => {
-                    this.logs = res.data.reverse();
-                }).catch(e => {
-                    this.$auth.checkResponse(e.response.status)
-                })
-            },
+            // updateLogs() {
+            //     this.$http.get(this.serverUrl + '/logs').then(res => {
+            //         this.logs = res.data.reverse();
+            //     }).catch(e => {
+            //         this.$auth.checkResponse(e.response.status)
+            //     })
+            // },
             sendMessage() {
                 this.$http.put(this.serverUrl + '/command', {
                     command: this.message
@@ -186,10 +193,30 @@
                 }).catch(e => {
                     this.$auth.checkResponse(e.response.status)
                 });
+            },
+            setupStream() {
+                this.stream = new this.$eventSource(this.$apiUrl + this.serverUrl + '/console', {
+                    headers: {
+                        Authorization: this.$auth.getAuthorizationHeader()
+                    }
+                });
+
+                this.stream.onerror = (event: any) => {
+                   console.error(event);
+                };
+
+                this.stream.addEventListener('message', (event: any) => {
+                    if(event.data === 'heartbeat') {
+                        return
+                    }
+
+                    let data = atob(event.data);
+                    this.logs.push(data)
+                }, false);
             }
         },
-        beforeDestroy() {
-            clearInterval(this.timer)
+        beforeDestroy(): void {
+            this.stream.close()
         }
-    }
+    });
 </script>

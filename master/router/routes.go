@@ -300,6 +300,14 @@ var routes = Routes{
 		true,
 		true,
 	},
+	Route{
+		"GameServer Console",
+		"GET",
+		"/host/{host_id}/server/{server_id}/console",
+		events.Handler,
+		true,
+		false,
+	},
 
 	//User
 	Route{
