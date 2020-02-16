@@ -97,6 +97,10 @@ docker-images:
   image: docker:stable
   services:
     - docker:stable-dind
+  variables:
+    # Use TLS https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#tls-enabled
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_CERTDIR: "/certs"
   script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker build --tag $CI_REGISTRY_IMAGE/frontend:pipeline-$CI_PIPELINE_ID -f frontend.Dockerfile .
