@@ -16,7 +16,7 @@ var devCmd = &cobra.Command{
 	Long:  "",
 	//Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		tree, _ := filemanager.NewTree("/opt/aimpanel/gs/448c29e3-0a2f-40b4-ad83-35fe0847fded")
+		tree, _ := filemanager.NewTree("/opt/aimpanel", 100, 10)
 		logrus.Info(tree.String())
 	},
 }

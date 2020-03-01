@@ -4,6 +4,7 @@ package filemanager
 import (
 	"encoding/json"
 	"gitlab.com/systemz/aimpanel2/lib"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -39,11 +40,14 @@ func (n *Node) String() string {
 }
 
 // Create directory hierarchy.
-func NewTree(root string) (result *Node, err error) {
+// maxContentSize represents max size in kB of file which content will be showed
+func NewTree(root string, limit int, maxContentSize int64) (result *Node, err error) {
 	absRoot, err := filepath.Abs(root)
 	if err != nil {
 		return
 	}
+
+	count := 0
 	parents := make(map[string]*Node)
 	walkFunc := func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -52,7 +56,7 @@ func NewTree(root string) (result *Node, err error) {
 
 		var content []byte
 		if !info.IsDir() &&
-			(info.Size()/1000) <= 10 &&
+			(info.Size()/1000) <= maxContentSize &&
 			lib.StringInSlice(filepath.Ext(path), []string{".properties", ".yml"}) {
 
 			content, err = ioutil.ReadFile(path)
@@ -66,9 +70,15 @@ func NewTree(root string) (result *Node, err error) {
 			Info:     fileInfoFromInterface(info, string(content)),
 			Children: make([]*Node, 0),
 		}
+
+		count++
+		if count == limit {
+			return io.EOF
+		}
+
 		return nil
 	}
-	if err = filepath.Walk(absRoot, walkFunc); err != nil {
+	if err = filepath.Walk(absRoot, walkFunc); err != nil && err != io.EOF {
 		return
 	}
 
