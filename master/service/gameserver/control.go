@@ -43,7 +43,7 @@ func Start(gsId string) error {
 
 	channel.SendMessage(sse.NewMessage("", taskMsgStr, strconv.Itoa(task.WRAPPER_START)))
 
-	model.Redis.Set("gs_start_id_"+gameServer.ID.String(), 1, 1*time.Hour)
+	model.SetGsStart(model.Redis, gameServer.ID.String(), 1)
 
 	return nil
 }
@@ -170,7 +170,7 @@ func Restart(gsId string, stopType uint) error {
 		return errors.New("error when getting host token from db")
 	}
 
-	model.Redis.Set("gs_restart_id_"+gameServer.ID.String(), 0, 24*time.Hour)
+	model.SetGsRestart(model.Redis, gameServer.ID.String(), 0)
 
 	channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken)
 	if !ok {
@@ -193,18 +193,18 @@ func Restart(gsId string, stopType uint) error {
 
 	channel.SendMessage(sse.NewMessage("", taskMsgStr, strconv.Itoa(taskMsg.TaskId)))
 
-	model.Redis.Set("gs_restart_id_"+gameServer.ID.String(), 1, 24*time.Hour)
+	model.SetGsRestart(model.Redis, gameServer.ID.String(), 1)
 
 	go func() {
 		<-time.After(time.Duration(gameServer.StopTimeout) * time.Second)
 
-		val, err := model.Redis.Get("gs_restart_id_" + gameServer.ID.String()).Int64()
+		val, err := model.GetGsRestart(model.Redis, gameServer.ID.String())
 		if err != nil {
 			return
 		}
 
 		if val == 1 {
-			model.Redis.Set("gs_restart_id_"+gameServer.ID.String(), -1, 24*time.Hour)
+			model.SetGsRestart(model.Redis, gameServer.ID.String(), -1)
 		}
 	}()
 
@@ -271,12 +271,12 @@ func Update(hostId string) error {
 		return errors.New("host is not turned on")
 	}
 
-	commit, err := model.Redis.Get("slave_commit").Result()
+	commit, err := model.GetSlaveCommit(model.Redis)
 	if err != nil {
 		return err
 	}
 
-	url, err := model.Redis.Get("slave_url").Result()
+	url, err := model.GetSlaveUrl(model.Redis)
 	if err != nil {
 		return err
 	}

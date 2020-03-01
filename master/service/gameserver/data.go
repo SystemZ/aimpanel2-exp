@@ -13,7 +13,6 @@ import (
 	"gitlab.com/systemz/aimpanel2/master/events"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"strconv"
-	"time"
 )
 
 func HostData(hostToken string, taskMsg *task.Message) error {
@@ -100,7 +99,7 @@ func HostData(hostToken string, taskMsg *task.Message) error {
 		model.DB.Save(&host)
 
 	case task.AGENT_HEARTBEAT:
-		model.Redis.Set("agent_heartbeat_token_"+hostToken, taskMsg.Timestamp, 24*time.Hour)
+		model.SetAgentHeartbeat(model.Redis, hostToken, taskMsg.Timestamp)
 	case task.AGENT_SHUTDOWN:
 		model.DB.Save(&model.Event{
 			EventId: event.AGENT_SHUTDOWN,
@@ -116,7 +115,7 @@ func GsData(hostToken string, gsId string, taskMsg *task.Message) error {
 	case task.WRAPPER_STARTED:
 		logrus.Info("WRAPPER_STARTED")
 		gameServerId := taskMsg.GameServerID
-		_, err := model.Redis.Get("gs_restart_id_" + gameServerId).Int64()
+		_, err := model.GetGsRestart(model.Redis, gameServerId)
 		if err == nil {
 			var gs model.GameServer
 			if model.DB.Where("id = ?", gameServerId).First(&gs).RecordNotFound() {
@@ -144,10 +143,10 @@ func GsData(hostToken string, gsId string, taskMsg *task.Message) error {
 
 			channel.SendMessage(sse.NewMessage("", taskMsgStr, strconv.Itoa(task.GAME_START)))
 
-			model.Redis.Del("gs_restart_id_" + gs.ID.String())
+			model.DelGsRestart(model.Redis, gs.ID.String())
 		}
 
-		_, err = model.Redis.Get("gs_start_id_" + gameServerId).Int64()
+		_, err = model.GetGsStart(model.Redis, gameServerId)
 		if err == nil {
 			var gs model.GameServer
 			if model.DB.Where("id = ?", gameServerId).First(&gs).RecordNotFound() {
@@ -175,7 +174,7 @@ func GsData(hostToken string, gsId string, taskMsg *task.Message) error {
 
 			channel.SendMessage(sse.NewMessage("", taskMsgStr, strconv.Itoa(task.GAME_START)))
 
-			model.Redis.Del("gs_start_id_" + gs.ID.String())
+			model.DelGsStart(model.Redis, gs.ID.String())
 		}
 
 	case task.SERVER_LOG:
@@ -204,9 +203,9 @@ func GsData(hostToken string, gsId string, taskMsg *task.Message) error {
 		logrus.Info("WRAPPER_EXITED")
 		gameServerId := taskMsg.GameServerID
 
-		val, err := model.Redis.Get("gs_restart_id_" + gameServerId).Int()
+		val, err := model.GetGsRestart(model.Redis, gameServerId)
 		if err != redis.Nil && val != -1 {
-			model.Redis.Set("gs_restart_id_"+gameServerId, 2, 24*time.Hour)
+			model.SetGsRestart(model.Redis, gameServerId, 2)
 
 			var gs model.GameServer
 			if model.DB.Where("id = ?", gameServerId).First(&gs).RecordNotFound() {
@@ -235,7 +234,7 @@ func GsData(hostToken string, gsId string, taskMsg *task.Message) error {
 
 			channel.SendMessage(sse.NewMessage("", taskMsgStr, strconv.Itoa(task.WRAPPER_START)))
 
-			model.Redis.Set("gs_restart_id_"+gameServerId, 3, 24*time.Hour)
+			model.SetGsRestart(model.Redis, gameServerId, 3)
 		}
 
 	case task.WRAPPER_METRICS_FREQUENCY:
@@ -270,7 +269,7 @@ func GsData(hostToken string, gsId string, taskMsg *task.Message) error {
 		}
 		model.DB.Save(metric)
 	case task.WRAPPER_HEARTBEAT:
-		model.Redis.Set("wrapper_heartbeat_id_"+taskMsg.GameServerID, taskMsg.Timestamp, 24*time.Hour)
+		model.SetWrapperHeartbeat(model.Redis, taskMsg.GameServerID, taskMsg.Timestamp)
 	}
 
 	return nil
