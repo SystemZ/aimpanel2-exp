@@ -7,6 +7,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/master/config"
 	"gitlab.com/systemz/aimpanel2/master/cron"
 	"gitlab.com/systemz/aimpanel2/master/events"
+	"gitlab.com/systemz/aimpanel2/master/exit"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"gitlab.com/systemz/aimpanel2/master/router"
 	"net/http"
@@ -23,6 +24,8 @@ var serverCmd = &cobra.Command{
 	Long:  "",
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		exit.CheckForExitSignal()
+
 		model.DB = model.InitMysql()
 		model.InitRedis()
 		events.SSE = events.InitSSE()

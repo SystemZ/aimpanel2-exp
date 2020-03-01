@@ -139,6 +139,13 @@ func CreatePermissionsForNewGameServer(groupId int, hostId string, gameServerId 
 		GroupId:  groupId,
 		Endpoint: "/v1/host/" + hostId + "/server/" + gameServerId + "/logs",
 	})
+
+	DB.Save(&Permission{
+		Name:     "Console feed",
+		Verb:     lib.GetVerbByName("GET"),
+		GroupId:  groupId,
+		Endpoint: "/v1/host/" + hostId + "/server/" + gameServerId + "/console",
+	})
 }
 
 // FIXME return errors
