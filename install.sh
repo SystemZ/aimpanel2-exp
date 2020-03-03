@@ -102,6 +102,10 @@ WantedBy=multi-user.target
 [Service]
 Type=simple
 User=aimpanel
+StandardInput=tty-force
+StandardOutput=journal
+TTYPath=/dev/tty20
+KillMode=process
 ExecStart=$REDIS_DIR/$REDIS_BINARY_NAME $REDIS_DIR/redis.conf
 WorkingDirectory=/opt/aimpanel/redis/
 Restart=always
