@@ -11,12 +11,15 @@ import (
 
 	_ "github.com/go-kivik/couchdb/v3" // The CouchDB driver
 	"github.com/go-kivik/kivik/v3"
+
+	"github.com/bwmarrin/snowflake"
 )
 
 var (
-	DB      *gorm.DB
-	Redis   *redis.Client
-	CouchDB *kivik.DB
+	DB        *gorm.DB
+	Redis     *redis.Client
+	CouchDB   *kivik.DB
+	Snowflake *snowflake.Node
 )
 
 func InitCouchDb() *kivik.DB {
@@ -95,4 +98,14 @@ func InitRedis() {
 	}
 
 	logrus.Info("Connection to Redis seems OK!")
+}
+
+func InitSnowflake() *snowflake.Node {
+	node, err := snowflake.NewNode(config.NODE_ID)
+	if err != nil {
+		logrus.Error(err.Error())
+		panic("Failed to set snowflake node")
+	}
+
+	return node
 }

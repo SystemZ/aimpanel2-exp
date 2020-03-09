@@ -3,7 +3,6 @@ package model
 import (
 	"context"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/gofrs/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"os"
@@ -62,13 +61,9 @@ func (u *User) GenerateJWT() (string, error) {
 }
 
 func (u *User) Put() error {
-	uuidGen, err := uuid.NewV4()
-	if err != nil {
-		log.Println(err)
-	}
-	u.ID = uuidGen.String()
+	u.ID = Snowflake.Generate().String()
 
-	rev, err := CouchDB.Put(context.TODO(), uuidGen.String(), u)
+	rev, err := CouchDB.Put(context.TODO(), u.ID, u)
 	if err != nil {
 		return err
 	}

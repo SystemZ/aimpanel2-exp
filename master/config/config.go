@@ -19,6 +19,8 @@ var (
 	DEV_MODE bool
 
 	UPDATE_TOKEN string
+
+	NODE_ID int64
 )
 
 func init() {
@@ -50,4 +52,7 @@ func init() {
 
 	viper.SetDefault("UPDATE_TOKEN", "")
 	UPDATE_TOKEN = viper.GetString("UPDATE_TOKEN")
+
+	viper.SetDefault("NODE_ID", 1)
+	NODE_ID = viper.GetInt64("NODE_ID")
 }

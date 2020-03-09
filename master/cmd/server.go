@@ -28,6 +28,7 @@ var serverCmd = &cobra.Command{
 
 		model.DB = model.InitMysql()
 		model.CouchDB = model.InitCouchDb()
+		model.Snowflake = model.InitSnowflake()
 		model.InitRedis()
 		events.SSE = events.InitSSE()
 

@@ -6,6 +6,7 @@ require (
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
 	github.com/alexandrevicenzi/go-sse v0.0.0-20191008221740-c629c4a96646
 	github.com/badoux/checkmail v0.0.0-20181210160741-9661bd69e9ad // indirect
+	github.com/bwmarrin/snowflake v0.3.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-kivik/couchdb/v3 v3.0.0
 	github.com/go-kivik/kivik/v3 v3.0.0
