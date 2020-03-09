@@ -2,12 +2,10 @@ package handler
 
 import (
 	"encoding/json"
-	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/ecode"
-	"gitlab.com/systemz/aimpanel2/lib/request"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"gitlab.com/systemz/aimpanel2/master/response"
 	"gitlab.com/systemz/aimpanel2/master/service/gameserver"
@@ -25,9 +23,9 @@ import (
 // @Failure 400 {object} JsonError
 // @Security ApiKey
 func HostList(w http.ResponseWriter, r *http.Request) {
-	user := context.Get(r, "user").(model.User)
-	hosts := model.GetHostsByUserId(model.DB, user.ID)
-	lib.MustEncode(json.NewEncoder(w), response.HostList{Hosts: hosts})
+	//user := context.Get(r, "user").(model.User)
+	//hosts := model.GetHostsByUserId(model.DB, user.ID)
+	//lib.MustEncode(json.NewEncoder(w), response.HostList{Hosts: hosts})
 }
 
 // @Router /host/{id} [get]
@@ -65,24 +63,24 @@ func HostDetails(w http.ResponseWriter, r *http.Request) {
 // @Failure 400 {object} JsonError
 // @Security ApiKey
 func HostCreate(w http.ResponseWriter, r *http.Request) {
-	user := context.Get(r, "user").(model.User)
+	//user := context.Get(r, "user").(model.User)
+	//
+	//data := &request.HostCreate{}
+	//err := json.NewDecoder(r.Body).Decode(&data)
+	//if err != nil {
+	//	lib.MustEncode(json.NewEncoder(w),
+	//		JsonError{ErrorCode: ecode.JsonDecode})
+	//	return
+	//}
 
-	data := &request.HostCreate{}
-	err := json.NewDecoder(r.Body).Decode(&data)
-	if err != nil {
-		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: ecode.JsonDecode})
-		return
-	}
+	//h, errCode := host.Create(data, user.ID)
+	//if errCode != ecode.NoError {
+	//	lib.MustEncode(json.NewEncoder(w),
+	//		JsonError{ErrorCode: errCode})
+	//	return
+	//}
 
-	h, errCode := host.Create(data, user.ID)
-	if errCode != ecode.NoError {
-		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: errCode})
-		return
-	}
-
-	lib.MustEncode(json.NewEncoder(w), response.Token{Token: h.Token})
+	//lib.MustEncode(json.NewEncoder(w), response.Token{Token: h.Token})
 }
 
 // @Router /host/{id}/metric [get]

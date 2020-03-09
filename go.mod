@@ -7,6 +7,8 @@ require (
 	github.com/alexandrevicenzi/go-sse v0.0.0-20191008221740-c629c4a96646
 	github.com/badoux/checkmail v0.0.0-20181210160741-9661bd69e9ad // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/go-kivik/couchdb/v3 v3.0.0
+	github.com/go-kivik/kivik/v3 v3.0.0
 	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/go-redis/redis v6.15.6+incompatible
 	github.com/go-redis/redis/v7 v7.0.0-beta.4
@@ -28,8 +30,7 @@ require (
 	github.com/spf13/viper v1.6.1
 	github.com/streadway/amqp v0.0.0-20190827072141-edfb9018d271
 	golang.org/x/crypto v0.0.0-20191227163750-53104e6ec876
-	golang.org/x/net v0.0.0-20191116160921-f9c825593386
+	golang.org/x/net v0.0.0-20200202094626-16171245cfb2
 	golang.org/x/oauth2 v0.0.0-20190226205417-e64efc72b421
 	google.golang.org/api v0.3.1
-	google.golang.org/grpc v1.21.0
 )

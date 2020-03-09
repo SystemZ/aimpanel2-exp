@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib/ecode"
 	"gitlab.com/systemz/aimpanel2/lib/request"
 	"gitlab.com/systemz/aimpanel2/master/model"
@@ -15,19 +16,20 @@ func Register(data *request.AuthRegister) (string, int) {
 		return "", ecode.WrongEmail
 	}
 
-	var count int64
-	model.DB.Model(&model.User{}).Where("username = ?", data.Username).Count(&count)
-	if count > 0 {
-		return "", ecode.DuplicateUsername
-	}
+	//var count int64
+	//model.DB.Model(&model.User{}).Where("username = ?", data.Username).Count(&count)
+	//if count > 0 {
+	//	return "", ecode.DuplicateUsername
+	//}
 
 	var user model.User
 	user.Username = data.Username
 	user.Email = data.Email
 	user.PasswordHash = user.HashPassword(data.Password)
 
-	err := model.DB.Save(&user).Error
+	err := user.Put()
 	if err != nil {
+		logrus.Error(err)
 		return "", ecode.DbSave
 	}
 
@@ -37,19 +39,19 @@ func Register(data *request.AuthRegister) (string, int) {
 	}
 
 	//Create group
-	group := &model.Group{
-		Name: "USER-" + user.ID.String(),
-	}
-	model.DB.Save(group)
+	//group := &model.Group{
+	//	Name: "USER-" + user.ID,
+	//}
+	//model.DB.Save(group)
 
-	//Add user to group
-	groupUser := &model.GroupUser{
-		GroupId: group.ID,
-		UserId:  user.ID,
-	}
-	// FIXME error handling
-	model.DB.Save(groupUser)
-	model.CreatePermissionsForNewUser(group.ID)
+	////Add user to group
+	//groupUser := &model.GroupUser{
+	//	GroupId: group.ID,
+	//	UserId:  user.ID,
+	//}
+	//// FIXME error handling
+	//model.DB.Save(groupUser)
+	//model.CreatePermissionsForNewUser(group.ID)
 
 	return token, ecode.NoError
 }

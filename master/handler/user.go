@@ -68,7 +68,7 @@ func UserProfile(w http.ResponseWriter, r *http.Request) {
 
 	userProfile := response.UserProfileResponse{
 		User: response.UserProfile{
-			ID:       user.ID,
+			//ID:       user.ID,
 			Username: user.Username,
 			Email:    user.Email,
 		},

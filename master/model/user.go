@@ -1,9 +1,9 @@
 package model
 
 import (
+	"context"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gofrs/uuid"
-	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"os"
@@ -11,29 +11,31 @@ import (
 )
 
 type User struct {
-	ID uuid.UUID `json:"id" gorm:"primary_key;type:varchar(36)"`
+	ID string `json:"_id"`
 
-	Username string `gorm:"column:username" json:"username"`
+	Rev string `json:"_rev,omitempty"`
 
-	PasswordHash string `gorm:"column:password_hash" json:"-"`
+	Username string `json:"username"`
 
-	Email string `gorm:"column:email" json:"email"`
+	PasswordHash string `json:"password_hash"`
 
-	CreatedAt time.Time  `json:"created_at"`
-	UpdatedAt time.Time  `json:"-"`
-	DeletedAt *time.Time `json:"-"`
+	Email string `json:"email"`
+
+	//CreatedAt time.Time  `json:"created_at"`
+	//UpdatedAt time.Time  `json:"-"`
+	//DeletedAt *time.Time `json:"-"`
 
 	//TODO: plan_id
 }
 
-func (u *User) BeforeCreate(scope *gorm.Scope) error {
-	uuidGen, err := uuid.NewV4()
-	if err != nil {
-		log.Println(err)
-	}
-	scope.SetColumn("ID", uuidGen)
-	return nil
-}
+//func (u *User) BeforeCreate(scope *gorm.Scope) error {
+//	uuidGen, err := uuid.NewV4()
+//	if err != nil {
+//		log.Println(err)
+//	}
+//	scope.SetColumn("ID", uuidGen)
+//	return nil
+//}
 
 func (u *User) HashPassword(password string) string {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 4)
@@ -57,6 +59,22 @@ func (u *User) GenerateJWT() (string, error) {
 	})
 	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
 	return tokenString, err
+}
+
+func (u *User) Put() error {
+	uuidGen, err := uuid.NewV4()
+	if err != nil {
+		log.Println(err)
+	}
+	u.ID = uuidGen.String()
+
+	rev, err := CouchDB.Put(context.TODO(), uuidGen.String(), u)
+	if err != nil {
+		return err
+	}
+	u.Rev = rev
+
+	return nil
 }
 
 //func (u *User) GetHost(db *gorm.DB, hostId string) *Host {

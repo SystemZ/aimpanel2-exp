@@ -27,6 +27,7 @@ var serverCmd = &cobra.Command{
 		exit.CheckForExitSignal()
 
 		model.DB = model.InitMysql()
+		model.CouchDB = model.InitCouchDb()
 		model.InitRedis()
 		events.SSE = events.InitSSE()
 
