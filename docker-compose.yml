@@ -36,9 +36,22 @@ services:
       - 8090:80
     depends_on:
       - redis
+  couchdb:
+    image: 'bitnami/couchdb:2'
+    environment:
+      - COUCHDB_USER=dev
+      - COUCHDB_PASSWORD=dev
+    ports:
+      - 5984:5984
+      - 4369:4369
+      - 9100:9100
+    volumes:
+      - 'couchdb_data:/bitnami/couchdb'
 volumes:
   redis_data:
     driver: local
   mariadb:
+    driver: local
+  couchdb_data:
     driver: local
 
