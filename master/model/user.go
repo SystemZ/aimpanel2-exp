@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
 	"log"
@@ -10,31 +9,13 @@ import (
 )
 
 type User struct {
-	ID string `json:"_id"`
+	Base
 
-	Rev string `json:"_rev,omitempty"`
-
-	Username string `json:"username"`
-
+	Username     string `json:"username"`
 	PasswordHash string `json:"password_hash"`
-
-	Email string `json:"email"`
-
-	//CreatedAt time.Time  `json:"created_at"`
-	//UpdatedAt time.Time  `json:"-"`
-	//DeletedAt *time.Time `json:"-"`
-
+	Email        string `json:"email"`
 	//TODO: plan_id
 }
-
-//func (u *User) BeforeCreate(scope *gorm.Scope) error {
-//	uuidGen, err := uuid.NewV4()
-//	if err != nil {
-//		log.Println(err)
-//	}
-//	scope.SetColumn("ID", uuidGen)
-//	return nil
-//}
 
 func (u *User) HashPassword(password string) string {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 4)
@@ -58,18 +39,6 @@ func (u *User) GenerateJWT() (string, error) {
 	})
 	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
 	return tokenString, err
-}
-
-func (u *User) Put() error {
-	u.ID = Snowflake.Generate().String()
-
-	rev, err := CouchDB.Put(context.TODO(), u.ID, u)
-	if err != nil {
-		return err
-	}
-	u.Rev = rev
-
-	return nil
 }
 
 //func (u *User) GetHost(db *gorm.DB, hostId string) *Host {

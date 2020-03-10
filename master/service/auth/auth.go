@@ -16,18 +16,21 @@ func Register(data *request.AuthRegister) (string, int) {
 		return "", ecode.WrongEmail
 	}
 
-	//var count int64
-	//model.DB.Model(&model.User{}).Where("username = ?", data.Username).Count(&count)
-	//if count > 0 {
-	//	return "", ecode.DuplicateUsername
-	//}
+	count, err := model.Count(map[string]interface{}{
+		"selector": map[string]string{
+			"username": data.Username,
+		},
+	})
+	if count > 0 {
+		return "", ecode.DuplicateUsername
+	}
 
 	var user model.User
 	user.Username = data.Username
 	user.Email = data.Email
 	user.PasswordHash = user.HashPassword(data.Password)
 
-	err := user.Put()
+	err = user.Put(&user)
 	if err != nil {
 		logrus.Error(err)
 		return "", ecode.DbSave
