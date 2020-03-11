@@ -3,7 +3,6 @@ package model
 import (
 	"context"
 	"encoding/json"
-	"github.com/go-kivik/kivik/v3"
 	"time"
 )
 
@@ -51,10 +50,60 @@ func Count(query map[string]interface{}) (int, error) {
 	return count, nil
 }
 
-func Get(query map[string]interface{}) (*kivik.Rows, error) {
+//Get all documents by specified query
+func Get(out []interface{}, query map[string]interface{}) error {
 	rows, err := CouchDB.Find(context.TODO(), query)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return rows, nil
+	var result []interface{}
+	for rows.Next() {
+		var doc interface{}
+		if err := rows.ScanDoc(&doc); err != nil {
+			return err
+		}
+		result = append(result, doc)
+	}
+
+	out = result
+
+	return nil
+}
+
+//Get all documents by specified selector
+func GetS(out []interface{}, selector map[string]string) error {
+	err := Get(out, map[string]interface{}{
+		"selector": selector,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+//Get one document by specified query
+func GetOne(out interface{}, query map[string]interface{}) error {
+	rows, err := CouchDB.Find(context.TODO(), query)
+	if err != nil {
+		return err
+	}
+
+	for rows.Next() {
+		if err := rows.ScanDoc(&out); err != nil {
+			return err
+		}
+		break
+	}
+	return nil
+}
+
+//Get one document by specified selector
+func GetOneS(out interface{}, selector map[string]string) error {
+	err := GetOne(out, map[string]interface{}{
+		"selector": selector,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
 }

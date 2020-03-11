@@ -7,7 +7,7 @@ import (
 )
 
 func ChangePassword(data *request.UserChangePassword, user *model.User) int {
-	if user.CheckPassword(data.Password) {
+	if user.IsPasswordOk(data.Password) {
 		if data.NewPassword == data.NewPasswordRepeat {
 			user.PasswordHash = user.HashPassword(data.NewPassword)
 			model.DB.Save(&user)

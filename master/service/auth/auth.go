@@ -61,10 +61,14 @@ func Register(data *request.AuthRegister) (string, int) {
 
 func Login(data *request.AuthLogin) (string, int) {
 	var user model.User
-	model.DB.Where("username = ?", data.Username).Find(&user)
+	err := model.GetOneS(&user, map[string]string{
+		"username": data.Username,
+	})
+	if err != nil {
+		return "", ecode.DbError
+	}
 
-	// TODO maybe IsPasswordOk would be more semantic?
-	if user.CheckPassword(data.Password) {
+	if user.IsPasswordOk(data.Password) {
 		token, err := user.GenerateJWT()
 		if err != nil {
 			return "", ecode.JwtGenerate

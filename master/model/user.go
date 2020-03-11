@@ -25,7 +25,7 @@ func (u *User) HashPassword(password string) string {
 	return string(bytes)
 }
 
-func (u *User) CheckPassword(password string) bool {
+func (u *User) IsPasswordOk(password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(u.PasswordHash), []byte(password))
 	return err == nil
 }
@@ -40,20 +40,3 @@ func (u *User) GenerateJWT() (string, error) {
 	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
 	return tokenString, err
 }
-
-//func (u *User) GetHost(db *gorm.DB, hostId string) *Host {
-//	var host Host
-//	if db.Where("id = ? and user_id = ?", hostId, u.ID).First(&host).RecordNotFound() {
-//		return nil
-//	}
-//	return &host
-//}
-//
-//func (u *User) GetHosts(db *gorm.DB, hostId string) *[]Host {
-//	var hosts []Host
-//
-//	if db.Where("user_id = ?", u.ID).Find(&hosts).RecordNotFound() {
-//		return nil
-//	}
-//	return &hosts
-//}

@@ -18,6 +18,7 @@ const (
 	JsonDecode
 	JsonEncode
 	DbSave
+	DbError
 	// auth/user
 	WrongUsernameOrPassword
 	WrongPassword
