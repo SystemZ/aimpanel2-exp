@@ -1,21 +1,13 @@
 package model
 
-import (
-	"github.com/gofrs/uuid"
-	"time"
-)
-
 type Event struct {
-	ID uint `gorm:"primary_key" json:"id"`
+	Base
 
-	EventId int `gorm:"column:event_id" json:"event_id"`
+	EventId int `json:"event_id"`
 
-	HostId uuid.UUID `gorm:"column:host_id" json:"host_id"`
+	HostId string `json:"host_id"`
 
-	UserId uuid.UUID `gorm:"column:user_id" json:"user_id"`
+	UserId string `json:"user_id"`
 
-	GameServerId uuid.UUID `gorm:"column:game_server_id" json:"game_server_id"`
-
-	//Created at timestamp
-	CreatedAt time.Time `json:"created_at"`
+	GameServerId string `json:"game_server_id"`
 }

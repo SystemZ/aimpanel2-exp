@@ -56,7 +56,7 @@ func InitMysql() *gorm.DB {
 	db.DB().SetMaxIdleConns(0)
 	db.LogMode(config.DEV_MODE)
 
-	db.AutoMigrate(&User{})
+	//db.AutoMigrate(&User{})
 	db.AutoMigrate(&Host{})
 
 	db.AutoMigrate(&GameServer{})
@@ -67,12 +67,12 @@ func InitMysql() *gorm.DB {
 	db.AutoMigrate(&MetricHost{})
 	db.AutoMigrate(&MetricGameServer{})
 
-	db.AutoMigrate(&Group{})
-	db.AutoMigrate(&GroupUser{})
+	//db.AutoMigrate(&Group{})
+	//db.AutoMigrate(&GroupUser{})
 
 	db.AutoMigrate(&Permission{})
 
-	db.AutoMigrate(&Event{})
+	//db.AutoMigrate(&Event{})
 
 	logrus.Info("Connection to database seems OK!")
 
