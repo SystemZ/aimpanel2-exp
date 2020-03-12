@@ -98,7 +98,7 @@ func GetOne(out interface{}, query map[string]interface{}) error {
 }
 
 //Get one document by specified selector
-func GetOneS(out interface{}, selector map[string]string) error {
+func GetOneS(out interface{}, selector map[string]interface{}) error {
 	err := GetOne(out, map[string]interface{}{
 		"selector": selector,
 	})

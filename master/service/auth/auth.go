@@ -69,7 +69,7 @@ func Register(data *request.AuthRegister) (string, int) {
 
 func Login(data *request.AuthLogin) (string, int) {
 	var user model.User
-	err := model.GetOneS(&user, map[string]string{
+	err := model.GetOneS(&user, map[string]interface{}{
 		"username": data.Username,
 	})
 	if err != nil {

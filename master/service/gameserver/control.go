@@ -94,7 +94,7 @@ func Install(gsId string) error {
 		return errors.New("error when getting host token from db")
 	}
 
-	gameFile := model.GetGameFileByGameIdAndVersion(model.DB, gameServer.GameId, gameServer.GameVersion)
+	gameFile := model.GetGameFileByGameIdAndVersion(gameServer.GameId, gameServer.GameVersion)
 	if gameFile == nil {
 		return errors.New("error when getting game file from db")
 	}

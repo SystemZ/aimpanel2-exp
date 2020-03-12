@@ -15,7 +15,7 @@ type Group struct {
 
 func GetGroup(name string) *Group {
 	var group Group
-	if err := GetOneS(&group, map[string]string{
+	if err := GetOneS(&group, map[string]interface{}{
 		"name": name,
 	}); err != nil {
 		logrus.Error(err)
