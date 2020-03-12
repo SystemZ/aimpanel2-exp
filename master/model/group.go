@@ -1,7 +1,5 @@
 package model
 
-import "github.com/sirupsen/logrus"
-
 // Group represents the group for this application
 // swagger:model group
 type Group struct {
@@ -15,10 +13,10 @@ type Group struct {
 
 func GetGroup(name string) *Group {
 	var group Group
-	if err := GetOneS(&group, map[string]interface{}{
+	err := GetOneS(&group, map[string]interface{}{
 		"name": name,
-	}); err != nil {
-		logrus.Error(err)
+	})
+	if err != nil {
 		return nil
 	}
 

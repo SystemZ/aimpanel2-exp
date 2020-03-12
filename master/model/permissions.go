@@ -27,6 +27,9 @@ type Permission struct {
 // FIXME return errors
 func CreatePermissionsForNewHost(groupId string, hostId string) {
 	perm := &Permission{
+		Base: Base{
+			DocType: "permission",
+		},
 		Name:     "Get host",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
@@ -38,6 +41,9 @@ func CreatePermissionsForNewHost(groupId string, hostId string) {
 	}
 
 	perm = &Permission{
+		Base: Base{
+			DocType: "permission",
+		},
 		Name:     "Delete host",
 		Verb:     lib.GetVerbByName("DELETE"),
 		GroupId:  groupId,
@@ -49,6 +55,9 @@ func CreatePermissionsForNewHost(groupId string, hostId string) {
 	}
 
 	perm = &Permission{
+		Base: Base{
+			DocType: "permission",
+		},
 		Name:     "Create game server",
 		Verb:     lib.GetVerbByName("POST"),
 		GroupId:  groupId,
@@ -60,6 +69,9 @@ func CreatePermissionsForNewHost(groupId string, hostId string) {
 	}
 
 	perm = &Permission{
+		Base: Base{
+			DocType: "permission",
+		},
 		Name:     "List game servers by host id",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
@@ -71,6 +83,9 @@ func CreatePermissionsForNewHost(groupId string, hostId string) {
 	}
 
 	perm = &Permission{
+		Base: Base{
+			DocType: "permission",
+		},
 		Name:     "Get host metric",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
@@ -82,6 +97,9 @@ func CreatePermissionsForNewHost(groupId string, hostId string) {
 	}
 
 	perm = &Permission{
+		Base: Base{
+			DocType: "permission",
+		},
 		Name:     "Update host",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
@@ -96,6 +114,9 @@ func CreatePermissionsForNewHost(groupId string, hostId string) {
 // FIXME return errors
 func CreatePermissionsForNewGameServer(groupId string, hostId string, gameServerId string) {
 	perm := &Permission{
+		Base: Base{
+			DocType: "permission",
+		},
 		Name:     "Get game server",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
@@ -107,6 +128,9 @@ func CreatePermissionsForNewGameServer(groupId string, hostId string, gameServer
 	}
 
 	perm = &Permission{
+		Base: Base{
+			DocType: "permission",
+		},
 		Name:     "Delete game server",
 		Verb:     lib.GetVerbByName("DELETE"),
 		GroupId:  groupId,
@@ -118,6 +142,9 @@ func CreatePermissionsForNewGameServer(groupId string, hostId string, gameServer
 	}
 
 	perm = &Permission{
+		Base: Base{
+			DocType: "permission",
+		},
 		Name:     "Install game server",
 		Verb:     lib.GetVerbByName("PUT"),
 		GroupId:  groupId,
@@ -129,6 +156,9 @@ func CreatePermissionsForNewGameServer(groupId string, hostId string, gameServer
 	}
 
 	perm = &Permission{
+		Base: Base{
+			DocType: "permission",
+		},
 		Name:     "Start game server",
 		Verb:     lib.GetVerbByName("PUT"),
 		GroupId:  groupId,
@@ -140,6 +170,9 @@ func CreatePermissionsForNewGameServer(groupId string, hostId string, gameServer
 	}
 
 	perm = &Permission{
+		Base: Base{
+			DocType: "permission",
+		},
 		Name:     "Restart game server",
 		Verb:     lib.GetVerbByName("PUT"),
 		GroupId:  groupId,
@@ -151,6 +184,9 @@ func CreatePermissionsForNewGameServer(groupId string, hostId string, gameServer
 	}
 
 	perm = &Permission{
+		Base: Base{
+			DocType: "permission",
+		},
 		Name:     "Stop game server",
 		Verb:     lib.GetVerbByName("PUT"),
 		GroupId:  groupId,
@@ -162,6 +198,9 @@ func CreatePermissionsForNewGameServer(groupId string, hostId string, gameServer
 	}
 
 	perm = &Permission{
+		Base: Base{
+			DocType: "permission",
+		},
 		Name:     "Send command to game server",
 		Verb:     lib.GetVerbByName("PUT"),
 		GroupId:  groupId,
@@ -173,6 +212,9 @@ func CreatePermissionsForNewGameServer(groupId string, hostId string, gameServer
 	}
 
 	perm = &Permission{
+		Base: Base{
+			DocType: "permission",
+		},
 		Name:     "Get logs from game server",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
@@ -184,6 +226,9 @@ func CreatePermissionsForNewGameServer(groupId string, hostId string, gameServer
 	}
 
 	perm = &Permission{
+		Base: Base{
+			DocType: "permission",
+		},
 		Name:     "Console feed",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
@@ -198,6 +243,9 @@ func CreatePermissionsForNewGameServer(groupId string, hostId string, gameServer
 // FIXME return errors
 func CreatePermissionsForNewUser(groupId string) {
 	perm := &Permission{
+		Base: Base{
+			DocType: "permission",
+		},
 		Name:     "List hosts",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
@@ -209,6 +257,9 @@ func CreatePermissionsForNewUser(groupId string) {
 	}
 
 	perm = &Permission{
+		Base: Base{
+			DocType: "permission",
+		},
 		Name:     "Create host",
 		Verb:     lib.GetVerbByName("POST"),
 		GroupId:  groupId,
@@ -220,6 +271,9 @@ func CreatePermissionsForNewUser(groupId string) {
 	}
 
 	perm = &Permission{
+		Base: Base{
+			DocType: "permission",
+		},
 		Name:     "List game servers by user id",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
@@ -231,6 +285,9 @@ func CreatePermissionsForNewUser(groupId string) {
 	}
 
 	perm = &Permission{
+		Base: Base{
+			DocType: "permission",
+		},
 		Name:     "Change password",
 		Verb:     lib.GetVerbByName("POST"),
 		GroupId:  groupId,
@@ -242,6 +299,9 @@ func CreatePermissionsForNewUser(groupId string) {
 	}
 
 	perm = &Permission{
+		Base: Base{
+			DocType: "permission",
+		},
 		Name:     "Change email",
 		Verb:     lib.GetVerbByName("POST"),
 		GroupId:  groupId,
@@ -253,6 +313,9 @@ func CreatePermissionsForNewUser(groupId string) {
 	}
 
 	perm = &Permission{
+		Base: Base{
+			DocType: "permission",
+		},
 		Name:     "User profile",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
@@ -264,6 +327,9 @@ func CreatePermissionsForNewUser(groupId string) {
 	}
 
 	perm = &Permission{
+		Base: Base{
+			DocType: "permission",
+		},
 		Name:     "List games",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,

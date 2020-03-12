@@ -7,9 +7,12 @@ import (
 )
 
 type Base struct {
-	ID        string    `json:"_id"`
-	Rev       string    `json:"_rev,omitempty"`
-	CreatedAt time.Time `json:"created_at"`
+	ID      string `json:"_id" example:"1238206236281802752"`
+	Rev     string `json:"_rev,omitempty"`
+	DocType string `json:"doc_type"`
+
+	// Date of creation
+	CreatedAt time.Time `json:"created_at" example:"2019-09-29T03:16:27+02:00"`
 
 	obj interface{}
 }

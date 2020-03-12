@@ -18,6 +18,7 @@ func Register(data *request.AuthRegister) (string, int) {
 
 	count, err := model.Count(map[string]interface{}{
 		"selector": map[string]string{
+			"doc_type": "user",
 			"username": data.Username,
 		},
 	})
@@ -26,6 +27,7 @@ func Register(data *request.AuthRegister) (string, int) {
 	}
 
 	var user model.User
+	user.Base.DocType = "user"
 	user.Username = data.Username
 	user.Email = data.Email
 	user.PasswordHash = user.HashPassword(data.Password)
@@ -43,6 +45,9 @@ func Register(data *request.AuthRegister) (string, int) {
 
 	//Create group
 	group := &model.Group{
+		Base: model.Base{
+			DocType: "group",
+		},
 		Name: "USER-" + user.ID,
 	}
 	err = group.Put(&group)
@@ -53,6 +58,9 @@ func Register(data *request.AuthRegister) (string, int) {
 
 	//Add user to group
 	groupUser := &model.GroupUser{
+		Base: model.Base{
+			DocType: "group_user",
+		},
 		GroupId: group.ID,
 		UserId:  user.ID,
 	}

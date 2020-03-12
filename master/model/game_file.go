@@ -14,7 +14,8 @@ func GetGameFileByGameIdAndVersion(gameId uint, version string) *GameFile {
 	var gf GameFile
 
 	err := GetOneS(&gf, map[string]interface{}{
-		"game_id": gameId,
+		"doc_type": "game_file",
+		"game_id":  gameId,
 		"$or": []map[string]interface{}{
 			{
 				"game_version": version,
