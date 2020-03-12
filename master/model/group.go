@@ -1,37 +1,26 @@
 package model
 
-import (
-	"github.com/jinzhu/gorm"
-	"time"
-)
+import "github.com/sirupsen/logrus"
 
 // Group represents the group for this application
 // swagger:model group
 type Group struct {
-	// ID of the group
-	//
-	// required: true
-	ID int `gorm:"primary_key" json:"id"`
+	Base
 
 	// Name of the group
 	//
 	// required: true
-	Name string `gorm:"column:name" json:"name"`
-
-	// Created at timestamp
-	CreatedAt time.Time `json:"created_at"`
-
-	// Updated at timestamp
-	UpdatedAt time.Time `json:"-"`
-
-	// Deleted at timestamp
-	DeletedAt *time.Time `json:"-"`
+	Name string `json:"name"`
 }
 
-func GetGroup(db *gorm.DB, name string) *Group {
+func GetGroup(name string) *Group {
 	var group Group
-	if db.Where("name = ?", name).First(&group).RecordNotFound() {
+	if err := GetOneS(&group, map[string]string{
+		"name": name,
+	}); err != nil {
+		logrus.Error(err)
 		return nil
 	}
+
 	return &group
 }

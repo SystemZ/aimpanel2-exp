@@ -1,18 +1,14 @@
 package model
 
 import (
+	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
-	"time"
 )
 
 // Group represents the group for this application
 // swagger:model group
 type Permission struct {
-	// ID of the group
-	//
-	// required: true
-	ID uint `gorm:"primary_key" json:"id"`
-
+	Base
 	// Name of the permission
 	//
 	// required: true
@@ -21,181 +17,260 @@ type Permission struct {
 	// ID of the permission
 	//
 	// required: true
-	GroupId int `gorm:"column:group_id" json:"group_id"`
+	GroupId string `gorm:"column:group_id" json:"group_id"`
 
 	Verb uint8 `gorm:"column:verb" json:"verb"`
 
 	Endpoint string `gorm:"column:endpoint" json:"endpoint"`
-
-	// Created at timestamp
-	CreatedAt time.Time `json:"created_at"`
-
-	// Updated at timestamp
-	UpdatedAt time.Time `json:"-"`
-
-	// Deleted at timestamp
-	DeletedAt *time.Time `json:"-"`
 }
 
 // FIXME return errors
-func CreatePermissionsForNewHost(groupId int, hostId string) {
-	DB.Save(&Permission{
+func CreatePermissionsForNewHost(groupId string, hostId string) {
+	perm := &Permission{
 		Name:     "Get host",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
 		Endpoint: "/v1/host/" + hostId,
-	})
+	}
+	err := perm.Put(&perm)
+	if err != nil {
+		logrus.Error(err)
+	}
 
-	DB.Save(&Permission{
+	perm = &Permission{
 		Name:     "Delete host",
 		Verb:     lib.GetVerbByName("DELETE"),
 		GroupId:  groupId,
 		Endpoint: "/v1/host/" + hostId,
-	})
+	}
+	err = perm.Put(&perm)
+	if err != nil {
+		logrus.Error(err)
+	}
 
-	DB.Save(&Permission{
+	perm = &Permission{
 		Name:     "Create game server",
 		Verb:     lib.GetVerbByName("POST"),
 		GroupId:  groupId,
 		Endpoint: "/v1/host/" + hostId + "/server",
-	})
+	}
+	err = perm.Put(&perm)
+	if err != nil {
+		logrus.Error(err)
+	}
 
-	DB.Save(&Permission{
+	perm = &Permission{
 		Name:     "List game servers by host id",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
 		Endpoint: "/v1/host/" + hostId + "/server",
-	})
+	}
+	err = perm.Put(&perm)
+	if err != nil {
+		logrus.Error(err)
+	}
 
-	DB.Save(&Permission{
+	perm = &Permission{
 		Name:     "Get host metric",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
 		Endpoint: "/v1/host/" + hostId + "/metric",
-	})
+	}
+	err = perm.Put(&perm)
+	if err != nil {
+		logrus.Error(err)
+	}
 
-	DB.Save(&Permission{
+	perm = &Permission{
 		Name:     "Update host",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
 		Endpoint: "/v1/host/" + hostId + "/update",
-	})
+	}
+	err = perm.Put(&perm)
+	if err != nil {
+		logrus.Error(err)
+	}
 }
 
 // FIXME return errors
-func CreatePermissionsForNewGameServer(groupId int, hostId string, gameServerId string) {
-	DB.Save(&Permission{
+func CreatePermissionsForNewGameServer(groupId string, hostId string, gameServerId string) {
+	perm := &Permission{
 		Name:     "Get game server",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
 		Endpoint: "/v1/host/" + hostId + "/server/" + gameServerId,
-	})
+	}
+	err := perm.Put(&perm)
+	if err != nil {
+		logrus.Error(err)
+	}
 
-	DB.Save(&Permission{
+	perm = &Permission{
 		Name:     "Delete game server",
 		Verb:     lib.GetVerbByName("DELETE"),
 		GroupId:  groupId,
 		Endpoint: "/v1/host/" + hostId + "/server/" + gameServerId,
-	})
+	}
+	err = perm.Put(&perm)
+	if err != nil {
+		logrus.Error(err)
+	}
 
-	DB.Save(&Permission{
+	perm = &Permission{
 		Name:     "Install game server",
 		Verb:     lib.GetVerbByName("PUT"),
 		GroupId:  groupId,
 		Endpoint: "/v1/host/" + hostId + "/server/" + gameServerId + "/install",
-	})
+	}
+	err = perm.Put(&perm)
+	if err != nil {
+		logrus.Error(err)
+	}
 
-	DB.Save(&Permission{
+	perm = &Permission{
 		Name:     "Start game server",
 		Verb:     lib.GetVerbByName("PUT"),
 		GroupId:  groupId,
 		Endpoint: "/v1/host/" + hostId + "/server/" + gameServerId + "/start",
-	})
+	}
+	err = perm.Put(&perm)
+	if err != nil {
+		logrus.Error(err)
+	}
 
-	DB.Save(&Permission{
+	perm = &Permission{
 		Name:     "Restart game server",
 		Verb:     lib.GetVerbByName("PUT"),
 		GroupId:  groupId,
 		Endpoint: "/v1/host/" + hostId + "/server/" + gameServerId + "/restart",
-	})
+	}
+	err = perm.Put(&perm)
+	if err != nil {
+		logrus.Error(err)
+	}
 
-	DB.Save(&Permission{
+	perm = &Permission{
 		Name:     "Stop game server",
 		Verb:     lib.GetVerbByName("PUT"),
 		GroupId:  groupId,
 		Endpoint: "/v1/host/" + hostId + "/server/" + gameServerId + "/stop",
-	})
+	}
+	err = perm.Put(&perm)
+	if err != nil {
+		logrus.Error(err)
+	}
 
-	DB.Save(&Permission{
+	perm = &Permission{
 		Name:     "Send command to game server",
 		Verb:     lib.GetVerbByName("PUT"),
 		GroupId:  groupId,
 		Endpoint: "/v1/host/" + hostId + "/server/" + gameServerId + "/command",
-	})
+	}
+	err = perm.Put(&perm)
+	if err != nil {
+		logrus.Error(err)
+	}
 
-	DB.Save(&Permission{
+	perm = &Permission{
 		Name:     "Get logs from game server",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
 		Endpoint: "/v1/host/" + hostId + "/server/" + gameServerId + "/logs",
-	})
+	}
+	err = perm.Put(&perm)
+	if err != nil {
+		logrus.Error(err)
+	}
 
-	DB.Save(&Permission{
+	perm = &Permission{
 		Name:     "Console feed",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
 		Endpoint: "/v1/host/" + hostId + "/server/" + gameServerId + "/console",
-	})
+	}
+	err = perm.Put(&perm)
+	if err != nil {
+		logrus.Error(err)
+	}
 }
 
 // FIXME return errors
-func CreatePermissionsForNewUser(groupId int) {
-	DB.Save(&Permission{
+func CreatePermissionsForNewUser(groupId string) {
+	perm := &Permission{
 		Name:     "List hosts",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
 		Endpoint: "/v1/host",
-	})
+	}
+	err := perm.Put(&perm)
+	if err != nil {
+		logrus.Error(err)
+	}
 
-	DB.Save(&Permission{
+	perm = &Permission{
 		Name:     "Create host",
 		Verb:     lib.GetVerbByName("POST"),
 		GroupId:  groupId,
 		Endpoint: "/v1/host",
-	})
+	}
+	err = perm.Put(&perm)
+	if err != nil {
+		logrus.Error(err)
+	}
 
-	DB.Save(&Permission{
+	perm = &Permission{
 		Name:     "List game servers by user id",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
 		Endpoint: "/v1/host/my/server",
-	})
+	}
+	err = perm.Put(&perm)
+	if err != nil {
+		logrus.Error(err)
+	}
 
-	DB.Save(&Permission{
+	perm = &Permission{
 		Name:     "Change password",
 		Verb:     lib.GetVerbByName("POST"),
 		GroupId:  groupId,
 		Endpoint: "/v1/user/change_password",
-	})
+	}
+	err = perm.Put(&perm)
+	if err != nil {
+		logrus.Error(err)
+	}
 
-	DB.Save(&Permission{
+	perm = &Permission{
 		Name:     "Change email",
 		Verb:     lib.GetVerbByName("POST"),
 		GroupId:  groupId,
 		Endpoint: "/v1/user/change_email",
-	})
+	}
+	err = perm.Put(&perm)
+	if err != nil {
+		logrus.Error(err)
+	}
 
-	DB.Save(&Permission{
+	perm = &Permission{
 		Name:     "User profile",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
 		Endpoint: "/v1/user/profile",
-	})
+	}
+	err = perm.Put(&perm)
+	if err != nil {
+		logrus.Error(err)
+	}
 
-	DB.Save(&Permission{
+	perm = &Permission{
 		Name:     "List games",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
 		Endpoint: "/v1/game",
-	})
+	}
+	err = perm.Put(&perm)
+	if err != nil {
+		logrus.Error(err)
+	}
 }

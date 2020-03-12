@@ -20,7 +20,7 @@ func Create(data *request.HostCreate, userId uuid.UUID) (*model.Host, int) {
 	}
 	model.DB.Save(&host)
 
-	group := model.GetGroup(model.DB, "USER-"+userId.String())
+	group := model.GetGroup("USER-" + userId.String())
 	if group == nil {
 		return nil, ecode.GroupNotFound
 	}

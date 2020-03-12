@@ -42,19 +42,27 @@ func Register(data *request.AuthRegister) (string, int) {
 	}
 
 	//Create group
-	//group := &model.Group{
-	//	Name: "USER-" + user.ID,
-	//}
-	//model.DB.Save(group)
+	group := &model.Group{
+		Name: "USER-" + user.ID,
+	}
+	err = group.Put(&group)
+	if err != nil {
+		logrus.Error(err)
+		return "", ecode.DbError
+	}
 
-	////Add user to group
-	//groupUser := &model.GroupUser{
-	//	GroupId: group.ID,
-	//	UserId:  user.ID,
-	//}
-	//// FIXME error handling
-	//model.DB.Save(groupUser)
-	//model.CreatePermissionsForNewUser(group.ID)
+	//Add user to group
+	groupUser := &model.GroupUser{
+		GroupId: group.ID,
+		UserId:  user.ID,
+	}
+	err = groupUser.Put(&groupUser)
+	if err != nil {
+		logrus.Error(err)
+		return "", ecode.DbError
+	}
+	// FIXME error handling
+	model.CreatePermissionsForNewUser(group.ID)
 
 	return token, ecode.NoError
 }
