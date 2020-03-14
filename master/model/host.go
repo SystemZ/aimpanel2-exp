@@ -1,9 +1,5 @@
 package model
 
-import (
-	"github.com/jinzhu/gorm"
-)
-
 type Host struct {
 	Base
 	// User assigned name
@@ -44,11 +40,24 @@ type Host struct {
 	State uint `json:"state" example:"1"`
 }
 
+func GetHosts() []Host {
+	var hosts []Host
+
+	err := GetS(&hosts, map[string]interface{}{
+		"doc_type": "host",
+	})
+	if err != nil {
+		return nil
+	}
+
+	return hosts
+}
+
 func GetHost(hostId string) *Host {
 	var host Host
 	err := GetOneS(&host, map[string]interface{}{
 		"doc_type": "host",
-		"id":       hostId,
+		"_id":      hostId,
 	})
 	if err != nil {
 		return nil
@@ -61,7 +70,7 @@ func GetHostToken(hostId string) string {
 	var host Host
 	err := GetOneS(&host, map[string]interface{}{
 		"doc_type": "host",
-		"id":       hostId,
+		"_id":      hostId,
 	})
 	if err != nil {
 		return ""
@@ -86,7 +95,7 @@ func GetHostByToken(token string) *Host {
 func GetHostsByUserId(userId string) []Host {
 	var hosts []Host
 
-	err := GetS(&hosts, map[string]string{
+	err := GetS(&hosts, map[string]interface{}{
 		"doc_type": "host",
 		"user_id":  userId,
 	})
@@ -97,7 +106,7 @@ func GetHostsByUserId(userId string) []Host {
 	return hosts
 }
 
-func GetHostMetrics(db *gorm.DB, hostId string, limit int) []MetricHost {
+func GetHostMetrics(hostId string, limit int) []MetricHost {
 	var metrics []MetricHost
 
 	err := Get(&metrics, map[string]interface{}{

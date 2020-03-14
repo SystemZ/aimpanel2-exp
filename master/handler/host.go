@@ -2,10 +2,12 @@ package handler
 
 import (
 	"encoding/json"
+	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/ecode"
+	"gitlab.com/systemz/aimpanel2/lib/request"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"gitlab.com/systemz/aimpanel2/master/response"
 	"gitlab.com/systemz/aimpanel2/master/service/gameserver"
@@ -23,9 +25,9 @@ import (
 // @Failure 400 {object} JsonError
 // @Security ApiKey
 func HostList(w http.ResponseWriter, r *http.Request) {
-	//user := context.Get(r, "user").(model.User)
-	//hosts := model.GetHostsByUserId(model.DB, user.ID)
-	//lib.MustEncode(json.NewEncoder(w), response.HostList{Hosts: hosts})
+	user := context.Get(r, "user").(model.User)
+	hosts := model.GetHostsByUserId(user.ID)
+	lib.MustEncode(json.NewEncoder(w), response.HostList{Hosts: hosts})
 }
 
 // @Router /host/{id} [get]
@@ -41,7 +43,7 @@ func HostList(w http.ResponseWriter, r *http.Request) {
 func HostDetails(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
-	h := model.GetHost(model.DB, params["id"])
+	h := model.GetHost(params["id"])
 	if h == nil {
 		w.WriteHeader(http.StatusBadRequest)
 		lib.MustEncode(json.NewEncoder(w),
@@ -63,24 +65,24 @@ func HostDetails(w http.ResponseWriter, r *http.Request) {
 // @Failure 400 {object} JsonError
 // @Security ApiKey
 func HostCreate(w http.ResponseWriter, r *http.Request) {
-	//user := context.Get(r, "user").(model.User)
-	//
-	//data := &request.HostCreate{}
-	//err := json.NewDecoder(r.Body).Decode(&data)
-	//if err != nil {
-	//	lib.MustEncode(json.NewEncoder(w),
-	//		JsonError{ErrorCode: ecode.JsonDecode})
-	//	return
-	//}
+	user := context.Get(r, "user").(model.User)
 
-	//h, errCode := host.Create(data, user.ID)
-	//if errCode != ecode.NoError {
-	//	lib.MustEncode(json.NewEncoder(w),
-	//		JsonError{ErrorCode: errCode})
-	//	return
-	//}
+	data := &request.HostCreate{}
+	err := json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		lib.MustEncode(json.NewEncoder(w),
+			JsonError{ErrorCode: ecode.JsonDecode})
+		return
+	}
 
-	//lib.MustEncode(json.NewEncoder(w), response.Token{Token: h.Token})
+	h, errCode := host.Create(data, user.ID)
+	if errCode != ecode.NoError {
+		lib.MustEncode(json.NewEncoder(w),
+			JsonError{ErrorCode: errCode})
+		return
+	}
+
+	lib.MustEncode(json.NewEncoder(w), response.Token{Token: h.Token})
 }
 
 // @Router /host/{id}/metric [get]
@@ -95,7 +97,7 @@ func HostCreate(w http.ResponseWriter, r *http.Request) {
 // @Security ApiKey
 func HostMetric(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	metrics := model.GetHostMetrics(model.DB, params["id"], 1)
+	metrics := model.GetHostMetrics(params["id"], 1)
 	lib.MustEncode(json.NewEncoder(w), response.HostMetrics{Metrics: metrics})
 }
 

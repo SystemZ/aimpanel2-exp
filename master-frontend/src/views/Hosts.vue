@@ -63,7 +63,7 @@
                 >
                     <template v-slot:body="{ items }">
                         <tbody>
-                        <tr v-for="item in items" :key="item.id" class="clickable" @click="goToHost(item.id)">
+                        <tr v-for="item in items" :key="item._id" class="clickable" @click="goToHost(item._id)">
                             <td>{{item.name}}</td>
                             <td class="text-right">{{item.ip}}</td>
                             <td class="text-right">N/A</td>

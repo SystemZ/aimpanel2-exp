@@ -78,6 +78,7 @@ func Register(data *request.AuthRegister) (string, int) {
 func Login(data *request.AuthLogin) (string, int) {
 	var user model.User
 	err := model.GetOneS(&user, map[string]interface{}{
+		"doc_type": "user",
 		"username": data.Username,
 	})
 	if err != nil {

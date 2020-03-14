@@ -24,6 +24,23 @@ type Permission struct {
 	Endpoint string `gorm:"column:endpoint" json:"endpoint"`
 }
 
+func GetPermisionsByEndpointRegex(endpoint string) []Permission {
+	var permissions []Permission
+	err := Get(&permissions, map[string]interface{}{
+		"selector": map[string]interface{}{
+			"doc_type": "permission",
+			"endpoint": map[string]interface{}{
+				"$regex": endpoint,
+			},
+		},
+	})
+	if err != nil {
+		return nil
+	}
+
+	return permissions
+}
+
 // FIXME return errors
 func CreatePermissionsForNewHost(groupId string, hostId string) {
 	perm := &Permission{

@@ -42,12 +42,10 @@ func NewVersion(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//TODO: Find better way to update all hosts
-	var hosts []model.Host
-	model.DB.Find(&hosts)
-
+	hosts := model.GetHosts()
 	go func() {
 		for _, host := range hosts {
-			err := gameserver.Update(host.ID.String())
+			err := gameserver.Update(host.ID)
 			if err != nil {
 				logrus.Error(err)
 			}

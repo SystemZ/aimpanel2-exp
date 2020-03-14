@@ -26,8 +26,7 @@ var serverCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		exit.CheckForExitSignal()
 
-		model.DB = model.InitMysql()
-		model.CouchDB = model.InitCouchDb()
+		model.DB = model.InitDB()
 		model.Snowflake = model.InitSnowflake()
 		model.InitRedis()
 		events.SSE = events.InitSSE()

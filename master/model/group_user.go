@@ -14,3 +14,16 @@ type GroupUser struct {
 	// required: true
 	UserId string `json:"user_id"`
 }
+
+func GetGroupUserByUserId(userId string) *GroupUser {
+	var gu GroupUser
+	err := GetOneS(&gu, map[string]interface{}{
+		"doc_type": "group_user",
+		"user_id":  userId,
+	})
+	if err != nil {
+		return nil
+	}
+
+	return &gu
+}

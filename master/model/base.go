@@ -3,6 +3,7 @@ package model
 import (
 	"context"
 	"encoding/json"
+	"github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -68,13 +69,17 @@ func Get(out interface{}, query map[string]interface{}) error {
 		result = append(result, doc)
 	}
 
-	out = result
+	jsonStr, _ := json.Marshal(result)
+	err = json.Unmarshal(jsonStr, &out)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
 
 //Get all documents by specified selector
-func GetS(out interface{}, selector map[string]string) error {
+func GetS(out interface{}, selector map[string]interface{}) error {
 	err := Get(out, map[string]interface{}{
 		"selector": selector,
 	})
@@ -118,6 +123,15 @@ func GetOneS(out interface{}, selector map[string]interface{}) error {
 		"selector": selector,
 	})
 	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func Delete(id string, rev string) error {
+	_, err := DB.Delete(context.TODO(), id, rev)
+	if err != nil {
+		logrus.Info(err)
 		return err
 	}
 	return nil

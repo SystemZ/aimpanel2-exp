@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/alexandrevicenzi/go-sse"
 	"github.com/go-redis/redis"
-	"github.com/gofrs/uuid"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib/game"
 	"gitlab.com/systemz/aimpanel2/lib/task"
@@ -18,7 +17,7 @@ import (
 
 func HostData(hostToken string, taskMsg *task.Message) error {
 	logrus.Info("HostData")
-	host := model.GetHostByToken(model.DB, hostToken)
+	host := model.GetHostByToken(hostToken)
 	if host == nil {
 		return errors.New("error when getting host from db")
 	}
@@ -30,15 +29,15 @@ func HostData(hostToken string, taskMsg *task.Message) error {
 		//	HostId:  host.ID,
 		//})
 
-		err := Update(host.ID.String())
+		err := Update(host.ID)
 		if err != nil {
 			logrus.Error(err)
 		}
 	case task.AGENT_METRICS_FREQUENCY:
 		logrus.Info("AGENT_METRICS_FREQUENCY")
 
-		var host model.Host
-		if model.DB.Where("token = ?", hostToken).First(&host).RecordNotFound() {
+		host := model.GetHostByToken(hostToken)
+		if host == nil {
 			break
 		}
 
@@ -59,12 +58,15 @@ func HostData(hostToken string, taskMsg *task.Message) error {
 
 		channel.SendMessage(sse.NewMessage("", taskMsgStr, strconv.Itoa(taskMsg.TaskId)))
 	case task.AGENT_METRICS:
-		var host model.Host
-		if model.DB.Where("token = ?", hostToken).First(&host).RecordNotFound() {
+		host := model.GetHostByToken(hostToken)
+		if host == nil {
 			break
 		}
 
 		metric := &model.MetricHost{
+			Base: model.Base{
+				DocType: "metric_host",
+			},
 			HostId:    host.ID,
 			CpuUsage:  taskMsg.CpuUsage,
 			RamFree:   taskMsg.RamFree,
@@ -83,10 +85,13 @@ func HostData(hostToken string, taskMsg *task.Message) error {
 			Guest:     taskMsg.Guest,
 			GuestNice: taskMsg.GuestNice,
 		}
-		model.DB.Save(metric)
+		err := metric.Put(&metric)
+		if err != nil {
+			return err
+		}
 	case task.AGENT_OS:
-		var host model.Host
-		if model.DB.Where("token = ?", hostToken).First(&host).RecordNotFound() {
+		host := model.GetHostByToken(hostToken)
+		if host == nil {
 			break
 		}
 
@@ -97,7 +102,10 @@ func HostData(hostToken string, taskMsg *task.Message) error {
 		host.KernelVersion = taskMsg.KernelVersion
 		host.KernelArch = taskMsg.KernelArch
 
-		model.DB.Save(&host)
+		err := host.Put(&host)
+		if err != nil {
+			return err
+		}
 
 	case task.AGENT_HEARTBEAT:
 		model.SetAgentHeartbeat(model.Redis, hostToken, taskMsg.Timestamp)
@@ -118,8 +126,8 @@ func GsData(hostToken string, gsId string, taskMsg *task.Message) error {
 		gameServerId := taskMsg.GameServerID
 		_, err := model.GetGsRestart(model.Redis, gameServerId)
 		if err == nil {
-			var gs model.GameServer
-			if model.DB.Where("id = ?", gameServerId).First(&gs).RecordNotFound() {
+			gs := model.GetGameServer(gameServerId)
+			if gs == nil {
 				break
 			}
 
@@ -144,13 +152,13 @@ func GsData(hostToken string, gsId string, taskMsg *task.Message) error {
 
 			channel.SendMessage(sse.NewMessage("", taskMsgStr, strconv.Itoa(task.GAME_START)))
 
-			model.DelGsRestart(model.Redis, gs.ID.String())
+			model.DelGsRestart(model.Redis, gs.ID)
 		}
 
 		_, err = model.GetGsStart(model.Redis, gameServerId)
 		if err == nil {
-			var gs model.GameServer
-			if model.DB.Where("id = ?", gameServerId).First(&gs).RecordNotFound() {
+			gs := model.GetGameServer(gameServerId)
+			if gs == nil {
 				break
 			}
 
@@ -175,13 +183,14 @@ func GsData(hostToken string, gsId string, taskMsg *task.Message) error {
 
 			channel.SendMessage(sse.NewMessage("", taskMsgStr, strconv.Itoa(task.GAME_START)))
 
-			model.DelGsStart(model.Redis, gs.ID.String())
+			model.DelGsStart(model.Redis, gs.ID)
 		}
 
 	case task.SERVER_LOG:
 		logrus.Info("SERVER_LOG")
 		var gsLog model.GameServerLog
-		gsLog.GameServerId = uuid.FromStringOrNil(taskMsg.GameServerID)
+		gsLog.Base.DocType = "game_server_log"
+		gsLog.GameServerId = taskMsg.GameServerID
 
 		if len(taskMsg.Stdout) > 0 {
 			gsLog.Log = taskMsg.Stdout
@@ -193,13 +202,13 @@ func GsData(hostToken string, gsId string, taskMsg *task.Message) error {
 			gsLog.Type = model.STDERR
 		}
 
-		host := model.GetHostByToken(model.DB, hostToken)
+		host := model.GetHostByToken(hostToken)
 		events.SSE.SendMessage(fmt.Sprintf("/v1/host/%s/server/%s/console",
-			host.ID.String(),
-			gsLog.GameServerId.String()),
+			host.ID,
+			gsLog.GameServerId),
 			sse.SimpleMessage(base64.StdEncoding.EncodeToString([]byte(gsLog.Log))))
 
-		err := model.DB.Save(&gsLog).Error
+		err := gsLog.Put(&gsLog)
 		if err != nil {
 			logrus.Warn(err)
 		}
@@ -211,13 +220,13 @@ func GsData(hostToken string, gsId string, taskMsg *task.Message) error {
 		if err != redis.Nil && val != -1 {
 			model.SetGsRestart(model.Redis, gameServerId, 2)
 
-			var gs model.GameServer
-			if model.DB.Where("id = ?", gameServerId).First(&gs).RecordNotFound() {
+			gs := model.GetGameServer(gameServerId)
+			if gs == nil {
 				break
 			}
 
-			var host model.Host
-			if model.DB.Where("id = ?", gs.HostId).First(&host).RecordNotFound() {
+			host := model.GetHostByToken(hostToken)
+			if host == nil {
 				break
 			}
 
@@ -244,8 +253,8 @@ func GsData(hostToken string, gsId string, taskMsg *task.Message) error {
 	case task.WRAPPER_METRICS_FREQUENCY:
 		gameServerId := taskMsg.GameServerID
 
-		var gs model.GameServer
-		if model.DB.Where("id = ?", gameServerId).First(&gs).RecordNotFound() {
+		gs := model.GetGameServer(gameServerId)
+		if gs == nil {
 			break
 		}
 
@@ -267,11 +276,17 @@ func GsData(hostToken string, gsId string, taskMsg *task.Message) error {
 		channel.SendMessage(sse.NewMessage("", taskMsgStr, strconv.Itoa(task.WRAPPER_METRICS_FREQUENCY)))
 	case task.WRAPPER_METRICS:
 		metric := &model.MetricGameServer{
-			GameServerId: uuid.FromStringOrNil(taskMsg.GameServerID),
+			Base: model.Base{
+				DocType: "metric_game_server",
+			},
+			GameServerId: taskMsg.GameServerID,
 			CpuUsage:     taskMsg.CpuUsage,
 			RamUsage:     taskMsg.RamUsage,
 		}
-		model.DB.Save(metric)
+		err := metric.Put(&metric)
+		if err != nil {
+			return err
+		}
 	case task.WRAPPER_HEARTBEAT:
 		model.SetWrapperHeartbeat(model.Redis, taskMsg.GameServerID, taskMsg.Timestamp)
 	}

@@ -23,7 +23,7 @@
                                             <v-select
                                                     :items="hosts"
                                                     item-text="name"
-                                                    item-value="id"
+                                                    item-value="_id"
                                                     v-model="createGameServer.selectedHost"
                                                     label="Select host">
                                             </v-select>
@@ -80,22 +80,18 @@
                 >
                     <template v-slot:body="{ items }">
                         <tbody>
-                        <tr v-for="item in gameServers" :key="item.id" class="clickable"
-                            @click="goToGameServer(item.host_id, item.id)">
-                            <td class="clickable">{{ item.name }}</td>
+                        <tr v-for="item in items" :key="item._id" class="clickable"
+                            @click="goToGameServer(item.host_id, item._id)">
+                            <td class="clickable" v-text="item.name"></td>
+                            <td class="text-right" v-text="getHostName(item.host_id)"></td>
+                            <td class="text-right" v-text="getGameName(item.game_id)"></td>
                             <td class="text-right">
-                                {{ hosts.find(x => x.id === item.host_id).name || '' }}
-                            </td>
-                            <td class="text-right">
-                                {{ games.find(x => x.id === item.game_id).name || '' }}
-                            </td>
-                            <td class="text-right">
-                                    <span v-if="item.state === 1">
-                                        <v-icon class="green--text" small>fa-circle</v-icon> Active
-                                    </span>
+                                <span v-if="item.state === 1">
+                                    <v-icon class="green--text" small>fa-circle</v-icon> Active
+                                </span>
                                 <span v-else>
-                                        <v-icon class="red--text" small>fa-circle</v-icon> Locked
-                                    </span>
+                                    <v-icon class="red--text" small>fa-circle</v-icon> Locked
+                                </span>
                             </td>
                         </tr>
                         </tbody>
@@ -167,7 +163,6 @@
             getGameServers() {
                 return this.$http.get("/v1/host/my/server").then(res => {
                     this.gameServers = res.data.game_servers;
-                    console.log(this.gameServers)
                 }).catch(e => {
                     this.$auth.checkResponse(e.response.status)
                 });
@@ -211,6 +206,24 @@
                     "/server/" + this.createGameServer.gameId + "/install").then(res => {
                     console.log(res);
                 });
+            },
+            getHostName(hostId) {
+                if (this.hosts && this.hosts.length > 0) {
+                    let host = this.hosts.find(x => x._id === hostId)
+                    if (host) {
+                        return host.name;
+                    }
+                }
+                return ""
+            },
+            getGameName(gameId) {
+                if (this.games && this.games.length > 0) {
+                    let game = this.games.find(x => x.id === gameId)
+                    if (game) {
+                        return game.name;
+                    }
+                }
+                return ""
             }
         },
         mounted() {

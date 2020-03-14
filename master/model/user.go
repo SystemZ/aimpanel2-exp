@@ -40,3 +40,16 @@ func (u *User) GenerateJWT() (string, error) {
 	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
 	return tokenString, err
 }
+
+func GetUser(id string) *User {
+	var user User
+	err := GetOneS(&user, map[string]interface{}{
+		"doc_type": "user",
+		"_id":      id,
+	})
+	if err != nil {
+		return nil
+	}
+
+	return &user
+}

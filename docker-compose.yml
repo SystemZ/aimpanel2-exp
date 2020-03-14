@@ -37,7 +37,8 @@ services:
     depends_on:
       - redis
   couchdb:
-    image: 'couchdb:3.0.0'
+    image: 'couchdb:2'
+    restart: always
     environment:
       - COUCHDB_USER=dev
       - COUCHDB_PASSWORD=dev

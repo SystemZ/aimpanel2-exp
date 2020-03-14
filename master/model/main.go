@@ -20,7 +20,7 @@ var (
 	Snowflake *snowflake.Node
 )
 
-func InitCouchDb() *kivik.DB {
+func InitDB() *kivik.DB {
 	client, err := kivik.New("couch", fmt.Sprintf("http://%s:%s@%s:%s/", config.DB_USERNAME, config.DB_PASSWORD, config.DB_HOST, config.DB_PORT))
 	if err != nil {
 		logrus.Error(err.Error())

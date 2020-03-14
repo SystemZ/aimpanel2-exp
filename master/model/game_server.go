@@ -1,11 +1,11 @@
 package model
 
 import (
-	"github.com/jinzhu/gorm"
 	"time"
 )
 
 type GameServer struct {
+	Base
 	// User assigned name
 	Name string `json:"name" example:"Ultra MC Server"`
 
@@ -38,12 +38,25 @@ type GameServer struct {
 	StopTimeout int `json:"stop_timeout" example:"30"`
 }
 
+func GetGameServers() []GameServer {
+	var gs []GameServer
+
+	err := GetOneS(&gs, map[string]interface{}{
+		"doc_type": "game_server",
+	})
+	if err != nil {
+		return nil
+	}
+
+	return gs
+}
+
 func GetGameServer(gsId string) *GameServer {
 	var gs GameServer
 
 	err := GetOneS(&gs, map[string]interface{}{
 		"doc_type": "game_server",
-		"id":       gsId,
+		"_id":      gsId,
 	})
 	if err != nil {
 		return nil
@@ -57,8 +70,8 @@ func GetGameServerByGsIdAndHostId(serverId string, hostId string) *GameServer {
 
 	err := GetOneS(&gs, map[string]interface{}{
 		"doc_type": "game_server",
-		"id":       serverId,
-		"hostId":   hostId,
+		"_id":      serverId,
+		"host_id":  hostId,
 	})
 	if err != nil {
 		return nil
@@ -72,7 +85,7 @@ func GetGameServersByHostId(hostId string) *[]GameServer {
 
 	err := GetOneS(&gs, map[string]interface{}{
 		"doc_type": "game_server",
-		"hostId":   hostId,
+		"host_id":  hostId,
 	})
 	if err != nil {
 		return nil
@@ -82,15 +95,23 @@ func GetGameServersByHostId(hostId string) *[]GameServer {
 }
 
 //FIXME
-func GetUserGameServers(db *gorm.DB, userId string) *[]GameServer {
-	//var gameServers []GameServer
-	//
-	//if db.Table("game_servers").Select("game_servers.*").Joins(
-	//	"LEFT JOIN hosts ON game_servers.host_id = hosts.id").Where(
-	//	"hosts.user_id = ?", userId).Find(&gameServers).RecordNotFound() {
-	//	return nil
-	//}
-	//
-	//return &gameServers
-	return nil
+func GetUserGameServers(userId string) *[]GameServer {
+	hosts := GetHostsByUserId(userId)
+	var hostsId []interface{}
+	for _, host := range hosts {
+		hostsId = append(hostsId, map[string]interface{}{
+			"host_id": host.ID,
+		})
+	}
+
+	var gameServers []GameServer
+	err := GetS(&gameServers, map[string]interface{}{
+		"doc_type": "game_server",
+		"$or":      hostsId,
+	})
+	if err != nil {
+		return nil
+	}
+
+	return &gameServers
 }
