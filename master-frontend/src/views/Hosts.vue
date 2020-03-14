@@ -60,23 +60,15 @@
                         :items="hosts"
                         hide-default-footer
                         class="elevation-1"
+                        @click:row="goToHost"
                 >
-                    <template v-slot:body="{ items }">
-                        <tbody>
-                        <tr v-for="item in items" :key="item._id" class="clickable" @click="goToHost(item._id)">
-                            <td>{{item.name}}</td>
-                            <td class="text-right">{{item.ip}}</td>
-                            <td class="text-right">N/A</td>
-                            <td class="text-right">
-                                    <span v-if="item.state === 1">
-                                        <v-icon class="green--text" small>fa-circle</v-icon> Active
-                                    </span>
-                                <span v-else>
-                                        <v-icon class="red--text" small>fa-circle</v-icon> Locked
-                                    </span>
-                            </td>
-                        </tr>
-                        </tbody>
+                    <template v-slot:item.state="{ item }">
+                        <span v-if="item.state === 1">
+                            <v-icon class="green--text" small>fa-circle</v-icon> Active
+                        </span>
+                        <span v-else>
+                            <v-icon class="red--text" small>fa-circle</v-icon> Locked
+                        </span>
                     </template>
                 </v-data-table>
             </v-col>
@@ -127,8 +119,8 @@
             timer: 0,
         }),
         methods: {
-            goToHost(id: string): void {
-                this.$router.push('/host/' + id);
+            goToHost(row: Host): void {
+                this.$router.push('/host/' + row._id);
             },
             getHosts(): void {
                 this.$http.get('/v1/host').then(res => {

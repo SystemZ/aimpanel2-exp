@@ -77,24 +77,23 @@
                         :items="gameServers"
                         hide-default-footer
                         class="elevation-1"
+                        @click:row="goToGameServer"
                 >
-                    <template v-slot:body="{ items }">
-                        <tbody>
-                        <tr v-for="item in items" :key="item._id" class="clickable"
-                            @click="goToGameServer(item.host_id, item._id)">
-                            <td class="clickable" v-text="item.name"></td>
-                            <td class="text-right" v-text="getHostName(item.host_id)"></td>
-                            <td class="text-right" v-text="getGameName(item.game_id)"></td>
-                            <td class="text-right">
-                                <span v-if="item.state === 1">
-                                    <v-icon class="green--text" small>fa-circle</v-icon> Active
-                                </span>
-                                <span v-else>
-                                    <v-icon class="red--text" small>fa-circle</v-icon> Locked
-                                </span>
-                            </td>
-                        </tr>
-                        </tbody>
+                    <template v-slot:item.state="{ item }">
+                        <span v-if="item.state === 1">
+                            <v-icon class="green--text" small>fa-circle</v-icon> Active
+                        </span>
+                        <span v-else>
+                            <v-icon class="red--text" small>fa-circle</v-icon> Locked
+                        </span>
+                    </template>
+
+                    <template v-slot:item.host="{ item }">
+                        <span v-text="getHostName(item.host_id)"></span>
+                    </template>
+
+                    <template v-slot:item.game="{ item }">
+                        <span v-text="getGameName(item.game_id)"></span>
                     </template>
                 </v-data-table>
             </v-col>
@@ -150,8 +149,8 @@
             timer: ''
         }),
         methods: {
-            goToGameServer(host_id, id) {
-                this.$router.push('/host/' + host_id + '/server/' + id)
+            goToGameServer(row) {
+                this.$router.push('/host/' + row.host_id + '/server/' + row._id)
             },
             getGames() {
                 return this.$http.get("/v1/game").then(res => {
