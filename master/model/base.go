@@ -31,7 +31,7 @@ func (b *Base) Put(obj interface{}) error {
 	b.ID = Snowflake.Generate().String()
 	b.CreatedAt = time.Now()
 
-	rev, err := CouchDB.Put(context.TODO(), b.ID, b.obj)
+	rev, err := DB.Put(context.TODO(), b.ID, b.obj)
 	if err != nil {
 		return err
 	}
@@ -41,7 +41,7 @@ func (b *Base) Put(obj interface{}) error {
 }
 
 func Count(query map[string]interface{}) (int, error) {
-	rows, err := CouchDB.Find(context.TODO(), query)
+	rows, err := DB.Find(context.TODO(), query)
 	if err != nil {
 		return 0, err
 	}
@@ -54,8 +54,8 @@ func Count(query map[string]interface{}) (int, error) {
 }
 
 //Get all documents by specified query
-func Get(out []interface{}, query map[string]interface{}) error {
-	rows, err := CouchDB.Find(context.TODO(), query)
+func Get(out interface{}, query map[string]interface{}) error {
+	rows, err := DB.Find(context.TODO(), query)
 	if err != nil {
 		return err
 	}
@@ -74,7 +74,7 @@ func Get(out []interface{}, query map[string]interface{}) error {
 }
 
 //Get all documents by specified selector
-func GetS(out []interface{}, selector map[string]string) error {
+func GetS(out interface{}, selector map[string]string) error {
 	err := Get(out, map[string]interface{}{
 		"selector": selector,
 	})
@@ -84,9 +84,21 @@ func GetS(out []interface{}, selector map[string]string) error {
 	return nil
 }
 
+//Get all documents by specified selector and limit
+func GetSLimit(out interface{}, limit int, selector map[string]string) error {
+	err := Get(out, map[string]interface{}{
+		"selector": selector,
+		"limit":    limit,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 //Get one document by specified query
 func GetOne(out interface{}, query map[string]interface{}) error {
-	rows, err := CouchDB.Find(context.TODO(), query)
+	rows, err := DB.Find(context.TODO(), query)
 	if err != nil {
 		return err
 	}
