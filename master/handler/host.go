@@ -21,7 +21,7 @@ import (
 // @Accept json
 // @Produce json
 // @Success 200 {object} response.HostList
-// @Failure 400 {object} JsonError
+// @Failure 400 {object} response.JsonError
 // @Security ApiKey
 func HostList(w http.ResponseWriter, r *http.Request) {
 	user := context.Get(r, "user").(model.User)
@@ -37,7 +37,7 @@ func HostList(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Param id path string true "Host ID"
 // @Success 200 {object} response.Host
-// @Failure 400 {object} JsonError
+// @Failure 400 {object} response.JsonError
 // @Security ApiKey
 func HostDetails(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
@@ -59,7 +59,7 @@ func HostDetails(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Param host body request.HostCreate true " "
 // @Success 200 {object} response.Token
-// @Failure 400 {object} JsonError
+// @Failure 400 {object} response.JsonError
 // @Security ApiKey
 func HostCreate(w http.ResponseWriter, r *http.Request) {
 	user := context.Get(r, "user").(model.User)
@@ -88,7 +88,7 @@ func HostCreate(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Param id path string true "Host ID"
 // @Success 200 {object} response.HostMetrics
-// @Failure 400 {object} JsonError
+// @Failure 400 {object} response.JsonError
 // @Security ApiKey
 func HostMetric(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
@@ -103,8 +103,8 @@ func HostMetric(w http.ResponseWriter, r *http.Request) {
 // @Accept json
 // @Produce json
 // @Param id path string true "Host ID"
-// @Success 200 {object} JsonSuccess
-// @Failure 400 {object} JsonError
+// @Success 200 {object} response.JsonSuccess
+// @Failure 400 {object} response.JsonError
 // @Security ApiKey
 func HostRemove(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)

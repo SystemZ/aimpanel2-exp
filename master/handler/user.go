@@ -56,7 +56,7 @@ func UserChangeEmail(w http.ResponseWriter, r *http.Request) {
 // @Accept json
 // @Produce json
 // @Success 200 {object} response.UserProfile
-// @Failure 400 {object} JsonError
+// @Failure 400 {object} response.JsonError
 // @Router /me [get]
 // @Security ApiKey
 func UserProfile(w http.ResponseWriter, r *http.Request) {

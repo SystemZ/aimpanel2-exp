@@ -20,7 +20,7 @@ import (
 // @Param host_id path string true "Host ID"
 // @Param server_id path string true "Game Server ID"
 // @Success 204 ""
-// @Failure 400 {object} handler.JsonError
+// @Failure 400 {object} response.JsonError
 // @Security ApiKey
 func Start(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
@@ -44,7 +44,7 @@ func Start(w http.ResponseWriter, r *http.Request) {
 // @Param host_id path string true "Host ID"
 // @Param server_id path string true "Game Server ID"
 // @Success 204 ""
-// @Failure 400 {object} handler.JsonError
+// @Failure 400 {object} response.JsonError
 // @Security ApiKey
 func Install(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
@@ -68,7 +68,7 @@ func Install(w http.ResponseWriter, r *http.Request) {
 // @Param host_id path string true "Host ID"
 // @Param server_id path string true "Game Server ID"
 // @Success 204 ""
-// @Failure 400 {object} handler.JsonError
+// @Failure 400 {object} response.JsonError
 // @Security ApiKey
 func Restart(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
@@ -99,7 +99,7 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 // @Param host_id path string true "Host ID"
 // @Param server_id path string true "Game Server ID"
 // @Success 204 ""
-// @Failure 400 {object} handler.JsonError
+// @Failure 400 {object} response.JsonError
 // @Security ApiKey
 func Stop(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
@@ -131,7 +131,7 @@ func Stop(w http.ResponseWriter, r *http.Request) {
 // @Param server_id path string true "Game Server ID"
 // @Param host body request.GameServerSendCommand true " "
 // @Success 204 ""
-// @Failure 400 {object} handler.JsonError
+// @Failure 400 {object} response.JsonError
 // @Security ApiKey
 func SendCommand(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)

@@ -13,6 +13,12 @@ type JsonSuccess struct {
 	Message string `json:"message" example:""`
 }
 
+//This need to be here for swagger
+type JsonError struct {
+	ErrorCode int    `json:"error_code" example:"1"`
+	Message   string `json:"message" example:""`
+}
+
 type Game struct {
 	//ID of the game
 	Id uint `json:"id" example:"1"`

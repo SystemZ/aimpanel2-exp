@@ -22,7 +22,7 @@ import (
 // @Produce json
 // @Param host body request.GameServerCreate true " "
 // @Success 200 {object} response.ID
-// @Failure 400 {object} handler.JsonError
+// @Failure 400 {object} response.JsonError
 // @Security ApiKey
 func Create(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
@@ -93,7 +93,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 // @Accept json
 // @Produce json
 // @Success 200 {object} response.GameServerList
-// @Failure 400 {object} handler.JsonError
+// @Failure 400 {object} response.JsonError
 // @Security ApiKey
 func ListByHostId(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
@@ -122,7 +122,7 @@ func ListByHostId(w http.ResponseWriter, r *http.Request) {
 // @Accept json
 // @Produce json
 // @Success 200 {object} response.GameServerList
-// @Failure 400 {object} handler.JsonError
+// @Failure 400 {object} response.JsonError
 // @Security ApiKey
 func ListByUser(w http.ResponseWriter, r *http.Request) {
 	user := context.Get(r, "user").(model.User)
@@ -145,7 +145,7 @@ func ListByUser(w http.ResponseWriter, r *http.Request) {
 // @Param host_id path string true "Host ID"
 // @Param server_id path string true "Game Server ID"
 // @Success 200 {object} response.GameServer
-// @Failure 400 {object} handler.JsonError
+// @Failure 400 {object} response.JsonError
 // @Security ApiKey
 func Get(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
@@ -178,8 +178,8 @@ func PutLogs(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Param host_id path string true "Host ID"
 // @Param server_id path string true "Game Server ID"
-// @Success 200 {object} handler.JsonSuccess
-// @Failure 400 {object} handler.JsonError
+// @Success 200 {object} response.JsonSuccess
+// @Failure 400 {object} response.JsonError
 // @Security ApiKey
 func Remove(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
