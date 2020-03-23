@@ -7,10 +7,13 @@ import (
 )
 
 func ChangePassword(data *request.UserChangePassword, user *model.User) int {
-	if user.CheckPassword(data.Password) {
+	if user.IsPasswordOk(data.Password) {
 		if data.NewPassword == data.NewPasswordRepeat {
 			user.PasswordHash = user.HashPassword(data.NewPassword)
-			model.DB.Save(&user)
+			err := user.Put(&user)
+			if err != nil {
+				return ecode.DbSave
+			}
 
 			return ecode.NoError
 		} else {
@@ -25,7 +28,10 @@ func ChangeEmail(data *request.UserChangeEmail, user *model.User) int {
 	if user.Email == data.Email {
 		if data.NewEmail == data.NewEmailRepeat {
 			user.Email = data.NewEmail
-			model.DB.Save(&user)
+			err := user.Put(&user)
+			if err != nil {
+				return ecode.DbSave
+			}
 
 			return ecode.NoError
 		} else {

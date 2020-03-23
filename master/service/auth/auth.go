@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib/ecode"
 	"gitlab.com/systemz/aimpanel2/lib/request"
 	"gitlab.com/systemz/aimpanel2/master/model"
@@ -15,19 +16,25 @@ func Register(data *request.AuthRegister) (string, int) {
 		return "", ecode.WrongEmail
 	}
 
-	var count int64
-	model.DB.Model(&model.User{}).Where("username = ?", data.Username).Count(&count)
+	count, err := model.Count(map[string]interface{}{
+		"selector": map[string]string{
+			"doc_type": "user",
+			"username": data.Username,
+		},
+	})
 	if count > 0 {
 		return "", ecode.DuplicateUsername
 	}
 
 	var user model.User
+	user.Base.DocType = "user"
 	user.Username = data.Username
 	user.Email = data.Email
 	user.PasswordHash = user.HashPassword(data.Password)
 
-	err := model.DB.Save(&user).Error
+	err = user.Put(&user)
 	if err != nil {
+		logrus.Error(err)
 		return "", ecode.DbSave
 	}
 
@@ -38,17 +45,31 @@ func Register(data *request.AuthRegister) (string, int) {
 
 	//Create group
 	group := &model.Group{
-		Name: "USER-" + user.ID.String(),
+		Base: model.Base{
+			DocType: "group",
+		},
+		Name: "USER-" + user.ID,
 	}
-	model.DB.Save(group)
+	err = group.Put(&group)
+	if err != nil {
+		logrus.Error(err)
+		return "", ecode.DbError
+	}
 
 	//Add user to group
 	groupUser := &model.GroupUser{
+		Base: model.Base{
+			DocType: "group_user",
+		},
 		GroupId: group.ID,
 		UserId:  user.ID,
 	}
+	err = groupUser.Put(&groupUser)
+	if err != nil {
+		logrus.Error(err)
+		return "", ecode.DbError
+	}
 	// FIXME error handling
-	model.DB.Save(groupUser)
 	model.CreatePermissionsForNewUser(group.ID)
 
 	return token, ecode.NoError
@@ -56,10 +77,15 @@ func Register(data *request.AuthRegister) (string, int) {
 
 func Login(data *request.AuthLogin) (string, int) {
 	var user model.User
-	model.DB.Where("username = ?", data.Username).Find(&user)
+	err := model.GetOneS(&user, map[string]interface{}{
+		"doc_type": "user",
+		"username": data.Username,
+	})
+	if err != nil {
+		return "", ecode.DbError
+	}
 
-	// TODO maybe IsPasswordOk would be more semantic?
-	if user.CheckPassword(data.Password) {
+	if user.IsPasswordOk(data.Password) {
 		token, err := user.GenerateJWT()
 		if err != nil {
 			return "", ecode.JwtGenerate

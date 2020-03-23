@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/ecode"
 	"gitlab.com/systemz/aimpanel2/lib/request"
@@ -22,11 +21,11 @@ import (
 // @Accept json
 // @Produce json
 // @Success 200 {object} response.HostList
-// @Failure 400 {object} JsonError
+// @Failure 400 {object} response.JsonError
 // @Security ApiKey
 func HostList(w http.ResponseWriter, r *http.Request) {
 	user := context.Get(r, "user").(model.User)
-	hosts := model.GetHostsByUserId(model.DB, user.ID)
+	hosts := model.GetHostsByUserId(user.ID)
 	lib.MustEncode(json.NewEncoder(w), response.HostList{Hosts: hosts})
 }
 
@@ -38,16 +37,14 @@ func HostList(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Param id path string true "Host ID"
 // @Success 200 {object} response.Host
-// @Failure 400 {object} JsonError
+// @Failure 400 {object} response.JsonError
 // @Security ApiKey
 func HostDetails(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
-	h := model.GetHost(model.DB, params["id"])
+	h := model.GetHost(params["id"])
 	if h == nil {
-		w.WriteHeader(http.StatusBadRequest)
-		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: ecode.HostNotFound})
+		lib.ReturnError(w, http.StatusBadRequest, ecode.HostNotFound, nil)
 		return
 	}
 
@@ -62,7 +59,7 @@ func HostDetails(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Param host body request.HostCreate true " "
 // @Success 200 {object} response.Token
-// @Failure 400 {object} JsonError
+// @Failure 400 {object} response.JsonError
 // @Security ApiKey
 func HostCreate(w http.ResponseWriter, r *http.Request) {
 	user := context.Get(r, "user").(model.User)
@@ -70,15 +67,13 @@ func HostCreate(w http.ResponseWriter, r *http.Request) {
 	data := &request.HostCreate{}
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
-		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: ecode.JsonDecode})
+		lib.ReturnError(w, http.StatusBadRequest, ecode.JsonDecode, err)
 		return
 	}
 
 	h, errCode := host.Create(data, user.ID)
 	if errCode != ecode.NoError {
-		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: errCode})
+		lib.ReturnError(w, http.StatusInternalServerError, errCode, nil)
 		return
 	}
 
@@ -93,11 +88,11 @@ func HostCreate(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Param id path string true "Host ID"
 // @Success 200 {object} response.HostMetrics
-// @Failure 400 {object} JsonError
+// @Failure 400 {object} response.JsonError
 // @Security ApiKey
 func HostMetric(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	metrics := model.GetHostMetrics(model.DB, params["id"], 1)
+	metrics := model.GetHostMetrics(params["id"], 1)
 	lib.MustEncode(json.NewEncoder(w), response.HostMetrics{Metrics: metrics})
 }
 
@@ -108,17 +103,15 @@ func HostMetric(w http.ResponseWriter, r *http.Request) {
 // @Accept json
 // @Produce json
 // @Param id path string true "Host ID"
-// @Success 200 {object} JsonSuccess
-// @Failure 400 {object} JsonError
+// @Success 200 {object} response.JsonSuccess
+// @Failure 400 {object} response.JsonError
 // @Security ApiKey
 func HostRemove(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
 	errCode := host.Remove(params["id"])
 	if errCode != ecode.NoError {
-		w.WriteHeader(http.StatusBadRequest)
-		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: errCode})
+		lib.ReturnError(w, http.StatusBadRequest, errCode, nil)
 		return
 	}
 
@@ -130,9 +123,7 @@ func HostAuth(w http.ResponseWriter, r *http.Request) {
 
 	token, errCode := host.Auth(params["token"])
 	if errCode != ecode.NoError {
-		w.WriteHeader(http.StatusBadRequest)
-		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: errCode})
+		lib.ReturnError(w, http.StatusBadRequest, errCode, nil)
 		return
 	}
 
@@ -146,11 +137,7 @@ func HostUpdate(w http.ResponseWriter, r *http.Request) {
 
 	err := gameserver.Update(hostId)
 	if err != nil {
-		logrus.Error(err)
-
-		w.WriteHeader(http.StatusInternalServerError)
-		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: ecode.GsUpdate})
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.GsUpdate, err)
 		return
 	}
 

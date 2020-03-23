@@ -23,7 +23,7 @@
                                             <v-select
                                                     :items="hosts"
                                                     item-text="name"
-                                                    item-value="id"
+                                                    item-value="_id"
                                                     v-model="createGameServer.selectedHost"
                                                     label="Select host">
                                             </v-select>
@@ -77,28 +77,23 @@
                         :items="gameServers"
                         hide-default-footer
                         class="elevation-1"
+                        @click:row="goToGameServer"
                 >
-                    <template v-slot:body="{ items }">
-                        <tbody>
-                        <tr v-for="item in gameServers" :key="item.id" class="clickable"
-                            @click="goToGameServer(item.host_id, item.id)">
-                            <td class="clickable">{{ item.name }}</td>
-                            <td class="text-right">
-                                {{ hosts.find(x => x.id === item.host_id).name || '' }}
-                            </td>
-                            <td class="text-right">
-                                {{ games.find(x => x.id === item.game_id).name || '' }}
-                            </td>
-                            <td class="text-right">
-                                    <span v-if="item.state === 1">
-                                        <v-icon class="green--text" small>fa-circle</v-icon> Active
-                                    </span>
-                                <span v-else>
-                                        <v-icon class="red--text" small>fa-circle</v-icon> Locked
-                                    </span>
-                            </td>
-                        </tr>
-                        </tbody>
+                    <template v-slot:item.state="{ item }">
+                        <span v-if="item.state === 1">
+                            <v-icon class="green--text" small>fa-circle</v-icon> Active
+                        </span>
+                        <span v-else>
+                            <v-icon class="red--text" small>fa-circle</v-icon> Locked
+                        </span>
+                    </template>
+
+                    <template v-slot:item.host="{ item }">
+                        <span v-text="getHostName(item.host_id)"></span>
+                    </template>
+
+                    <template v-slot:item.game="{ item }">
+                        <span v-text="getGameName(item.game_id)"></span>
                     </template>
                 </v-data-table>
             </v-col>
@@ -154,8 +149,8 @@
             timer: ''
         }),
         methods: {
-            goToGameServer(host_id, id) {
-                this.$router.push('/host/' + host_id + '/server/' + id)
+            goToGameServer(row) {
+                this.$router.push('/host/' + row.host_id + '/server/' + row._id)
             },
             getGames() {
                 return this.$http.get("/v1/game").then(res => {
@@ -167,7 +162,6 @@
             getGameServers() {
                 return this.$http.get("/v1/host/my/server").then(res => {
                     this.gameServers = res.data.game_servers;
-                    console.log(this.gameServers)
                 }).catch(e => {
                     this.$auth.checkResponse(e.response.status)
                 });
@@ -211,6 +205,24 @@
                     "/server/" + this.createGameServer.gameId + "/install").then(res => {
                     console.log(res);
                 });
+            },
+            getHostName(hostId) {
+                if (this.hosts && this.hosts.length > 0) {
+                    let host = this.hosts.find(x => x._id === hostId)
+                    if (host) {
+                        return host.name;
+                    }
+                }
+                return ""
+            },
+            getGameName(gameId) {
+                if (this.games && this.games.length > 0) {
+                    let game = this.games.find(x => x.id === gameId)
+                    if (game) {
+                        return game.name;
+                    }
+                }
+                return ""
             }
         },
         mounted() {

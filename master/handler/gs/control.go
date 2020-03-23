@@ -3,12 +3,10 @@ package gs
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
-	log "github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/ecode"
 	"gitlab.com/systemz/aimpanel2/lib/request"
 	"gitlab.com/systemz/aimpanel2/lib/task"
-	"gitlab.com/systemz/aimpanel2/master/handler"
 	"gitlab.com/systemz/aimpanel2/master/service/gameserver"
 	"net/http"
 )
@@ -22,7 +20,7 @@ import (
 // @Param host_id path string true "Host ID"
 // @Param server_id path string true "Game Server ID"
 // @Success 204 ""
-// @Failure 400 {object} handler.JsonError
+// @Failure 400 {object} response.JsonError
 // @Security ApiKey
 func Start(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
@@ -30,10 +28,7 @@ func Start(w http.ResponseWriter, r *http.Request) {
 
 	err := gameserver.Start(gsId)
 	if err != nil {
-		log.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: ecode.GsStart})
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.GsStart, err)
 		return
 	}
 
@@ -49,7 +44,7 @@ func Start(w http.ResponseWriter, r *http.Request) {
 // @Param host_id path string true "Host ID"
 // @Param server_id path string true "Game Server ID"
 // @Success 204 ""
-// @Failure 400 {object} handler.JsonError
+// @Failure 400 {object} response.JsonError
 // @Security ApiKey
 func Install(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
@@ -57,10 +52,7 @@ func Install(w http.ResponseWriter, r *http.Request) {
 
 	err := gameserver.Install(gsId)
 	if err != nil {
-		log.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: ecode.GsInstall})
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.GsInstall, err)
 		return
 	}
 
@@ -76,7 +68,7 @@ func Install(w http.ResponseWriter, r *http.Request) {
 // @Param host_id path string true "Host ID"
 // @Param server_id path string true "Game Server ID"
 // @Success 204 ""
-// @Failure 400 {object} handler.JsonError
+// @Failure 400 {object} response.JsonError
 // @Security ApiKey
 func Restart(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
@@ -85,18 +77,13 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 	data := &request.GameServerStop{}
 	err := json.NewDecoder(r.Body).Decode(data)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: ecode.JsonDecode})
+		lib.ReturnError(w, http.StatusBadRequest, ecode.JsonDecode, err)
 		return
 	}
 
 	err = gameserver.Restart(gsId, data.Type)
 	if err != nil {
-		log.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: ecode.GsRestart})
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.GsRestart, err)
 		return
 	}
 
@@ -112,7 +99,7 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 // @Param host_id path string true "Host ID"
 // @Param server_id path string true "Game Server ID"
 // @Success 204 ""
-// @Failure 400 {object} handler.JsonError
+// @Failure 400 {object} response.JsonError
 // @Security ApiKey
 func Stop(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
@@ -121,18 +108,13 @@ func Stop(w http.ResponseWriter, r *http.Request) {
 	data := &request.GameServerStop{}
 	err := json.NewDecoder(r.Body).Decode(data)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: ecode.JsonDecode})
+		lib.ReturnError(w, http.StatusBadRequest, ecode.JsonDecode, err)
 		return
 	}
 
 	err = gameserver.Stop(gsId, data.Type)
 	if err != nil {
-		log.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: ecode.GsStop})
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.GsStop, err)
 		return
 	}
 
@@ -149,7 +131,7 @@ func Stop(w http.ResponseWriter, r *http.Request) {
 // @Param server_id path string true "Game Server ID"
 // @Param host body request.GameServerSendCommand true " "
 // @Success 204 ""
-// @Failure 400 {object} handler.JsonError
+// @Failure 400 {object} response.JsonError
 // @Security ApiKey
 func SendCommand(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
@@ -158,18 +140,13 @@ func SendCommand(w http.ResponseWriter, r *http.Request) {
 	data := &request.GameServerSendCommand{}
 	err := json.NewDecoder(r.Body).Decode(data)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: ecode.JsonDecode})
+		lib.ReturnError(w, http.StatusBadRequest, ecode.JsonDecode, err)
 		return
 	}
 
 	err = gameserver.SendCommand(gsId, data.Command)
 	if err != nil {
-		log.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: ecode.GsCmd})
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.GsCmd, err)
 		return
 	}
 
@@ -183,19 +160,13 @@ func Data(w http.ResponseWriter, r *http.Request) {
 	data := &task.Message{}
 	err := json.NewDecoder(r.Body).Decode(data)
 	if err != nil {
-		log.Error(err)
-		w.WriteHeader(http.StatusBadRequest)
-		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: ecode.JsonDecode})
+		lib.ReturnError(w, http.StatusBadRequest, ecode.JsonDecode, err)
 		return
 	}
 
 	err = gameserver.HostData(hostToken, data)
 	if err != nil {
-		log.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: ecode.HostData})
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.HostData, err)
 		return
 	}
 
@@ -203,10 +174,7 @@ func Data(w http.ResponseWriter, r *http.Request) {
 	if ok {
 		err = gameserver.GsData(hostToken, gsId, data)
 		if err != nil {
-			log.Error(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			lib.MustEncode(json.NewEncoder(w),
-				handler.JsonError{ErrorCode: ecode.GsData})
+			lib.ReturnError(w, http.StatusInternalServerError, ecode.GsData, err)
 			return
 		}
 	}

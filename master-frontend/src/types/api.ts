@@ -1,5 +1,5 @@
 export interface Host {
-    id: string,
+    _id: string,
     name: string,
     user_id: string,
     ip: string,
@@ -16,7 +16,7 @@ export interface Host {
 }
 
 export interface Metric {
-    id: string,
+    _id: string,
     host_id: string,
     cpu_usage: number,
     ram_free: number,

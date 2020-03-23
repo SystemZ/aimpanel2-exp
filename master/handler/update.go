@@ -25,9 +25,7 @@ func NewVersion(w http.ResponseWriter, r *http.Request) {
 	data := &NewVersionReq{}
 	err := json.NewDecoder(r.Body).Decode(data)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: ecode.JsonDecode})
+		lib.ReturnError(w, http.StatusBadRequest, ecode.JsonDecode, err)
 		return
 	}
 
@@ -42,12 +40,10 @@ func NewVersion(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//TODO: Find better way to update all hosts
-	var hosts []model.Host
-	model.DB.Find(&hosts)
-
+	hosts := model.GetHosts()
 	go func() {
 		for _, host := range hosts {
-			err := gameserver.Update(host.ID.String())
+			err := gameserver.Update(host.ID)
 			if err != nil {
 				logrus.Error(err)
 			}

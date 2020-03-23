@@ -39,12 +39,13 @@ func AuthMiddleware(handler http.Handler) http.Handler {
 			return
 		}
 
-		var user model.User
-		if model.DB.Where("id = ?", token.Claims.(jwt.MapClaims)["uid"].(string)).First(&user).RecordNotFound() {
+		user := model.GetUser(token.Claims.(jwt.MapClaims)["uid"].(string))
+		if user == nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
-		context.Set(r, "user", user)
+
+		context.Set(r, "user", *user)
 
 		handler.ServeHTTP(w, r)
 	})
@@ -54,11 +55,15 @@ func PermissionMiddleware(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user := context.Get(r, "user").(model.User)
 
-		var count int
-		row := model.DB.Raw("SELECT COUNT(*) FROM permissions WHERE "+
-			"endpoint = ? AND verb = ? AND group_id = (SELECT group_id FROM group_users WHERE user_id = ?);",
-			r.URL.Path, lib.GetVerbByName(r.Method), user.ID.String()).Row()
-		err := row.Scan(&count)
+		groupUser := model.GetGroupUserByUserId(user.ID)
+		count, err := model.Count(map[string]interface{}{
+			"selector": map[string]interface{}{
+				"doc_type": "permission",
+				"endpoint": r.URL.Path,
+				"verb":     lib.GetVerbByName(r.Method),
+				"group_id": groupUser.GroupId,
+			},
+		})
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
@@ -92,8 +97,8 @@ func SlavePermissionMiddleware(handler http.Handler) http.Handler {
 			return
 		}
 
-		var host model.Host
-		if model.DB.Where("id = ?", token.Claims.(jwt.MapClaims)["uid"].(string)).First(&host).RecordNotFound() {
+		host := model.GetHost(token.Claims.(jwt.MapClaims)["uid"].(string))
+		if host == nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
@@ -106,8 +111,8 @@ func SlavePermissionMiddleware(handler http.Handler) http.Handler {
 
 		gsId, ok := params["server_id"]
 		if ok {
-			var gs model.GameServer
-			if model.DB.Where("id = ?", gsId).First(&gs).RecordNotFound() {
+			gs := model.GetGameServer(gsId)
+			if gs == nil {
 				w.WriteHeader(http.StatusUnauthorized)
 				return
 			}

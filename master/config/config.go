@@ -19,6 +19,8 @@ var (
 	DEV_MODE bool
 
 	UPDATE_TOKEN string
+
+	NODE_ID int64
 )
 
 func init() {
@@ -27,7 +29,7 @@ func init() {
 	viper.SetDefault("DB_HOST", "localhost")
 	DB_HOST = viper.GetString("DB_HOST")
 
-	viper.SetDefault("DB_PORT", "3306")
+	viper.SetDefault("DB_PORT", "5984")
 	DB_PORT = viper.GetString("DB_PORT")
 
 	viper.SetDefault("DB_USERNAME", "dev")
@@ -50,4 +52,7 @@ func init() {
 
 	viper.SetDefault("UPDATE_TOKEN", "")
 	UPDATE_TOKEN = viper.GetString("UPDATE_TOKEN")
+
+	viper.SetDefault("NODE_ID", 0)
+	NODE_ID = viper.GetInt64("NODE_ID")
 }

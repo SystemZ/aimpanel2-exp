@@ -8,7 +8,6 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib/ecode"
 	"gitlab.com/systemz/aimpanel2/lib/game"
 	"gitlab.com/systemz/aimpanel2/lib/request"
-	"gitlab.com/systemz/aimpanel2/master/handler"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"gitlab.com/systemz/aimpanel2/master/response"
 	"gitlab.com/systemz/aimpanel2/master/service/gameserver"
@@ -23,7 +22,7 @@ import (
 // @Produce json
 // @Param host body request.GameServerCreate true " "
 // @Success 200 {object} response.ID
-// @Failure 400 {object} handler.JsonError
+// @Failure 400 {object} response.JsonError
 // @Security ApiKey
 func Create(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
@@ -33,8 +32,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	data := &request.GameServerCreate{}
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
-		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: ecode.JsonDecode})
+		lib.ReturnError(w, http.StatusBadRequest, ecode.JsonDecode, nil)
 		return
 	}
 
@@ -47,14 +45,16 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	//gameServer.GameJson = string(gameDefJson)
 
 	//Check if host exist
-	host := model.GetHost(model.DB, hostId)
+	host := model.GetHost(hostId)
 	if host == nil {
-		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: ecode.HostNotFound})
+		lib.ReturnError(w, http.StatusBadRequest, ecode.HostNotFound, nil)
 		return
 	}
 
 	gameServer := &model.GameServer{
+		Base: model.Base{
+			DocType: "game_server",
+		},
 		Name:            data.Name,
 		GameId:          data.GameId,
 		GameVersion:     data.GameVersion,
@@ -65,22 +65,25 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Save game server to db
-	model.DB.Save(&gameServer)
+	err = gameServer.Put(&gameServer)
+	if err != nil {
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, err)
+		return
+	}
 
 	//TODO: create array of permissions?
 	user := context.Get(r, "user").(model.User)
-	group := model.GetGroup(model.DB, "USER-"+user.ID.String())
+	group := model.GetGroup("USER-" + user.ID)
 	if group == nil {
-		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: ecode.GroupNotFound})
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.GroupNotFound, nil)
 		return
 	}
 
 	// FIXME handle errors
-	model.CreatePermissionsForNewGameServer(group.ID, host.ID.String(), gameServer.ID.String())
+	model.CreatePermissionsForNewGameServer(group.ID, host.ID, gameServer.ID)
 
 	lib.MustEncode(json.NewEncoder(w),
-		response.ID{ID: gameServer.ID.String()})
+		response.ID{ID: gameServer.ID})
 }
 
 // @Router /host/{id}/server [get]
@@ -90,23 +93,21 @@ func Create(w http.ResponseWriter, r *http.Request) {
 // @Accept json
 // @Produce json
 // @Success 200 {object} response.GameServerList
-// @Failure 400 {object} handler.JsonError
+// @Failure 400 {object} response.JsonError
 // @Security ApiKey
 func ListByHostId(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	hostId := params["id"]
 
-	host := model.GetHost(model.DB, hostId)
+	host := model.GetHost(hostId)
 	if host == nil {
-		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: ecode.HostNotFound})
+		lib.ReturnError(w, http.StatusNoContent, ecode.HostNotFound, nil)
 		return
 	}
 
-	gameServers := model.GetGameServersByHostId(model.DB, host.ID.String())
+	gameServers := model.GetGameServersByHostId(host.ID)
 	if gameServers == nil {
-		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: ecode.GsNotFound})
+		lib.ReturnError(w, http.StatusNoContent, ecode.GsNotFound, nil)
 		return
 	}
 
@@ -121,12 +122,16 @@ func ListByHostId(w http.ResponseWriter, r *http.Request) {
 // @Accept json
 // @Produce json
 // @Success 200 {object} response.GameServerList
-// @Failure 400 {object} handler.JsonError
+// @Failure 400 {object} response.JsonError
 // @Security ApiKey
 func ListByUser(w http.ResponseWriter, r *http.Request) {
 	user := context.Get(r, "user").(model.User)
 
-	gameServers := model.GetUserGameServers(model.DB, user.ID.String())
+	gameServers := model.GetUserGameServers(user.ID)
+	if gameServers == nil {
+		lib.MustEncode(json.NewEncoder(w), response.GameServerList{GameServers: nil})
+		return
+	}
 
 	lib.MustEncode(json.NewEncoder(w), response.GameServerList{GameServers: *gameServers})
 }
@@ -140,11 +145,11 @@ func ListByUser(w http.ResponseWriter, r *http.Request) {
 // @Param host_id path string true "Host ID"
 // @Param server_id path string true "Game Server ID"
 // @Success 200 {object} response.GameServer
-// @Failure 400 {object} handler.JsonError
+// @Failure 400 {object} response.JsonError
 // @Security ApiKey
 func Get(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	gameServer := model.GetGameServerByGsIdAndHostId(model.DB, params["server_id"], params["host_id"])
+	gameServer := model.GetGameServerByGsIdAndHostId(params["server_id"], params["host_id"])
 	lib.MustEncode(json.NewEncoder(w), response.GameServer{GameServer: *gameServer})
 }
 
@@ -152,10 +157,9 @@ func ConsoleLog(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	gameServerId := params["server_id"]
 
-	logs := model.GetLogsByGameServer(model.DB, gameServerId, 20)
+	logs := model.GetLogsByGameServer(gameServerId, 20)
 	if logs == nil {
-		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: ecode.GsNoLogs})
+		lib.ReturnError(w, http.StatusNoContent, ecode.GsNoLogs, nil)
 		return
 	}
 
@@ -174,18 +178,17 @@ func PutLogs(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Param host_id path string true "Host ID"
 // @Param server_id path string true "Game Server ID"
-// @Success 200 {object} handler.JsonSuccess
-// @Failure 400 {object} handler.JsonError
+// @Success 200 {object} response.JsonSuccess
+// @Failure 400 {object} response.JsonError
 // @Security ApiKey
 func Remove(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	gameServerId := params["server_id"]
 	err := gameserver.Remove(gameServerId)
 	if err != nil {
-		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: ecode.GsRemove})
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.GsRemove, err)
 		return
 	}
 
-	lib.MustEncode(json.NewEncoder(w), handler.JsonSuccess{Message: "Removing game server"})
+	lib.MustEncode(json.NewEncoder(w), response.JsonSuccess{Message: "Removing game server"})
 }

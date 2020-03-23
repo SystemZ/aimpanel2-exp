@@ -2,8 +2,6 @@ package model
 
 import (
 	"github.com/dgrijalva/jwt-go"
-	"github.com/gofrs/uuid"
-	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"os"
@@ -11,28 +9,12 @@ import (
 )
 
 type User struct {
-	ID uuid.UUID `json:"id" gorm:"primary_key;type:varchar(36)"`
+	Base
 
-	Username string `gorm:"column:username" json:"username"`
-
-	PasswordHash string `gorm:"column:password_hash" json:"-"`
-
-	Email string `gorm:"column:email" json:"email"`
-
-	CreatedAt time.Time  `json:"created_at"`
-	UpdatedAt time.Time  `json:"-"`
-	DeletedAt *time.Time `json:"-"`
-
+	Username     string `json:"username"`
+	PasswordHash string `json:"password_hash"`
+	Email        string `json:"email"`
 	//TODO: plan_id
-}
-
-func (u *User) BeforeCreate(scope *gorm.Scope) error {
-	uuidGen, err := uuid.NewV4()
-	if err != nil {
-		log.Println(err)
-	}
-	scope.SetColumn("ID", uuidGen)
-	return nil
 }
 
 func (u *User) HashPassword(password string) string {
@@ -43,7 +25,7 @@ func (u *User) HashPassword(password string) string {
 	return string(bytes)
 }
 
-func (u *User) CheckPassword(password string) bool {
+func (u *User) IsPasswordOk(password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(u.PasswordHash), []byte(password))
 	return err == nil
 }
@@ -59,19 +41,15 @@ func (u *User) GenerateJWT() (string, error) {
 	return tokenString, err
 }
 
-//func (u *User) GetHost(db *gorm.DB, hostId string) *Host {
-//	var host Host
-//	if db.Where("id = ? and user_id = ?", hostId, u.ID).First(&host).RecordNotFound() {
-//		return nil
-//	}
-//	return &host
-//}
-//
-//func (u *User) GetHosts(db *gorm.DB, hostId string) *[]Host {
-//	var hosts []Host
-//
-//	if db.Where("user_id = ?", u.ID).Find(&hosts).RecordNotFound() {
-//		return nil
-//	}
-//	return &hosts
-//}
+func GetUser(id string) *User {
+	var user User
+	err := GetOneS(&user, map[string]interface{}{
+		"doc_type": "user",
+		"_id":      id,
+	})
+	if err != nil {
+		return nil
+	}
+
+	return &user
+}
