@@ -53,6 +53,6 @@ func init() {
 	viper.SetDefault("UPDATE_TOKEN", "")
 	UPDATE_TOKEN = viper.GetString("UPDATE_TOKEN")
 
-	viper.SetDefault("NODE_ID", 1)
+	viper.SetDefault("NODE_ID", 0)
 	NODE_ID = viper.GetInt64("NODE_ID")
 }
