@@ -24,6 +24,7 @@ type Permission struct {
 	Endpoint string `gorm:"column:endpoint" json:"endpoint"`
 }
 
+//TODO verify it for security vulnerability
 func GetPermisionsByEndpointRegex(endpoint string) []Permission {
 	var permissions []Permission
 	err := Get(&permissions, map[string]interface{}{
