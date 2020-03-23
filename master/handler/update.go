@@ -25,9 +25,7 @@ func NewVersion(w http.ResponseWriter, r *http.Request) {
 	data := &NewVersionReq{}
 	err := json.NewDecoder(r.Body).Decode(data)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: ecode.JsonDecode})
+		lib.ReturnError(w, http.StatusBadRequest, ecode.JsonDecode, err)
 		return
 	}
 

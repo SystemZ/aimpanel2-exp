@@ -6,6 +6,7 @@ import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib/ecode"
+	"gitlab.com/systemz/aimpanel2/lib/response"
 	"io"
 	"io/ioutil"
 	"math/rand"
@@ -107,4 +108,12 @@ func SendTaskData(url string, token string, jsonStr string) (int, error) {
 	defer res.Body.Close()
 
 	return res.StatusCode, nil
+}
+
+func ReturnError(w http.ResponseWriter, httpCode int, errorCode int, err error) {
+	if err != nil {
+		log.Warn(err)
+	}
+	w.WriteHeader(httpCode)
+	MustEncode(json.NewEncoder(w), response.JsonError{ErrorCode: errorCode})
 }

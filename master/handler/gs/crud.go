@@ -8,7 +8,6 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib/ecode"
 	"gitlab.com/systemz/aimpanel2/lib/game"
 	"gitlab.com/systemz/aimpanel2/lib/request"
-	"gitlab.com/systemz/aimpanel2/master/handler"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"gitlab.com/systemz/aimpanel2/master/response"
 	"gitlab.com/systemz/aimpanel2/master/service/gameserver"
@@ -33,8 +32,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	data := &request.GameServerCreate{}
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
-		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: ecode.JsonDecode})
+		lib.ReturnError(w, http.StatusBadRequest, ecode.JsonDecode, nil)
 		return
 	}
 
@@ -49,8 +47,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	//Check if host exist
 	host := model.GetHost(hostId)
 	if host == nil {
-		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: ecode.HostNotFound})
+		lib.ReturnError(w, http.StatusBadRequest, ecode.HostNotFound, nil)
 		return
 	}
 
@@ -70,8 +67,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	//Save game server to db
 	err = gameServer.Put(&gameServer)
 	if err != nil {
-		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: ecode.DbError})
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, err)
 		return
 	}
 
@@ -79,8 +75,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	user := context.Get(r, "user").(model.User)
 	group := model.GetGroup("USER-" + user.ID)
 	if group == nil {
-		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: ecode.GroupNotFound})
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.GroupNotFound, nil)
 		return
 	}
 
@@ -106,15 +101,13 @@ func ListByHostId(w http.ResponseWriter, r *http.Request) {
 
 	host := model.GetHost(hostId)
 	if host == nil {
-		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: ecode.HostNotFound})
+		lib.ReturnError(w, http.StatusNoContent, ecode.HostNotFound, nil)
 		return
 	}
 
 	gameServers := model.GetGameServersByHostId(host.ID)
 	if gameServers == nil {
-		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: ecode.GsNotFound})
+		lib.ReturnError(w, http.StatusNoContent, ecode.GsNotFound, nil)
 		return
 	}
 
@@ -166,8 +159,7 @@ func ConsoleLog(w http.ResponseWriter, r *http.Request) {
 
 	logs := model.GetLogsByGameServer(gameServerId, 20)
 	if logs == nil {
-		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: ecode.GsNoLogs})
+		lib.ReturnError(w, http.StatusNoContent, ecode.GsNoLogs, nil)
 		return
 	}
 
@@ -194,10 +186,9 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 	gameServerId := params["server_id"]
 	err := gameserver.Remove(gameServerId)
 	if err != nil {
-		lib.MustEncode(json.NewEncoder(w),
-			handler.JsonError{ErrorCode: ecode.GsRemove})
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.GsRemove, err)
 		return
 	}
 
-	lib.MustEncode(json.NewEncoder(w), handler.JsonSuccess{Message: "Removing game server"})
+	lib.MustEncode(json.NewEncoder(w), response.JsonSuccess{Message: "Removing game server"})
 }

@@ -18,15 +18,13 @@ func UserChangePassword(w http.ResponseWriter, r *http.Request) {
 	data := &request.UserChangePassword{}
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
-		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: ecode.JsonDecode})
+		lib.ReturnError(w, http.StatusBadRequest, ecode.JsonDecode, err)
 		return
 	}
 
 	errCode := userService.ChangePassword(data, &user)
 	if errCode != ecode.NoError {
-		w.WriteHeader(http.StatusBadRequest)
-		lib.MustEncode(json.NewEncoder(w), JsonError{ErrorCode: errCode})
+		lib.ReturnError(w, http.StatusInternalServerError, errCode, err)
 		return
 	}
 
@@ -39,15 +37,13 @@ func UserChangeEmail(w http.ResponseWriter, r *http.Request) {
 	data := &request.UserChangeEmail{}
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
-		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: ecode.JsonDecode})
+		lib.ReturnError(w, http.StatusBadRequest, ecode.JsonDecode, err)
 		return
 	}
 
 	errCode := userService.ChangeEmail(data, &user)
 	if errCode != ecode.NoError {
-		w.WriteHeader(http.StatusBadRequest)
-		lib.MustEncode(json.NewEncoder(w), JsonError{ErrorCode: errCode})
+		lib.ReturnError(w, http.StatusBadRequest, errCode, err)
 		return
 	}
 

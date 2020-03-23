@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/ecode"
 	"gitlab.com/systemz/aimpanel2/lib/request"
@@ -45,9 +44,7 @@ func HostDetails(w http.ResponseWriter, r *http.Request) {
 
 	h := model.GetHost(params["id"])
 	if h == nil {
-		w.WriteHeader(http.StatusBadRequest)
-		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: ecode.HostNotFound})
+		lib.ReturnError(w, http.StatusBadRequest, ecode.HostNotFound, nil)
 		return
 	}
 
@@ -70,15 +67,13 @@ func HostCreate(w http.ResponseWriter, r *http.Request) {
 	data := &request.HostCreate{}
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
-		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: ecode.JsonDecode})
+		lib.ReturnError(w, http.StatusBadRequest, ecode.JsonDecode, err)
 		return
 	}
 
 	h, errCode := host.Create(data, user.ID)
 	if errCode != ecode.NoError {
-		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: errCode})
+		lib.ReturnError(w, http.StatusInternalServerError, errCode, nil)
 		return
 	}
 
@@ -116,9 +111,7 @@ func HostRemove(w http.ResponseWriter, r *http.Request) {
 
 	errCode := host.Remove(params["id"])
 	if errCode != ecode.NoError {
-		w.WriteHeader(http.StatusBadRequest)
-		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: errCode})
+		lib.ReturnError(w, http.StatusBadRequest, errCode, nil)
 		return
 	}
 
@@ -130,9 +123,7 @@ func HostAuth(w http.ResponseWriter, r *http.Request) {
 
 	token, errCode := host.Auth(params["token"])
 	if errCode != ecode.NoError {
-		w.WriteHeader(http.StatusBadRequest)
-		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: errCode})
+		lib.ReturnError(w, http.StatusBadRequest, errCode, nil)
 		return
 	}
 
@@ -146,11 +137,7 @@ func HostUpdate(w http.ResponseWriter, r *http.Request) {
 
 	err := gameserver.Update(hostId)
 	if err != nil {
-		logrus.Error(err)
-
-		w.WriteHeader(http.StatusInternalServerError)
-		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: ecode.GsUpdate})
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.GsUpdate, err)
 		return
 	}
 

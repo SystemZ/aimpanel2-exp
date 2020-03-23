@@ -9,6 +9,10 @@ type Token struct {
 	Token string `json:"token"`
 }
 
+type JsonSuccess struct {
+	Message string `json:"message" example:""`
+}
+
 type Game struct {
 	//ID of the game
 	Id uint `json:"id" example:"1"`
