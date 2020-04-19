@@ -19,6 +19,7 @@ require (
 	github.com/gorilla/mux v1.7.3
 	github.com/inconshreveable/go-update v0.0.0-20160112193335-8152e7eb6ccf
 	github.com/jinzhu/gorm v1.9.11
+	github.com/jpillora/backoff v1.0.0
 	github.com/klauspost/compress v1.9.4 // indirect
 	github.com/klauspost/pgzip v1.2.1
 	github.com/r3labs/sse v0.0.0-20191214223212-f0cc80f53f80
@@ -34,4 +35,5 @@ require (
 	golang.org/x/net v0.0.0-20200202094626-16171245cfb2
 	golang.org/x/oauth2 v0.0.0-20190226205417-e64efc72b421
 	google.golang.org/api v0.3.1
+	google.golang.org/grpc v1.21.0 // indirect
 )
