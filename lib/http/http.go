@@ -11,8 +11,8 @@ import (
 )
 
 var b = &backoff.Backoff{
-	Min:    200 * time.Millisecond,
-	Max:    60 * time.Second,
+	Min:    2 * time.Second,
+	Max:    1 * time.Minute,
 	Factor: 2,
 	Jitter: true,
 }

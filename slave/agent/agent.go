@@ -1,14 +1,13 @@
 package agent
 
 import (
-	"encoding/json"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
+	"gitlab.com/systemz/aimpanel2/lib/http"
 	"gitlab.com/systemz/aimpanel2/lib/response"
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/slave/config"
 	"gitlab.com/systemz/aimpanel2/slave/model"
-	"net/http"
 )
 
 var (
@@ -21,15 +20,10 @@ func Start(hostToken string) {
 	logrus.Info("Starting Agent Version." + config.GIT_COMMIT)
 	config.HOST_TOKEN = hostToken
 
-	resp, err := http.Get(config.API_URL + "/v1/host/auth/" + config.HOST_TOKEN)
+	var token response.Token
+	_, err := http.Get(config.API_URL+"/v1/host/auth/"+config.HOST_TOKEN, &token)
 	if err != nil {
 		lib.FailOnError(err, "Failed to get host token")
-	}
-
-	var token response.Token
-	err = json.NewDecoder(resp.Body).Decode(&token)
-	if err != nil {
-		lib.FailOnError(err, "Failed to decode credentials json")
 	}
 	config.API_TOKEN = token.Token
 
