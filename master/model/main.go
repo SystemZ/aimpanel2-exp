@@ -1,53 +1,38 @@
 package model
 
 import (
+	"context"
 	"fmt"
 	"github.com/go-redis/redis"
-	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/master/config"
+
+	_ "github.com/go-kivik/couchdb/v3" // The CouchDB driver
+	"github.com/go-kivik/kivik/v3"
+
+	"github.com/bwmarrin/snowflake"
 )
 
 var (
-	DB    *gorm.DB
-	Redis *redis.Client
+	Redis     *redis.Client
+	DB        *kivik.DB
+	Snowflake *snowflake.Node
 )
 
-func InitMysql() *gorm.DB {
-	db, err := gorm.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True", config.DB_USERNAME, config.DB_PASSWORD, config.DB_HOST, config.DB_PORT, config.DB_NAME))
+func InitDB() *kivik.DB {
+	client, err := kivik.New("couch", fmt.Sprintf("http://%s:%s@%s:%s/", config.DB_USERNAME, config.DB_PASSWORD, config.DB_HOST, config.DB_PORT))
 	if err != nil {
 		logrus.Error(err.Error())
 		panic("Failed to connect to database")
 	}
 
-	err = db.DB().Ping()
+	_, err = client.Ping(context.TODO())
 	if err != nil {
 		logrus.Panic("Ping to db failed")
 	}
 
-	//https://github.com/go-sql-driver/mysql/issues/257
-	db.DB().SetMaxIdleConns(0)
-	db.LogMode(config.DEV_MODE)
-
-	db.AutoMigrate(&User{})
-	db.AutoMigrate(&Host{})
-
-	db.AutoMigrate(&GameServer{})
-	db.AutoMigrate(&GameServerLog{})
-
-	db.AutoMigrate(&GameFile{})
-
-	db.AutoMigrate(&MetricHost{})
-	db.AutoMigrate(&MetricGameServer{})
-
-	db.AutoMigrate(&Group{})
-	db.AutoMigrate(&GroupUser{})
-
-	db.AutoMigrate(&Permission{})
-
-	db.AutoMigrate(&Event{})
-
+	db := client.DB(context.TODO(), config.DB_NAME)
 	logrus.Info("Connection to database seems OK!")
 
 	return db
@@ -72,4 +57,14 @@ func InitRedis() {
 	}
 
 	logrus.Info("Connection to Redis seems OK!")
+}
+
+func InitSnowflake() *snowflake.Node {
+	node, err := snowflake.NewNode(config.NODE_ID)
+	if err != nil {
+		logrus.Error(err.Error())
+		panic("Failed to set snowflake node")
+	}
+
+	return node
 }

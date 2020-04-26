@@ -18,15 +18,13 @@ func UserChangePassword(w http.ResponseWriter, r *http.Request) {
 	data := &request.UserChangePassword{}
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
-		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: ecode.JsonDecode})
+		lib.ReturnError(w, http.StatusBadRequest, ecode.JsonDecode, err)
 		return
 	}
 
 	errCode := userService.ChangePassword(data, &user)
 	if errCode != ecode.NoError {
-		w.WriteHeader(http.StatusBadRequest)
-		lib.MustEncode(json.NewEncoder(w), JsonError{ErrorCode: errCode})
+		lib.ReturnError(w, http.StatusInternalServerError, errCode, err)
 		return
 	}
 
@@ -39,15 +37,13 @@ func UserChangeEmail(w http.ResponseWriter, r *http.Request) {
 	data := &request.UserChangeEmail{}
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
-		lib.MustEncode(json.NewEncoder(w),
-			JsonError{ErrorCode: ecode.JsonDecode})
+		lib.ReturnError(w, http.StatusBadRequest, ecode.JsonDecode, err)
 		return
 	}
 
 	errCode := userService.ChangeEmail(data, &user)
 	if errCode != ecode.NoError {
-		w.WriteHeader(http.StatusBadRequest)
-		lib.MustEncode(json.NewEncoder(w), JsonError{ErrorCode: errCode})
+		lib.ReturnError(w, http.StatusBadRequest, errCode, err)
 		return
 	}
 
@@ -60,7 +56,7 @@ func UserChangeEmail(w http.ResponseWriter, r *http.Request) {
 // @Accept json
 // @Produce json
 // @Success 200 {object} response.UserProfile
-// @Failure 400 {object} JsonError
+// @Failure 400 {object} response.JsonError
 // @Router /me [get]
 // @Security ApiKey
 func UserProfile(w http.ResponseWriter, r *http.Request) {
@@ -68,7 +64,7 @@ func UserProfile(w http.ResponseWriter, r *http.Request) {
 
 	userProfile := response.UserProfileResponse{
 		User: response.UserProfile{
-			ID:       user.ID,
+			//ID:       user.ID,
 			Username: user.Username,
 			Email:    user.Email,
 		},

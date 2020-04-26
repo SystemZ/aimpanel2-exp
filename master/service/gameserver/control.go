@@ -16,12 +16,12 @@ import (
 )
 
 func Start(gsId string) error {
-	gameServer := model.GetGameServer(model.DB, gsId)
+	gameServer := model.GetGameServer(gsId)
 	if gameServer == nil {
 		return errors.New("getting game server from db failed")
 	}
 
-	hostToken := model.GetHostToken(model.DB, gameServer.HostId.String())
+	hostToken := model.GetHostToken(gameServer.HostId)
 	if hostToken == "" {
 		return errors.New("getting host token from db failed")
 	}
@@ -43,18 +43,18 @@ func Start(gsId string) error {
 
 	channel.SendMessage(sse.NewMessage("", taskMsgStr, strconv.Itoa(task.WRAPPER_START)))
 
-	model.SetGsStart(model.Redis, gameServer.ID.String(), 1)
+	model.SetGsStart(model.Redis, gameServer.ID, 1)
 
 	return nil
 }
 
 func Stop(gsId string, stopType uint) error {
-	gameServer := model.GetGameServer(model.DB, gsId)
+	gameServer := model.GetGameServer(gsId)
 	if gameServer == nil {
 		return errors.New("error when getting game server from db")
 	}
 
-	hostToken := model.GetHostToken(model.DB, gameServer.HostId.String())
+	hostToken := model.GetHostToken(gameServer.HostId)
 	if hostToken == "" {
 		return errors.New("error when getting host token from db")
 	}
@@ -84,17 +84,17 @@ func Stop(gsId string, stopType uint) error {
 }
 
 func Install(gsId string) error {
-	gameServer := model.GetGameServer(model.DB, gsId)
+	gameServer := model.GetGameServer(gsId)
 	if gameServer == nil {
 		return errors.New("error when getting game server from db")
 	}
 
-	hostToken := model.GetHostToken(model.DB, gameServer.HostId.String())
+	hostToken := model.GetHostToken(gameServer.HostId)
 	if hostToken == "" {
 		return errors.New("error when getting host token from db")
 	}
 
-	gameFile := model.GetGameFileByGameIdAndVersion(model.DB, gameServer.GameId, gameServer.GameVersion)
+	gameFile := model.GetGameFileByGameIdAndVersion(gameServer.GameId, gameServer.GameVersion)
 	if gameFile == nil {
 		return errors.New("error when getting game file from db")
 	}
@@ -128,12 +128,12 @@ func Install(gsId string) error {
 }
 
 func SendCommand(gsId string, command string) error {
-	gameServer := model.GetGameServer(model.DB, gsId)
+	gameServer := model.GetGameServer(gsId)
 	if gameServer == nil {
 		return &lib.Error{ErrorCode: ecode.GsNotFound}
 	}
 
-	hostToken := model.GetHostToken(model.DB, gameServer.HostId.String())
+	hostToken := model.GetHostToken(gameServer.HostId)
 	if hostToken == "" {
 		return errors.New("error when getting host token from db")
 	}
@@ -160,17 +160,17 @@ func SendCommand(gsId string, command string) error {
 }
 
 func Restart(gsId string, stopType uint) error {
-	gameServer := model.GetGameServer(model.DB, gsId)
+	gameServer := model.GetGameServer(gsId)
 	if gameServer == nil {
 		return &lib.Error{ErrorCode: ecode.GsNotFound}
 	}
 
-	hostToken := model.GetHostToken(model.DB, gameServer.HostId.String())
+	hostToken := model.GetHostToken(gameServer.HostId)
 	if hostToken == "" {
 		return errors.New("error when getting host token from db")
 	}
 
-	model.SetGsRestart(model.Redis, gameServer.ID.String(), 0)
+	model.SetGsRestart(model.Redis, gameServer.ID, 0)
 
 	channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken)
 	if !ok {
@@ -193,18 +193,18 @@ func Restart(gsId string, stopType uint) error {
 
 	channel.SendMessage(sse.NewMessage("", taskMsgStr, strconv.Itoa(taskMsg.TaskId)))
 
-	model.SetGsRestart(model.Redis, gameServer.ID.String(), 1)
+	model.SetGsRestart(model.Redis, gameServer.ID, 1)
 
 	go func() {
 		<-time.After(time.Duration(gameServer.StopTimeout) * time.Second)
 
-		val, err := model.GetGsRestart(model.Redis, gameServer.ID.String())
+		val, err := model.GetGsRestart(model.Redis, gameServer.ID)
 		if err != nil {
 			return
 		}
 
 		if val == 1 {
-			model.SetGsRestart(model.Redis, gameServer.ID.String(), -1)
+			model.SetGsRestart(model.Redis, gameServer.ID, -1)
 		}
 	}()
 
@@ -212,12 +212,12 @@ func Restart(gsId string, stopType uint) error {
 }
 
 func Remove(gsId string) error {
-	gameServer := model.GetGameServer(model.DB, gsId)
+	gameServer := model.GetGameServer(gsId)
 	if gameServer == nil {
 		return &lib.Error{ErrorCode: ecode.GsNotFound}
 	}
 
-	hostToken := model.GetHostToken(model.DB, gameServer.HostId.String())
+	hostToken := model.GetHostToken(gameServer.HostId)
 	if hostToken == "" {
 		return &lib.Error{ErrorCode: ecode.GameNotFound}
 	}
@@ -254,14 +254,24 @@ func Remove(gsId string) error {
 	}
 	channel.SendMessage(sse.NewMessage("", taskMsgStr, strconv.Itoa(taskMsg.TaskId)))
 
-	model.DB.Where("endpoint LIKE ?", "/v1/host/"+gameServer.HostId.String()+"/server/"+gsId+"%").Delete(&model.Permission{})
-	model.DB.Delete(&gameServer)
+	permissions := model.GetPermisionsByEndpointRegex("/v1/host/" + gameServer.HostId + "/server/" + gsId + "%")
+	for _, perm := range permissions {
+		err := model.Delete(perm.ID, perm.Rev)
+		if err != nil {
+			return err
+		}
+	}
+
+	err = model.Delete(gameServer.ID, gameServer.Rev)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
 
 func Update(hostId string) error {
-	hostToken := model.GetHostToken(model.DB, hostId)
+	hostToken := model.GetHostToken(hostId)
 	if hostToken == "" {
 		return errors.New("error when getting host token from db")
 	}

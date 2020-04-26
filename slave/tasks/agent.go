@@ -1,44 +1,60 @@
 package tasks
 
 import (
-	"bytes"
 	"github.com/inconshreveable/go-update"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/slave/config"
 	"gitlab.com/systemz/aimpanel2/slave/model"
-	"io"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 )
 
 // tasks below will be eventually finished by agent
-
 func StartWrapper(taskMsg task.Message) {
-	//TODO: move gsID to env variable
-	cmd := exec.Command("slave", "wrapper", taskMsg.GameServerID)
-
-	cmd.Env = os.Environ()
-	cmd.Env = append(cmd.Env, "HOST_TOKEN="+config.HOST_TOKEN)
-	cmd.Env = append(cmd.Env, "API_TOKEN="+config.API_TOKEN)
-
-	//TODO: FOR TESTING ONLY
-	var stdBuffer bytes.Buffer
-	mw := io.MultiWriter(os.Stdout, &stdBuffer)
-	cmd.Stdout = mw
-	cmd.Stderr = mw
-
-	if err := cmd.Start(); err != nil {
-		logrus.Error(err)
+	cred := &syscall.Credential{
+		Uid:         uint32(syscall.Getuid()),
+		Gid:         uint32(syscall.Getgid()),
+		Groups:      []uint32{},
+		NoSetGroups: true,
 	}
 
-	cmd.Process.Release()
+	sysproc := &syscall.SysProcAttr{
+		Credential: cred,
+		Noctty:     true,
+		Setpgid:    true,
+	}
+
+	attr := os.ProcAttr{
+		Dir: ".",
+		Env: os.Environ(),
+		Files: []*os.File{
+			os.Stdin,
+			nil,
+			nil,
+		},
+		Sys: sysproc,
+	}
+	attr.Env = append(attr.Env, "HOST_TOKEN="+config.HOST_TOKEN)
+	attr.Env = append(attr.Env, "API_TOKEN="+config.API_TOKEN)
+
+	//TODO: move gsID to env variable
+	process, err := os.StartProcess("/usr/local/bin/slave", []string{"/usr/local/bin/slave", "wrapper", taskMsg.GameServerID}, &attr)
+	if err != nil {
+		logrus.Error(err)
+	}
+	go func() {
+		_, err := process.Wait()
+		if err != nil {
+			logrus.Error(err)
+		}
+	}()
 }
 
 func GsRemove(taskMsg task.Message) {
@@ -148,7 +164,7 @@ func AgentShutdown() {
 		logrus.Error(err)
 	}
 
-	GsStop("all")
+	//GsStop("all")
 
 	<-time.After(5 * time.Second)
 

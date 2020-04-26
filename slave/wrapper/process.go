@@ -235,9 +235,11 @@ func (p *Process) RedisTaskHandler(taskCh string, taskBody string) {
 	case task.GAME_STOP_SIGTERM:
 		logrus.Info("Got GAME_STOP_SIGTERM msg")
 		p.Kill(syscall.SIGTERM)
+		os.Exit(0)
 	case task.GAME_STOP_SIGKILL:
 		logrus.Info("Got GAME_STOP_SIGKILL msg")
 		p.Kill(syscall.SIGKILL)
+		os.Exit(0)
 	case task.GAME_COMMAND:
 		logrus.Info("Got GAME_COMMAND msg")
 		go func() { p.Input <- taskMsg.Body }()

@@ -1,15 +1,16 @@
 package lib
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib/ecode"
+	"gitlab.com/systemz/aimpanel2/lib/http"
+	"gitlab.com/systemz/aimpanel2/lib/response"
 	"io"
 	"io/ioutil"
 	"math/rand"
-	"net/http"
+	goHttp "net/http"
 	"os"
 	"time"
 )
@@ -62,11 +63,10 @@ func DownloadFile(url string, filepath string) error {
 	defer out.Close()
 
 	// Get the data
-	resp, err := http.Get(url)
+	resp, err := http.Get(url, nil)
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
 
 	// Write the body to file
 	_, err = io.Copy(out, resp.Body)
@@ -92,21 +92,20 @@ func CopyFile(source string, destination string) error {
 }
 
 func SendTaskData(url string, token string, jsonStr string) (int, error) {
-	req, err := http.NewRequest("POST", url, bytes.NewBufferString(jsonStr))
+	resp, err := http.Post(url, token, jsonStr)
 	if err != nil {
 		return 0, err
 	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+token)
 
-	client := &http.Client{}
-	res, err := client.Do(req)
+	return resp.StatusCode, nil
+}
+
+func ReturnError(w goHttp.ResponseWriter, httpCode int, errorCode int, err error) {
 	if err != nil {
-		return 0, err
+		log.Warn(err)
 	}
-	defer res.Body.Close()
-
-	return res.StatusCode, nil
+	w.WriteHeader(httpCode)
+	MustEncode(json.NewEncoder(w), response.JsonError{ErrorCode: errorCode})
 }
 
 func StringInSlice(a string, list []string) bool {

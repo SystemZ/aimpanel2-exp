@@ -36,9 +36,18 @@ services:
       - 8090:80
     depends_on:
       - redis
+  couchdb:
+    image: 'couchdb:2'
+    restart: always
+    environment:
+      - COUCHDB_USER=dev
+      - COUCHDB_PASSWORD=dev
+    ports:
+      - 5984:5984
+      - 4369:4369
+      - 9100:9100
 volumes:
   redis_data:
     driver: local
   mariadb:
     driver: local
-
