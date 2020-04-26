@@ -132,6 +132,10 @@ WantedBy=multi-user.target
 [Service]
 Type=simple
 User=aimpanel
+StandardInput=tty-force
+TTYPath=/dev/tty20
+StandardOutput=journal
+KillMode=process
 ExecStart=$AIMPANEL_BINARY_DIR/$AIMPANEL_BINARY_NAME agent $TOKEN
 WorkingDirectory=/opt/aimpanel/
 Restart=always
