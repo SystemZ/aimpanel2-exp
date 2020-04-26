@@ -94,7 +94,7 @@
                                 v-for="item in files.selected.children"
                                 v-if="item.info.is_dir"
                                 :key="item.info.name"
-                                @click="goToDirectory(item)"
+                                @click="files.selected = item"
                         >
                             <v-list-item-avatar>
                                 <v-icon class="grey lighten-1 white--text">
@@ -305,10 +305,6 @@
                 });
 
                 return node;
-            },
-            goToDirectory(item: Node) {
-                this.files.parent = this.files.selected.info.name;
-                this.files.selected = item;
             },
             goToParentDirectory() {
                 if(this.files.selected.parent_name === this.files.root.info.name) {
