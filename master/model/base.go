@@ -59,6 +59,8 @@ func Count(query map[string]interface{}) (int, error) {
 		return 0, err
 	}
 	count := 0
+	// release resources
+	defer rows.Close()
 	for rows.Next() {
 		count++
 	}
@@ -73,6 +75,8 @@ func Get(out interface{}, query map[string]interface{}) error {
 		return err
 	}
 	var result []interface{}
+	// release resources
+	defer rows.Close()
 	for rows.Next() {
 		var doc interface{}
 		if err := rows.ScanDoc(&doc); err != nil {
@@ -119,7 +123,8 @@ func GetOne(out interface{}, query map[string]interface{}) error {
 	if err != nil {
 		return err
 	}
-
+	// release resources
+	defer rows.Close()
 	for rows.Next() {
 		if err := rows.ScanDoc(&out); err != nil {
 			return err
