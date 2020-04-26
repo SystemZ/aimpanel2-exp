@@ -186,13 +186,12 @@ func FileList(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	gsId := params["server_id"]
 
-	err := gameserver.FileList(gsId)
+	files, err := gameserver.FileList(gsId)
 	if err != nil {
 		lib.ReturnError(w, http.StatusInternalServerError, ecode.GsFileList, err)
 		return
 	}
 
-	//subscribe to redis and return data
-
-	w.WriteHeader(http.StatusNoContent)
+	w.WriteHeader(http.StatusOK)
+	lib.MustEncode(json.NewEncoder(w), files)
 }

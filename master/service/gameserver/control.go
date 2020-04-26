@@ -7,6 +7,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/ecode"
+	"gitlab.com/systemz/aimpanel2/lib/filemanager"
 	"gitlab.com/systemz/aimpanel2/lib/game"
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/master/events"
@@ -307,20 +308,20 @@ func Update(hostId string) error {
 	return nil
 }
 
-func FileList(gsId string) error {
+func FileList(gsId string) (*filemanager.Node, error) {
 	gameServer := model.GetGameServer(gsId)
 	if gameServer == nil {
-		return errors.New("error when getting game server from db")
+		return nil, errors.New("error when getting game server from db")
 	}
 
 	hostToken := model.GetHostToken(gameServer.HostId)
 	if hostToken == "" {
-		return errors.New("error when getting host token from db")
+		return nil, errors.New("error when getting host token from db")
 	}
 
 	channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken)
 	if !ok {
-		return errors.New("host is not turned on")
+		return nil, errors.New("host is not turned on")
 	}
 
 	taskMsg := task.Message{
@@ -330,10 +331,30 @@ func FileList(gsId string) error {
 
 	taskMsgStr, err := taskMsg.Serialize()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	channel.SendMessage(sse.NewMessage("", taskMsgStr, strconv.Itoa(taskMsg.TaskId)))
 
-	return nil
+	//wait for files
+	pubsub, err := model.GsFilesSubscribe(model.Redis, gsId)
+	if err != nil {
+		return nil, err
+	}
+	ch := pubsub.Channel()
+
+	var filesStr string
+	for msg := range ch {
+		filesStr = msg.Payload
+		break
+	}
+	_ = pubsub.Close()
+
+	var files filemanager.Node
+	err = json.Unmarshal([]byte(filesStr), &files)
+	if err != nil {
+		return nil, err
+	}
+
+	return &files, err
 }

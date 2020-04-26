@@ -116,7 +116,10 @@ func HostData(hostToken string, taskMsg *task.Message) error {
 		//})
 	case task.GAME_FILE_LIST:
 		logrus.Info("GAME_FILE_LIST")
-		model.SetGsFiles(model.Redis, taskMsg.GameServerID, &taskMsg.Files)
+		err := model.GsFilesPublish(model.Redis, taskMsg.GameServerID, &taskMsg.Files)
+		if err != nil {
+			logrus.Error(err)
+		}
 	}
 
 	return nil
