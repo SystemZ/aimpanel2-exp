@@ -69,8 +69,11 @@
             </v-col>
         </v-row>
         <v-row class="mb-6">
-            <v-col cols="3">
+            <v-col cols="12" md="12" sm="12" xs="12">
+                <v-card>
+                    <v-card-title>Files</v-card-title>
 
+                </v-card>
             </v-col>
         </v-row>
         <v-snackbar
@@ -116,6 +119,11 @@
             installSnackbar: false,
             removeSnackbar: false,
             stream: '' as any,
+
+            files: {
+                files: {},
+                selectedDirectory: {}
+            }
         }),
         mounted() {
             this.serverId = this.$route.params.server_id;
@@ -131,6 +139,8 @@
             if(this.stream === '' || this.stream === undefined) {
                 this.setupStream()
             }
+
+            this.getFiles()
 
             // let source = new EventSource(process.env.VUE_APP_API_URL + this.serverUrl + '/console');
             // var self = this;
@@ -213,6 +223,14 @@
                     let data = atob(event.data);
                     this.logs.push(data)
                 }, false);
+            },
+            getFiles() {
+                this.$http.get(this.serverUrl + '/file/list').then(res => {
+                    this.files.files = res.data
+                }).catch(e => {
+                    this.$auth.checkResponse(e.response.status)
+                });
+
             }
         },
         beforeDestroy(): void {
