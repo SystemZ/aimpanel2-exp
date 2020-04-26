@@ -54,7 +54,7 @@
                 <v-card>
                     <v-card-title>Console</v-card-title>
                     <v-card class="pa-5">
-                        <span v-for="item in logs" :key="item">{{item}}<br/></span>
+                        <span v-for="item in logs">{{item}}<br/></span>
                     </v-card>
                     <v-card-actions>
                         <v-text-field full-width

@@ -26,7 +26,7 @@ func GetSlaveUrl(redis *redis.Client) (string, error) {
 }
 
 func SetGsStart(redis *redis.Client, gsId string, state int) {
-	redis.Set("gs_start_id"+gsId, state, 24*time.Hour)
+	redis.Set("gs_start_id_"+gsId, state, 24*time.Hour)
 }
 
 func GetGsStart(redis *redis.Client, gsId string) (int64, error) {

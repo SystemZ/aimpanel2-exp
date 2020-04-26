@@ -68,6 +68,13 @@ func listenerSse() {
 			logrus.Info("agent gs cmd requested")
 			tasks.GsCmd(taskMsg.GameServerID, taskMsg.Body)
 			logrus.Info("agent gs cmd finished")
+		case task.GAME_FILE_LIST:
+			// executed by agent
+			logrus.Info("agent gs file list requested")
+			tasks.GsFileList(taskMsg.GameServerID)
+			logrus.Info("agent gs file list finished")
+		default:
+			logrus.Info("Unknown task")
 		}
 	})
 	if err != nil {

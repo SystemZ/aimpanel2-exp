@@ -1,24 +1,5 @@
 version: "3.7"
 services:
-  database:
-    image: docker.io/bitnami/mariadb:10.1.37
-    environment:
-      - MARIADB_ROOT_PASSWORD=root
-      - MARIADB_DATABASE=dev
-      - MARIADB_USER=dev
-      - MARIADB_PASSWORD=dev
-    ports:
-      - 3306:3306
-    volumes:
-      - mariadb:/bitnami/mariadb
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    ports:
-      - 8080:80
-    environment:
-      - PMA_HOST=database
-      - PMA_USER=dev
-      - PMA_PASSWORD=dev
   redis:
     image: 'redis:5-alpine'
     environment:
@@ -36,18 +17,17 @@ services:
       - 8090:80
     depends_on:
       - redis
-  couchdb:
-    image: 'couchdb:2'
-    restart: always
-    environment:
-      - COUCHDB_USER=dev
-      - COUCHDB_PASSWORD=dev
-    ports:
-      - 5984:5984
-      - 4369:4369
-      - 9100:9100
+#  couchdb:
+#    hostname: couch
+#    image: 'couchdb:2'
+#    restart: always
+#    environment:
+#      - COUCHDB_USER=dev
+#      - COUCHDB_PASSWORD=dev
+#    ports:
+#      - 5984:5984
+#      - 4369:4369
+#      - 9100:9100
 volumes:
   redis_data:
-    driver: local
-  mariadb:
     driver: local
