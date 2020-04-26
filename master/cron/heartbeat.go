@@ -56,7 +56,7 @@ func CheckGSHeartbeat() {
 				if time.Since(heartbeatTime) > 10*time.Second {
 					if gs.State == 1 {
 						gs.State = 0
-						err := gs.Put(&gs)
+						err := gs.Update(&gs)
 						if err != nil {
 							logrus.Error(err)
 						}
@@ -65,7 +65,7 @@ func CheckGSHeartbeat() {
 				} else {
 					if gs.State == 0 {
 						gs.State = 1
-						err := gs.Put(&gs)
+						err := gs.Update(&gs)
 						if err != nil {
 							logrus.Error(err)
 						}

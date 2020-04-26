@@ -102,7 +102,7 @@ func HostData(hostToken string, taskMsg *task.Message) error {
 		host.KernelVersion = taskMsg.KernelVersion
 		host.KernelArch = taskMsg.KernelArch
 
-		err := host.Put(&host)
+		err := host.Update(&host)
 		if err != nil {
 			return err
 		}

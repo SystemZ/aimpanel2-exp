@@ -41,6 +41,18 @@ func (b *Base) Put(obj interface{}) error {
 	return nil
 }
 
+func (b *Base) Update(obj interface{}) error {
+	b.obj = &obj
+
+	rev, err := DB.Put(context.TODO(), b.ID, b.obj)
+	if err != nil {
+		return err
+	}
+	b.Rev = rev
+
+	return nil
+}
+
 func Count(query map[string]interface{}) (int, error) {
 	rows, err := DB.Find(context.TODO(), query)
 	if err != nil {

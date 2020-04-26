@@ -10,7 +10,7 @@ func ChangePassword(data *request.UserChangePassword, user *model.User) int {
 	if user.IsPasswordOk(data.Password) {
 		if data.NewPassword == data.NewPasswordRepeat {
 			user.PasswordHash = user.HashPassword(data.NewPassword)
-			err := user.Put(&user)
+			err := user.Update(&user)
 			if err != nil {
 				return ecode.DbSave
 			}
@@ -28,7 +28,7 @@ func ChangeEmail(data *request.UserChangeEmail, user *model.User) int {
 	if user.Email == data.Email {
 		if data.NewEmail == data.NewEmailRepeat {
 			user.Email = data.NewEmail
-			err := user.Put(&user)
+			err := user.Update(&user)
 			if err != nil {
 				return ecode.DbSave
 			}
