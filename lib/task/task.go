@@ -2,6 +2,7 @@ package task
 
 import (
 	"encoding/json"
+	"gitlab.com/systemz/aimpanel2/lib/filemanager"
 	"gitlab.com/systemz/aimpanel2/lib/game"
 	"gitlab.com/systemz/aimpanel2/master/model"
 )
@@ -12,6 +13,7 @@ const (
 	GAME_COMMAND
 	GAME_STOP_SIGKILL
 	GAME_STOP_SIGTERM
+	GAME_FILE_LIST
 
 	SLAVE_UPDATE
 
@@ -81,6 +83,8 @@ type Message struct {
 
 	Commit string `json:"commit,omitempty"`
 	Url    string `json:"url,omitempty"`
+
+	Files filemanager.Node `json:"files,omitempty"`
 
 	Timestamp int64 `json:"timestamp,omitempty"`
 }

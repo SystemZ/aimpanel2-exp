@@ -256,6 +256,20 @@ func CreatePermissionsForNewGameServer(groupId string, hostId string, gameServer
 	if err != nil {
 		logrus.Error(err)
 	}
+
+	perm = &Permission{
+		Base: Base{
+			DocType: "permission",
+		},
+		Name:     "File list",
+		Verb:     lib.GetVerbByName("GET"),
+		GroupId:  groupId,
+		Endpoint: "/v1/host/" + hostId + "/server/" + gameServerId + "/file/list",
+	}
+	err = perm.Put(&perm)
+	if err != nil {
+		logrus.Error(err)
+	}
 }
 
 // FIXME return errors

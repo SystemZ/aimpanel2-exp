@@ -54,7 +54,7 @@
                 <v-card>
                     <v-card-title>Console</v-card-title>
                     <v-card class="pa-5">
-                        <span v-for="item in logs" :key="item">{{item}}<br/></span>
+                        <span v-for="item in logs">{{item}}<br/></span>
                     </v-card>
                     <v-card-actions>
                         <v-text-field full-width
@@ -68,9 +68,79 @@
                 </v-card>
             </v-col>
         </v-row>
-        <v-row class="mb-6">
-            <v-col cols="3">
+        <v-row class="mb-6" v-if="files.selected">
+            <v-col cols="12" md="12" sm="12" xs="12">
+                <v-card>
+                    <v-card-title>Files</v-card-title>
 
+                    <v-list two-line subheader>
+                        <v-subheader inset>Folders</v-subheader>
+
+                        <v-list-item
+                            @click="goToParentDirectory()"
+                            v-if="files.selected.info.name !== files.root.info.name"
+                        >
+                            <v-list-item-avatar>
+                                <v-icon class="grey lighten-1 white--text">
+                                    fa-level-up
+                                </v-icon>
+                            </v-list-item-avatar>
+                            <v-list-item-content>
+                                <v-list-item-title>Go to parent directory</v-list-item-title>
+                            </v-list-item-content>
+                        </v-list-item>
+
+                        <v-list-item
+                                v-for="item in files.selected.children"
+                                v-if="item.info.is_dir"
+                                :key="item.info.name"
+                                @click="files.selected = item"
+                        >
+                            <v-list-item-avatar>
+                                <v-icon class="grey lighten-1 white--text">
+                                    fa-folder
+                                </v-icon>
+                            </v-list-item-avatar>
+
+                            <v-list-item-content>
+                                <v-list-item-title v-text="item.info.name"></v-list-item-title>
+                                <v-list-item-subtitle v-text="item.info.size"></v-list-item-subtitle>
+                            </v-list-item-content>
+
+                            <v-list-item-action>
+                                <v-btn icon>
+                                    <v-icon color="grey lighten-1">fa-info</v-icon>
+                                </v-btn>
+                            </v-list-item-action>
+                        </v-list-item>
+
+                        <v-divider inset></v-divider>
+
+                        <v-subheader inset>Files</v-subheader>
+
+                        <v-list-item
+                                v-for="item in files.selected.children"
+                                v-if="!item.info.is_dir"
+                                :key="item.info.name"
+                                @click=""
+                        >
+                            <v-list-item-avatar>
+                                <v-icon class="blue white--text">fa-file</v-icon>
+                            </v-list-item-avatar>
+
+                            <v-list-item-content>
+                                <v-list-item-title v-text="item.info.name"></v-list-item-title>
+                                <v-list-item-subtitle v-text="item.info.size"></v-list-item-subtitle>
+                            </v-list-item-content>
+
+                            <v-list-item-action>
+                                <v-btn icon>
+                                    <v-icon color="grey lighten-1">fa-info</v-icon>
+                                </v-btn>
+                            </v-list-item-action>
+                        </v-list-item>
+                    </v-list>
+                </v-card>
             </v-col>
         </v-row>
         <v-snackbar
@@ -102,6 +172,14 @@
 
 <script lang="ts">
     import Vue from 'vue';
+    import {Node} from "@/types/files";
+
+    interface FileRow {
+        icon: string,
+        iconClass: string,
+        title: string,
+        subtitle: string
+    }
 
     export default Vue.extend({
         name: 'game_server',
@@ -116,6 +194,11 @@
             installSnackbar: false,
             removeSnackbar: false,
             stream: '' as any,
+
+            files: {
+                root: {} as Node,
+                selected: {} as Node
+            }
         }),
         mounted() {
             this.serverId = this.$route.params.server_id;
@@ -128,21 +211,11 @@
                 this.$auth.checkResponse(e.response.status)
             });
 
-            if(this.stream === '' || this.stream === undefined) {
+            if (this.stream === '' || this.stream === undefined) {
                 this.setupStream()
             }
 
-            // let source = new EventSource(process.env.VUE_APP_API_URL + this.serverUrl + '/console');
-            // var self = this;
-            // source.onmessage = function (event) {
-            //     let str = atob(event.data);
-            //     self.logs.push(str)
-            // }
-            //
-            // this.updateLogs();
-            // this.timer = setInterval(() => {
-            //     this.updateLogs()
-            // }, 3 * 1000)
+            this.getFiles()
         },
         methods: {
             start() {
@@ -161,13 +234,6 @@
                     this.$auth.checkResponse(e.response.status)
                 })
             },
-            // updateLogs() {
-            //     this.$http.get(this.serverUrl + '/logs').then(res => {
-            //         this.logs = res.data.reverse();
-            //     }).catch(e => {
-            //         this.$auth.checkResponse(e.response.status)
-            //     })
-            // },
             sendMessage() {
                 this.$http.put(this.serverUrl + '/command', {
                     command: this.message
@@ -202,21 +268,55 @@
                 });
 
                 this.stream.onerror = (event: any) => {
-                   console.error(event);
+                    console.error(event);
                 };
 
                 this.stream.addEventListener('message', (event: any) => {
-                    if(event.data === 'heartbeat') {
+                    if (event.data === 'heartbeat') {
                         return
                     }
 
                     let data = atob(event.data);
                     this.logs.push(data)
                 }, false);
+            },
+            getFiles() {
+                this.$http.get(this.serverUrl + '/file/list').then(res => {
+                    this.files.root = res.data
+                    this.files.selected = this.files.root
+                }).catch(e => {
+                    this.$auth.checkResponse(e.response.status)
+                });
+            },
+            getParent(root: Node, name: string) {
+                let node = null;
+                if(name === '') {
+                    return root;
+                }
+
+                root.children.some(n => {
+                    if(n.info.name === name) {
+                        return node = n;
+                    }
+
+                    if(n.children) {
+                        return node = this.getParent(n, name)
+                    }
+                });
+
+                return node;
+            },
+            goToParentDirectory() {
+                if(this.files.selected.parent_name === this.files.root.info.name) {
+                    this.files.selected = this.files.root;
+                } else {
+                    let node = this.getParent(this.files.root, this.files.selected.parent_name)
+                    this.files.selected = node as Node;
+                }
             }
         },
         beforeDestroy(): void {
             this.stream.close()
-        }
+        },
     });
 </script>

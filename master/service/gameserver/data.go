@@ -102,7 +102,7 @@ func HostData(hostToken string, taskMsg *task.Message) error {
 		host.KernelVersion = taskMsg.KernelVersion
 		host.KernelArch = taskMsg.KernelArch
 
-		err := host.Put(&host)
+		err := host.Update(&host)
 		if err != nil {
 			return err
 		}
@@ -114,6 +114,12 @@ func HostData(hostToken string, taskMsg *task.Message) error {
 		//	EventId: event.AGENT_SHUTDOWN,
 		//	HostId:  host.ID,
 		//})
+	case task.GAME_FILE_LIST:
+		logrus.Info("GAME_FILE_LIST")
+		err := model.GsFilesPublish(model.Redis, taskMsg.GameServerID, &taskMsg.Files)
+		if err != nil {
+			logrus.Error(err)
+		}
 	}
 
 	return nil

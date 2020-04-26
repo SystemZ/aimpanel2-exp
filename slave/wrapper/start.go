@@ -19,8 +19,13 @@ func Start(gameServerID string) {
 		GameServerID: gameServerID,
 	}
 
-	go p.SseListener()
-	go p.RedisListener()
+	sseStarted := make(chan bool, 1)
+	redisStarted := make(chan bool, 1)
+	go p.SseListener(sseStarted)
+	go p.RedisListener(redisStarted)
+
+	<-sseStarted
+	<-redisStarted
 
 	logrus.Info("Send WRAPPER_STARTED")
 	taskMsg := task.Message{

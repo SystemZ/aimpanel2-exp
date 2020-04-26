@@ -4,6 +4,7 @@ import (
 	"github.com/inconshreveable/go-update"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
+	"gitlab.com/systemz/aimpanel2/lib/filemanager"
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/slave/config"
 	"gitlab.com/systemz/aimpanel2/slave/model"
@@ -36,8 +37,8 @@ func StartWrapper(taskMsg task.Message) {
 		Env: os.Environ(),
 		Files: []*os.File{
 			os.Stdin,
-			nil,
-			nil,
+			os.Stdout,
+			os.Stderr,
 		},
 		Sys: sysproc,
 	}
@@ -146,6 +147,33 @@ func GsBackup(gsId string) {
 
 	// all done!
 	logrus.Infof("Backup for GS ID %v finished", gsId)
+}
+
+func GsFileList(gsId string) {
+	logrus.Infof("File list for GS ID %v started", gsId)
+
+	node, err := filemanager.NewTree(config.GS_DIR+"/"+gsId, 100, 64)
+	if err != nil {
+		logrus.Error(err)
+	}
+
+	taskMsg := task.Message{
+		TaskId:       task.GAME_FILE_LIST,
+		GameServerID: gsId,
+		Files:        *node,
+	}
+
+	jsonStr, err := taskMsg.Serialize()
+	if err != nil {
+		logrus.Error(err)
+	}
+
+	_, err = lib.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, jsonStr)
+	if err != nil {
+		logrus.Error(err)
+	}
+
+	logrus.Infof("File list for GS ID %v finished", gsId)
 }
 
 func AgentShutdown() {

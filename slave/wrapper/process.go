@@ -150,11 +150,15 @@ func (p *Process) Kill(signal syscall.Signal) {
 
 }
 
-func (p *Process) SseListener() {
+func (p *Process) SseListener(done chan bool) {
+	logrus.Info("Starting SSE listener")
 	client := sse.NewClient(config.API_URL + "/v1/events/" + config.HOST_TOKEN + "/" + p.GameServerID)
 	client.Headers = map[string]string{
 		"Authorization": "Bearer " + config.API_TOKEN,
 	}
+
+	done <- true
+
 	err := client.SubscribeRaw(func(msg *sse.Event) {
 		logrus.Info(msg.ID)
 		logrus.Info(string(msg.Data))
@@ -191,7 +195,7 @@ func (p *Process) SseListener() {
 	}
 }
 
-func (p *Process) RedisListener() {
+func (p *Process) RedisListener(done chan bool) {
 	// start connection to redis
 	model.InitRedis()
 
@@ -209,6 +213,8 @@ func (p *Process) RedisListener() {
 
 	// Go channel which receives messages.
 	ch := pubsub.Channel()
+
+	done <- true
 
 	// Consume messages.
 	for msg := range ch {

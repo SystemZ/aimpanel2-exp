@@ -181,3 +181,17 @@ func Data(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusNoContent)
 }
+
+func FileList(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	gsId := params["server_id"]
+
+	files, err := gameserver.FileList(gsId)
+	if err != nil {
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.GsFileList, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	lib.MustEncode(json.NewEncoder(w), files)
+}

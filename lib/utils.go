@@ -107,3 +107,12 @@ func ReturnError(w goHttp.ResponseWriter, httpCode int, errorCode int, err error
 	w.WriteHeader(httpCode)
 	MustEncode(json.NewEncoder(w), response.JsonError{ErrorCode: errorCode})
 }
+
+func StringInSlice(a string, list []string) bool {
+	for _, b := range list {
+		if b == a {
+			return true
+		}
+	}
+	return false
+}
