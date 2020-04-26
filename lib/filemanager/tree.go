@@ -16,7 +16,7 @@ type FileInfo struct {
 	Name    string      `json:"name"`
 	Size    int64       `json:"size"`
 	Mode    os.FileMode `json:"-"`
-	ModTime time.Time   `json:"-"`
+	ModTime time.Time   `json:"mod_time"`
 	IsDir   bool        `json:"is_dir"`
 	Content string      `json:"content,omitempty"`
 }
@@ -28,10 +28,11 @@ func fileInfoFromInterface(v os.FileInfo, content string) *FileInfo {
 
 // Node represents a node in a directory tree.
 type Node struct {
-	FullPath string    `json:"path"`
-	Info     *FileInfo `json:"info"`
-	Children []*Node   `json:"children"`
-	Parent   *Node     `json:"-"`
+	FullPath   string    `json:"path"`
+	Info       *FileInfo `json:"info"`
+	Children   []*Node   `json:"children"`
+	ParentName string    `json:"parent_name"`
+	Parent     *Node     `json:"-"`
 }
 
 func (n *Node) String() string {
@@ -89,6 +90,7 @@ func NewTree(root string, limit int, maxContentSize int64) (result *Node, err er
 			result = node
 		} else {
 			node.Parent = parent
+			node.ParentName = parent.Info.Name
 			parent.Children = append(parent.Children, node)
 		}
 	}
