@@ -156,7 +156,22 @@ func GsFileList(gsId string) {
 	if err != nil {
 		logrus.Error(err)
 	}
-	logrus.Info(node.String())
+
+	taskMsg := task.Message{
+		TaskId:       task.GAME_FILE_LIST,
+		GameServerID: gsId,
+		Files:        *node,
+	}
+
+	jsonStr, err := taskMsg.Serialize()
+	if err != nil {
+		logrus.Error(err)
+	}
+
+	_, err = lib.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, jsonStr)
+	if err != nil {
+		logrus.Error(err)
+	}
 
 	logrus.Infof("File list for GS ID %v finished", gsId)
 }

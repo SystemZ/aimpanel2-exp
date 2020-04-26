@@ -309,6 +309,16 @@ var routes = Routes{
 		false,
 	},
 
+	//GameServer Files
+	Route{
+		"GameServer File list",
+		"GET",
+		"/host/{host_id}/server/{server_id}/file/list",
+		gs.FileList,
+		false,
+		false,
+	},
+
 	//User
 	Route{
 		"Change password",

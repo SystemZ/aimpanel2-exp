@@ -1,7 +1,9 @@
 package model
 
 import (
+	"encoding/json"
 	"github.com/go-redis/redis"
+	"gitlab.com/systemz/aimpanel2/lib/filemanager"
 	"time"
 )
 
@@ -43,4 +45,23 @@ func SetAgentHeartbeat(redis *redis.Client, token string, timestamp int64) {
 
 func SetWrapperHeartbeat(redis *redis.Client, gsId string, timestamp int64) {
 	redis.Set("wrapper_heartbeat_id_"+gsId, timestamp, 24*time.Hour)
+}
+
+func SetGsFiles(redis *redis.Client, gsId string, files *filemanager.Node) {
+	redis.Set("gs_files_"+gsId, files.String(), 24*time.Hour)
+}
+
+func GetGsFiles(redis *redis.Client, gsId string) (*filemanager.Node, error) {
+	filesStr, err := redis.Get("gs_files_" + gsId).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	var files filemanager.Node
+	err = json.Unmarshal([]byte(filesStr), &files)
+	if err != nil {
+		return nil, err
+	}
+
+	return &files, nil
 }

@@ -306,3 +306,34 @@ func Update(hostId string) error {
 
 	return nil
 }
+
+func FileList(gsId string) error {
+	gameServer := model.GetGameServer(gsId)
+	if gameServer == nil {
+		return errors.New("error when getting game server from db")
+	}
+
+	hostToken := model.GetHostToken(gameServer.HostId)
+	if hostToken == "" {
+		return errors.New("error when getting host token from db")
+	}
+
+	channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken)
+	if !ok {
+		return errors.New("host is not turned on")
+	}
+
+	taskMsg := task.Message{
+		TaskId:       task.GAME_FILE_LIST,
+		GameServerID: gsId,
+	}
+
+	taskMsgStr, err := taskMsg.Serialize()
+	if err != nil {
+		return err
+	}
+
+	channel.SendMessage(sse.NewMessage("", taskMsgStr, strconv.Itoa(taskMsg.TaskId)))
+
+	return nil
+}

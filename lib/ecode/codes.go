@@ -42,6 +42,7 @@ const (
 	GsNotFound
 	GsRemove
 	GsNoLogs
+	GsFileList
 	// games
 	GameNotFound
 	///agent

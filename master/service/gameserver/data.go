@@ -114,6 +114,9 @@ func HostData(hostToken string, taskMsg *task.Message) error {
 		//	EventId: event.AGENT_SHUTDOWN,
 		//	HostId:  host.ID,
 		//})
+	case task.GAME_FILE_LIST:
+		logrus.Info("GAME_FILE_LIST")
+		model.SetGsFiles(model.Redis, taskMsg.GameServerID, &taskMsg.Files)
 	}
 
 	return nil
