@@ -315,7 +315,7 @@ var routes = Routes{
 		"GET",
 		"/host/{host_id}/server/{server_id}/file/list",
 		gs.FileList,
-		false,
+		true,
 		false,
 	},
 
