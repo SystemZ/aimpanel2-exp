@@ -49,7 +49,6 @@ func StartWrapper(taskMsg task.Message) {
 	if err != nil {
 		logrus.Error(err)
 	}
-
 	go func() {
 		_, err := process.Wait()
 		if err != nil {
