@@ -1,5 +1,9 @@
 package model
 
+import (
+	"fmt"
+)
+
 type GameFile struct {
 	Base
 
@@ -15,7 +19,7 @@ func GetGameFileByGameIdAndVersion(gameId uint, version string) *GameFile {
 
 	err := GetOneS(&gf, map[string]interface{}{
 		"doc_type": "game_file",
-		"game_id":  gameId,
+		"game_id":  fmt.Sprint(gameId),
 		"$or": []map[string]interface{}{
 			{
 				"game_version": version,
