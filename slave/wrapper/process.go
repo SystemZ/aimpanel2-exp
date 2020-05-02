@@ -11,6 +11,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/slave/model"
 	"io"
 	"log"
+	"net/http"
 	"os"
 	"os/exec"
 	"strconv"
@@ -156,6 +157,9 @@ func (p *Process) SseListener(done chan bool) {
 	client := sse.NewClient(config.API_URL + "/v1/events/" + config.HOST_TOKEN + "/" + p.GameServerID)
 	client.Headers = map[string]string{
 		"Authorization": "Bearer " + config.API_TOKEN,
+	}
+	client.Connection.Transport = &http.Transport{
+		DialTLSContext: ahttp.VerifyPinTLSContext,
 	}
 
 	events := make(chan *sse.Event)

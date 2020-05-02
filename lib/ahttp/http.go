@@ -26,50 +26,51 @@ var b = &backoff.Backoff{
 }
 
 var HttpClient *http.Client
+var Fingerprints = []string{
+	//local
+	"74439d64c7d7c6d30fc1fbad056ded5c19674fec425d181a9207b6cb1891ccbd",
+
+	//my-lab.aimpanel.pro
+	"67d08017c05e2bca29f404947491b9055aad84da17b45951e3b9c1fa7f5126a4",
+}
 
 func InitHttpClient() *http.Client {
-	fingerprints := []string{
-		//local
-		"74439d64c7d7c6d30fc1fbad056ded5c19674fec425d181a9207b6cb1891ccbd",
-
-		//my-lab.aimpanel.pro
-		"67d08017c05e2bca29f404947491b9055aad84da17b45951e3b9c1fa7f5126a4",
-	}
-
 	client := &http.Client{}
 	client.Transport = &http.Transport{
-		DialTLSContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
-			conn, err := tls.Dial(network, addr, &tls.Config{InsecureSkipVerify: true})
-			if err != nil {
-				return conn, err
-			}
-
-			keyPinValid := false
-			connState := conn.ConnectionState()
-
-			for _, peerCert := range connState.PeerCertificates {
-				der, err := x509.MarshalPKIXPublicKey(peerCert.PublicKey)
-				hash := sha256.Sum256(der)
-				if err != nil {
-					log.Fatal(err)
-				}
-
-				for _, f := range fingerprints {
-					if f == hex.EncodeToString(hash[:]) {
-						keyPinValid = true
-					}
-				}
-			}
-
-			if !keyPinValid {
-				return nil, errors.New("pin is not valid")
-			}
-
-			return conn, nil
-		},
+		DialTLSContext: VerifyPinTLSContext,
 	}
 
 	return client
+}
+
+func VerifyPinTLSContext(ctx context.Context, network, addr string) (net.Conn, error) {
+	conn, err := tls.Dial(network, addr, &tls.Config{InsecureSkipVerify: true})
+	if err != nil {
+		return conn, err
+	}
+
+	keyPinValid := false
+	connState := conn.ConnectionState()
+
+	for _, peerCert := range connState.PeerCertificates {
+		der, err := x509.MarshalPKIXPublicKey(peerCert.PublicKey)
+		hash := sha256.Sum256(der)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		for _, f := range Fingerprints {
+			if f == hex.EncodeToString(hash[:]) {
+				keyPinValid = true
+			}
+		}
+	}
+
+	if !keyPinValid {
+		return nil, errors.New("pin is not valid")
+	}
+
+	return conn, nil
 }
 
 func Get(path string, output interface{}) (*http.Response, error) {

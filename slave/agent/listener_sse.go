@@ -4,9 +4,11 @@ import (
 	"github.com/r3labs/sse"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
+	"gitlab.com/systemz/aimpanel2/lib/ahttp"
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/slave/config"
 	"gitlab.com/systemz/aimpanel2/slave/tasks"
+	"net/http"
 	"strconv"
 )
 
@@ -15,6 +17,10 @@ func listenerSse(done chan bool) {
 	client.Headers = map[string]string{
 		"Authorization": "Bearer " + config.API_TOKEN,
 	}
+	client.Connection.Transport = &http.Transport{
+		DialTLSContext: ahttp.VerifyPinTLSContext,
+	}
+
 	events := make(chan *sse.Event)
 	err := client.SubscribeChan("", events)
 	if err != nil {
