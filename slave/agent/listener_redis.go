@@ -8,7 +8,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/slave/tasks"
 )
 
-func listenerRedis() {
+func listenerRedis(done chan bool) {
 	// start connection to redis
 	model.InitRedis()
 
@@ -26,6 +26,8 @@ func listenerRedis() {
 
 	// Go channel which receives messages.
 	ch := pubsub.Channel()
+
+	done <- true
 
 	// Consume messages.
 	for msg := range ch {

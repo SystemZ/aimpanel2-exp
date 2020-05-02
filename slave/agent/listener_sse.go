@@ -10,12 +10,21 @@ import (
 	"strconv"
 )
 
-func listenerSse() {
+func listenerSse(done chan bool) {
 	client := sse.NewClient(config.API_URL + "/v1/events/" + config.HOST_TOKEN)
 	client.Headers = map[string]string{
 		"Authorization": "Bearer " + config.API_TOKEN,
 	}
-	err := client.SubscribeRaw(func(msg *sse.Event) {
+	events := make(chan *sse.Event)
+	err := client.SubscribeChan("", events)
+	if err != nil {
+		lib.FailOnError(err, "Can't connect to event channel")
+	}
+
+	logrus.Info("Subscribed to SSE")
+	done <- true
+
+	for msg := range events {
 		logrus.Info(msg.ID)
 		logrus.Info(string(msg.Data))
 		logrus.Info(string(msg.Event))
@@ -76,8 +85,5 @@ func listenerSse() {
 		default:
 			logrus.Info("Unknown task")
 		}
-	})
-	if err != nil {
-		lib.FailOnError(err, "Failed to subscribe a channel")
 	}
 }

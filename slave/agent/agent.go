@@ -3,7 +3,7 @@ package agent
 import (
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
-	"gitlab.com/systemz/aimpanel2/lib/http"
+	"gitlab.com/systemz/aimpanel2/lib/ahttp"
 	"gitlab.com/systemz/aimpanel2/lib/response"
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/slave/config"
@@ -16,19 +16,25 @@ var (
 
 func Start(hostToken string) {
 	model.InitRedis()
+	ahttp.HttpClient = ahttp.InitHttpClient()
 
 	logrus.Info("Starting Agent Version." + config.GIT_COMMIT)
 	config.HOST_TOKEN = hostToken
 
 	var token response.Token
-	_, err := http.Get(config.API_URL+"/v1/host/auth/"+config.HOST_TOKEN, &token)
+	_, err := ahttp.Get(config.API_URL+"/v1/host/auth/"+config.HOST_TOKEN, &token)
 	if err != nil {
 		lib.FailOnError(err, "Failed to get host token")
 	}
 	config.API_TOKEN = token.Token
 
-	go listenerSse()
-	go listenerRedis()
+	sseStarted := make(chan bool, 1)
+	redisStarted := make(chan bool, 1)
+	go listenerSse(sseStarted)
+	go listenerRedis(redisStarted)
+
+	<-sseStarted
+	<-redisStarted
 
 	logrus.Info("Send AGENT_STARTED")
 	taskMsg := task.Message{
@@ -40,7 +46,7 @@ func Start(hostToken string) {
 		logrus.Error(err)
 	}
 	//TODO: do something with status code
-	_, err = lib.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, jsonStr)
+	_, err = ahttp.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, jsonStr)
 	if err != nil {
 		logrus.Error(err)
 	}
@@ -55,7 +61,7 @@ func Start(hostToken string) {
 		logrus.Error(err)
 	}
 	//TODO: do something with status code
-	_, err = lib.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, jsonStr)
+	_, err = ahttp.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, jsonStr)
 	if err != nil {
 		logrus.Error(err)
 	}

@@ -404,6 +404,8 @@ github.com/swaggo/gin-swagger v1.2.0/go.mod h1:qlH2+W7zXGZkczuL+r2nEBR2JTT+/lX05
 github.com/swaggo/swag v1.5.1/go.mod h1:1Bl9F/ZBpVWh22nY0zmYyASPO1lI/zIwRDrpZU+tv8Y=
 github.com/swaggo/swag v1.6.3 h1:N+uVPGP4H2hXoss2pt5dctoSUPKKRInr6qcTMOm0usI=
 github.com/swaggo/swag v1.6.3/go.mod h1:wcc83tB4Mb2aNiL/HP4MFeQdpHUrca+Rp/DRNgWAUio=
+github.com/tam7t/hpkp v0.0.0-20160821193359-2b70b4024ed5 h1:YqAladjX7xpA6BM04leXMWAEjS0mTZ5kUU9KRBriQJc=
+github.com/tam7t/hpkp v0.0.0-20160821193359-2b70b4024ed5/go.mod h1:2JjD2zLQYH5HO74y5+aE3remJQvl6q4Sn6aWA2wD1Ng=
 github.com/thoas/bokchoy v0.2.0 h1:WoCmO5UeEEg+fFo9LqzBqHbAuKTeYQ1Nk4RB94jWsgY=
 github.com/thoas/bokchoy v0.2.0/go.mod h1:XsxxUXst6/Qtn7PDkxm/KtVEZPw2Fkmbp+s02FGGum0=
 github.com/thoas/go-funk v0.4.0 h1:KBaa5NL7NMtsFlQaD8nQMbDt1wuM+OOaNQyYNYQFhVo=

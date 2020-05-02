@@ -5,7 +5,6 @@ import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib/ecode"
-	"gitlab.com/systemz/aimpanel2/lib/http"
 	"gitlab.com/systemz/aimpanel2/lib/response"
 	"io"
 	"io/ioutil"
@@ -89,15 +88,6 @@ func CopyFile(source string, destination string) error {
 	}
 
 	return nil
-}
-
-func SendTaskData(url string, token string, jsonStr string) (int, error) {
-	resp, err := http.Post(url, token, jsonStr)
-	if err != nil {
-		return 0, err
-	}
-
-	return resp.StatusCode, nil
 }
 
 func ReturnError(w goHttp.ResponseWriter, httpCode int, errorCode int, err error) {
