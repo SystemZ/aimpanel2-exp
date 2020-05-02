@@ -5,11 +5,13 @@ import (
 	"github.com/r3labs/sse"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
+	"gitlab.com/systemz/aimpanel2/lib/ahttp"
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/slave/config"
 	"gitlab.com/systemz/aimpanel2/slave/model"
 	"io"
 	"log"
+	"net/http"
 	"os"
 	"os/exec"
 	"strconv"
@@ -114,7 +116,7 @@ func (p *Process) Run() {
 				logrus.Error(err)
 			}
 			//TODO: do something with status code
-			_, err = lib.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN+"/"+p.GameServerID, config.API_TOKEN, jsonStr)
+			_, err = ahttp.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN+"/"+p.GameServerID, config.API_TOKEN, jsonStr)
 			if err != nil {
 				logrus.Error(err)
 			}
@@ -129,7 +131,7 @@ func (p *Process) Run() {
 				logrus.Error(err)
 			}
 			//TODO: do something with status code
-			_, err = lib.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN+"/"+p.GameServerID, config.API_TOKEN, jsonStr)
+			_, err = ahttp.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN+"/"+p.GameServerID, config.API_TOKEN, jsonStr)
 			if err != nil {
 				logrus.Error(err)
 			}
@@ -156,10 +158,20 @@ func (p *Process) SseListener(done chan bool) {
 	client.Headers = map[string]string{
 		"Authorization": "Bearer " + config.API_TOKEN,
 	}
+	client.Connection.Transport = &http.Transport{
+		DialTLSContext: ahttp.VerifyPinTLSContext,
+	}
 
+	events := make(chan *sse.Event)
+	err := client.SubscribeChan("", events)
+	if err != nil {
+		lib.FailOnError(err, "Can't connect to event channel")
+	}
+
+	logrus.Info("Subscribed to SSE")
 	done <- true
 
-	err := client.SubscribeRaw(func(msg *sse.Event) {
+	for msg := range events {
 		logrus.Info(msg.ID)
 		logrus.Info(string(msg.Data))
 		logrus.Info(string(msg.Event))
@@ -189,9 +201,6 @@ func (p *Process) SseListener(done chan bool) {
 			p.MetricFrequency = taskMsg.MetricFrequency
 			go p.Metrics()
 		}
-	})
-	if err != nil {
-		lib.FailOnError(err, "Can't connect to event channel")
 	}
 }
 

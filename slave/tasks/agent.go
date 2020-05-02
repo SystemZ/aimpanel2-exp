@@ -3,7 +3,7 @@ package tasks
 import (
 	"github.com/inconshreveable/go-update"
 	"github.com/sirupsen/logrus"
-	"gitlab.com/systemz/aimpanel2/lib"
+	"gitlab.com/systemz/aimpanel2/lib/ahttp"
 	"gitlab.com/systemz/aimpanel2/lib/filemanager"
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/slave/config"
@@ -168,7 +168,7 @@ func GsFileList(gsId string) {
 		logrus.Error(err)
 	}
 
-	_, err = lib.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, jsonStr)
+	_, err = ahttp.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, jsonStr)
 	if err != nil {
 		logrus.Error(err)
 	}
@@ -187,7 +187,7 @@ func AgentShutdown() {
 		logrus.Error(err)
 	}
 	//TODO: do something with status code
-	_, err = lib.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, jsonStr)
+	_, err = ahttp.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, jsonStr)
 	if err != nil {
 		logrus.Error(err)
 	}

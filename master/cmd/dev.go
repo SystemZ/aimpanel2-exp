@@ -3,7 +3,7 @@ package cmd
 import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"gitlab.com/systemz/aimpanel2/lib/filemanager"
+	"gitlab.com/systemz/aimpanel2/lib/ahttp"
 )
 
 func init() {
@@ -16,7 +16,21 @@ var devCmd = &cobra.Command{
 	Long:  "",
 	//Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		tree, _ := filemanager.NewTree("/opt/aimpanel", 100, 10)
-		logrus.Info(tree.String())
+		ahttp.HttpClient = ahttp.InitHttpClient()
+
+		_, err := ahttp.Get("https://aimpanel.local/", nil)
+		if err != nil {
+			logrus.Error(err.Error())
+		}
+
+		_, err = ahttp.Get("https://google.com/", nil)
+		if err != nil {
+			logrus.Error(err.Error())
+		}
+
+		_, err = ahttp.Get("https://api-lab.aimpanel.pro", nil)
+		if err != nil {
+			logrus.Error(err.Error())
+		}
 	},
 }

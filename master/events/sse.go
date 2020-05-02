@@ -16,6 +16,7 @@ func InitSSE() *sse.Server {
 	options := &sse.Options{
 		Headers: map[string]string{
 			"Access-Control-Allow-Origin": "*",
+			"X-Accel-Buffering":           "no",
 		},
 	}
 
