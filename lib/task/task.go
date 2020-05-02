@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"gitlab.com/systemz/aimpanel2/lib/filemanager"
 	"gitlab.com/systemz/aimpanel2/lib/game"
-	"gitlab.com/systemz/aimpanel2/master/model"
 )
 
 const (
@@ -44,11 +43,10 @@ const (
 
 type Message struct {
 	// task id
-	TaskId       int             `json:"task_id,omitempty"`
-	Game         game.Game       `json:"game,omitempty"`
-	GameServerID string          `json:"game_server_id,omitempty"`
-	Body         string          `json:"body,omitempty"`
-	GameFile     *model.GameFile `json:"game_file,omitempty"`
+	TaskId       int        `json:"task_id,omitempty"`
+	Game         *game.Game `json:"game,omitempty"`
+	GameServerID string     `json:"game_server_id,omitempty"`
+	Body         string     `json:"body,omitempty"`
 
 	// task progress
 	Stdout string `json:"stdout,omitempty"`
@@ -84,7 +82,7 @@ type Message struct {
 	Commit string `json:"commit,omitempty"`
 	Url    string `json:"url,omitempty"`
 
-	Files filemanager.Node `json:"files,omitempty"`
+	Files *filemanager.Node `json:"files,omitempty"`
 
 	Timestamp int64 `json:"timestamp,omitempty"`
 }

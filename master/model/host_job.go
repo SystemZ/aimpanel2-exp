@@ -1,5 +1,7 @@
 package model
 
+import "gitlab.com/systemz/aimpanel2/lib/task"
+
 type HostJob struct {
 	Base
 
@@ -11,14 +13,9 @@ type HostJob struct {
 	// required: true
 	HostId string `json:"host_id" example:"100112233-4455-6677-8899-aabbccddeeff"`
 
-	// Game server ID
-	//
-	// required: false
-	GameServerId string `json:"game_server_id"`
-
 	CronExpression string `json:"cron_expression" example:"5 4 * * *"`
 
-	TaskMessageJson string `json:"task_message_json"`
+	TaskMessage task.Message `json:"task_message"`
 }
 
 func GetHostJobs(hostId string) []HostJob {

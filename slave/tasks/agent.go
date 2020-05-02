@@ -160,7 +160,7 @@ func GsFileList(gsId string) {
 	taskMsg := task.Message{
 		TaskId:       task.GAME_FILE_LIST,
 		GameServerID: gsId,
-		Files:        *node,
+		Files:        node,
 	}
 
 	jsonStr, err := taskMsg.Serialize()

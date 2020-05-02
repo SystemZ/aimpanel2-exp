@@ -114,7 +114,7 @@ func Install(gsId string) error {
 
 	taskMsg := task.Message{
 		TaskId:       task.GAME_INSTALL,
-		Game:         g,
+		Game:         &g,
 		GameServerID: gsId,
 	}
 
