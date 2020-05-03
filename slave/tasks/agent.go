@@ -17,6 +17,28 @@ import (
 	"time"
 )
 
+func AgentTaskHandler(taskMsg task.Message) {
+	switch taskMsg.TaskId {
+	case task.AGENT_START_GS:
+		logrus.Infof("Agent task handler got %v", taskMsg.TaskId)
+		model.SetGsGame(taskMsg.GameServerID, taskMsg.Game)
+		StartWrapper(taskMsg)
+	case task.AGENT_INSTALL_GS:
+		logrus.Infof("Agent task handler got %v", taskMsg.TaskId)
+		GsInstall(taskMsg)
+	//case task.AGENT_BACKUP_GS:
+	case task.AGENT_UPDATE:
+		logrus.Infof("Agent task handler got %v", taskMsg.TaskId)
+		SelfUpdate(taskMsg)
+	case task.AGENT_REMOVE_GS:
+		logrus.Infof("Agent task handler got %v", taskMsg.TaskId)
+		GsRemove(taskMsg)
+	case task.AGENT_FILE_LIST_GS:
+		logrus.Infof("Agent task handler got %v", taskMsg.TaskId)
+		GsFileList(taskMsg.GameServerID)
+	}
+}
+
 // tasks below will be eventually finished by agent
 func StartWrapper(taskMsg task.Message) {
 	cred := &syscall.Credential{
@@ -50,11 +72,18 @@ func StartWrapper(taskMsg task.Message) {
 	if err != nil {
 		logrus.Error(err)
 	}
+
 	go func() {
 		_, err := process.Wait()
 		if err != nil {
 			logrus.Error(err)
 		}
+
+		taskMsg := task.Message{
+			TaskId:       task.GAME_SHUTDOWN,
+			GameServerID: taskMsg.GameServerID,
+		}
+		model.SendTask(config.REDIS_PUB_SUB_AGENT_CH, taskMsg)
 	}()
 }
 
@@ -117,7 +146,7 @@ func SelfUpdate(taskMsg task.Message) {
 func GsBackupTrigger(gsId string) {
 	taskMsg := task.Message{
 		// FIXME other task IDs for user CLI actions
-		TaskId:       task.GAME_MAKE_BACKUP,
+		TaskId:       task.AGENT_BACKUP_GS,
 		GameServerID: gsId,
 	}
 	taskMsgStr, err := taskMsg.Serialize()
@@ -125,7 +154,7 @@ func GsBackupTrigger(gsId string) {
 		logrus.Errorf("preparing msg failed: %v", err)
 		return
 	}
-	res, err := model.Redis.Publish(config.REDIS_PUB_SUB_CH, taskMsgStr).Result()
+	res, err := model.Redis.Publish(config.REDIS_PUB_SUB_AGENT_CH, taskMsgStr).Result()
 	if err != nil {
 		logrus.Errorf("sending msg failed: %v", err)
 	}
@@ -158,17 +187,12 @@ func GsFileList(gsId string) {
 	}
 
 	taskMsg := task.Message{
-		TaskId:       task.GAME_FILE_LIST,
+		TaskId:       task.AGENT_FILE_LIST_GS,
 		GameServerID: gsId,
 		Files:        *node,
 	}
 
-	jsonStr, err := taskMsg.Serialize()
-	if err != nil {
-		logrus.Error(err)
-	}
-
-	_, err = ahttp.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, jsonStr)
+	_, err = ahttp.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
 	if err != nil {
 		logrus.Error(err)
 	}
@@ -182,12 +206,8 @@ func AgentShutdown() {
 		TaskId: task.AGENT_SHUTDOWN,
 	}
 
-	jsonStr, err := taskMsg.Serialize()
-	if err != nil {
-		logrus.Error(err)
-	}
 	//TODO: do something with status code
-	_, err = ahttp.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, jsonStr)
+	_, err := ahttp.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
 	if err != nil {
 		logrus.Error(err)
 	}
@@ -210,7 +230,7 @@ func AgentShutdownTrigger() {
 		return
 	}
 
-	res, err := model.Redis.Publish(config.REDIS_PUB_SUB_CH, taskMsgStr).Result()
+	res, err := model.Redis.Publish(config.REDIS_PUB_SUB_AGENT_CH, taskMsgStr).Result()
 	if err != nil {
 		logrus.Errorf("sending msg failed: %v", err)
 	}

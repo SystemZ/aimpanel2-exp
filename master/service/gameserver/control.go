@@ -12,8 +12,6 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/master/events"
 	"gitlab.com/systemz/aimpanel2/master/model"
-	"strconv"
-	"time"
 )
 
 func Start(gsId string) error {
@@ -32,9 +30,16 @@ func Start(gsId string) error {
 		return errors.New("host is not turned on")
 	}
 
+	var gameDef game.Game
+	err := json.Unmarshal([]byte(gameServer.GameJson), &gameDef)
+	if err != nil {
+		return errors.New("error when getting game")
+	}
+
 	taskMsg := task.Message{
-		TaskId:       task.WRAPPER_START,
+		TaskId:       task.AGENT_START_GS,
 		GameServerID: gsId,
+		Game:         gameDef,
 	}
 
 	taskMsgStr, err := taskMsg.Serialize()
@@ -42,7 +47,7 @@ func Start(gsId string) error {
 		return err
 	}
 
-	channel.SendMessage(sse.NewMessage("", taskMsgStr, strconv.Itoa(task.WRAPPER_START)))
+	channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
 
 	model.SetGsStart(model.Redis, gameServer.ID, 1)
 
@@ -79,7 +84,7 @@ func Stop(gsId string, stopType uint) error {
 		return err
 	}
 
-	channel.SendMessage(sse.NewMessage("", taskMsgStr, strconv.Itoa(taskMsg.TaskId)))
+	channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
 
 	return nil
 }
@@ -113,7 +118,7 @@ func Install(gsId string) error {
 	}
 
 	taskMsg := task.Message{
-		TaskId:       task.GAME_INSTALL,
+		TaskId:       task.AGENT_INSTALL_GS,
 		Game:         g,
 		GameServerID: gsId,
 	}
@@ -123,7 +128,7 @@ func Install(gsId string) error {
 		return err
 	}
 
-	channel.SendMessage(sse.NewMessage("", taskMsgStr, strconv.Itoa(task.GAME_INSTALL)))
+	channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
 
 	return nil
 }
@@ -155,7 +160,7 @@ func SendCommand(gsId string, command string) error {
 		return err
 	}
 
-	channel.SendMessage(sse.NewMessage("", taskMsgStr, strconv.Itoa(taskMsg.TaskId)))
+	channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
 
 	return nil
 }
@@ -171,6 +176,12 @@ func Restart(gsId string, stopType uint) error {
 		return errors.New("error when getting host token from db")
 	}
 
+	var gameDef game.Game
+	err := json.Unmarshal([]byte(gameServer.GameJson), &gameDef)
+	if err != nil {
+		return errors.New("error when getting game")
+	}
+
 	model.SetGsRestart(model.Redis, gameServer.ID, 0)
 
 	channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken)
@@ -179,12 +190,10 @@ func Restart(gsId string, stopType uint) error {
 	}
 
 	taskMsg := task.Message{
+		TaskId:       task.GAME_RESTART,
 		GameServerID: gsId,
-	}
-	if stopType == 1 {
-		taskMsg.TaskId = task.GAME_STOP_SIGKILL
-	} else if stopType == 2 {
-		taskMsg.TaskId = task.GAME_STOP_SIGTERM
+		StopTimeout:  gameServer.StopTimeout,
+		Game:         gameDef,
 	}
 
 	taskMsgStr, err := taskMsg.Serialize()
@@ -192,22 +201,7 @@ func Restart(gsId string, stopType uint) error {
 		return err
 	}
 
-	channel.SendMessage(sse.NewMessage("", taskMsgStr, strconv.Itoa(taskMsg.TaskId)))
-
-	model.SetGsRestart(model.Redis, gameServer.ID, 1)
-
-	go func() {
-		<-time.After(time.Duration(gameServer.StopTimeout) * time.Second)
-
-		val, err := model.GetGsRestart(model.Redis, gameServer.ID)
-		if err != nil {
-			return
-		}
-
-		if val == 1 {
-			model.SetGsRestart(model.Redis, gameServer.ID, -1)
-		}
-	}()
+	channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
 
 	return nil
 }
@@ -233,11 +227,11 @@ func Remove(gsId string) error {
 			return err
 		}
 
-		channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken + "/" + gsId)
+		channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken)
 		if !ok {
 			return errors.New("game server is not turned on")
 		}
-		channel.SendMessage(sse.NewMessage("", taskMsgStr, strconv.Itoa(taskMsg.TaskId)))
+		channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
 	}
 
 	taskMsg := task.Message{
@@ -253,7 +247,7 @@ func Remove(gsId string) error {
 	if !ok {
 		return errors.New("host is not turned on")
 	}
-	channel.SendMessage(sse.NewMessage("", taskMsgStr, strconv.Itoa(taskMsg.TaskId)))
+	channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
 
 	permissions := model.GetPermisionsByEndpointRegex("/v1/host/" + gameServer.HostId + "/server/" + gsId + "%")
 	for _, perm := range permissions {
@@ -293,7 +287,7 @@ func Update(hostId string) error {
 	}
 
 	taskMsg := task.Message{
-		TaskId: task.SLAVE_UPDATE,
+		TaskId: task.AGENT_UPDATE,
 		Commit: commit,
 		Url:    url,
 	}
@@ -303,7 +297,7 @@ func Update(hostId string) error {
 		return err
 	}
 
-	channel.SendMessage(sse.NewMessage("", taskMsgStr, strconv.Itoa(taskMsg.TaskId)))
+	channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
 
 	return nil
 }
@@ -325,7 +319,7 @@ func FileList(gsId string) (*filemanager.Node, error) {
 	}
 
 	taskMsg := task.Message{
-		TaskId:       task.GAME_FILE_LIST,
+		TaskId:       task.AGENT_FILE_LIST_GS,
 		GameServerID: gsId,
 	}
 
@@ -334,7 +328,7 @@ func FileList(gsId string) (*filemanager.Node, error) {
 		return nil, err
 	}
 
-	channel.SendMessage(sse.NewMessage("", taskMsgStr, strconv.Itoa(taskMsg.TaskId)))
+	channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
 
 	//wait for files
 	pubsub, err := model.GsFilesSubscribe(model.Redis, gsId)

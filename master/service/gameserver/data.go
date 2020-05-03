@@ -2,17 +2,13 @@ package gameserver
 
 import (
 	"encoding/base64"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/alexandrevicenzi/go-sse"
-	"github.com/go-redis/redis"
 	"github.com/sirupsen/logrus"
-	"gitlab.com/systemz/aimpanel2/lib/game"
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/master/events"
 	"gitlab.com/systemz/aimpanel2/master/model"
-	"strconv"
 )
 
 func HostData(hostToken string, taskMsg *task.Message) error {
@@ -56,7 +52,7 @@ func HostData(hostToken string, taskMsg *task.Message) error {
 			return err
 		}
 
-		channel.SendMessage(sse.NewMessage("", taskMsgStr, strconv.Itoa(taskMsg.TaskId)))
+		channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
 	case task.AGENT_METRICS:
 		host := model.GetHostByToken(hostToken)
 		if host == nil {
@@ -106,15 +102,12 @@ func HostData(hostToken string, taskMsg *task.Message) error {
 		if err != nil {
 			return err
 		}
-
-	case task.AGENT_HEARTBEAT:
-		model.SetAgentHeartbeat(model.Redis, hostToken, taskMsg.Timestamp)
 	case task.AGENT_SHUTDOWN:
 		//model.DB.Save(&model.Event{
 		//	EventId: event.AGENT_SHUTDOWN,
 		//	HostId:  host.ID,
 		//})
-	case task.GAME_FILE_LIST:
+	case task.AGENT_FILE_LIST_GS:
 		logrus.Info("GAME_FILE_LIST")
 		err := model.GsFilesPublish(model.Redis, taskMsg.GameServerID, &taskMsg.Files)
 		if err != nil {
@@ -125,74 +118,12 @@ func HostData(hostToken string, taskMsg *task.Message) error {
 	return nil
 }
 
-func GsData(hostToken string, gsId string, taskMsg *task.Message) error {
+func GsData(hostToken string, taskMsg *task.Message) error {
 	switch taskMsg.TaskId {
-	case task.WRAPPER_STARTED:
-		logrus.Info("WRAPPER_STARTED")
-		gameServerId := taskMsg.GameServerID
-		_, err := model.GetGsRestart(model.Redis, gameServerId)
-		if err == nil {
-			gs := model.GetGameServer(gameServerId)
-			if gs == nil {
-				break
-			}
+	case task.GAME_STARTED:
+		logrus.Info("GAME_STARTED")
 
-			var gameDef game.Game
-			err = json.Unmarshal([]byte(gs.GameJson), &gameDef)
-
-			channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken + "/" + gsId)
-			if !ok {
-				return errors.New("game server is not turned on")
-			}
-
-			taskMsg := task.Message{
-				TaskId:       task.GAME_START,
-				GameServerID: taskMsg.GameServerID,
-				Game:         gameDef,
-			}
-
-			taskMsgStr, err := taskMsg.Serialize()
-			if err != nil {
-				return err
-			}
-
-			channel.SendMessage(sse.NewMessage("", taskMsgStr, strconv.Itoa(task.GAME_START)))
-
-			model.DelGsRestart(model.Redis, gs.ID)
-		}
-
-		_, err = model.GetGsStart(model.Redis, gameServerId)
-		if err == nil {
-			gs := model.GetGameServer(gameServerId)
-			if gs == nil {
-				break
-			}
-
-			var gameDef game.Game
-			err = json.Unmarshal([]byte(gs.GameJson), &gameDef)
-
-			channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken + "/" + gsId)
-			if !ok {
-				return errors.New("game server is not turned on")
-			}
-
-			taskMsg := task.Message{
-				TaskId:       task.GAME_START,
-				GameServerID: taskMsg.GameServerID,
-				Game:         gameDef,
-			}
-
-			taskMsgStr, err := taskMsg.Serialize()
-			if err != nil {
-				return err
-			}
-
-			channel.SendMessage(sse.NewMessage("", taskMsgStr, strconv.Itoa(task.GAME_START)))
-
-			model.DelGsStart(model.Redis, gs.ID)
-		}
-
-	case task.SERVER_LOG:
+	case task.GAME_SERVER_LOG:
 		logrus.Info("SERVER_LOG")
 		var gsLog model.GameServerLog
 		gsLog.Base.DocType = "game_server_log"
@@ -218,45 +149,10 @@ func GsData(hostToken string, gsId string, taskMsg *task.Message) error {
 		if err != nil {
 			logrus.Warn(err)
 		}
-	case task.WRAPPER_EXITED:
-		logrus.Info("WRAPPER_EXITED")
-		gameServerId := taskMsg.GameServerID
+	case task.GAME_SHUTDOWN:
+		logrus.Info("GAME_EXITED")
 
-		val, err := model.GetGsRestart(model.Redis, gameServerId)
-		if err != redis.Nil && val != -1 {
-			model.SetGsRestart(model.Redis, gameServerId, 2)
-
-			gs := model.GetGameServer(gameServerId)
-			if gs == nil {
-				break
-			}
-
-			host := model.GetHostByToken(hostToken)
-			if host == nil {
-				break
-			}
-
-			channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken + "/" + gsId)
-			if !ok {
-				return errors.New("game server is not turned on")
-			}
-
-			taskMsg := task.Message{
-				TaskId:       task.WRAPPER_START,
-				GameServerID: gameServerId,
-			}
-
-			taskMsgStr, err := taskMsg.Serialize()
-			if err != nil {
-				return err
-			}
-
-			channel.SendMessage(sse.NewMessage("", taskMsgStr, strconv.Itoa(task.WRAPPER_START)))
-
-			model.SetGsRestart(model.Redis, gameServerId, 3)
-		}
-
-	case task.WRAPPER_METRICS_FREQUENCY:
+	case task.GAME_METRICS_FREQUENCY:
 		gameServerId := taskMsg.GameServerID
 
 		gs := model.GetGameServer(gameServerId)
@@ -264,13 +160,14 @@ func GsData(hostToken string, gsId string, taskMsg *task.Message) error {
 			break
 		}
 
-		channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken + "/" + gsId)
+		channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken)
 		if !ok {
 			return errors.New("game server is not turned on")
 		}
 
 		taskMsg := task.Message{
-			TaskId:          task.WRAPPER_METRICS_FREQUENCY,
+			TaskId:          task.GAME_METRICS_FREQUENCY,
+			GameServerID:    gameServerId,
 			MetricFrequency: gs.MetricFrequency,
 		}
 
@@ -279,8 +176,8 @@ func GsData(hostToken string, gsId string, taskMsg *task.Message) error {
 			return err
 		}
 
-		channel.SendMessage(sse.NewMessage("", taskMsgStr, strconv.Itoa(task.WRAPPER_METRICS_FREQUENCY)))
-	case task.WRAPPER_METRICS:
+		channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
+	case task.GAME_METRICS:
 		metric := &model.MetricGameServer{
 			Base: model.Base{
 				DocType: "metric_game_server",
@@ -293,8 +190,6 @@ func GsData(hostToken string, gsId string, taskMsg *task.Message) error {
 		if err != nil {
 			return err
 		}
-	case task.WRAPPER_HEARTBEAT:
-		model.SetWrapperHeartbeat(model.Redis, taskMsg.GameServerID, taskMsg.Timestamp)
 	}
 
 	return nil

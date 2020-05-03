@@ -1,7 +1,9 @@
 package agent
 
 import (
+	"github.com/go-redis/redis"
 	"github.com/sirupsen/logrus"
+	"gitlab.com/systemz/aimpanel2/lib/ahttp"
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/slave/config"
 	"gitlab.com/systemz/aimpanel2/slave/model"
@@ -14,7 +16,7 @@ func listenerRedis(done chan bool) {
 
 	// subscribe tasks
 	// https://godoc.org/github.com/go-redis/redis#PubSub
-	pubsub := model.Redis.Subscribe(config.REDIS_PUB_SUB_CH)
+	pubsub := model.Redis.Subscribe(config.REDIS_PUB_SUB_AGENT_CH)
 
 	// Wait for confirmation that subscription is created before publishing anything.
 	_, err := pubsub.Receive()
@@ -43,20 +45,42 @@ func redisTaskHandler(taskCh string, taskBody string) {
 	}
 
 	switch taskMsg.TaskId {
+	case task.GAME_STARTED:
+		logrus.Info("Agent got " + taskMsg.TaskId.String())
+		tasks.GsStartGame(taskMsg)
 
-	case task.GAME_STOP_SIGTERM:
-		logrus.Info("agent got GAME_STOP_SIGTERM msg")
-	case task.GAME_STOP_SIGKILL:
-		logrus.Info("agent got GAME_STOP_SIGKILL msg")
-	case task.GAME_COMMAND:
-		logrus.Info("agent got GAME_COMMAND msg")
-	case task.GAME_MAKE_BACKUP:
+		_, err = ahttp.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
+		if err != nil {
+			logrus.Error(err)
+		}
+	case task.GAME_SHUTDOWN:
+		//Start wrapper if gs is restarting
+		val, err := model.GetGsRestart(taskMsg.GameServerID)
+		if err != redis.Nil && val != -1 {
+			model.SetGsRestart(taskMsg.GameServerID, 2)
+			tasks.StartWrapper(taskMsg)
+			model.DelGsRestart(taskMsg.GameServerID)
+		}
+		fallthrough
+	case task.GAME_SERVER_LOG:
+		fallthrough
+	case task.GAME_METRICS:
+		fallthrough
+	case task.GAME_METRICS_FREQUENCY:
+		logrus.Info("Agent got " + taskMsg.TaskId.String())
+
+		_, err = ahttp.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
+		if err != nil {
+			logrus.Error(err)
+		}
+
+	case task.AGENT_BACKUP_GS:
 		logrus.Info("agent got GAME_MAKE_BACKUP msg")
 		go tasks.GsBackup(taskMsg.GameServerID)
 	case task.AGENT_SHUTDOWN:
 		logrus.Info("agent got AGENT_SHUTDOWN msg")
 		tasks.AgentShutdown()
 	default:
-		logrus.Warning("Unhandled task!")
+		logrus.Warningf("Unhandled task %v!", taskMsg.TaskId)
 	}
 }
