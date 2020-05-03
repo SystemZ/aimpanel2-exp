@@ -170,9 +170,8 @@ func Data(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	gsId, ok := params["server_id"]
-	if ok {
-		err = gameserver.GsData(hostToken, gsId, data)
+	if data.GameServerID != "" {
+		err = gameserver.GsData(hostToken, data)
 		if err != nil {
 			lib.ReturnError(w, http.StatusInternalServerError, ecode.GsData, err)
 			return

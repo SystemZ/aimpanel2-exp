@@ -2,14 +2,13 @@ package wrapper
 
 import (
 	"github.com/sirupsen/logrus"
-	"gitlab.com/systemz/aimpanel2/lib/ahttp"
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/slave/config"
+	"gitlab.com/systemz/aimpanel2/slave/model"
 )
 
 func Start(gameServerID string) {
 	logrus.Info("Starting Wrapper Version. " + config.GIT_COMMIT)
-	ahttp.HttpClient = ahttp.InitHttpClient()
 
 	output := make(chan string)
 	input := make(chan string)
@@ -20,45 +19,21 @@ func Start(gameServerID string) {
 		GameServerID: gameServerID,
 	}
 
-	sseStarted := make(chan bool, 1)
 	redisStarted := make(chan bool, 1)
-	go p.SseListener(sseStarted)
 	go p.RedisListener(redisStarted)
-
-	<-sseStarted
 	<-redisStarted
 
-	logrus.Info("Send WRAPPER_STARTED")
 	taskMsg := task.Message{
-		TaskId:       task.WRAPPER_STARTED,
+		TaskId:       task.GAME_STARTED,
 		GameServerID: gameServerID,
 	}
+	model.SendTask(config.REDIS_PUB_SUB_AGENT_CH, taskMsg)
 
-	jsonStr, err := taskMsg.Serialize()
-	if err != nil {
-		logrus.Error(err)
-	}
-	//TODO: do something with status code
-	_, err = ahttp.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN+"/"+gameServerID, config.API_TOKEN, jsonStr)
-	if err != nil {
-		logrus.Error(err)
-	}
-
-	logrus.Info("Send WRAPPER_METRICS_FREQUENCY")
 	taskMsg = task.Message{
-		TaskId:       task.WRAPPER_METRICS_FREQUENCY,
+		TaskId:       task.GAME_METRICS_FREQUENCY,
 		GameServerID: gameServerID,
 	}
-
-	jsonStr, err = taskMsg.Serialize()
-	if err != nil {
-		logrus.Error(err)
-	}
-	//TODO: do something with status code
-	_, err = ahttp.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN+"/"+gameServerID, config.API_TOKEN, jsonStr)
-	if err != nil {
-		logrus.Error(err)
-	}
+	model.SendTask(config.REDIS_PUB_SUB_AGENT_CH, taskMsg)
 
 	select {}
 }

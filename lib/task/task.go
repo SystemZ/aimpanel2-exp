@@ -5,46 +5,45 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib/filemanager"
 	"gitlab.com/systemz/aimpanel2/lib/game"
 	"gitlab.com/systemz/aimpanel2/master/model"
+	"strconv"
 )
+
+type Id int
 
 const (
 	//WRAPPER
-	GAME_START = iota + 1
+	GAME_START Id = iota + 1
 	GAME_COMMAND
 	GAME_STOP_SIGKILL
 	GAME_STOP_SIGTERM
-	GAME_FILE_LIST
-
-	SLAVE_UPDATE
-
-	//AGENT
-	WRAPPER_START
-	GAME_INSTALL
-
-	SERVER_LOG
-	WRAPPER_STARTED
-	WRAPPER_EXITED
-
-	WRAPPER_METRICS_FREQUENCY
-	WRAPPER_METRICS
+	GAME_RESTART
+	GAME_SERVER_LOG
+	GAME_STARTED
+	GAME_SHUTDOWN
+	GAME_METRICS_FREQUENCY
+	GAME_METRICS
 
 	AGENT_STARTED
-	AGENT_METRICS_FREQUENCY
-	AGENT_METRICS
-	AGENT_OS
-	AGENT_REMOVE_GS
-
-	AGENT_HEARTBEAT
-	WRAPPER_HEARTBEAT
-
-	GAME_MAKE_BACKUP
-
 	AGENT_SHUTDOWN
+	AGENT_UPDATE
+	AGENT_OS
+	AGENT_METRICS
+	AGENT_METRICS_FREQUENCY
+
+	AGENT_REMOVE_GS
+	AGENT_BACKUP_GS
+	AGENT_START_GS
+	AGENT_INSTALL_GS
+	AGENT_FILE_LIST_GS
 )
+
+func (i Id) StringValue() string {
+	return strconv.Itoa(int(i))
+}
 
 type Message struct {
 	// task id
-	TaskId       int             `json:"task_id,omitempty"`
+	TaskId       Id              `json:"task_id,omitempty"`
 	Game         game.Game       `json:"game,omitempty"`
 	GameServerID string          `json:"game_server_id,omitempty"`
 	Body         string          `json:"body,omitempty"`

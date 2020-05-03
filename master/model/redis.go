@@ -38,14 +38,6 @@ func DelGsStart(redis *redis.Client, gsId string) {
 	redis.Del("gs_start_id_" + gsId)
 }
 
-func SetAgentHeartbeat(redis *redis.Client, token string, timestamp int64) {
-	redis.Set("agent_heartbeat_token_"+token, timestamp, 24*time.Hour)
-}
-
-func SetWrapperHeartbeat(redis *redis.Client, gsId string, timestamp int64) {
-	redis.Set("wrapper_heartbeat_id_"+gsId, timestamp, 24*time.Hour)
-}
-
 func GsFilesSubscribe(redis *redis.Client, gsId string) (*redis.PubSub, error) {
 	pubsub := redis.Subscribe("gs_files_" + gsId)
 

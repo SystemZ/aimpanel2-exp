@@ -8,9 +8,36 @@ import (
 )
 
 // tasks below will be eventually finished by wrapper
+func WrapperTaskHandler(taskMsg task.Message) {
+	switch taskMsg.TaskId {
+	case task.GAME_COMMAND:
+		logrus.Infof("Game task handler got %v", taskMsg.TaskId)
+		GsCmd(taskMsg.GameServerID, taskMsg.Body)
+	case task.GAME_STOP_SIGTERM:
+		logrus.Infof("Game task handler got %v", taskMsg.TaskId)
+		GsStop(taskMsg.GameServerID)
+	case task.GAME_STOP_SIGKILL:
+		logrus.Infof("Game task handler got %v", taskMsg.TaskId)
+		GsKill(taskMsg.GameServerID)
+	case task.GAME_RESTART:
+		logrus.Infof("Game task handler got %v", taskMsg.TaskId)
+		//nothing yet
+	}
+}
 
-func GsStart() {
+func GsStartGame(taskMsg task.Message) {
+	game, err := model.GetGsGame(taskMsg.GameServerID)
+	if err != nil {
+		logrus.Printf("Something went wrong when sending msg: %v", err)
+		return
+	}
+	wrapperTask := task.Message{
+		TaskId:       task.GAME_START,
+		GameServerID: taskMsg.GameServerID,
+		Game:         game,
+	}
 
+	model.SendTask(config.REDIS_PUB_SUB_WRAPPER_CH, wrapperTask)
 }
 
 func GsCmd(gsId string, cmdStr string) {
@@ -24,7 +51,8 @@ func GsCmd(gsId string, cmdStr string) {
 		logrus.Printf("Something went wrong when sending msg: %v", err)
 		return
 	}
-	res, err := model.Redis.Publish(config.REDIS_PUB_SUB_CH, taskMsgStr).Result()
+
+	res, err := model.Redis.Publish(config.REDIS_PUB_SUB_WRAPPER_CH, taskMsgStr).Result()
 	if err != nil {
 		logrus.Printf("%v", err)
 	}
@@ -42,7 +70,7 @@ func GsStop(gsId string) {
 		logrus.Errorf("preparing msg failed: %v", err)
 		return
 	}
-	res, err := model.Redis.Publish(config.REDIS_PUB_SUB_CH, taskMsgStr).Result()
+	res, err := model.Redis.Publish(config.REDIS_PUB_SUB_WRAPPER_CH, taskMsgStr).Result()
 	if err != nil {
 		logrus.Errorf("sending msg failed: %v", err)
 	}
@@ -60,7 +88,7 @@ func GsKill(gsId string) {
 		logrus.Errorf("preparing msg failed: %v", err)
 		return
 	}
-	res, err := model.Redis.Publish(config.REDIS_PUB_SUB_CH, taskMsgStr).Result()
+	res, err := model.Redis.Publish(config.REDIS_PUB_SUB_WRAPPER_CH, taskMsgStr).Result()
 	if err != nil {
 		logrus.Errorf("sending msg failed: %v", err)
 	}
