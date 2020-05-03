@@ -32,7 +32,7 @@ func SendTask(channel string, taskMsg task.Message) bool {
 
 	res, err := Redis.Publish(channel, taskMsgStr).Result()
 	if err != nil {
-		logrus.Errorf("sending %v failed: %v", taskMsg.TaskId)
+		logrus.Errorf("sending %v failed: %v", taskMsg.TaskId, err)
 		return false
 	}
 
