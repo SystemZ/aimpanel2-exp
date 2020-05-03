@@ -24,6 +24,11 @@ function up-slave {
     vagrant ssh-config > vagrant.slave.ssh.config
 }
 
+function update-hosts-slave {
+  ssh -F vagrant.slave.ssh.config default "sudo sed -i '/aimpanel.local/d' /etc/hosts"
+  ssh -F vagrant.slave.ssh.config default "echo "$(hostname -I | cut -d' ' -f1) aimpanel.local" | sudo tee -a /etc/hosts > /dev/null"
+}
+
 # should be called by IDE or script after file save in slave codebase
 function sync-slave {
     go build -o ./vagrant.slave.bin gitlab.com/systemz/aimpanel2/slave &
