@@ -7,6 +7,7 @@
                     <v-card-text>
                         <v-btn class="ma-2" color="green" dark @click="start()">Start</v-btn>
                         <v-btn class="ma-2" color="red" dark @click="stop()">Stop</v-btn>
+                        <v-btn class="ma-2" color="orange" dark @click="restart()">Restart</v-btn>
                         <v-btn class="ma-2" color="blue" dark @click="install()">Install</v-btn>
                     </v-card-text>
                 </v-card>
@@ -227,6 +228,15 @@
             },
             stop() {
                 this.$http.put(this.serverUrl + '/stop', {
+                    type: 1
+                }).then(res => {
+                    console.log(res);
+                }).catch(e => {
+                    this.$auth.checkResponse(e.response.status)
+                })
+            },
+            restart() {
+                this.$http.put(this.serverUrl + '/restart', {
                     type: 1
                 }).then(res => {
                     console.log(res);

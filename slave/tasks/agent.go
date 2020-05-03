@@ -21,6 +21,7 @@ func AgentTaskHandler(taskMsg task.Message) {
 	switch taskMsg.TaskId {
 	case task.AGENT_START_GS:
 		logrus.Infof("Agent task handler got %v", taskMsg.TaskId)
+		model.SetGsGame(taskMsg.GameServerID, taskMsg.Game)
 		StartWrapper(taskMsg)
 	case task.AGENT_INSTALL_GS:
 		logrus.Infof("Agent task handler got %v", taskMsg.TaskId)
@@ -40,8 +41,6 @@ func AgentTaskHandler(taskMsg task.Message) {
 
 // tasks below will be eventually finished by agent
 func StartWrapper(taskMsg task.Message) {
-	model.SetGsGame(taskMsg.GameServerID, taskMsg.Game)
-
 	cred := &syscall.Credential{
 		Uid:         uint32(syscall.Getuid()),
 		Gid:         uint32(syscall.Getgid()),
@@ -79,6 +78,12 @@ func StartWrapper(taskMsg task.Message) {
 		if err != nil {
 			logrus.Error(err)
 		}
+
+		taskMsg := task.Message{
+			TaskId:       task.GAME_SHUTDOWN,
+			GameServerID: taskMsg.GameServerID,
+		}
+		model.SendTask(config.REDIS_PUB_SUB_AGENT_CH, taskMsg)
 	}()
 }
 
@@ -187,12 +192,7 @@ func GsFileList(gsId string) {
 		Files:        *node,
 	}
 
-	jsonStr, err := taskMsg.Serialize()
-	if err != nil {
-		logrus.Error(err)
-	}
-
-	_, err = ahttp.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, jsonStr)
+	_, err = ahttp.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
 	if err != nil {
 		logrus.Error(err)
 	}
@@ -206,12 +206,8 @@ func AgentShutdown() {
 		TaskId: task.AGENT_SHUTDOWN,
 	}
 
-	jsonStr, err := taskMsg.Serialize()
-	if err != nil {
-		logrus.Error(err)
-	}
 	//TODO: do something with status code
-	_, err = ahttp.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, jsonStr)
+	_, err := ahttp.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
 	if err != nil {
 		logrus.Error(err)
 	}

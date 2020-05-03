@@ -48,6 +48,7 @@ type Message struct {
 	GameServerID string          `json:"game_server_id,omitempty"`
 	Body         string          `json:"body,omitempty"`
 	GameFile     *model.GameFile `json:"game_file,omitempty"`
+	StopTimeout  int             `json:"stop_timeout,omitempty"`
 
 	// task progress
 	Stdout string `json:"stdout,omitempty"`

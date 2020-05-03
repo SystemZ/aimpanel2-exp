@@ -1,6 +1,7 @@
 package agent
 
 import (
+	"github.com/go-redis/redis"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib/ahttp"
 	"gitlab.com/systemz/aimpanel2/lib/task"
@@ -48,8 +49,18 @@ func redisTaskHandler(taskCh string, taskBody string) {
 		logrus.Info("Agent got " + taskMsg.TaskId.String())
 		tasks.GsStartGame(taskMsg)
 
-		fallthrough
+		_, err = ahttp.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
+		if err != nil {
+			logrus.Error(err)
+		}
 	case task.GAME_SHUTDOWN:
+		//Start wrapper if gs is restarting
+		val, err := model.GetGsRestart(taskMsg.GameServerID)
+		if err != redis.Nil && val != -1 {
+			model.SetGsRestart(taskMsg.GameServerID, 2)
+			tasks.StartWrapper(taskMsg)
+			model.DelGsRestart(taskMsg.GameServerID)
+		}
 		fallthrough
 	case task.GAME_SERVER_LOG:
 		fallthrough

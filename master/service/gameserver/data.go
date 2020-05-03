@@ -167,6 +167,7 @@ func GsData(hostToken string, taskMsg *task.Message) error {
 
 		taskMsg := task.Message{
 			TaskId:          task.GAME_METRICS_FREQUENCY,
+			GameServerID:    gameServerId,
 			MetricFrequency: gs.MetricFrequency,
 		}
 

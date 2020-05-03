@@ -42,7 +42,7 @@ func SendTask(channel string, taskMsg task.Message) bool {
 }
 
 func SetGsRestart(gsId string, state int) {
-	Redis.Set("gs_restart_id"+gsId, state, 24*time.Hour)
+	Redis.Set("gs_restart_id_"+gsId, state, 24*time.Hour)
 }
 
 func GetGsRestart(gsId string) (int64, error) {

@@ -12,7 +12,6 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/master/events"
 	"gitlab.com/systemz/aimpanel2/master/model"
-	"time"
 )
 
 func Start(gsId string) error {
@@ -177,6 +176,12 @@ func Restart(gsId string, stopType uint) error {
 		return errors.New("error when getting host token from db")
 	}
 
+	var gameDef game.Game
+	err := json.Unmarshal([]byte(gameServer.GameJson), &gameDef)
+	if err != nil {
+		return errors.New("error when getting game")
+	}
+
 	model.SetGsRestart(model.Redis, gameServer.ID, 0)
 
 	channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken)
@@ -185,12 +190,10 @@ func Restart(gsId string, stopType uint) error {
 	}
 
 	taskMsg := task.Message{
+		TaskId:       task.GAME_RESTART,
 		GameServerID: gsId,
-	}
-	if stopType == 1 {
-		taskMsg.TaskId = task.GAME_STOP_SIGKILL
-	} else if stopType == 2 {
-		taskMsg.TaskId = task.GAME_STOP_SIGTERM
+		StopTimeout:  gameServer.StopTimeout,
+		Game:         gameDef,
 	}
 
 	taskMsgStr, err := taskMsg.Serialize()
@@ -199,21 +202,6 @@ func Restart(gsId string, stopType uint) error {
 	}
 
 	channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
-
-	model.SetGsRestart(model.Redis, gameServer.ID, 1)
-
-	go func() {
-		<-time.After(time.Duration(gameServer.StopTimeout) * time.Second)
-
-		val, err := model.GetGsRestart(model.Redis, gameServer.ID)
-		if err != nil {
-			return
-		}
-
-		if val == 1 {
-			model.SetGsRestart(model.Redis, gameServer.ID, -1)
-		}
-	}()
 
 	return nil
 }

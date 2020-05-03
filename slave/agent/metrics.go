@@ -46,13 +46,8 @@ func metrics() {
 			Guest:     int(cpuTimes[0].Guest),
 			GuestNice: int(cpuTimes[0].GuestNice),
 		}
-
-		jsonStr, err := taskMsg.Serialize()
-		if err != nil {
-			logrus.Error(err)
-		}
 		//TODO: do something with status code
-		_, err = ahttp.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, jsonStr)
+		_, err := ahttp.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
 		if err != nil {
 			logrus.Error(err)
 		}
@@ -72,13 +67,8 @@ func sendOSInfo() {
 		KernelVersion:   h.KernelVersion,
 		KernelArch:      h.KernelArch,
 	}
-
-	jsonStr, err := taskMsg.Serialize()
-	if err != nil {
-		logrus.Error(err)
-	}
 	//TODO: do something with status code
-	_, err = ahttp.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, jsonStr)
+	_, err := ahttp.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
 	if err != nil {
 		logrus.Error(err)
 	}

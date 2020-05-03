@@ -42,7 +42,7 @@ func listenerSse(done chan bool) {
 
 		switch taskMsg.TaskId {
 		case task.GAME_COMMAND, task.GAME_STOP_SIGKILL,
-			task.GAME_STOP_SIGTERM, task.GAME_RESTART:
+			task.GAME_STOP_SIGTERM, task.GAME_RESTART, task.GAME_METRICS_FREQUENCY:
 
 			// executed by wrapper
 			tasks.WrapperTaskHandler(taskMsg)
@@ -60,7 +60,7 @@ func listenerSse(done chan bool) {
 			go metrics()
 			logrus.Info("agent metrics freq finished")
 		default:
-			logrus.Info("Unknown task")
+			logrus.Infof("Unknown task %v", taskMsg.TaskId)
 		}
 	}
 }
