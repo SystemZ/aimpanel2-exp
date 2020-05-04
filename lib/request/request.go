@@ -1,11 +1,22 @@
 package request
 
+import "gitlab.com/systemz/aimpanel2/lib/task"
+
 type HostCreate struct {
 	// User assigned name
 	Name string `json:"name" example:"My Great Linux server"`
 
 	// User assigned ip
 	Ip string `json:"ip" example:"192.51.100.128"`
+}
+
+type HostCreateJob struct {
+	// User assigned name
+	Name string `json:"name" example:"My Great job"`
+
+	CronExpression string `json:"cron_expression"`
+
+	TaskMessage task.Message `json:"task_message"`
 }
 
 type GameServerCreate struct {

@@ -89,71 +89,58 @@
                 </v-card>
             </v-col>
         </v-row>
-        <v-row>
-            <v-col xs6>
+        <v-row class="mb-6">
+            <v-col>
+                <v-card>
+                    <v-card-text>
+                        <v-text-field label="Name" required
+                                      v-model="createJob.name"></v-text-field>
 
+                        <v-text-field label="Cron expression" required
+                                      v-model="createJob.cron_expression"></v-text-field>
+                        <v-select
+                                :items="gameServers"
+                                item-text="name"
+                                item-value="_id"
+                                v-model="createJob.game_server_id"
+                                label="Select game server">
+                        </v-select>
+                        <v-select v-model="createJob.task_id"
+                                  :items="tasks"
+                                  item-text="name"
+                                  item-value="id"
+                                  label="Select task"
+                                  return-object
+                                  single-line
+                        ></v-select>
+                        <v-text-field label="Body"
+                                      v-model="createJob.body"></v-text-field>
+
+
+                        <v-btn class="ma-2" color="green" dark @click="addJob()">Add job</v-btn>
+                    </v-card-text>
+                </v-card>
             </v-col>
-            <v-col xs6>
-                <!--                <br>-->
-                <!--                <div class="display-1 grey&#45;&#45;text text&#45;&#45;darken-1">File Manager</div>-->
-                <!--                <br>-->
-                <!--                <v-row>-->
-                <!--                    <v-col xs12>-->
-                <!--                        <v-card>-->
-                <!--                            <v-list two-line subheader>-->
-                <!--                                <v-subheader inset>Current directory {{ fileManager.current_dir }}</v-subheader>-->
-                <!--                                <v-subheader inset>Directories</v-subheader>-->
+            <v-col>
 
-                <!--                                <v-list-item-->
-                <!--                                        v-for="dir in fileManager.directories"-->
-                <!--                                        :key="dir.title"-->
-                <!--                                        avatar-->
-                <!--                                        @click="">-->
-                <!--                                    <v-list-item-avatar>-->
-                <!--                                        <v-icon>{{ dir.icon }}</v-icon>-->
-                <!--                                    </v-list-item-avatar>-->
-
-                <!--                                    <v-list-item-content>-->
-                <!--                                        <v-list-item-title>{{ dir.title }}</v-list-item-title>-->
-                <!--                                        <v-list-item-sub-title>{{ dir.last_modification }}</v-list-item-sub-title>-->
-                <!--                                    </v-list-item-content>-->
-
-                <!--                                    <v-list-item-action>-->
-                <!--                                        <v-btn icon ripple>-->
-                <!--                                            <v-icon color="red lighten-1">fa-trash-o</v-icon>-->
-                <!--                                        </v-btn>-->
-                <!--                                    </v-list-item-action>-->
-                <!--                                </v-list-item>-->
-
-                <!--                                <v-divider inset></v-divider>-->
-
-                <!--                                <v-subheader inset>Files</v-subheader>-->
-
-                <!--                                <v-list-item-->
-                <!--                                        v-for="file in fileManager.files"-->
-                <!--                                        :key="file.title"-->
-                <!--                                        avatar-->
-                <!--                                        @click=""-->
-                <!--                                >-->
-                <!--                                    <v-list-item-avatar>-->
-                <!--                                        <v-icon>{{ file.icon }}</v-icon>-->
-                <!--                                    </v-list-item-avatar>-->
-
-                <!--                                    <v-list-item-content>-->
-                <!--                                        <v-list-item-title>{{ file.title }}</v-list-item-title>-->
-                <!--                                        <v-list-item-sub-title>{{ file.last_modification }}</v-list-item-sub-title>-->
-                <!--                                    </v-list-item-content>-->
-
-                <!--                                    <v-list-item-action>-->
-                <!--                                        <v-btn icon ripple>-->
-                <!--                                            <v-icon color="red lighten-1">fa-trash-o</v-icon>-->
-                <!--                                        </v-btn>-->
-                <!--                                    </v-list-item-action>-->
-                <!--                                </v-list-item>-->
-                <!--                            </v-list>-->
-                <!--                        </v-card>-->
-                <!--                    </v-col>-->
-                <!--                </v-row>-->
+                <v-card>
+                    <v-card-title>Jobs</v-card-title>
+                    <v-list>
+                        <v-list-item
+                                v-for="job in jobs"
+                                :key="job.name"
+                                >
+                            <v-list-item-content>
+                                <v-list-item-title v-text="job.name"></v-list-item-title>
+                            </v-list-item-content>
+                            <v-list-item-action>
+                                <v-btn @click="removeJob(job._id)">
+                                    DELETE
+                                </v-btn>
+                            </v-list-item-action>
+                        </v-list-item>
+                    </v-list>
+                </v-card>
             </v-col>
         </v-row>
         <v-snackbar
@@ -213,6 +200,29 @@
                 ]
             },
             removeSnackbar: false,
+            createJob: {
+                name: '',
+                cron_expression: '* * * * *',
+                task_id: {} as any,
+                body: '',
+                game_server_id: ''
+            },
+            tasks: [
+                {
+                    name: 'GAME_COMMAND',
+                    id: 2
+                },
+                {
+                    name: 'GAME_STOP_SIGKILL',
+                    id: 3,
+                },
+                {
+                    name: 'GAME_STOP_SIGTERM',
+                    id: 4,
+                }
+            ],
+            gameServers: [],
+            jobs: []
         }),
         mounted(): void {
             this.$http.get('/v1/host/' + this.$route.params.id).then((res) => {
@@ -220,6 +230,9 @@
             }).catch(e => {
                 this.$auth.checkResponse(e.response.status);
             });
+
+            this.getGameServers()
+            this.getJobs()
 
             this.$http.get('/v1/host/' + this.$route.params.id + '/metric').then((res) => {
                 this.metric = res.data.metrics[0];
@@ -251,6 +264,49 @@
                 }).catch(e => {
                     this.$auth.checkResponse(e.response.status);
                 });
+            },
+            getGameServers(): void {
+                this.$http.get("/v1/host/" + this.$route.params.id + '/server').then(res => {
+                    this.gameServers = res.data.game_servers;
+                }).catch(e => {
+                    this.$auth.checkResponse(e.response.status)
+                });
+            },
+            removeJob(jobId: string): void {
+                this.$http.delete('/v1/host/' + this.$route.params.id + '/job/' + jobId).then(res => {
+                    console.log(res)
+                    this.getJobs()
+                }).catch(e => {
+                    this.$auth.checkResponse(e.response.status);
+                });
+            },
+            getJobs(): void {
+                this.$http.get("/v1/host/" + this.$route.params.id + '/job').then(res => {
+                    this.jobs = res.data.jobs;
+                }).catch(e => {
+                    this.$auth.checkResponse(e.response.status)
+                });
+            },
+            addJob(): void {
+                this.$http.post('/v1/host/' + this.$route.params.id + '/job', {
+                    name: this.createJob.name,
+                    cron_expression: this.createJob.cron_expression,
+                    task_message: {
+                        task_id: this.createJob.task_id.id,
+                        game_server_id: this.createJob.game_server_id,
+                        body: this.createJob.body
+                    }
+                }).then(res => {
+                    console.log(res)
+                    this.createJob = {
+                        name: '',
+                        cron_expression: '* * * * *',
+                        task_id: 0,
+                        body: '',
+                        game_server_id: ''
+                    }
+                    this.getJobs()
+                })
             }
         },
     });

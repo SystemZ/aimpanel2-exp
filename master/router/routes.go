@@ -202,6 +202,30 @@ var routes = Routes{
 		true,
 		false,
 	},
+	Route{
+		"Host Create Job",
+		"POST",
+		"/host/{id}/job",
+		handler.HostCreateJob,
+		true,
+		false,
+	},
+	Route{
+		"Host Jobs",
+		"GET",
+		"/host/{id}/job",
+		handler.HostJobList,
+		true,
+		false,
+	},
+	Route{
+		"Host Job Remove",
+		"DELETE",
+		"/host/{id}/job/{job_id}",
+		handler.HostJobRemove,
+		true,
+		false,
+	},
 
 	//GameServers
 	Route{

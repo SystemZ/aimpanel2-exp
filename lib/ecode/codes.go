@@ -31,6 +31,7 @@ const (
 	// host
 	HostNotFound
 	HostData
+	HostNotTurnedOn
 	// gs
 	GsData
 	GsUpdate

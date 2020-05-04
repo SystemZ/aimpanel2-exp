@@ -23,10 +23,24 @@ func GetHostJobs(hostId string) []HostJob {
 
 	err := GetS(&hj, map[string]interface{}{
 		"doc_type": "host_job",
+		"host_id":  hostId,
 	})
 	if err != nil {
 		return nil
 	}
 
 	return hj
+}
+
+func GetHostJob(jobId string) *HostJob {
+	var hostJob HostJob
+	err := GetOneS(&hostJob, map[string]interface{}{
+		"doc_type": "host_job",
+		"_id":      jobId,
+	})
+	if err != nil {
+		return nil
+	}
+
+	return &hostJob
 }

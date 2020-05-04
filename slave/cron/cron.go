@@ -14,10 +14,14 @@ func InitCron() {
 	logrus.Info("Cron initialized")
 }
 
-func AddJobs(jobs []task.Job) {
+func AddJobs(jobs *[]task.Job) {
 	Stop()
 
-	for _, job := range jobs {
+	if jobs == nil {
+		return
+	}
+
+	for _, job := range *jobs {
 		logrus.Infof("Adding job %v", job.Name)
 		_, err := Cron.AddFunc(job.CronExpression, func() {
 			tasks.ProcessTask(job.TaskMessage)

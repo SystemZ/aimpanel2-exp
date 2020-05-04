@@ -58,6 +58,11 @@ type HostMetrics struct {
 	Metrics []model.MetricHost `json:"metrics"`
 }
 
+type HostJobList struct {
+	//List of jobs
+	Jobs []model.HostJob `json:"jobs"`
+}
+
 type GameServerList struct {
 	//List of game servers
 	GameServers []model.GameServer `json:"game_servers"`
