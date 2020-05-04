@@ -11,6 +11,7 @@ import (
 	"errors"
 	"github.com/jpillora/backoff"
 	"github.com/sirupsen/logrus"
+	"gitlab.com/systemz/aimpanel2/lib/task"
 	"log"
 	"net"
 	"net/http"
@@ -139,7 +140,12 @@ func isServerUnavailable(code int) bool {
 	}
 }
 
-func SendTaskData(url string, token string, jsonStr string) (int, error) {
+func SendTaskData(url string, token string, taskMsg task.Message) (int, error) {
+	jsonStr, err := taskMsg.Serialize()
+	if err != nil {
+		return 0, err
+	}
+
 	resp, err := Post(url, token, jsonStr)
 	if err != nil {
 		return 0, err
