@@ -7,6 +7,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib/ahttp"
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/slave/config"
+	"gitlab.com/systemz/aimpanel2/slave/cron"
 	"gitlab.com/systemz/aimpanel2/slave/tasks"
 	"net/http"
 )
@@ -40,27 +41,11 @@ func listenerSse(done chan bool) {
 			logrus.Error(err)
 		}
 
-		switch taskMsg.TaskId {
-		case task.GAME_COMMAND, task.GAME_STOP_SIGKILL,
-			task.GAME_STOP_SIGTERM, task.GAME_RESTART, task.GAME_METRICS_FREQUENCY:
-
-			// executed by wrapper
-			tasks.WrapperTaskHandler(taskMsg)
-		case task.AGENT_START_GS, task.AGENT_INSTALL_GS,
-			task.AGENT_BACKUP_GS, task.AGENT_UPDATE,
-			task.AGENT_REMOVE_GS, task.AGENT_FILE_LIST_GS:
-
-			// executed by agent
-			tasks.AgentTaskHandler(taskMsg)
-
-		case task.AGENT_METRICS_FREQUENCY:
-			// executed by agent
-			logrus.Infof("agent metrics freq %v sec requested", taskMsg.MetricFrequency)
-			metricsFrequency = taskMsg.MetricFrequency
-			go metrics()
-			logrus.Info("agent metrics freq finished")
-		default:
-			logrus.Infof("Unknown task %v", taskMsg.TaskId)
+		if taskMsg.TaskId == task.AGENT_GET_JOBS {
+			go cron.AddJobs(*taskMsg.Jobs)
+			continue
 		}
+
+		tasks.ProcessTask(taskMsg)
 	}
 }
