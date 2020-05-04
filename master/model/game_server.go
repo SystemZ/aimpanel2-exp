@@ -41,7 +41,7 @@ type GameServer struct {
 func GetGameServers() []GameServer {
 	var gs []GameServer
 
-	err := GetOneS(&gs, map[string]interface{}{
+	err := GetS(&gs, map[string]interface{}{
 		"doc_type": "game_server",
 	})
 	if err != nil {
@@ -83,7 +83,7 @@ func GetGameServerByGsIdAndHostId(serverId string, hostId string) *GameServer {
 func GetGameServersByHostId(hostId string) *[]GameServer {
 	var gs []GameServer
 
-	err := GetOneS(&gs, map[string]interface{}{
+	err := GetS(&gs, map[string]interface{}{
 		"doc_type": "game_server",
 		"host_id":  hostId,
 	})

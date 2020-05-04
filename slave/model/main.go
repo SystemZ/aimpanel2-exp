@@ -53,7 +53,7 @@ func DelGsRestart(gsId string) {
 	Redis.Del("gs_restart_id_" + gsId)
 }
 
-func SetGsGame(gsId string, game game.Game) {
+func SetGsGame(gsId string, game *game.Game) {
 	gameStr, err := json.Marshal(game)
 	if err != nil {
 		logrus.Errorf("error while saving game: %v", err)

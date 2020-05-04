@@ -1,9 +1,7 @@
 package cmd
 
 import (
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"gitlab.com/systemz/aimpanel2/lib/task"
 )
 
 func init() {
@@ -33,7 +31,27 @@ var devCmd = &cobra.Command{
 		//	logrus.Error(err.Error())
 		//}
 
-		logrus.Info(task.AGENT_BACKUP_GS)
-		logrus.Info(task.AGENT_BACKUP_GS.StringValue())
+		//model.Snowflake = model.InitSnowflake()
+		//model.DB = model.InitDB()
+		//
+		//taskMsg := task.Message{
+		//	TaskId:       task.GAME_COMMAND,
+		//	GameServerID: "1256587000778067968",
+		//	Body:         "alert test",
+		//}
+		//
+		//hostJob := &model.HostJob{
+		//	Base: model.Base{
+		//		DocType: "host_job",
+		//	},
+		//	Name:           "Testowy job",
+		//	HostId:         "1256576238273695744",
+		//	CronExpression: "* * * * *",
+		//	TaskMessage:    taskMsg,
+		//}
+		//err := hostJob.Put(&hostJob)
+		//if err != nil {
+		//	logrus.Error(err)
+		//}
 	},
 }

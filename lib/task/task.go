@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"gitlab.com/systemz/aimpanel2/lib/filemanager"
 	"gitlab.com/systemz/aimpanel2/lib/game"
-	"gitlab.com/systemz/aimpanel2/master/model"
 	"strconv"
 )
 
@@ -29,6 +28,7 @@ const (
 	AGENT_OS
 	AGENT_METRICS
 	AGENT_METRICS_FREQUENCY
+	AGENT_GET_JOBS
 
 	AGENT_REMOVE_GS
 	AGENT_BACKUP_GS
@@ -43,12 +43,11 @@ func (i Id) StringValue() string {
 
 type Message struct {
 	// task id
-	TaskId       Id              `json:"task_id,omitempty"`
-	Game         game.Game       `json:"game,omitempty"`
-	GameServerID string          `json:"game_server_id,omitempty"`
-	Body         string          `json:"body,omitempty"`
-	GameFile     *model.GameFile `json:"game_file,omitempty"`
-	StopTimeout  int             `json:"stop_timeout,omitempty"`
+	TaskId       Id         `json:"task_id,omitempty"`
+	Game         *game.Game `json:"game,omitempty"`
+	GameServerID string     `json:"game_server_id,omitempty"`
+	Body         string     `json:"body,omitempty"`
+	StopTimeout  int        `json:"stop_timeout,omitempty"`
 
 	// task progress
 	Stdout string `json:"stdout,omitempty"`
@@ -84,9 +83,16 @@ type Message struct {
 	Commit string `json:"commit,omitempty"`
 	Url    string `json:"url,omitempty"`
 
-	Files filemanager.Node `json:"files,omitempty"`
+	Files *filemanager.Node `json:"files,omitempty"`
+	Jobs  *[]Job            `json:"jobs,omitempty"`
 
 	Timestamp int64 `json:"timestamp,omitempty"`
+}
+
+type Job struct {
+	Name           string  `json:"name,omitempty"`
+	CronExpression string  `json:"cron_expression,omitempty"`
+	TaskMessage    Message `json:"task_message,omitempty"`
 }
 
 func (m *Message) Serialize() (string, error) {

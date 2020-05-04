@@ -6,6 +6,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib/ahttp"
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/slave/config"
+	"gitlab.com/systemz/aimpanel2/slave/cron"
 	"gitlab.com/systemz/aimpanel2/slave/model"
 	"gitlab.com/systemz/aimpanel2/slave/tasks"
 )
@@ -79,6 +80,7 @@ func redisTaskHandler(taskCh string, taskBody string) {
 		go tasks.GsBackup(taskMsg.GameServerID)
 	case task.AGENT_SHUTDOWN:
 		logrus.Info("agent got AGENT_SHUTDOWN msg")
+		cron.Stop()
 		tasks.AgentShutdown()
 	default:
 		logrus.Warningf("Unhandled task %v!", taskMsg.TaskId)

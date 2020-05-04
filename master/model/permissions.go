@@ -127,6 +127,34 @@ func CreatePermissionsForNewHost(groupId string, hostId string) {
 	if err != nil {
 		logrus.Error(err)
 	}
+
+	perm = &Permission{
+		Base: Base{
+			DocType: "permission",
+		},
+		Name:     "Create host job",
+		Verb:     lib.GetVerbByName("POST"),
+		GroupId:  groupId,
+		Endpoint: "/v1/host/" + hostId + "/job",
+	}
+	err = perm.Put(&perm)
+	if err != nil {
+		logrus.Error(err)
+	}
+
+	perm = &Permission{
+		Base: Base{
+			DocType: "permission",
+		},
+		Name:     "Get host jobs",
+		Verb:     lib.GetVerbByName("GET"),
+		GroupId:  groupId,
+		Endpoint: "/v1/host/" + hostId + "/job",
+	}
+	err = perm.Put(&perm)
+	if err != nil {
+		logrus.Error(err)
+	}
 }
 
 // FIXME return errors
@@ -368,6 +396,22 @@ func CreatePermissionsForNewUser(groupId string) {
 		Endpoint: "/v1/game",
 	}
 	err = perm.Put(&perm)
+	if err != nil {
+		logrus.Error(err)
+	}
+}
+
+func CreatePermissionsForNewHostJob(groupId string, hostId string, jobId string) {
+	perm := &Permission{
+		Base: Base{
+			DocType: "permission",
+		},
+		Name:     "Remove host job",
+		Verb:     lib.GetVerbByName("DELETE"),
+		GroupId:  groupId,
+		Endpoint: "/v1/host/" + hostId + "/job/" + jobId,
+	}
+	err := perm.Put(&perm)
 	if err != nil {
 		logrus.Error(err)
 	}

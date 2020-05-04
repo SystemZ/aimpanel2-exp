@@ -37,7 +37,7 @@ func GsStartGame(taskMsg task.Message) {
 	wrapperTask := task.Message{
 		TaskId:       task.GAME_START,
 		GameServerID: taskMsg.GameServerID,
-		Game:         game,
+		Game:         &game,
 	}
 
 	model.SendTask(config.REDIS_PUB_SUB_WRAPPER_CH, wrapperTask)

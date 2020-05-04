@@ -12,7 +12,6 @@ import (
 )
 
 func HostData(hostToken string, taskMsg *task.Message) error {
-	logrus.Info("HostData")
 	host := model.GetHostByToken(hostToken)
 	if host == nil {
 		return errors.New("error when getting host from db")
@@ -20,6 +19,7 @@ func HostData(hostToken string, taskMsg *task.Message) error {
 
 	switch taskMsg.TaskId {
 	case task.AGENT_STARTED:
+		logrus.Infof("Got %v", taskMsg.TaskId)
 		//model.DB.Save(&model.Event{
 		//	EventId: event.AGENT_START,
 		//	HostId:  host.ID,
@@ -30,7 +30,7 @@ func HostData(hostToken string, taskMsg *task.Message) error {
 			logrus.Error(err)
 		}
 	case task.AGENT_METRICS_FREQUENCY:
-		logrus.Info("AGENT_METRICS_FREQUENCY")
+		logrus.Infof("Got %v", taskMsg.TaskId)
 
 		host := model.GetHostByToken(hostToken)
 		if host == nil {
@@ -54,6 +54,7 @@ func HostData(hostToken string, taskMsg *task.Message) error {
 
 		channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
 	case task.AGENT_METRICS:
+		logrus.Infof("Got %v", taskMsg.TaskId)
 		host := model.GetHostByToken(hostToken)
 		if host == nil {
 			break
@@ -86,6 +87,7 @@ func HostData(hostToken string, taskMsg *task.Message) error {
 			return err
 		}
 	case task.AGENT_OS:
+		logrus.Infof("Got %v", taskMsg.TaskId)
 		host := model.GetHostByToken(hostToken)
 		if host == nil {
 			break
@@ -102,17 +104,58 @@ func HostData(hostToken string, taskMsg *task.Message) error {
 		if err != nil {
 			return err
 		}
+
 	case task.AGENT_SHUTDOWN:
+		logrus.Infof("Got %v", taskMsg.TaskId)
 		//model.DB.Save(&model.Event{
 		//	EventId: event.AGENT_SHUTDOWN,
 		//	HostId:  host.ID,
 		//})
 	case task.AGENT_FILE_LIST_GS:
-		logrus.Info("GAME_FILE_LIST")
-		err := model.GsFilesPublish(model.Redis, taskMsg.GameServerID, &taskMsg.Files)
+		logrus.Infof("Got %v", taskMsg.TaskId)
+		err := model.GsFilesPublish(model.Redis, taskMsg.GameServerID, taskMsg.Files)
 		if err != nil {
 			logrus.Error(err)
 		}
+
+	case task.AGENT_GET_JOBS:
+		logrus.Infof("Got %v", taskMsg.TaskId)
+
+		host := model.GetHostByToken(hostToken)
+		if host == nil {
+			break
+		}
+
+		var jobs []task.Job
+
+		hostJobs := model.GetHostJobs(host.ID)
+		for _, job := range hostJobs {
+			jobs = append(jobs, task.Job{
+				Name:           job.Name,
+				CronExpression: job.CronExpression,
+				TaskMessage:    job.TaskMessage,
+			})
+		}
+
+		channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken)
+		if !ok {
+			return errors.New("host is not turned on")
+		}
+
+		taskMsg := task.Message{
+			TaskId: task.AGENT_GET_JOBS,
+			Jobs:   &jobs,
+		}
+
+		taskMsgStr, err := taskMsg.Serialize()
+		if err != nil {
+			return err
+		}
+
+		channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
+
+	default:
+		logrus.Infof("Unhandled task %v", taskMsg.TaskId)
 	}
 
 	return nil
@@ -121,10 +164,10 @@ func HostData(hostToken string, taskMsg *task.Message) error {
 func GsData(hostToken string, taskMsg *task.Message) error {
 	switch taskMsg.TaskId {
 	case task.GAME_STARTED:
-		logrus.Info("GAME_STARTED")
+		logrus.Infof("Got %v", taskMsg.TaskId)
 
 	case task.GAME_SERVER_LOG:
-		logrus.Info("SERVER_LOG")
+		logrus.Infof("Got %v", taskMsg.TaskId)
 		var gsLog model.GameServerLog
 		gsLog.Base.DocType = "game_server_log"
 		gsLog.GameServerId = taskMsg.GameServerID
@@ -150,9 +193,10 @@ func GsData(hostToken string, taskMsg *task.Message) error {
 			logrus.Warn(err)
 		}
 	case task.GAME_SHUTDOWN:
-		logrus.Info("GAME_EXITED")
+		logrus.Infof("Got %v", taskMsg.TaskId)
 
 	case task.GAME_METRICS_FREQUENCY:
+		logrus.Infof("Got %v", taskMsg.TaskId)
 		gameServerId := taskMsg.GameServerID
 
 		gs := model.GetGameServer(gameServerId)
@@ -178,6 +222,7 @@ func GsData(hostToken string, taskMsg *task.Message) error {
 
 		channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
 	case task.GAME_METRICS:
+		logrus.Infof("Got %v", taskMsg.TaskId)
 		metric := &model.MetricGameServer{
 			Base: model.Base{
 				DocType: "metric_game_server",
@@ -190,6 +235,8 @@ func GsData(hostToken string, taskMsg *task.Message) error {
 		if err != nil {
 			return err
 		}
+	default:
+		logrus.Infof("Unhandled task %v", taskMsg.TaskId)
 	}
 
 	return nil
