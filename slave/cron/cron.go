@@ -27,7 +27,7 @@ func AddJobs(jobs *[]task.Job) {
 			tasks.ProcessTask(job.TaskMessage)
 		})
 		if err != nil {
-			logrus.Error("Error while setting up %v cron job", job.Name)
+			logrus.Errorf("Error while setting up %v cron job", job.Name)
 		}
 	}
 
