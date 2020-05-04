@@ -39,7 +39,7 @@ func Start(gsId string) error {
 	taskMsg := task.Message{
 		TaskId:       task.AGENT_START_GS,
 		GameServerID: gsId,
-		Game:         gameDef,
+		Game:         &gameDef,
 	}
 
 	taskMsgStr, err := taskMsg.Serialize()
@@ -119,7 +119,7 @@ func Install(gsId string) error {
 
 	taskMsg := task.Message{
 		TaskId:       task.AGENT_INSTALL_GS,
-		Game:         g,
+		Game:         &g,
 		GameServerID: gsId,
 	}
 
@@ -193,7 +193,7 @@ func Restart(gsId string, stopType uint) error {
 		TaskId:       task.GAME_RESTART,
 		GameServerID: gsId,
 		StopTimeout:  gameServer.StopTimeout,
-		Game:         gameDef,
+		Game:         &gameDef,
 	}
 
 	taskMsgStr, err := taskMsg.Serialize()

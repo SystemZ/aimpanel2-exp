@@ -103,8 +103,6 @@ func HostData(hostToken string, taskMsg *task.Message) error {
 			return err
 		}
 
-	case task.AGENT_HEARTBEAT:
-		model.SetAgentHeartbeat(model.Redis, hostToken, taskMsg.Timestamp)
 	case task.AGENT_SHUTDOWN:
 		//model.DB.Save(&model.Event{
 		//	EventId: event.AGENT_SHUTDOWN,
@@ -112,7 +110,7 @@ func HostData(hostToken string, taskMsg *task.Message) error {
 		//})
 	case task.AGENT_FILE_LIST_GS:
 		logrus.Info("GAME_FILE_LIST")
-		err := model.GsFilesPublish(model.Redis, taskMsg.GameServerID, &taskMsg.Files)
+		err := model.GsFilesPublish(model.Redis, taskMsg.GameServerID, taskMsg.Files)
 		if err != nil {
 			logrus.Error(err)
 		}
