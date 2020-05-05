@@ -1,135 +1,92 @@
 <template>
     <v-container>
-        <v-row class="mb-6">
-            <v-col cols="3" md="3" sm="12" xs="12">
-                <v-card>
-                    <v-card-title>Actions</v-card-title>
-                    <v-card-text>
-                        <v-btn @click="start()" class="ma-2" color="green" dark>Start</v-btn>
-                        <v-btn @click="stop()" class="ma-2" color="red" dark>Stop</v-btn>
-                        <v-btn @click="restart()" class="ma-2" color="orange" dark>Restart</v-btn>
-                        <v-btn @click="install()" class="ma-2" color="blue" dark>Install</v-btn>
-                    </v-card-text>
-                </v-card>
-                <v-card class="mt-5">
-                    <v-card-title>Details</v-card-title>
-                    <v-card-text>
-                        <v-list-item two-line>
-                            <v-list-item-content>
-                                <v-list-item-title>{{game_server.name}}</v-list-item-title>
-                                <v-list-item-subtitle>Name</v-list-item-subtitle>
-                            </v-list-item-content>
-                        </v-list-item>
+        <v-card>
+            <v-tabs
+                    v-model="tab"
+                    background-color="transparent"
+                    color="basil"
+                    grow
+                    :vertical="$vuetify.breakpoint.xsOnly"
+                    @change="tabChange"
+            >
+                <v-tab left>
+                    State & control
+                </v-tab>
+                <v-tab>
+                    File manager
+                </v-tab>
+            </v-tabs>
+            <v-tabs-items v-model="tab">
+                <v-tab-item>
+                    <v-container>
+                        <v-row class="mb-6">
+                            <v-col cols="3" md="3" sm="12" xs="12">
+                                <v-card>
+                                    <v-card-title>Actions</v-card-title>
+                                    <v-card-text>
+                                        <v-btn @click="start()" class="ma-2" color="green" dark>Start</v-btn>
+                                        <v-btn @click="stop()" class="ma-2" color="red" dark>Stop</v-btn>
+                                        <v-btn @click="restart()" class="ma-2" color="orange" dark>Restart</v-btn>
+                                        <v-btn @click="install()" class="ma-2" color="blue" dark>Install</v-btn>
+                                    </v-card-text>
+                                </v-card>
+                                <v-card class="mt-5">
+                                    <v-card-title>Details</v-card-title>
+                                    <v-card-text>
+                                        <v-list-item two-line>
+                                            <v-list-item-content>
+                                                <v-list-item-title>{{game_server.name}}</v-list-item-title>
+                                                <v-list-item-subtitle>Name</v-list-item-subtitle>
+                                            </v-list-item-content>
+                                        </v-list-item>
 
-                        <v-list-item two-line>
-                            <v-list-item-content>
-                                <v-list-item-title>{{game_server.state == 1 ? 'Active' : 'Locked'}}
-                                </v-list-item-title>
-                                <v-list-item-subtitle>Status</v-list-item-subtitle>
-                            </v-list-item-content>
-                        </v-list-item>
+                                        <v-list-item two-line>
+                                            <v-list-item-content>
+                                                <v-list-item-title>{{game_server.state == 1 ? 'Active' : 'Locked'}}
+                                                </v-list-item-title>
+                                                <v-list-item-subtitle>Status</v-list-item-subtitle>
+                                            </v-list-item-content>
+                                        </v-list-item>
 
-                        <v-list-item two-line>
-                            <v-list-item-content>
-                                <v-list-item-title>{{game_server.metric_frequency}}s</v-list-item-title>
-                                <v-list-item-subtitle>Metric frequency</v-list-item-subtitle>
-                            </v-list-item-content>
-                        </v-list-item>
+                                        <v-list-item two-line>
+                                            <v-list-item-content>
+                                                <v-list-item-title>{{game_server.metric_frequency}}s</v-list-item-title>
+                                                <v-list-item-subtitle>Metric frequency</v-list-item-subtitle>
+                                            </v-list-item-content>
+                                        </v-list-item>
 
-                        <v-list-item two-line>
-                            <v-list-item-content>
-                                <v-list-item-title>{{game_server.stop_timeout}}s</v-list-item-title>
-                                <v-list-item-subtitle>Stop timeout</v-list-item-subtitle>
-                            </v-list-item-content>
-                        </v-list-item>
-                    </v-card-text>
-                    <v-card-actions>
-                        <v-btn @click="remove()" color="red darken-3">
-                            <v-icon class="mr-2">fa-trash</v-icon>
-                            Remove game server
-                        </v-btn>
-                    </v-card-actions>
-                </v-card>
-            </v-col>
-            <v-col cols="9" md="9" sm="12" xs="12">
-                <gs-console :host-id="hostId" :server-id="serverId"/>
-            </v-col>
-        </v-row>
-        <v-row class="mb-6" v-if="files.selected">
-            <v-col cols="12" md="12" sm="12" xs="12">
-                <v-card>
-                    <v-card-title>Files</v-card-title>
+                                        <v-list-item two-line>
+                                            <v-list-item-content>
+                                                <v-list-item-title>{{game_server.stop_timeout}}s</v-list-item-title>
+                                                <v-list-item-subtitle>Stop timeout</v-list-item-subtitle>
+                                            </v-list-item-content>
+                                        </v-list-item>
+                                    </v-card-text>
+                                    <v-card-actions>
+                                        <v-btn @click="remove()" color="red darken-3">
+                                            <v-icon class="mr-2">fa-trash</v-icon>
+                                            Remove game server
+                                        </v-btn>
+                                    </v-card-actions>
+                                </v-card>
+                            </v-col>
+                            <v-col cols="9" md="9" sm="12" xs="12">
+                                <gs-console :host-id="hostId" :server-id="serverId"/>
+                            </v-col>
+                        </v-row>
+                    </v-container>
+                </v-tab-item>
+                <v-tab-item>
+                    <!-- v-if="files.selected" -->
+                    <v-row class="mb-6">
+                        <v-col cols="12" md="12" sm="12" xs="12">
+                            <gs-file-manager :host-id="hostId" :server-id="serverId"/>
+                        </v-col>
+                    </v-row>
+                </v-tab-item>
+            </v-tabs-items>
+        </v-card>
 
-                    <v-list subheader two-line>
-                        <v-subheader inset>Folders</v-subheader>
-
-                        <v-list-item
-                                @click="goToParentDirectory()"
-                                v-if="files.selected.info.name !== files.root.info.name"
-                        >
-                            <v-list-item-avatar>
-                                <v-icon class="grey lighten-1 white--text">
-                                    fa-level-up
-                                </v-icon>
-                            </v-list-item-avatar>
-                            <v-list-item-content>
-                                <v-list-item-title>Go to parent directory</v-list-item-title>
-                            </v-list-item-content>
-                        </v-list-item>
-
-                        <v-list-item
-                                :key="item.info.name"
-                                @click="files.selected = item"
-                                v-for="item in files.selected.children"
-                                v-if="item.info.is_dir"
-                        >
-                            <v-list-item-avatar>
-                                <v-icon class="grey lighten-1 white--text">
-                                    fa-folder
-                                </v-icon>
-                            </v-list-item-avatar>
-
-                            <v-list-item-content>
-                                <v-list-item-title v-text="item.info.name"></v-list-item-title>
-                                <v-list-item-subtitle v-text="item.info.size"></v-list-item-subtitle>
-                            </v-list-item-content>
-
-                            <v-list-item-action>
-                                <v-btn icon>
-                                    <v-icon color="grey lighten-1">fa-info</v-icon>
-                                </v-btn>
-                            </v-list-item-action>
-                        </v-list-item>
-
-                        <v-divider inset></v-divider>
-
-                        <v-subheader inset>Files</v-subheader>
-
-                        <v-list-item
-                                :key="item.info.name"
-                                @click=""
-                                v-for="item in files.selected.children"
-                                v-if="!item.info.is_dir"
-                        >
-                            <v-list-item-avatar>
-                                <v-icon class="blue white--text">fa-file</v-icon>
-                            </v-list-item-avatar>
-
-                            <v-list-item-content>
-                                <v-list-item-title v-text="item.info.name"></v-list-item-title>
-                                <v-list-item-subtitle v-text="item.info.size"></v-list-item-subtitle>
-                            </v-list-item-content>
-
-                            <v-list-item-action>
-                                <v-btn icon>
-                                    <v-icon color="grey lighten-1">fa-info</v-icon>
-                                </v-btn>
-                            </v-list-item-action>
-                        </v-list-item>
-                    </v-list>
-                </v-card>
-            </v-col>
-        </v-row>
         <v-snackbar
                 v-model="installSnackbar"
         >
@@ -154,52 +111,46 @@
                 Close
             </v-btn>
         </v-snackbar>
+
     </v-container>
 </template>
 
 <script lang="ts">
     import Vue from 'vue';
     import GsConsole from '@/components/GsConsole.vue';
-    import {Node} from '@/types/files';
-
-    interface FileRow {
-        icon: string,
-        iconClass: string,
-        title: string,
-        subtitle: string
-    }
+    import GsFileManager from '@/components/GsFileManager.vue';
 
     export default Vue.extend({
         name: 'game_server',
-        components: {GsConsole},
+        components: {
+            GsConsole,
+            GsFileManager
+        },
         data: () => ({
+            tab: 0,
             game_server: {},
-            serverId: '',
-            hostId: '',
             message: '',
-            serverUrl: '',
             timer: '',
             installSnackbar: false,
             removeSnackbar: false,
-            stream: '' as any,
-
-            files: {
-                root: {} as Node,
-                selected: {} as Node
-            }
         }),
+        computed: {
+            serverId() {
+                return this.$route.params.server_id;
+            },
+            hostId() {
+                return this.$route.params.id;
+            },
+            serverUrl() {
+                return '/v1/host/' + this.$route.params.id + '/server/' + this.$route.params.server_id;
+            }
+        },
         mounted() {
-            this.serverId = this.$route.params.server_id;
-            this.hostId = this.$route.params.id;
-            this.serverUrl = '/v1/host/' + this.hostId + '/server/' + this.serverId;
-
             this.$http.get(this.serverUrl).then(res => {
                 this.game_server = res.data.game_server;
             }).catch(e => {
                 this.$auth.checkResponse(e.response.status);
             });
-
-            this.getFiles();
         },
         methods: {
             start() {
@@ -243,43 +194,6 @@
                     this.$auth.checkResponse(e.response.status);
                 });
             },
-            getFiles() {
-                this.$http.get(this.serverUrl + '/file/list').then(res => {
-                    this.files.root = res.data;
-                    this.files.selected = this.files.root;
-                }).catch(e => {
-                    this.$auth.checkResponse(e.response.status);
-                });
-            },
-            getParent(root: Node, name: string) {
-                let node = null;
-                if (name === '') {
-                    return root;
-                }
-
-                root.children.some(n => {
-                    if (n.info.name === name) {
-                        return node = n;
-                    }
-
-                    if (n.children) {
-                        return node = this.getParent(n, name);
-                    }
-                });
-
-                return node;
-            },
-            goToParentDirectory() {
-                if (this.files.selected.parent_name === this.files.root.info.name) {
-                    this.files.selected = this.files.root;
-                } else {
-                    let node = this.getParent(this.files.root, this.files.selected.parent_name);
-                    this.files.selected = node as Node;
-                }
-            }
-        },
-        beforeDestroy(): void {
-            this.stream.close();
         },
     });
 </script>
