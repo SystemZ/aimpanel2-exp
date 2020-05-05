@@ -52,21 +52,7 @@
                 </v-card>
             </v-col>
             <v-col cols="9" md="9" sm="12" xs="12">
-                <v-card>
-                    <v-card-title>Console</v-card-title>
-                    <v-card class="pa-5">
-                        <span v-for="item in logs">{{item}}<br/></span>
-                    </v-card>
-                    <v-card-actions>
-                        <v-text-field full-width
-                                      label="Type some message here"
-                                      hide-details
-                                      v-model="message"
-                                      v-on:keyup.enter="sendMessage()">
-                            <v-icon slot="append" color="grey">fa-paper-plane</v-icon>
-                        </v-text-field>
-                    </v-card-actions>
-                </v-card>
+                <gs-console :host-id="hostId" :server-id="serverId"/>
             </v-col>
         </v-row>
         <v-row class="mb-6" v-if="files.selected">
@@ -173,6 +159,7 @@
 
 <script lang="ts">
     import Vue from 'vue';
+    import GsConsole from '@/components/GsConsole.vue';
     import {Node} from '@/types/files';
 
     interface FileRow {
@@ -184,11 +171,11 @@
 
     export default Vue.extend({
         name: 'game_server',
+        components: {GsConsole},
         data: () => ({
             game_server: {},
             serverId: '',
             hostId: '',
-            logs: [] as string[],
             message: '',
             serverUrl: '',
             timer: '',
@@ -211,10 +198,6 @@
             }).catch(e => {
                 this.$auth.checkResponse(e.response.status);
             });
-
-            if (this.stream === '' || this.stream === undefined) {
-                this.setupStream();
-            }
 
             this.getFiles();
         },
@@ -244,16 +227,6 @@
                     this.$auth.checkResponse(e.response.status);
                 });
             },
-            sendMessage() {
-                this.$http.put(this.serverUrl + '/command', {
-                    command: this.message
-                }).then(res => {
-                    console.log(res);
-                    this.message = '';
-                }).catch(e => {
-                    this.$auth.checkResponse(e.response.status);
-                });
-            },
             install() {
                 this.$http.put(this.serverUrl + '/install').then(res => {
                     this.installSnackbar = true;
@@ -269,26 +242,6 @@
                 }).catch(e => {
                     this.$auth.checkResponse(e.response.status);
                 });
-            },
-            setupStream() {
-                this.stream = new this.$eventSource(this.$apiUrl + this.serverUrl + '/console', {
-                    headers: {
-                        Authorization: this.$auth.getAuthorizationHeader()
-                    }
-                });
-
-                this.stream.onerror = (event: any) => {
-                    console.error(event);
-                };
-
-                this.stream.addEventListener('message', (event: any) => {
-                    if (event.data === 'heartbeat') {
-                        return;
-                    }
-
-                    let data = atob(event.data);
-                    this.logs.push(data);
-                }, false);
             },
             getFiles() {
                 this.$http.get(this.serverUrl + '/file/list').then(res => {
