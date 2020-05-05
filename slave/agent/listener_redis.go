@@ -1,7 +1,6 @@
 package agent
 
 import (
-	"github.com/go-redis/redis"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib/ahttp"
 	"gitlab.com/systemz/aimpanel2/lib/task"
@@ -48,25 +47,50 @@ func redisTaskHandler(taskCh string, taskBody string) {
 	switch taskMsg.TaskId {
 	case task.GAME_STARTED:
 		logrus.Info("Agent got " + taskMsg.TaskId.String())
-		tasks.GsStartGame(taskMsg)
+
+		val, err := model.GetGsStart(taskMsg.GameServerID)
+		if val == 1 {
+			model.SetGsStart(taskMsg.GameServerID, 2)
+			tasks.GsStartGame(taskMsg)
+			model.DelGsStart(taskMsg.GameServerID)
+
+			_, err = ahttp.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
+			if err != nil {
+				logrus.Error(err)
+			}
+		}
+
+	case task.GAME_SHUTDOWN:
+		logrus.Info("Agent got " + taskMsg.TaskId.String())
 
 		_, err = ahttp.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
 		if err != nil {
 			logrus.Error(err)
 		}
-	case task.GAME_SHUTDOWN:
+
 		//Start wrapper if gs is restarting
-		val, err := model.GetGsRestart(taskMsg.GameServerID)
-		if err != redis.Nil && val != -1 {
+		val, _ := model.GetGsRestart(taskMsg.GameServerID)
+		if val == 1 {
+			logrus.Info("no to cyk")
 			model.SetGsRestart(taskMsg.GameServerID, 2)
 			tasks.StartWrapper(taskMsg)
 			model.DelGsRestart(taskMsg.GameServerID)
 		}
-		fallthrough
+
 	case task.GAME_SERVER_LOG:
-		fallthrough
+		logrus.Info("Agent got " + taskMsg.TaskId.String())
+
+		_, err = ahttp.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
+		if err != nil {
+			logrus.Error(err)
+		}
 	case task.GAME_METRICS:
-		fallthrough
+		logrus.Info("Agent got " + taskMsg.TaskId.String())
+
+		_, err = ahttp.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
+		if err != nil {
+			logrus.Error(err)
+		}
 	case task.GAME_METRICS_FREQUENCY:
 		logrus.Info("Agent got " + taskMsg.TaskId.String())
 

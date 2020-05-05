@@ -164,16 +164,16 @@ func Data(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = gameserver.HostData(hostToken, data)
-	if err != nil {
-		lib.ReturnError(w, http.StatusInternalServerError, ecode.HostData, err)
-		return
-	}
-
 	if data.GameServerID != "" {
 		err = gameserver.GsData(hostToken, data)
 		if err != nil {
 			lib.ReturnError(w, http.StatusInternalServerError, ecode.GsData, err)
+			return
+		}
+	} else {
+		err = gameserver.HostData(hostToken, data)
+		if err != nil {
+			lib.ReturnError(w, http.StatusInternalServerError, ecode.HostData, err)
 			return
 		}
 	}

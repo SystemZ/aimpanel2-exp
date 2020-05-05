@@ -175,7 +175,7 @@ func (game *Game) Install(storagePath string, gsPath string) (err error) {
 		}
 
 		if _, err := os.Stat(storagePath + "/spigot-" + game.Version + ".jar"); os.IsNotExist(err) {
-			cmd := exec.Command("java", "-jar", "BuildTools.jar", "--output-dir="+storagePath, " --rev="+game.Version)
+			cmd := exec.Command("java", "-jar", "BuildTools.jar", "--output-dir", storagePath, "--rev", game.Version)
 			cmd.Dir = storagePath + "/BuildTools"
 
 			if err = cmd.Run(); err != nil {

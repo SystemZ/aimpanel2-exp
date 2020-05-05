@@ -69,3 +69,15 @@ func GetGsGame(gsId string) (game.Game, error) {
 	err = json.Unmarshal([]byte(gameStr), &g)
 	return g, err
 }
+
+func SetGsStart(gsId string, state int) {
+	Redis.Set("gs_start_id_"+gsId, state, 24*time.Hour)
+}
+
+func GetGsStart(gsId string) (int64, error) {
+	return Redis.Get("gs_start_id_" + gsId).Int64()
+}
+
+func DelGsStart(gsId string) {
+	Redis.Del("gs_start_id_" + gsId)
+}
