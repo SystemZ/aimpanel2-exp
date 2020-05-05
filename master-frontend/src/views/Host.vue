@@ -4,7 +4,7 @@
             <v-col>
                 <v-card>
                     <v-card-text>
-                        <v-btn class="ma-2" color="green" dark @click="update()">Update</v-btn>
+                        <v-btn @click="update()" class="ma-2" color="green" dark>Update</v-btn>
                     </v-card-text>
                 </v-card>
             </v-col>
@@ -42,7 +42,7 @@
                         </v-list-item>
                     </v-card-text>
                     <v-card-actions>
-                        <v-btn color="red darken-2 accent-4" text @click="remove()">Remove host</v-btn>
+                        <v-btn @click="remove()" color="red darken-2 accent-4" text>Remove host</v-btn>
                     </v-card-actions>
                 </v-card>
             </v-col>
@@ -53,10 +53,10 @@
                         <v-row>
                             <v-col xs3>
                                 <v-progress-circular
-                                        :size="120"
-                                        :width="15"
                                         :rotate="-90"
+                                        :size="120"
                                         :value="metric.cpu_usage"
+                                        :width="15"
                                         color="primary">
                                     {{metric.cpu_usage}}% CPU
                                 </v-progress-circular>
@@ -64,10 +64,10 @@
                             </v-col>
                             <v-col xs3>
                                 <v-progress-circular
-                                        :size="120"
-                                        :width="15"
                                         :rotate="-90"
+                                        :size="120"
                                         :value="(metric.ram_used/metric.ram_total) * 100"
+                                        :width="15"
                                         color="primary">
                                     {{metric.ram_used }}/{{metric.ram_total }} GB
                                 </v-progress-circular>
@@ -75,10 +75,10 @@
                             </v-col>
                             <v-col xs3>
                                 <v-progress-circular
-                                        :size="120"
-                                        :width="15"
                                         :rotate="-90"
+                                        :size="120"
                                         :value="(metric.disk_used/metric.disk_total) * 100"
+                                        :width="15"
                                         color="green">
                                     {{metric.disk_used}}/{{metric.disk_total}} GB
                                 </v-progress-circular>
@@ -102,22 +102,22 @@
                                 :items="gameServers"
                                 item-text="name"
                                 item-value="_id"
-                                v-model="createJob.game_server_id"
-                                label="Select game server">
+                                label="Select game server"
+                                v-model="createJob.game_server_id">
                         </v-select>
-                        <v-select v-model="createJob.task_id"
-                                  :items="tasks"
+                        <v-select :items="tasks"
                                   item-text="name"
                                   item-value="id"
                                   label="Select task"
                                   return-object
                                   single-line
+                                  v-model="createJob.task_id"
                         ></v-select>
                         <v-text-field label="Body"
                                       v-model="createJob.body"></v-text-field>
 
 
-                        <v-btn class="ma-2" color="green" dark @click="addJob()">Add job</v-btn>
+                        <v-btn @click="addJob()" class="ma-2" color="green" dark>Add job</v-btn>
                     </v-card-text>
                 </v-card>
             </v-col>
@@ -127,9 +127,9 @@
                     <v-card-title>Jobs</v-card-title>
                     <v-list>
                         <v-list-item
-                                v-for="job in jobs"
                                 :key="job.name"
-                                >
+                                v-for="job in jobs"
+                        >
                             <v-list-item-content>
                                 <v-list-item-title v-text="job.name"></v-list-item-title>
                             </v-list-item-content>
@@ -148,9 +148,9 @@
         >
             Removing host...
             <v-btn
+                    @click="removeSnackbar = false"
                     color="red"
                     text
-                    @click="removeSnackbar = false"
             >
                 Close
             </v-btn>
@@ -231,8 +231,8 @@
                 this.$auth.checkResponse(e.response.status);
             });
 
-            this.getGameServers()
-            this.getJobs()
+            this.getGameServers();
+            this.getJobs();
 
             this.$http.get('/v1/host/' + this.$route.params.id + '/metric').then((res) => {
                 this.metric = res.data.metrics[0];
@@ -266,25 +266,25 @@
                 });
             },
             getGameServers(): void {
-                this.$http.get("/v1/host/" + this.$route.params.id + '/server').then(res => {
+                this.$http.get('/v1/host/' + this.$route.params.id + '/server').then(res => {
                     this.gameServers = res.data.game_servers;
                 }).catch(e => {
-                    this.$auth.checkResponse(e.response.status)
+                    this.$auth.checkResponse(e.response.status);
                 });
             },
             removeJob(jobId: string): void {
                 this.$http.delete('/v1/host/' + this.$route.params.id + '/job/' + jobId).then(res => {
-                    console.log(res)
-                    this.getJobs()
+                    console.log(res);
+                    this.getJobs();
                 }).catch(e => {
                     this.$auth.checkResponse(e.response.status);
                 });
             },
             getJobs(): void {
-                this.$http.get("/v1/host/" + this.$route.params.id + '/job').then(res => {
+                this.$http.get('/v1/host/' + this.$route.params.id + '/job').then(res => {
                     this.jobs = res.data.jobs;
                 }).catch(e => {
-                    this.$auth.checkResponse(e.response.status)
+                    this.$auth.checkResponse(e.response.status);
                 });
             },
             addJob(): void {
@@ -297,16 +297,16 @@
                         body: this.createJob.body
                     }
                 }).then(res => {
-                    console.log(res)
+                    console.log(res);
                     this.createJob = {
                         name: '',
                         cron_expression: '* * * * *',
                         task_id: 0,
                         body: '',
                         game_server_id: ''
-                    }
-                    this.getJobs()
-                })
+                    };
+                    this.getJobs();
+                });
             }
         },
     });

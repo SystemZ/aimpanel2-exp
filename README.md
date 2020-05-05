@@ -4,6 +4,14 @@ The most easy to use game panel as a service
 
 ## Dev
 
+### Frontend
+
+Remember to open `master-frontend/tslint.json` with IntelliJ and apply rules to formatting in popup!
+
+```bash
+./Taskfile.sh frontend
+```
+
 ### Slave VM via Vagrant
 
 Tested on Kubuntu 18.04

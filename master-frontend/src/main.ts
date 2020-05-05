@@ -7,9 +7,8 @@ import vuetify from './plugins/vuetify';
 import '@babel/polyfill';
 import axios, {AxiosStatic} from 'axios';
 import auth, {AuthInterface} from './auth';
-
 // @ts-ignore
-import { EventSourcePolyfill } from 'event-source-polyfill';
+import {EventSourcePolyfill} from 'event-source-polyfill';
 
 Vue.config.productionTip = false;
 

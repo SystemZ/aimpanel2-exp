@@ -2,7 +2,7 @@
     <v-container>
         <v-row>
             <v-col xs12>
-                <v-dialog v-model="createHost.dialog" persistent max-width="600px">
+                <v-dialog max-width="600px" persistent v-model="createHost.dialog">
                     <template v-slot:activator="{ on }">
                         <v-btn color="info" v-on="on">
                             <v-icon left small>fa-plus</v-icon>
@@ -33,12 +33,12 @@
                                     </v-layout>
                                 </v-container>
 
-                                <v-btn color="primary"
-                                       @click="addHost()">
+                                <v-btn @click="addHost()"
+                                       color="primary">
                                     Next
                                 </v-btn>
 
-                                <v-btn text @click="createHostCancel()">Cancel</v-btn>
+                                <v-btn @click="createHostCancel()" text>Cancel</v-btn>
                             </v-stepper-content>
                             <v-stepper-content step="2">
                                 <v-container grid-list-md>
@@ -46,7 +46,7 @@
                                         you run host app.</p>
                                     <code>{{createHost.token}}</code>
                                 </v-container>
-                                <v-btn text @click="finish()">Close</v-btn>
+                                <v-btn @click="finish()" text>Close</v-btn>
                             </v-stepper-content>
                         </v-stepper-items>
                     </v-stepper>
@@ -58,9 +58,9 @@
                 <v-data-table
                         :headers="headers"
                         :items="hosts"
-                        hide-default-footer
-                        class="elevation-1"
                         @click:row="goToHost"
+                        class="elevation-1"
+                        hide-default-footer
                 >
                     <template v-slot:item.state="{ item }">
                         <span v-if="item.state === 1">
