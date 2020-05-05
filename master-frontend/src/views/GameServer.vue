@@ -5,10 +5,10 @@
                 <v-card>
                     <v-card-title>Actions</v-card-title>
                     <v-card-text>
-                        <v-btn class="ma-2" color="green" dark @click="start()">Start</v-btn>
-                        <v-btn class="ma-2" color="red" dark @click="stop()">Stop</v-btn>
-                        <v-btn class="ma-2" color="orange" dark @click="restart()">Restart</v-btn>
-                        <v-btn class="ma-2" color="blue" dark @click="install()">Install</v-btn>
+                        <v-btn @click="start()" class="ma-2" color="green" dark>Start</v-btn>
+                        <v-btn @click="stop()" class="ma-2" color="red" dark>Stop</v-btn>
+                        <v-btn @click="restart()" class="ma-2" color="orange" dark>Restart</v-btn>
+                        <v-btn @click="install()" class="ma-2" color="blue" dark>Install</v-btn>
                     </v-card-text>
                 </v-card>
                 <v-card class="mt-5">
@@ -44,7 +44,7 @@
                         </v-list-item>
                     </v-card-text>
                     <v-card-actions>
-                        <v-btn color="red darken-3" @click="remove()">
+                        <v-btn @click="remove()" color="red darken-3">
                             <v-icon class="mr-2">fa-trash</v-icon>
                             Remove game server
                         </v-btn>
@@ -74,12 +74,12 @@
                 <v-card>
                     <v-card-title>Files</v-card-title>
 
-                    <v-list two-line subheader>
+                    <v-list subheader two-line>
                         <v-subheader inset>Folders</v-subheader>
 
                         <v-list-item
-                            @click="goToParentDirectory()"
-                            v-if="files.selected.info.name !== files.root.info.name"
+                                @click="goToParentDirectory()"
+                                v-if="files.selected.info.name !== files.root.info.name"
                         >
                             <v-list-item-avatar>
                                 <v-icon class="grey lighten-1 white--text">
@@ -92,10 +92,10 @@
                         </v-list-item>
 
                         <v-list-item
-                                v-for="item in files.selected.children"
-                                v-if="item.info.is_dir"
                                 :key="item.info.name"
                                 @click="files.selected = item"
+                                v-for="item in files.selected.children"
+                                v-if="item.info.is_dir"
                         >
                             <v-list-item-avatar>
                                 <v-icon class="grey lighten-1 white--text">
@@ -120,10 +120,10 @@
                         <v-subheader inset>Files</v-subheader>
 
                         <v-list-item
-                                v-for="item in files.selected.children"
-                                v-if="!item.info.is_dir"
                                 :key="item.info.name"
                                 @click=""
+                                v-for="item in files.selected.children"
+                                v-if="!item.info.is_dir"
                         >
                             <v-list-item-avatar>
                                 <v-icon class="blue white--text">fa-file</v-icon>
@@ -149,9 +149,9 @@
         >
             Installing game server...
             <v-btn
+                    @click="installSnackbar = false"
                     color="red"
                     text
-                    @click="installSnackbar = false"
             >
                 Close
             </v-btn>
@@ -161,9 +161,9 @@
         >
             Removing game server...
             <v-btn
+                    @click="removeSnackbar = false"
                     color="red"
                     text
-                    @click="removeSnackbar = false"
             >
                 Close
             </v-btn>
@@ -173,7 +173,7 @@
 
 <script lang="ts">
     import Vue from 'vue';
-    import {Node} from "@/types/files";
+    import {Node} from '@/types/files';
 
     interface FileRow {
         icon: string,
@@ -209,22 +209,22 @@
             this.$http.get(this.serverUrl).then(res => {
                 this.game_server = res.data.game_server;
             }).catch(e => {
-                this.$auth.checkResponse(e.response.status)
+                this.$auth.checkResponse(e.response.status);
             });
 
             if (this.stream === '' || this.stream === undefined) {
-                this.setupStream()
+                this.setupStream();
             }
 
-            this.getFiles()
+            this.getFiles();
         },
         methods: {
             start() {
                 this.$http.put(this.serverUrl + '/start').then(res => {
                     console.log(res);
                 }).catch(e => {
-                    this.$auth.checkResponse(e.response.status)
-                })
+                    this.$auth.checkResponse(e.response.status);
+                });
             },
             stop() {
                 this.$http.put(this.serverUrl + '/stop', {
@@ -232,8 +232,8 @@
                 }).then(res => {
                     console.log(res);
                 }).catch(e => {
-                    this.$auth.checkResponse(e.response.status)
-                })
+                    this.$auth.checkResponse(e.response.status);
+                });
             },
             restart() {
                 this.$http.put(this.serverUrl + '/restart', {
@@ -241,8 +241,8 @@
                 }).then(res => {
                     console.log(res);
                 }).catch(e => {
-                    this.$auth.checkResponse(e.response.status)
-                })
+                    this.$auth.checkResponse(e.response.status);
+                });
             },
             sendMessage() {
                 this.$http.put(this.serverUrl + '/command', {
@@ -251,23 +251,23 @@
                     console.log(res);
                     this.message = '';
                 }).catch(e => {
-                    this.$auth.checkResponse(e.response.status)
-                })
+                    this.$auth.checkResponse(e.response.status);
+                });
             },
             install() {
-                this.$http.put(this.serverUrl + "/install").then(res => {
+                this.$http.put(this.serverUrl + '/install').then(res => {
                     this.installSnackbar = true;
                 }).catch(e => {
-                    this.$auth.checkResponse(e.response.status)
+                    this.$auth.checkResponse(e.response.status);
                 });
             },
             remove() {
                 this.$http.delete(this.serverUrl).then(res => {
                     this.removeSnackbar = true;
                     console.log(res);
-                    this.$router.push("/game-servers");
+                    this.$router.push('/game-servers');
                 }).catch(e => {
-                    this.$auth.checkResponse(e.response.status)
+                    this.$auth.checkResponse(e.response.status);
                 });
             },
             setupStream() {
@@ -283,50 +283,50 @@
 
                 this.stream.addEventListener('message', (event: any) => {
                     if (event.data === 'heartbeat') {
-                        return
+                        return;
                     }
 
                     let data = atob(event.data);
-                    this.logs.push(data)
+                    this.logs.push(data);
                 }, false);
             },
             getFiles() {
                 this.$http.get(this.serverUrl + '/file/list').then(res => {
-                    this.files.root = res.data
-                    this.files.selected = this.files.root
+                    this.files.root = res.data;
+                    this.files.selected = this.files.root;
                 }).catch(e => {
-                    this.$auth.checkResponse(e.response.status)
+                    this.$auth.checkResponse(e.response.status);
                 });
             },
             getParent(root: Node, name: string) {
                 let node = null;
-                if(name === '') {
+                if (name === '') {
                     return root;
                 }
 
                 root.children.some(n => {
-                    if(n.info.name === name) {
+                    if (n.info.name === name) {
                         return node = n;
                     }
 
-                    if(n.children) {
-                        return node = this.getParent(n, name)
+                    if (n.children) {
+                        return node = this.getParent(n, name);
                     }
                 });
 
                 return node;
             },
             goToParentDirectory() {
-                if(this.files.selected.parent_name === this.files.root.info.name) {
+                if (this.files.selected.parent_name === this.files.root.info.name) {
                     this.files.selected = this.files.root;
                 } else {
-                    let node = this.getParent(this.files.root, this.files.selected.parent_name)
+                    let node = this.getParent(this.files.root, this.files.selected.parent_name);
                     this.files.selected = node as Node;
                 }
             }
         },
         beforeDestroy(): void {
-            this.stream.close()
+            this.stream.close();
         },
     });
 </script>

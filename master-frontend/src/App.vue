@@ -1,6 +1,6 @@
 <template xmlns:v-slot="http://www.w3.org/1999/XSL/Transform">
     <v-app :style="{background: $vuetify.theme.themes['dark'].background}">
-        <v-navigation-drawer v-model="drawer" app>
+        <v-navigation-drawer app v-model="drawer">
             <v-list-item>
                 <v-list-item-content>
                     <v-list-item-title class="title">
@@ -15,12 +15,12 @@
 
             <v-list dense nav>
                 <v-list-item
-                        v-for="item in menu"
                         :key="item.title"
                         :to="item.path"
-                        v-if="(item.authRequired && loggedIn) || (!item.authRequired && !loggedIn) || !item.authRequired"
+                        active-class="red--text red--darken-1"
                         link
-                        active-class="red--text red--darken-1">
+                        v-for="item in menu"
+                        v-if="(item.authRequired && loggedIn) || (!item.authRequired && !loggedIn) || !item.authRequired">
                     <v-list-item-icon>
                         <v-icon>{{item.icon}}</v-icon>
                     </v-list-item-icon>
@@ -30,7 +30,7 @@
                     </v-list-item-content>
                 </v-list-item>
 
-                <v-list-item v-if="!loggedIn" to="login" active-class="red--text red--darken-1">
+                <v-list-item active-class="red--text red--darken-1" to="login" v-if="!loggedIn">
                     <v-list-item-action>
                         <v-icon>fa-sign-in</v-icon>
                     </v-list-item-action>
@@ -41,7 +41,7 @@
             </v-list>
         </v-navigation-drawer>
 
-        <v-app-bar color="red darken-2" app>
+        <v-app-bar app color="red darken-2">
             <v-toolbar-title>
                 {{$route.meta.title}}
             </v-toolbar-title>
