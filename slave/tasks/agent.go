@@ -26,6 +26,7 @@ func AgentTaskHandler(taskMsg task.Message) {
 	case task.AGENT_START_GS:
 		logrus.Infof("Agent task handler got %v", taskMsg.TaskId)
 		model.SetGsGame(taskMsg.GameServerID, taskMsg.Game)
+		model.SetGsStart(taskMsg.GameServerID, 1)
 		StartWrapper(taskMsg)
 	case task.AGENT_INSTALL_GS:
 		logrus.Infof("Agent task handler got %v", taskMsg.TaskId)
@@ -71,6 +72,7 @@ func StartWrapper(taskMsg task.Message) {
 		},
 		Sys: sysproc,
 	}
+
 	attr.Env = append(attr.Env, "HOST_TOKEN="+config.HOST_TOKEN)
 	attr.Env = append(attr.Env, "API_TOKEN="+config.API_TOKEN)
 

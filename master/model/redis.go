@@ -3,20 +3,7 @@ package model
 import (
 	"github.com/go-redis/redis"
 	"gitlab.com/systemz/aimpanel2/lib/filemanager"
-	"time"
 )
-
-func SetGsRestart(redis *redis.Client, gsId string, state int) {
-	redis.Set("gs_restart_id"+gsId, state, 24*time.Hour)
-}
-
-func GetGsRestart(redis *redis.Client, gsId string) (int64, error) {
-	return redis.Get("gs_restart_id_" + gsId).Int64()
-}
-
-func DelGsRestart(redis *redis.Client, gsId string) {
-	redis.Del("gs_restart_id_" + gsId)
-}
 
 func GetSlaveCommit(redis *redis.Client) (string, error) {
 	return redis.Get("slave_commit").Result()
@@ -24,18 +11,6 @@ func GetSlaveCommit(redis *redis.Client) (string, error) {
 
 func GetSlaveUrl(redis *redis.Client) (string, error) {
 	return redis.Get("slave_url").Result()
-}
-
-func SetGsStart(redis *redis.Client, gsId string, state int) {
-	redis.Set("gs_start_id_"+gsId, state, 24*time.Hour)
-}
-
-func GetGsStart(redis *redis.Client, gsId string) (int64, error) {
-	return redis.Get("gs_start_id_" + gsId).Int64()
-}
-
-func DelGsStart(redis *redis.Client, gsId string) {
-	redis.Del("gs_start_id_" + gsId)
 }
 
 func GsFilesSubscribe(redis *redis.Client, gsId string) (*redis.PubSub, error) {

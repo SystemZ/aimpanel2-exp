@@ -100,7 +100,6 @@ func (p *Process) Run() {
 				}
 			}
 			logrus.Errorf("cmd.Wait: %v", err)
-
 			taskMsg := task.Message{
 				TaskId: task.GAME_SHUTDOWN,
 			}
@@ -108,10 +107,6 @@ func (p *Process) Run() {
 
 			os.Exit(0)
 		} else {
-			taskMsg := task.Message{
-				TaskId: task.GAME_SHUTDOWN,
-			}
-			model.SendTask(config.REDIS_PUB_SUB_AGENT_CH, taskMsg)
 			os.Exit(0)
 		}
 	}()
@@ -121,7 +116,7 @@ func (p *Process) Run() {
 }
 
 func (p *Process) Kill(signal syscall.Signal) {
-	logrus.Info("Kill" + signal.String())
+	logrus.Info("Kill " + signal.String())
 	if p.Running {
 		p.Cmd.Process.Signal(signal)
 		p.Running = false

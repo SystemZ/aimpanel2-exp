@@ -49,8 +49,6 @@ func Start(gsId string) error {
 
 	channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
 
-	model.SetGsStart(model.Redis, gameServer.ID, 1)
-
 	return nil
 }
 
@@ -181,8 +179,6 @@ func Restart(gsId string, stopType uint) error {
 	if err != nil {
 		return errors.New("error when getting game")
 	}
-
-	model.SetGsRestart(model.Redis, gameServer.ID, 0)
 
 	channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken)
 	if !ok {

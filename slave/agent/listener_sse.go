@@ -43,7 +43,6 @@ func listenerSse(done chan bool) {
 
 		if taskMsg.TaskId == task.AGENT_GET_JOBS {
 			go cron.AddJobs(taskMsg.Jobs)
-
 			continue
 		}
 
