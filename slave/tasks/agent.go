@@ -24,26 +24,21 @@ import (
 func AgentTaskHandler(taskMsg task.Message) {
 	switch taskMsg.TaskId {
 	case task.AGENT_START_GS:
-		logrus.Infof("Agent task handler got %v", taskMsg.TaskId)
 		model.SetGsGame(taskMsg.GameServerID, taskMsg.Game)
 		model.SetGsStart(taskMsg.GameServerID, 1)
 		StartWrapper(taskMsg)
 	case task.AGENT_INSTALL_GS:
-		logrus.Infof("Agent task handler got %v", taskMsg.TaskId)
 		GsInstall(taskMsg)
-	//case task.AGENT_BACKUP_GS:
 	case task.AGENT_UPDATE:
-		logrus.Infof("Agent task handler got %v", taskMsg.TaskId)
 		SelfUpdate(taskMsg)
 	case task.AGENT_REMOVE_GS:
-		logrus.Infof("Agent task handler got %v", taskMsg.TaskId)
 		GsRemove(taskMsg)
 	case task.AGENT_FILE_LIST_GS:
-		logrus.Infof("Agent task handler got %v", taskMsg.TaskId)
 		GsFileList(taskMsg.GameServerID)
 	case task.AGENT_METRICS_FREQUENCY:
-		logrus.Infof("Agent task handler got %v", taskMsg.TaskId)
 		go AgentMetrics(taskMsg.MetricFrequency)
+		// TODO enable backup task handler
+		// case task.AGENT_BACKUP_GS:
 	}
 }
 

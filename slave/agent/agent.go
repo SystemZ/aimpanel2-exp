@@ -30,7 +30,9 @@ func Start(hostToken string) {
 
 	sseStarted := make(chan bool, 1)
 	redisStarted := make(chan bool, 1)
+	// all tasks from master are handled here
 	go listenerSse(sseStarted)
+	// wrapper and cli handling
 	go listenerRedis(redisStarted)
 
 	<-sseStarted
