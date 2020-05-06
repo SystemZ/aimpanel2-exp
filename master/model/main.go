@@ -1,42 +1,38 @@
 package model
 
 import (
-	"context"
-	"fmt"
 	"github.com/go-redis/redis"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/master/config"
 
-	_ "github.com/go-kivik/couchdb/v3" // The CouchDB driver
-	"github.com/go-kivik/kivik/v3"
-
 	"github.com/bwmarrin/snowflake"
+	_ "github.com/go-kivik/couchdb/v3" // The CouchDB driver
 )
 
 var (
-	Redis     *redis.Client
-	DB        *kivik.DB
+	Redis *redis.Client
+	//DB        *kivik.DB
 	Snowflake *snowflake.Node
 )
 
-func InitDB() *kivik.DB {
-	client, err := kivik.New("couch", fmt.Sprintf("http://%s:%s@%s:%s/", config.DB_USERNAME, config.DB_PASSWORD, config.DB_HOST, config.DB_PORT))
-	if err != nil {
-		logrus.Error(err.Error())
-		panic("Failed to connect to database")
-	}
-
-	_, err = client.Ping(context.TODO())
-	if err != nil {
-		logrus.Panic("Ping to db failed")
-	}
-
-	db := client.DB(context.TODO(), config.DB_NAME)
-	logrus.Info("Connection to database seems OK!")
-
-	return db
-}
+//func InitDB() *kivik.DB {
+//	client, err := kivik.New("couch", fmt.Sprintf("http://%s:%s@%s:%s/", config.DB_USERNAME, config.DB_PASSWORD, config.DB_HOST, config.DB_PORT))
+//	if err != nil {
+//		logrus.Error(err.Error())
+//		panic("Failed to connect to database")
+//	}
+//
+//	_, err = client.Ping(context.TODO())
+//	if err != nil {
+//		logrus.Panic("Ping to db failed")
+//	}
+//
+//	db := client.DB(context.TODO(), config.DB_NAME)
+//	logrus.Info("Connection to database seems OK!")
+//
+//	return db
+//}
 
 func InitRedis() {
 	if len(config.REDIS_PASSWORD) > 1 {
