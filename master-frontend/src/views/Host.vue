@@ -156,7 +156,7 @@
                 this.$http.delete('/v1/host/' + this.$route.params.id).then(res => {
                     this.removeSnackbar = true;
                     console.log(res);
-                    this.$router.push('/hosts');
+                    this.$router.push('/');
                 }).catch(e => {
                     this.$auth.checkResponse(e.response.status);
                 });
