@@ -40,6 +40,17 @@
                                 <v-list-item-subtitle>Kernel</v-list-item-subtitle>
                             </v-list-item-content>
                         </v-list-item>
+
+                        <!--
+                        FIXME token for debug purposes only, remove after implementing better slave auth
+                        -->
+                        <v-list-item two-line>
+                            <v-list-item-content>
+                                <v-list-item-title>{{host.token}}</v-list-item-title>
+                                <v-list-item-subtitle>Token</v-list-item-subtitle>
+                            </v-list-item-content>
+                        </v-list-item>
+                        
                     </v-card-text>
                     <v-card-actions>
                         <v-btn @click="remove()" color="red darken-2 accent-4" text>Remove host</v-btn>
