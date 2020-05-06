@@ -28,94 +28,99 @@
 
 <script lang="ts">
     import Vue from 'vue';
+    import Component from 'vue-class-component';
     import {mdiCheckboxBlankCircle} from '@mdi/js';
+    import {Game, GameServer, GameServerList, Host} from '@/types/api';
 
-    export default Vue.extend({
-        name: 'gs-list',
-        data: () => ({
-            gsListLoading: true,
-            gameServers: [],
-            hosts: [],
-            games: [],
-            headers: [
-                {
-                    text: 'Name',
-                    align: 'left',
-                    sortable: true,
-                    value: 'name'
-                },
-                {
-                    text: 'Host',
-                    align: 'right',
-                    value: 'host'
-                },
-                {
-                    text: 'Game',
-                    align: 'right',
-                    value: 'game'
-                },
-                {
-                    text: 'State',
-                    align: 'right',
-                    value: 'state'
-                }
-            ],
-            refreshInterval: 0,
-            //icons
-            mdiCheckboxBlankCircle: mdiCheckboxBlankCircle,
-        }),
+    @Component
+    export default class GsList extends Vue {
+        gsListLoading = true;
+        gameServers = [] as GameServer[];
+        hosts = [] as Host[];
+        games = [] as Game[];
+        headers = [
+            {
+                text: 'Name',
+                align: 'left',
+                sortable: true,
+                value: 'name'
+            },
+            {
+                text: 'Host',
+                align: 'right',
+                value: 'host'
+            },
+            {
+                text: 'Game',
+                align: 'right',
+                value: 'game'
+            },
+            {
+                text: 'State',
+                align: 'right',
+                value: 'state'
+            }
+        ];
+        refreshInterval = 0;
+        mdiCheckboxBlankCircle = mdiCheckboxBlankCircle;
+
+
         mounted() {
             this.refreshInterval = setInterval(() => {
                 this.getGameServers();
             }, 10 * 1000);
-        },
+        }
+
         beforeDestroy() {
             clearInterval(this.refreshInterval);
-        },
-        methods: {
-            getHostName(hostId: number) {
-                if (this.hosts && this.hosts.length > 0) {
-                    let host = this.hosts.find(x => {
-                        const {_id} = x;
-                        return _id === hostId;
-                    });
-                    if (host) {
-                        return host.name;
-                    }
-                }
-                return '';
-            },
-            getGameName(gameId: string) {
-                if (this.games && this.games.length > 0) {
-                    let game = this.games.find(x => {
-                        const {id} = x;
-                        return id === gameId;
-                    });
-                    if (game) {
-                        return game.name;
-                    }
-                }
-                return '';
-            },
-            goToGameServer(row) {
-                this.$router.push('/host/' + row.host_id + '/server/' + row._id);
-            },
-            getGameServers() {
-                this.gsListLoading = true;
-                return this.$http.get('/v1/host/my/server').then(res => {
-                    this.gameServers = res.data.game_servers;
-                    this.gsListLoading = false;
-                }).catch(e => {
-                    this.$auth.checkResponse(e.response.status);
-                });
-            },
-            getHosts() {
-                return this.$http.get('/v1/host').then(res => {
-                    this.hosts = res.data.hosts;
-                }).catch(e => {
-                    this.$auth.checkResponse(e.response.status);
-                });
-            },
         }
-    });
+
+        getHostName(hostId: string): string {
+            if (this.hosts && this.hosts.length > 0) {
+                let host = this.hosts.find(x => {
+                    const {_id} = x;
+                    return _id === hostId;
+                });
+                if (host) {
+                    return host.name;
+                }
+            }
+            return '';
+        }
+
+        getGameName(gameId: number) {
+            if (this.games && this.games.length > 0) {
+                let game = this.games.find(x => {
+                    const {id} = x;
+                    return id === gameId;
+                });
+                if (game) {
+                    return game.name;
+                }
+            }
+            return '';
+        }
+
+        goToGameServer(row: GameServer): void {
+            this.$router.push('/host/' + row.host_id + '/server/' + row._id);
+        }
+
+        getGameServers() {
+            this.gsListLoading = true;
+            return this.$http.get('/v1/host/my/server').then(res => {
+                this.gameServers = res.data.game_servers;
+                this.gsListLoading = false;
+            }).catch(e => {
+                this.$auth.checkResponse(e.response.status);
+            });
+        }
+
+        getHosts() {
+            return this.$http.get('/v1/host').then(res => {
+                this.hosts = res.data.hosts;
+            }).catch(e => {
+                this.$auth.checkResponse(e.response.status);
+            });
+        }
+    }
 </script>

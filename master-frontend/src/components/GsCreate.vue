@@ -72,19 +72,100 @@
 </template>
 
 <script lang="ts">
-    import Vue from 'vue';
-    import {mdiPlus} from '@mdi/js';
+    import {Vue, Component, Watch} from 'vue-property-decorator';
 
-    export default Vue.extend({
-        name: 'gs-create',
-        data: () => ({
-            hostsLoading: true,
-            hosts: [],
-            gamesLoading: true,
-            games: [],
-            gameVersions: [],
-            gameServers: [],
-            createGameServer: {
+    import {mdiPlus} from '@mdi/js';
+    import {Game, GameServer, Host} from '@/types/api';
+
+    @Component
+    export default class GsCreate extends Vue {
+        hostsLoading = true;
+        hosts = [] as Host[];
+        gamesLoading = true;
+        games = [] as Game[];
+        gameVersions = [] as string[];
+        gameServers = [] as GameServer[];
+        createGameServer = {
+            dialog: false,
+            step: 0,
+            selectedHost: [],
+            versions: [] as string[],
+            game: {
+                name: '',
+                game_id: 0,
+                game_version: 0,
+            },
+            gameId: 0,
+        };
+
+        //icons
+        mdiPlus = mdiPlus;
+
+        @Watch('createGameServer.game.game_id')
+        onGameIdChanged(value: number) {
+            this.createGameServer.versions = this.games.filter((g) => {
+                return g.id === value;
+            })[0].versions;
+        }
+
+        mounted() {
+            this.getGames();
+            this.getHosts();
+            this.getGameServers();
+        }
+
+        getGames() {
+            this.gamesLoading = true;
+            return this.$http.get('/v1/game').then(res => {
+                this.games = res.data;
+                this.gamesLoading = false;
+            }).catch(e => {
+                this.$auth.checkResponse(e.response.status);
+            });
+        }
+
+        getHosts() {
+            this.hostsLoading = true;
+            return this.$http.get('/v1/host').then(res => {
+                this.hosts = res.data.hosts;
+                this.hostsLoading = false;
+            }).catch(e => {
+                this.$auth.checkResponse(e.response.status);
+            });
+        }
+
+        getGameServers() {
+            return this.$http.get('/v1/host/my/server').then(res => {
+                this.gameServers = res.data.game_servers;
+            }).catch(e => {
+                this.$auth.checkResponse(e.response.status);
+            });
+        }
+
+        addGameServer(): void {
+            this.$http.post('/v1/host/' + this.createGameServer.selectedHost + '/server',
+                this.createGameServer.game).then(res => {
+                    this.createGameServer.gameId = res.data.id;
+                    this.createGameServer.step = 2;
+                }
+            );
+        }
+
+        installGsEngine(): void {
+            this.$http.put('/v1/host/' + this.createGameServer.selectedHost +
+                '/server/' + this.createGameServer.gameId + '/install').then(res => {
+                console.log(res);
+            });
+        }
+
+        createGameServerCancel(): void {
+            this.createGameServer.dialog = false;
+            this.createGameServer.step = 1;
+            this.gsAddFinish();
+        }
+
+        gsAddFinish(): void {
+            this.createGameServer = {
                 dialog: false,
                 step: 0,
                 selectedHost: [],
@@ -92,87 +173,10 @@
                 game: {
                     name: '',
                     game_id: 0,
-                    game_version: 0
+                    game_version: 0,
                 },
-                gameId: '',
-            },
-            //icons
-            mdiPlus: mdiPlus,
-        }),
-        watch: {
-            'createGameServer.game.game_id': function(val) {
-                console.log(val);
-                this.createGameServer.versions = this.games.filter((g) => {
-                    return g.id === val;
-                })[0].versions;
-            }
-        },
-        mounted() {
-            this.getGames();
-            this.getHosts();
-            this.getGameServers();
-        },
-        beforeDestroy(): void {
-        },
-        methods: {
-            getGames() {
-                this.gamesLoading = true;
-                return this.$http.get('/v1/game').then(res => {
-                    this.games = res.data;
-                    this.gamesLoading = false;
-                }).catch(e => {
-                    this.$auth.checkResponse(e.response.status);
-                });
-            },
-            getHosts() {
-                this.hostsLoading = true;
-                return this.$http.get('/v1/host').then(res => {
-                    this.hosts = res.data.hosts;
-                    this.hostsLoading = false;
-                }).catch(e => {
-                    this.$auth.checkResponse(e.response.status);
-                });
-            },
-            getGameServers() {
-                return this.$http.get('/v1/host/my/server').then(res => {
-                    this.gameServers = res.data.game_servers;
-                }).catch(e => {
-                    this.$auth.checkResponse(e.response.status);
-                });
-            },
-            addGameServer() {
-                this.$http.post('/v1/host/' + this.createGameServer.selectedHost + '/server',
-                    this.createGameServer.game).then(res => {
-                        this.createGameServer.gameId = res.data.id;
-                        this.createGameServer.step = 2;
-                    }
-                );
-            },
-            installGsEngine() {
-                this.$http.put('/v1/host/' + this.createGameServer.selectedHost +
-                    '/server/' + this.createGameServer.gameId + '/install').then(res => {
-                    console.log(res);
-                });
-            },
-            createGameServerCancel() {
-                this.createGameServer.dialog = false;
-                this.createGameServer.step = 1;
-                this.gsAddFinish();
-            },
-            gsAddFinish() {
-                this.createGameServer = {
-                    dialog: false,
-                    step: 0,
-                    selectedHost: [],
-                    versions: [],
-                    game: {
-                        name: '',
-                        game_id: 0,
-                        game_version: 0,
-                    },
-                    gameId: '',
-                };
-            },
+                gameId: 0,
+            };
         }
-    });
+    }
 </script>
