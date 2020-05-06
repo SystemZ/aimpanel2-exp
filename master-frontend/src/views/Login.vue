@@ -147,11 +147,11 @@
         methods: {
             login() {
                 this.loginError = null;
-                this.$auth.login(this, this.loginForm, 'hosts');
+                this.$auth.login(this, this.loginForm, '/');
             },
             register() {
                 this.registerError = null;
-                this.$auth.register(this, this.registerForm, 'hosts');
+                this.$auth.register(this, this.registerForm, '/');
             }
         },
         watch: {
