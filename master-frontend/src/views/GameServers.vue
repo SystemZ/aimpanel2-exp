@@ -78,6 +78,7 @@
                         @click:row="goToGameServer"
                         class="elevation-1"
                         hide-default-footer
+                        :loading="gsListLoading"
                 >
                     <template v-slot:item.state="{ item }">
                         <span v-if="item.state === 1">
@@ -107,6 +108,7 @@
     export default Vue.extend({
         name: "game_servers",
         data: () => ({
+            gsListLoading: true,
             headers: [
                 {
                     text: "Name",
@@ -160,8 +162,10 @@
                 });
             },
             getGameServers() {
+                this.gsListLoading = true;
                 return this.$http.get("/v1/host/my/server").then(res => {
                     this.gameServers = res.data.game_servers;
+                    this.gsListLoading = false
                 }).catch(e => {
                     this.$auth.checkResponse(e.response.status)
                 });
