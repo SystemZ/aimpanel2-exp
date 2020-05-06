@@ -46,6 +46,6 @@ func listenerSse(done chan bool) {
 			continue
 		}
 
-		tasks.ProcessTask(taskMsg)
+		go tasks.ProcessTask(taskMsg)
 	}
 }
