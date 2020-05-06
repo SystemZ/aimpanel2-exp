@@ -16,6 +16,8 @@
                           hide-details
                           label="Type some message here"
                           v-model="message"
+                          :loading="commandSending"
+                          :disabled="commandSending"
                           v-on:keyup.enter="sendMessage()">
                 <v-icon color="grey" slot="append">fa-paper-plane</v-icon>
             </v-text-field>
@@ -46,6 +48,7 @@
             message: '',
             serverUrl: '',
             stream: '' as any,
+            commandSending: false,
         }),
         mounted() {
             this.serverUrl = '/v1/host/' + this.hostId + '/server/' + this.serverId;
@@ -73,11 +76,13 @@
                 }, 10);
             },
             sendMessage() {
+                this.commandSending = true;
                 this.$http.put(this.serverUrl + '/command', {
                     command: this.message
                 }).then(res => {
                     console.log(res);
                     this.message = '';
+                    this.commandSending = false;
                 }).catch(e => {
                     this.$auth.checkResponse(e.response.status);
                 });
