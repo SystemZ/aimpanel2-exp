@@ -65,6 +65,7 @@
                         @click:row="goToHost"
                         class="elevation-1"
                         hide-default-footer
+                        :loading="hostListLoading"
                 >
                     <template v-slot:item.state="{ item }">
                         <span v-if="item.state === 1">
@@ -87,6 +88,7 @@
     export default Vue.extend({
         name: 'Hosts',
         data: () => ({
+            hostListLoading: true,
             headers: [
                 {
                     text: 'Name',
@@ -127,8 +129,10 @@
                 this.$router.push('/host/' + row._id);
             },
             getHosts(): void {
+                this.hostListLoading = true;
                 this.$http.get('/v1/host').then(res => {
                     this.hosts = res.data.hosts;
+                    this.hostListLoading = false;
                 }).catch(e => {
                     this.$auth.checkResponse(e.response.status);
                 });
