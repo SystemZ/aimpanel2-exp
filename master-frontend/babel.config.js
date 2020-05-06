@@ -6,5 +6,9 @@ module.exports = {
         "useBuiltIns": "entry"
       }
     ]
+  ],
+  "plugins": [
+    ["@babel/proposal-decorators", { "legacy": true }],
+    ["@babel/proposal-class-properties", { "loose": true }]
   ]
 }
