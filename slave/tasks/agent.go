@@ -24,8 +24,13 @@ import (
 func AgentTaskHandler(taskMsg task.Message) {
 	switch taskMsg.TaskId {
 	case task.AGENT_START_GS:
+		// kill all instances of GS before starting it, just in case
+		// FIXME detect current state before starting server
+		GsKill(taskMsg.GameServerID)
+		// TODO check why we need this
 		model.SetGsGame(taskMsg.GameServerID, taskMsg.Game)
 		model.SetGsStart(taskMsg.GameServerID, 1)
+		// start game server by running wrapper
 		StartWrapper(taskMsg)
 	case task.AGENT_INSTALL_GS:
 		GsInstall(taskMsg)
