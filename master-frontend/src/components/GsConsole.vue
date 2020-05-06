@@ -76,6 +76,9 @@
                 }, 10);
             },
             sendMessage() {
+                if (this.message.length < 1) {
+                    return;
+                }
                 this.commandSending = true;
                 this.$http.put(this.serverUrl + '/command', {
                     command: this.message
