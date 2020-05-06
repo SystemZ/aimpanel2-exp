@@ -19,7 +19,18 @@
                           :loading="commandSending"
                           :disabled="commandSending"
                           v-on:keyup.enter="sendMessage()">
-                <v-icon color="grey" slot="append">{{mdiCogs}}</v-icon>
+                <template v-slot:append-outer>
+                    <v-btn color="primary"
+                           :loading="commandSending"
+                           :disabled="commandSending"
+                           @click="sendMessage()"
+                    >
+                        <v-icon class="mr-2">
+                            {{mdiCogs}}
+                        </v-icon>
+                        Execute
+                    </v-btn>
+                </template>
             </v-text-field>
         </v-card-actions>
     </v-card>
