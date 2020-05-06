@@ -29,7 +29,7 @@ func init() {
 	viper.SetDefault("DB_HOST", "localhost")
 	DB_HOST = viper.GetString("DB_HOST")
 
-	viper.SetDefault("DB_PORT", "5984")
+	viper.SetDefault("DB_PORT", "27017")
 	DB_PORT = viper.GetString("DB_PORT")
 
 	viper.SetDefault("DB_USERNAME", "dev")
