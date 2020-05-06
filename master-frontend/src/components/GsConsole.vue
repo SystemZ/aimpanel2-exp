@@ -19,7 +19,7 @@
                           :loading="commandSending"
                           :disabled="commandSending"
                           v-on:keyup.enter="sendMessage()">
-                <v-icon color="grey" slot="append">fa-paper-plane</v-icon>
+                <v-icon color="grey" slot="append">{{mdiCogs}}</v-icon>
             </v-text-field>
         </v-card-actions>
     </v-card>
@@ -27,6 +27,7 @@
 
 <script lang="ts">
     import Vue from 'vue';
+    import {mdiCogs} from '@mdi/js';
 
     export default Vue.extend({
         name: 'gs-console',
@@ -49,6 +50,8 @@
             serverUrl: '',
             stream: '' as any,
             commandSending: false,
+            //icons
+            mdiCogs: mdiCogs,
         }),
         mounted() {
             this.serverUrl = '/v1/host/' + this.hostId + '/server/' + this.serverId;

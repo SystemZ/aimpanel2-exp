@@ -2,7 +2,7 @@
     <v-dialog max-width="600px" v-model="createGameServer.dialog">
         <template v-slot:activator="{ on }">
             <v-btn color="info" v-on="on" class="mt-2 mb-2">
-                <v-icon left small>fa-plus</v-icon>
+                <v-icon class="mr-2">{{mdiPlus}}</v-icon>
                 Create new game server
             </v-btn>
         </template>
@@ -73,6 +73,7 @@
 
 <script lang="ts">
     import Vue from 'vue';
+    import {mdiPlus} from '@mdi/js';
 
     export default Vue.extend({
         name: 'gs-create',
@@ -95,6 +96,8 @@
                 },
                 gameId: '',
             },
+            //icons
+            mdiPlus: mdiPlus,
         }),
         watch: {
             'createGameServer.game.game_id': function(val) {

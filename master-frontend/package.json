@@ -23,6 +23,7 @@
     "vuex": "^3.0.1"
   },
   "devDependencies": {
+    "@mdi/js": "^5.1.45",
     "@types/jest": "^23.1.4",
     "@vue/cli-plugin-babel": "^3.9.0",
     "@vue/cli-plugin-e2e-cypress": "^3.9.0",

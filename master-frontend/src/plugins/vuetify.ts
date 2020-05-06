@@ -41,6 +41,6 @@ export default new Vuetify({
         },
     },
     icons: {
-        iconfont: 'fa4',
+        iconfont: 'mdiSvg',
     },
 });

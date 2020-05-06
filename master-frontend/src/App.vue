@@ -32,7 +32,7 @@
 
                 <v-list-item active-class="red--text red--darken-1" to="login" v-if="!loggedIn">
                     <v-list-item-action>
-                        <v-icon>fa-sign-in</v-icon>
+                        <v-icon>{{mdiLogin}}</v-icon>
                     </v-list-item-action>
                     <v-list-item-content>
                         <v-list-item-title>Login</v-list-item-title>
@@ -50,7 +50,10 @@
                 <v-menu offset-y>
                     <template v-slot:activator="{ on }">
                         <v-btn v-on="on">
-                            {{$auth.username}} <v-icon size="12">fa-chevron-down fa-small</v-icon>
+                            {{$auth.username}}
+                            <v-icon>
+                                {{mdiChevronDown}}
+                            </v-icon>
                         </v-btn>
                     </template>
                     <v-list>
@@ -73,6 +76,7 @@
 
 <script lang="ts">
     import Vue from 'vue';
+    import {mdiChevronDown, mdiHome, mdiLogin} from '@mdi/js';
 
     export default Vue.extend({
         name: 'App',
@@ -92,25 +96,29 @@
             menu: [
                 {
                     title: 'Home',
-                    icon: 'fa-home',
+                    icon: mdiHome,
                     path: '/',
                     authRequired: false
                 },
                 /*
                 {
                     title: 'License',
-                    icon: 'fa-certificate',
+                    icon: '',
                     path: '/license',
                     authRequired: false
                 },
                 {
                     title: 'Help',
-                    icon: 'fa-question',
+                    icon: '',
                     path: '/help',
                     authRequired: false
                 }
                 */
-            ]
+            ],
+            // icons
+            mdiLogin: mdiLogin,
+            mdiHome: mdiHome,
+            mdiChevronDown: mdiChevronDown,
         }),
     });
 </script>

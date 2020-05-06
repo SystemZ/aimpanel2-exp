@@ -29,7 +29,7 @@
                                             :rules="rules.username"
                                             label="Login"
                                             name="login"
-                                            prepend-icon="fa-user"
+                                            :prepend-icon="mdiAccount"
                                             type="text"
                                             v-model="loginForm.username"
                                     ></v-text-field>
@@ -39,16 +39,22 @@
                                             id="password"
                                             label="Password"
                                             name="password"
-                                            prepend-icon="fa-key"
+                                            :prepend-icon="mdiLock"
                                             type="password"
                                             v-model="loginForm.password"
                                     ></v-text-field>
                                 </v-form>
                             </v-card-text>
                             <v-card-actions>
-                                <v-btn @click="active = 1" color="primary">Create new account</v-btn>
+                                <v-btn @click="active = 1" color="primary">
+                                    <v-icon class="mr-2">{{mdiAccountPlus}}</v-icon>
+                                    Create new account
+                                </v-btn>
                                 <v-spacer></v-spacer>
-                                <v-btn :disabled="!loginValid" @click="login()" color="success">Login</v-btn>
+                                <v-btn :disabled="!loginValid" @click="login()" color="success">
+                                    <v-icon class="mr-2">{{mdiLogin}}</v-icon>
+                                    Login
+                                </v-btn>
                             </v-card-actions>
                         </v-tab-item>
                         <v-tab-item>
@@ -61,26 +67,30 @@
                                 </v-alert>
                                 <v-form @keyup.native.enter="registerValid && register()" v-model="registerValid">
                                     <v-text-field :rules="rules.username" label="Username"
-                                                  prepend-icon="fa-user" required
+                                                  :prepend-icon="mdiAccount"
+                                                  required
                                                   type="text" v-model="registerForm.username"></v-text-field>
 
                                     <v-text-field :rules="rules.password" label="Password"
-                                                  prepend-icon="fa-key" required
+                                                  :prepend-icon="mdiLock"
+                                                  required
                                                   type="password" v-model="registerForm.password"></v-text-field>
 
                                     <v-text-field :error-messages="confirmation.passwordConfirmation"
                                                   :rules="rules.password"
-                                                  label="Repeat password" prepend-icon="fa-key"
+                                                  label="Repeat password"
+                                                  :prepend-icon="mdiLockOpenCheck"
                                                   required
                                                   type="password"
                                                   v-model="registerForm.password_repeat"></v-text-field>
 
                                     <v-text-field :rules="rules.email" label="Email"
-                                                  prepend-icon="fa-envelope" required
+                                                  :prepend-icon="mdiEmail" required
                                                   type="email" v-model="registerForm.email"></v-text-field>
 
                                     <v-text-field :error-messages="confirmation.emailConfirmation" :rules="rules.email"
-                                                  label="Repeat email" prepend-icon="fa-envelope"
+                                                  label="Repeat email"
+                                                  :prepend-icon="mdiEmailCheck"
                                                   required
                                                   type="email"
                                                   v-model="registerForm.email_repeat"></v-text-field>
@@ -88,7 +98,10 @@
                             </v-card-text>
                             <v-card-actions>
                                 <v-spacer></v-spacer>
-                                <v-btn :disabled="!registerValid" @click="register()" color="success">Register</v-btn>
+                                <v-btn :disabled="!registerValid" @click="register()" color="success">
+                                    <v-icon class="mr-2">{{mdiRocket}}</v-icon>
+                                    Register
+                                </v-btn>
                             </v-card-actions>
                         </v-tab-item>
                     </v-tabs>
@@ -100,6 +113,16 @@
 
 <script lang="ts">
     import Vue from 'vue';
+    import {
+        mdiAccount,
+        mdiAccountPlus,
+        mdiEmail,
+        mdiEmailCheck,
+        mdiLock,
+        mdiLockOpenCheck,
+        mdiLogin,
+        mdiRocket
+    } from '@mdi/js';
 
     export default Vue.extend({
         name: 'Login',
@@ -143,6 +166,15 @@
             loginValid: false,
 
             active: null,
+            // icons
+            mdiAccount: mdiAccount,
+            mdiLock: mdiLock,
+            mdiAccountPlus: mdiAccountPlus,
+            mdiLogin: mdiLogin,
+            mdiLockOpenCheck: mdiLockOpenCheck,
+            mdiEmail: mdiEmail,
+            mdiEmailCheck: mdiEmailCheck,
+            mdiRocket: mdiRocket,
         }),
         methods: {
             login() {

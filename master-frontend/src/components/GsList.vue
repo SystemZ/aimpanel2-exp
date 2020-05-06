@@ -9,10 +9,10 @@
     >
         <template v-slot:item.state="{ item }">
                         <span v-if="item.state === 1">
-                            <v-icon class="green--text" small>fa-circle</v-icon> Active
+                            <v-icon class="green--text" small>{{mdiCheckboxBlankCircle}}</v-icon> Active
                         </span>
             <span v-else>
-                            <v-icon class="red--text" small>fa-circle</v-icon> Locked
+                            <v-icon class="red--text" small>{{mdiCheckboxBlankCircle}}</v-icon> Locked
                         </span>
         </template>
 
@@ -28,6 +28,7 @@
 
 <script lang="ts">
     import Vue from 'vue';
+    import {mdiCheckboxBlankCircle} from '@mdi/js';
 
     export default Vue.extend({
         name: 'gs-list',
@@ -60,6 +61,8 @@
                 }
             ],
             refreshInterval: 0,
+            //icons
+            mdiCheckboxBlankCircle: mdiCheckboxBlankCircle,
         }),
         mounted() {
             this.refreshInterval = setInterval(() => {

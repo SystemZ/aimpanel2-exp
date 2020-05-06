@@ -11,7 +11,7 @@
             >
                 <v-list-item-avatar>
                     <v-icon class="grey lighten-1 white--text">
-                        fa-level-up
+                        {{mdiArrowUp}}
                     </v-icon>
                 </v-list-item-avatar>
                 <v-list-item-content>
@@ -27,7 +27,7 @@
             >
                 <v-list-item-avatar>
                     <v-icon class="grey lighten-1 white--text">
-                        fa-folder
+                        {{mdiFolder}}
                     </v-icon>
                 </v-list-item-avatar>
 
@@ -38,7 +38,7 @@
 
                 <v-list-item-action>
                     <v-btn icon>
-                        <v-icon color="grey lighten-1">fa-info</v-icon>
+                        <v-icon color="grey lighten-1">{{mdiInformation}}</v-icon>
                     </v-btn>
                 </v-list-item-action>
             </v-list-item>
@@ -54,7 +54,7 @@
                     v-if="!item.info.is_dir"
             >
                 <v-list-item-avatar>
-                    <v-icon class="blue white--text">fa-file</v-icon>
+                    <v-icon class="blue white--text">{{mdiFile}}</v-icon>
                 </v-list-item-avatar>
 
                 <v-list-item-content>
@@ -64,7 +64,7 @@
 
                 <v-list-item-action>
                     <v-btn icon>
-                        <v-icon color="grey lighten-1">fa-info</v-icon>
+                        <v-icon color="grey lighten-1">{{mdiInformation}}</v-icon>
                     </v-btn>
                 </v-list-item-action>
             </v-list-item>
@@ -75,6 +75,7 @@
 <script lang="ts">
     import Vue from 'vue';
     import {Node} from '@/types/files';
+    import {mdiArrowUp, mdiFile, mdiFolder, mdiInformation} from '@mdi/js';
 
     interface FileRow {
         icon: string,
@@ -101,7 +102,12 @@
             files: {
                 root: {} as Node,
                 selected: {} as Node
-            }
+            },
+            //icons
+            mdiInformation: mdiInformation,
+            mdiFile: mdiFile,
+            mdiFolder: mdiFolder,
+            mdiArrowUp: mdiArrowUp,
         }),
         mounted() {
             this.serverUrl = '/v1/host/' + this.hostId + '/server/' + this.serverId;

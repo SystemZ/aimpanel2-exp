@@ -66,7 +66,7 @@
                                     </v-card-text>
                                     <v-card-actions>
                                         <v-btn @click="remove()" color="red darken-3">
-                                            <v-icon class="mr-2">fa-trash</v-icon>
+                                            <v-icon class="mr-2">{{mdiTrashCan}}</v-icon>
                                             Remove game server
                                         </v-btn>
                                     </v-card-actions>
@@ -125,6 +125,7 @@
     import GsConsole from '@/components/GsConsole.vue';
     import GsFileManager from '@/components/GsFileManager.vue';
     import GsScheduler from '@/components/GsScheduler.vue';
+    import {mdiTrashCan} from '@mdi/js';
 
     export default Vue.extend({
         name: 'game_server',
@@ -140,6 +141,8 @@
             timer: '',
             installSnackbar: false,
             removeSnackbar: false,
+            //icons
+            mdiTrashCan: mdiTrashCan,
         }),
         computed: {
             serverId() {
