@@ -1,18 +1,24 @@
 package model
 
+import "go.mongodb.org/mongo-driver/bson/primitive"
+
 const (
 	STDOUT = iota
 	STDERR = iota
 )
 
 type GameServerLog struct {
-	Base
+	ID primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty" example:"1238206236281802752"`
 
-	GameServerId string `json:"game_server_id"`
+	GameServerId primitive.ObjectID `json:"game_server_id"`
 
 	Type uint `json:"type"`
 
 	Log string `json:"log"`
+}
+
+func (g *GameServerLog) GetCollectionName() string {
+	return "game_servers_log"
 }
 
 func GetLogsByGameServer(gsId string, limit int) *[]GameServerLog {

@@ -9,6 +9,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/master/exit"
 	"gitlab.com/systemz/aimpanel2/master/model"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"log"
 	"net/http"
 	"os"
@@ -97,7 +98,8 @@ func SlavePermissionMiddleware(handler http.Handler) http.Handler {
 			return
 		}
 
-		host := model.GetHost(token.Claims.(jwt.MapClaims)["uid"].(string))
+		hostId, _ := primitive.ObjectIDFromHex(token.Claims.(jwt.MapClaims)["uid"].(string))
+		host := model.GetHost(hostId)
 		if host == nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
@@ -111,7 +113,8 @@ func SlavePermissionMiddleware(handler http.Handler) http.Handler {
 
 		gsId, ok := params["server_id"]
 		if ok {
-			gs := model.GetGameServer(gsId)
+			oid, _ := primitive.ObjectIDFromHex(gsId)
+			gs := model.GetGameServer(oid)
 			if gs == nil {
 				w.WriteHeader(http.StatusUnauthorized)
 				return

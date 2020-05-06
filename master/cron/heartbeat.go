@@ -20,7 +20,7 @@ func CheckHostsHeartbeat() {
 				if time.Since(heartbeatTime) > 10*time.Second {
 					if host.State == 1 {
 						host.State = 0
-						err := host.Put(&host)
+						err := model.Put(&host)
 						if err != nil {
 							logrus.Error(err)
 						}
@@ -29,7 +29,7 @@ func CheckHostsHeartbeat() {
 				} else {
 					if host.State == 0 {
 						host.State = 1
-						err := host.Put(&host)
+						err := model.Put(&host)
 						if err != nil {
 							logrus.Error(err)
 						}
@@ -49,14 +49,14 @@ func CheckGSHeartbeat() {
 		gameServers := model.GetGameServers()
 
 		for _, gs := range gameServers {
-			lastTimestamp, err := model.Redis.Get("wrapper_heartbeat_id_" + gs.ID).Int64()
+			lastTimestamp, err := model.Redis.Get("wrapper_heartbeat_id_" + gs.ID.String()).Int64()
 			if err == nil {
 				heartbeatTime := time.Unix(lastTimestamp, 0)
 
 				if time.Since(heartbeatTime) > 10*time.Second {
 					if gs.State == 1 {
 						gs.State = 0
-						err := gs.Update(&gs)
+						err := model.Update(&gs)
 						if err != nil {
 							logrus.Error(err)
 						}
@@ -65,7 +65,7 @@ func CheckGSHeartbeat() {
 				} else {
 					if gs.State == 0 {
 						gs.State = 1
-						err := gs.Update(&gs)
+						err := model.Update(&gs)
 						if err != nil {
 							logrus.Error(err)
 						}

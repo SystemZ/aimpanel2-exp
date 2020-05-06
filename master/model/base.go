@@ -1,40 +1,39 @@
 package model
 
 import (
-	"encoding/json"
-	"time"
+	"context"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type Base struct {
-	ID      string `json:"_id" example:"1238206236281802752"`
-	Rev     string `json:"_rev,omitempty"`
-	DocType string `json:"doc_type"`
-
-	// Date of creation
-	CreatedAt time.Time `json:"created_at" example:"2019-09-29T03:16:27+02:00"`
-
-	obj interface{}
+type Document interface {
+	GetCollectionName() string
 }
 
-func (b *Base) SetObj(obj interface{}) {
-	b.obj = obj
+type Base struct{}
+
+func Put(d Document) error {
+	_, err := DB.Collection(d.GetCollectionName()).InsertOne(context.TODO(), d)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func (b *Base) GetJSON() ([]byte, error) {
-	return json.Marshal(b.obj)
+func Update(d Document) error {
+	return nil
 }
 
-func (b *Base) Put(obj interface{}) error {
+func (b *Base) Put(obj Document) error {
 	//b.obj = &obj
-	//
-	//b.ID = Snowflake.Generate().String()
 	//b.CreatedAt = time.Now()
 	//
-	//rev, err := DB.Put(context.TODO(), b.ID, b.obj)
+	//res, err := DB.Collection(obj.GetCollectionName()).InsertOne(context.TODO(), b.obj)
 	//if err != nil {
 	//	return err
 	//}
-	//b.Rev = rev
+	//
+	//logrus.Info(res.InsertedID)
 
 	return nil
 }
@@ -143,7 +142,7 @@ func GetOneS(out interface{}, selector map[string]interface{}) error {
 	return nil
 }
 
-func Delete(id string, rev string) error {
+func Delete(id primitive.ObjectID, rev string) error {
 	//_, err := DB.Delete(context.TODO(), id, rev)
 	//if err != nil {
 	//	logrus.Info(err)

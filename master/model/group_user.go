@@ -1,21 +1,27 @@
 package model
 
+import "go.mongodb.org/mongo-driver/bson/primitive"
+
 // User group represents the group for this application
 // swagger:model userGroup
 type GroupUser struct {
-	Base
+	ID primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty" example:"1238206236281802752"`
 	// ID of the group
 	//
 	// required: true
-	GroupId string `json:"group_id"`
+	GroupId primitive.ObjectID `json:"group_id"`
 
 	// ID of the user
 	//
 	// required: true
-	UserId string `json:"user_id"`
+	UserId primitive.ObjectID `json:"user_id"`
 }
 
-func GetGroupUserByUserId(userId string) *GroupUser {
+func (g *GroupUser) GetCollectionName() string {
+	return "users_group"
+}
+
+func GetGroupUserByUserId(userId primitive.ObjectID) *GroupUser {
 	var gu GroupUser
 	err := GetOneS(&gu, map[string]interface{}{
 		"doc_type": "group_user",

@@ -12,9 +12,10 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/master/events"
 	"gitlab.com/systemz/aimpanel2/master/model"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func Start(gsId string) error {
+func Start(gsId primitive.ObjectID) error {
 	gameServer := model.GetGameServer(gsId)
 	if gameServer == nil {
 		return errors.New("getting game server from db failed")
@@ -38,7 +39,7 @@ func Start(gsId string) error {
 
 	taskMsg := task.Message{
 		TaskId:       task.AGENT_START_GS,
-		GameServerID: gsId,
+		GameServerID: gsId.String(),
 		Game:         &gameDef,
 	}
 
@@ -52,7 +53,7 @@ func Start(gsId string) error {
 	return nil
 }
 
-func Stop(gsId string, stopType uint) error {
+func Stop(gsId primitive.ObjectID, stopType uint) error {
 	gameServer := model.GetGameServer(gsId)
 	if gameServer == nil {
 		return errors.New("error when getting game server from db")
@@ -69,7 +70,7 @@ func Stop(gsId string, stopType uint) error {
 	}
 
 	taskMsg := task.Message{
-		GameServerID: gsId,
+		GameServerID: gsId.String(),
 	}
 	if stopType == 1 {
 		taskMsg.TaskId = task.GAME_STOP_SIGKILL
@@ -87,7 +88,7 @@ func Stop(gsId string, stopType uint) error {
 	return nil
 }
 
-func Install(gsId string) error {
+func Install(gsId primitive.ObjectID) error {
 	gameServer := model.GetGameServer(gsId)
 	if gameServer == nil {
 		return errors.New("error when getting game server from db")
@@ -118,7 +119,7 @@ func Install(gsId string) error {
 	taskMsg := task.Message{
 		TaskId:       task.AGENT_INSTALL_GS,
 		Game:         &g,
-		GameServerID: gsId,
+		GameServerID: gsId.String(),
 	}
 
 	taskMsgStr, err := taskMsg.Serialize()
@@ -131,7 +132,7 @@ func Install(gsId string) error {
 	return nil
 }
 
-func SendCommand(gsId string, command string) error {
+func SendCommand(gsId primitive.ObjectID, command string) error {
 	gameServer := model.GetGameServer(gsId)
 	if gameServer == nil {
 		return &lib.Error{ErrorCode: ecode.GsNotFound}
@@ -149,7 +150,7 @@ func SendCommand(gsId string, command string) error {
 
 	taskMsg := task.Message{
 		TaskId:       task.GAME_COMMAND,
-		GameServerID: gsId,
+		GameServerID: gsId.String(),
 		Body:         command,
 	}
 
@@ -163,7 +164,7 @@ func SendCommand(gsId string, command string) error {
 	return nil
 }
 
-func Restart(gsId string, stopType uint) error {
+func Restart(gsId primitive.ObjectID, stopType uint) error {
 	gameServer := model.GetGameServer(gsId)
 	if gameServer == nil {
 		return &lib.Error{ErrorCode: ecode.GsNotFound}
@@ -187,7 +188,7 @@ func Restart(gsId string, stopType uint) error {
 
 	taskMsg := task.Message{
 		TaskId:       task.GAME_RESTART,
-		GameServerID: gsId,
+		GameServerID: gsId.String(),
 		StopTimeout:  gameServer.StopTimeout,
 		Game:         &gameDef,
 	}
@@ -202,7 +203,7 @@ func Restart(gsId string, stopType uint) error {
 	return nil
 }
 
-func Remove(gsId string) error {
+func Remove(gsId primitive.ObjectID) error {
 	gameServer := model.GetGameServer(gsId)
 	if gameServer == nil {
 		return &lib.Error{ErrorCode: ecode.GsNotFound}
@@ -215,7 +216,7 @@ func Remove(gsId string) error {
 
 	if gameServer.State == 1 {
 		taskMsg := task.Message{
-			GameServerID: gsId,
+			GameServerID: gsId.String(),
 			TaskId:       task.GAME_STOP_SIGKILL,
 		}
 		taskMsgStr, err := taskMsg.Serialize()
@@ -231,7 +232,7 @@ func Remove(gsId string) error {
 	}
 
 	taskMsg := task.Message{
-		GameServerID: gsId,
+		GameServerID: gsId.String(),
 		TaskId:       task.AGENT_REMOVE_GS,
 	}
 	taskMsgStr, err := taskMsg.Serialize()
@@ -245,15 +246,15 @@ func Remove(gsId string) error {
 	}
 	channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
 
-	permissions := model.GetPermisionsByEndpointRegex("/v1/host/" + gameServer.HostId + "/server/" + gsId + "%")
+	permissions := model.GetPermisionsByEndpointRegex("/v1/host/" + gameServer.HostId.String() + "/server/" + gsId.String() + "%")
 	for _, perm := range permissions {
-		err := model.Delete(perm.ID, perm.Rev)
+		err := model.Delete(perm.ID, "")
 		if err != nil {
 			return err
 		}
 	}
 
-	err = model.Delete(gameServer.ID, gameServer.Rev)
+	err = model.Delete(gameServer.ID, "")
 	if err != nil {
 		return err
 	}
@@ -261,7 +262,7 @@ func Remove(gsId string) error {
 	return nil
 }
 
-func Update(hostId string) error {
+func Update(hostId primitive.ObjectID) error {
 	hostToken := model.GetHostToken(hostId)
 	if hostToken == "" {
 		return errors.New("error when getting host token from db")
@@ -298,7 +299,7 @@ func Update(hostId string) error {
 	return nil
 }
 
-func FileList(gsId string) (*filemanager.Node, error) {
+func FileList(gsId primitive.ObjectID) (*filemanager.Node, error) {
 	gameServer := model.GetGameServer(gsId)
 	if gameServer == nil {
 		return nil, errors.New("error when getting game server from db")
@@ -316,7 +317,7 @@ func FileList(gsId string) (*filemanager.Node, error) {
 
 	taskMsg := task.Message{
 		TaskId:       task.AGENT_FILE_LIST_GS,
-		GameServerID: gsId,
+		GameServerID: gsId.String(),
 	}
 
 	taskMsgStr, err := taskMsg.Serialize()
@@ -327,7 +328,7 @@ func FileList(gsId string) (*filemanager.Node, error) {
 	channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
 
 	//wait for files
-	pubsub, err := model.GsFilesSubscribe(model.Redis, gsId)
+	pubsub, err := model.GsFilesSubscribe(model.Redis, gsId.String())
 	if err != nil {
 		return nil, err
 	}

@@ -11,6 +11,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"gitlab.com/systemz/aimpanel2/master/response"
 	"gitlab.com/systemz/aimpanel2/master/service/gameserver"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
 )
 
@@ -27,6 +28,7 @@ import (
 func Create(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	hostId := params["host_id"]
+	oid, _ := primitive.ObjectIDFromHex(hostId)
 
 	//Decode json
 	data := &request.GameServerCreate{}
@@ -45,16 +47,13 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	//gameServer.GameJson = string(gameDefJson)
 
 	//Check if host exist
-	host := model.GetHost(hostId)
+	host := model.GetHost(oid)
 	if host == nil {
 		lib.ReturnError(w, http.StatusBadRequest, ecode.HostNotFound, nil)
 		return
 	}
 
 	gameServer := &model.GameServer{
-		Base: model.Base{
-			DocType: "game_server",
-		},
 		Name:            data.Name,
 		GameId:          data.GameId,
 		GameVersion:     data.GameVersion,
@@ -65,7 +64,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Save game server to db
-	err = gameServer.Put(&gameServer)
+	err = model.Put(gameServer)
 	if err != nil {
 		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, err)
 		return
@@ -73,7 +72,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 	//TODO: create array of permissions?
 	user := context.Get(r, "user").(model.User)
-	group := model.GetGroup("USER-" + user.ID)
+	group := model.GetGroup("USER-" + user.ID.String())
 	if group == nil {
 		lib.ReturnError(w, http.StatusInternalServerError, ecode.GroupNotFound, nil)
 		return
@@ -83,7 +82,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	model.CreatePermissionsForNewGameServer(group.ID, host.ID, gameServer.ID)
 
 	lib.MustEncode(json.NewEncoder(w),
-		response.ID{ID: gameServer.ID})
+		response.ID{ID: gameServer.ID.String()})
 }
 
 // @Router /host/{id}/server [get]
@@ -98,8 +97,9 @@ func Create(w http.ResponseWriter, r *http.Request) {
 func ListByHostId(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	hostId := params["id"]
+	oid, _ := primitive.ObjectIDFromHex(hostId)
 
-	host := model.GetHost(hostId)
+	host := model.GetHost(oid)
 	if host == nil {
 		lib.ReturnError(w, http.StatusNoContent, ecode.HostNotFound, nil)
 		return
@@ -149,7 +149,9 @@ func ListByUser(w http.ResponseWriter, r *http.Request) {
 // @Security ApiKey
 func Get(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	gameServer := model.GetGameServerByGsIdAndHostId(params["server_id"], params["host_id"])
+	serverId, _ := primitive.ObjectIDFromHex(params["server_id"])
+	hostId, _ := primitive.ObjectIDFromHex(params["hostId"])
+	gameServer := model.GetGameServerByGsIdAndHostId(serverId, hostId)
 	lib.MustEncode(json.NewEncoder(w), response.GameServer{GameServer: *gameServer})
 }
 
@@ -183,7 +185,7 @@ func PutLogs(w http.ResponseWriter, r *http.Request) {
 // @Security ApiKey
 func Remove(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	gameServerId := params["server_id"]
+	gameServerId, _ := primitive.ObjectIDFromHex(params["server_id"])
 	err := gameserver.Remove(gameServerId)
 	if err != nil {
 		lib.ReturnError(w, http.StatusInternalServerError, ecode.GsRemove, err)

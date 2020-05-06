@@ -10,27 +10,25 @@ import (
 	"gitlab.com/systemz/aimpanel2/master/events"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"gitlab.com/systemz/aimpanel2/master/service/gameserver"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"os"
 	"time"
 )
 
-func Create(data *request.HostCreate, userId string) (*model.Host, int) {
+func Create(data *request.HostCreate, userId primitive.ObjectID) (*model.Host, int) {
 	host := &model.Host{
-		Base: model.Base{
-			DocType: "host",
-		},
 		Name:            data.Name,
 		Ip:              data.Ip,
 		UserId:          userId,
 		MetricFrequency: 30,
 		Token:           lib.RandomString(32),
 	}
-	err := host.Put(&host)
+	err := model.Put(host)
 	if err != nil {
 		return nil, ecode.DbSave
 	}
 
-	group := model.GetGroup("USER-" + userId)
+	group := model.GetGroup("USER-" + userId.String())
 	if group == nil {
 		return nil, ecode.GroupNotFound
 	}
@@ -42,7 +40,7 @@ func Create(data *request.HostCreate, userId string) (*model.Host, int) {
 }
 
 //Removes host and linked game servers
-func Remove(hostId string) int {
+func Remove(hostId primitive.ObjectID) int {
 	host := model.GetHost(hostId)
 	gameServers := model.GetGameServersByHostId(hostId)
 	for _, gameServer := range *gameServers {
@@ -52,15 +50,15 @@ func Remove(hostId string) int {
 		}
 	}
 
-	permissions := model.GetPermisionsByEndpointRegex("/v1/host/" + host.ID)
+	permissions := model.GetPermisionsByEndpointRegex("/v1/host/" + host.ID.String())
 	for _, perm := range permissions {
-		err := model.Delete(perm.ID, perm.Rev)
+		err := model.Delete(perm.ID, "")
 		if err != nil {
 			return ecode.DbError
 		}
 	}
 
-	err := model.Delete(host.ID, host.Rev)
+	err := model.Delete(host.ID, "")
 	if err != nil {
 		return ecode.DbError
 	}
@@ -87,23 +85,20 @@ func Auth(t string) (string, int) {
 	return tokenString, ecode.NoError
 }
 
-func CreateJob(data *request.HostCreateJob, userId string, hostId string) (*model.HostJob, int) {
+func CreateJob(data *request.HostCreateJob, userId primitive.ObjectID, hostId primitive.ObjectID) (*model.HostJob, int) {
 	hostJob := &model.HostJob{
-		Base: model.Base{
-			DocType: "host_job",
-		},
 		Name:           data.Name,
 		HostId:         hostId,
 		CronExpression: data.CronExpression,
 		TaskMessage:    data.TaskMessage,
 	}
 
-	err := hostJob.Put(&hostJob)
+	err := model.Put(hostJob)
 	if err != nil {
 		return nil, ecode.DbSave
 	}
 
-	group := model.GetGroup("USER-" + userId)
+	group := model.GetGroup("USER-" + userId.String())
 	if group == nil {
 		return nil, ecode.GroupNotFound
 	}
@@ -119,18 +114,18 @@ func CreateJob(data *request.HostCreateJob, userId string, hostId string) (*mode
 	return hostJob, ecode.NoError
 }
 
-func RemoveJob(hostId string, jobId string) int {
+func RemoveJob(hostId primitive.ObjectID, jobId primitive.ObjectID) int {
 	hostJob := model.GetHostJob(jobId)
 
-	permissions := model.GetPermisionsByEndpointRegex("/v1/host/" + hostId + "/job/" + jobId)
+	permissions := model.GetPermisionsByEndpointRegex("/v1/host/" + hostId.String() + "/job/" + jobId.String())
 	for _, perm := range permissions {
-		err := model.Delete(perm.ID, perm.Rev)
+		err := model.Delete(perm.ID, "")
 		if err != nil {
 			return ecode.DbError
 		}
 	}
 
-	err := model.Delete(hostJob.ID, hostJob.Rev)
+	err := model.Delete(hostJob.ID, "")
 	if err != nil {
 		return ecode.DbError
 	}
@@ -138,7 +133,7 @@ func RemoveJob(hostId string, jobId string) int {
 	return sendJobsToAgent(hostId)
 }
 
-func sendJobsToAgent(hostId string) int {
+func sendJobsToAgent(hostId primitive.ObjectID) int {
 	host := model.GetHost(hostId)
 	if host == nil {
 		return ecode.HostNotFound

@@ -2,6 +2,7 @@ package model
 
 import (
 	"github.com/dgrijalva/jwt-go"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"os"
@@ -9,12 +10,16 @@ import (
 )
 
 type User struct {
-	Base
+	ID primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty" example:"1238206236281802752"`
 
 	Username     string `json:"username"`
 	PasswordHash string `json:"password_hash"`
 	Email        string `json:"email"`
 	//TODO: plan_id
+}
+
+func (u *User) GetCollectionName() string {
+	return "users"
 }
 
 func (u *User) HashPassword(password string) string {

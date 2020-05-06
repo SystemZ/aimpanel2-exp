@@ -9,6 +9,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/master/events"
 	"gitlab.com/systemz/aimpanel2/master/model"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func HostData(hostToken string, taskMsg *task.Message) error {
@@ -61,9 +62,6 @@ func HostData(hostToken string, taskMsg *task.Message) error {
 		}
 
 		metric := &model.MetricHost{
-			Base: model.Base{
-				DocType: "metric_host",
-			},
 			HostId:    host.ID,
 			CpuUsage:  taskMsg.CpuUsage,
 			RamFree:   taskMsg.RamFree,
@@ -82,7 +80,7 @@ func HostData(hostToken string, taskMsg *task.Message) error {
 			Guest:     taskMsg.Guest,
 			GuestNice: taskMsg.GuestNice,
 		}
-		err := metric.Put(&metric)
+		err := model.Put(metric)
 		if err != nil {
 			return err
 		}
@@ -100,7 +98,7 @@ func HostData(hostToken string, taskMsg *task.Message) error {
 		host.KernelVersion = taskMsg.KernelVersion
 		host.KernelArch = taskMsg.KernelArch
 
-		err := host.Update(&host)
+		err := model.Update(host)
 		if err != nil {
 			return err
 		}
@@ -163,8 +161,8 @@ func GsData(hostToken string, taskMsg *task.Message) error {
 	case task.GAME_SERVER_LOG:
 		logrus.Infof("Got %v", taskMsg.TaskId)
 		var gsLog model.GameServerLog
-		gsLog.Base.DocType = "game_server_log"
-		gsLog.GameServerId = taskMsg.GameServerID
+		oid, _ := primitive.ObjectIDFromHex(taskMsg.GameServerID)
+		gsLog.GameServerId = oid
 
 		if len(taskMsg.Stdout) > 0 {
 			gsLog.Log = taskMsg.Stdout
@@ -182,7 +180,7 @@ func GsData(hostToken string, taskMsg *task.Message) error {
 			gsLog.GameServerId),
 			sse.SimpleMessage(base64.StdEncoding.EncodeToString([]byte(gsLog.Log))))
 
-		err := gsLog.Put(&gsLog)
+		err := model.Put(&gsLog)
 		if err != nil {
 			logrus.Warn(err)
 		}
@@ -193,7 +191,8 @@ func GsData(hostToken string, taskMsg *task.Message) error {
 		logrus.Infof("Got %v", taskMsg.TaskId)
 		gameServerId := taskMsg.GameServerID
 
-		gs := model.GetGameServer(gameServerId)
+		oid, _ := primitive.ObjectIDFromHex(taskMsg.GameServerID)
+		gs := model.GetGameServer(oid)
 		if gs == nil {
 			break
 		}
@@ -217,15 +216,13 @@ func GsData(hostToken string, taskMsg *task.Message) error {
 		channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
 	case task.GAME_METRICS:
 		logrus.Infof("Got %v", taskMsg.TaskId)
+		oid, _ := primitive.ObjectIDFromHex(taskMsg.GameServerID)
 		metric := &model.MetricGameServer{
-			Base: model.Base{
-				DocType: "metric_game_server",
-			},
-			GameServerId: taskMsg.GameServerID,
+			GameServerId: oid,
 			CpuUsage:     taskMsg.CpuUsage,
 			RamUsage:     taskMsg.RamUsage,
 		}
-		err := metric.Put(&metric)
+		err := model.Put(metric)
 		if err != nil {
 			return err
 		}

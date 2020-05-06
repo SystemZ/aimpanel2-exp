@@ -1,12 +1,15 @@
 package model
 
+import "go.mongodb.org/mongo-driver/bson/primitive"
+
 type Host struct {
-	Base
+	ID primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty" example:"1238206236281802752"`
+
 	// User assigned name
 	Name string `json:"name" example:"My Great Linux server"`
 
 	// User ID
-	UserId string `json:"user_id" example:"100112233-4455-6677-8899-aabbccddeeff"`
+	UserId primitive.ObjectID `json:"user_id" example:"100112233-4455-6677-8899-aabbccddeeff"`
 
 	// User assigned ip
 	Ip string `json:"ip" example:"192.51.100.128"`
@@ -40,6 +43,10 @@ type Host struct {
 	State uint `json:"state" example:"1"`
 }
 
+func (h *Host) GetCollectionName() string {
+	return "hosts"
+}
+
 func GetHosts() []Host {
 	var hosts []Host
 
@@ -53,7 +60,7 @@ func GetHosts() []Host {
 	return hosts
 }
 
-func GetHost(hostId string) *Host {
+func GetHost(hostId primitive.ObjectID) *Host {
 	var host Host
 	err := GetOneS(&host, map[string]interface{}{
 		"doc_type": "host",
@@ -66,7 +73,7 @@ func GetHost(hostId string) *Host {
 	return &host
 }
 
-func GetHostToken(hostId string) string {
+func GetHostToken(hostId primitive.ObjectID) string {
 	var host Host
 	err := GetOneS(&host, map[string]interface{}{
 		"doc_type": "host",
@@ -92,7 +99,7 @@ func GetHostByToken(token string) *Host {
 	return &host
 }
 
-func GetHostsByUserId(userId string) []Host {
+func GetHostsByUserId(userId primitive.ObjectID) []Host {
 	var hosts []Host
 
 	err := GetS(&hosts, map[string]interface{}{
@@ -106,13 +113,13 @@ func GetHostsByUserId(userId string) []Host {
 	return hosts
 }
 
-func GetHostMetrics(hostId string, limit int) []MetricHost {
+func GetHostMetrics(hostId primitive.ObjectID, limit int) []MetricHost {
 	var metrics []MetricHost
 
 	err := Get(&metrics, map[string]interface{}{
 		"selector": map[string]string{
 			"doc_type": "metric_host",
-			"host_id":  hostId,
+			"host_id":  hostId.String(),
 		},
 		"limit": limit,
 		"sort": []map[string]interface{}{

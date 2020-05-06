@@ -1,18 +1,20 @@
 package model
 
 import (
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
 )
 
 type GameServer struct {
-	Base
+	ID primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty" example:"1238206236281802752"`
+
 	// User assigned name
 	Name string `json:"name" example:"Ultra MC Server"`
 
 	// Host ID
 	//
 	// required: true
-	HostId string `json:"host_id" example:"100112233-4455-6677-8899-aabbccddeeff"`
+	HostId primitive.ObjectID `json:"host_id" example:"100112233-4455-6677-8899-aabbccddeeff"`
 
 	// State
 	// 0 off, 1 running
@@ -38,6 +40,10 @@ type GameServer struct {
 	StopTimeout int `json:"stop_timeout" example:"30"`
 }
 
+func (g *GameServer) GetCollectionName() string {
+	return "game_servers"
+}
+
 func GetGameServers() []GameServer {
 	var gs []GameServer
 
@@ -51,7 +57,7 @@ func GetGameServers() []GameServer {
 	return gs
 }
 
-func GetGameServer(gsId string) *GameServer {
+func GetGameServer(gsId primitive.ObjectID) *GameServer {
 	var gs GameServer
 
 	err := GetOneS(&gs, map[string]interface{}{
@@ -65,7 +71,7 @@ func GetGameServer(gsId string) *GameServer {
 	return &gs
 }
 
-func GetGameServerByGsIdAndHostId(serverId string, hostId string) *GameServer {
+func GetGameServerByGsIdAndHostId(serverId primitive.ObjectID, hostId primitive.ObjectID) *GameServer {
 	var gs GameServer
 
 	err := GetOneS(&gs, map[string]interface{}{
@@ -80,7 +86,7 @@ func GetGameServerByGsIdAndHostId(serverId string, hostId string) *GameServer {
 	return &gs
 }
 
-func GetGameServersByHostId(hostId string) *[]GameServer {
+func GetGameServersByHostId(hostId primitive.ObjectID) *[]GameServer {
 	var gs []GameServer
 
 	err := GetS(&gs, map[string]interface{}{
@@ -95,7 +101,7 @@ func GetGameServersByHostId(hostId string) *[]GameServer {
 }
 
 //FIXME
-func GetUserGameServers(userId string) *[]GameServer {
+func GetUserGameServers(userId primitive.ObjectID) *[]GameServer {
 	hosts := GetHostsByUserId(userId)
 	var hostsId []interface{}
 	for _, host := range hosts {

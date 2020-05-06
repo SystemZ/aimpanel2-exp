@@ -1,9 +1,12 @@
 package model
 
-import "gitlab.com/systemz/aimpanel2/lib/task"
+import (
+	"gitlab.com/systemz/aimpanel2/lib/task"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type HostJob struct {
-	Base
+	ID primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty" example:"1238206236281802752"`
 
 	//User assigned name
 	Name string `json:"name" example:"Restart server"`
@@ -11,14 +14,18 @@ type HostJob struct {
 	// Host ID
 	//
 	// required: true
-	HostId string `json:"host_id" example:"100112233-4455-6677-8899-aabbccddeeff"`
+	HostId primitive.ObjectID `json:"host_id" example:"100112233-4455-6677-8899-aabbccddeeff"`
 
 	CronExpression string `json:"cron_expression" example:"5 4 * * *"`
 
 	TaskMessage task.Message `json:"task_message"`
 }
 
-func GetHostJobs(hostId string) []HostJob {
+func (h *HostJob) GetCollectionName() string {
+	return "hosts_job"
+}
+
+func GetHostJobs(hostId primitive.ObjectID) []HostJob {
 	var hj []HostJob
 
 	err := GetS(&hj, map[string]interface{}{
@@ -32,7 +39,7 @@ func GetHostJobs(hostId string) []HostJob {
 	return hj
 }
 
-func GetHostJob(jobId string) *HostJob {
+func GetHostJob(jobId primitive.ObjectID) *HostJob {
 	var hostJob HostJob
 	err := GetOneS(&hostJob, map[string]interface{}{
 		"doc_type": "host_job",

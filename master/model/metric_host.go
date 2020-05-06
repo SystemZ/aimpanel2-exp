@@ -1,10 +1,12 @@
 package model
 
+import "go.mongodb.org/mongo-driver/bson/primitive"
+
 type MetricHost struct {
-	Base
+	ID primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty" example:"1238206236281802752"`
 
 	// ID of the host
-	HostId string `json:"host_id" example:"100112233-4455-6677-8899-aabbccddeeff"`
+	HostId primitive.ObjectID `json:"host_id" example:"100112233-4455-6677-8899-aabbccddeeff"`
 
 	// CPU usage
 	CpuUsage int `json:"cpu_usage" example:"12"`
@@ -53,4 +55,8 @@ type MetricHost struct {
 
 	// Guest nice
 	GuestNice int `json:"guest_nice" example:"0"`
+}
+
+func (m *MetricHost) GetCollectionName() string {
+	return "metrics_host"
 }
