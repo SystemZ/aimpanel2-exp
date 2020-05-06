@@ -50,7 +50,7 @@
                                 <v-list-item-subtitle>Token</v-list-item-subtitle>
                             </v-list-item-content>
                         </v-list-item>
-                        
+
                     </v-card-text>
                     <v-card-actions>
                         <v-btn @click="remove()" color="red darken-2 accent-4" text>Remove host</v-btn>
@@ -100,60 +100,6 @@
                 </v-card>
             </v-col>
         </v-row>
-        <v-row class="mb-6">
-            <v-col>
-                <v-card>
-                    <v-card-text>
-                        <v-text-field label="Name" required
-                                      v-model="createJob.name"></v-text-field>
-
-                        <v-text-field label="Cron expression" required
-                                      v-model="createJob.cron_expression"></v-text-field>
-                        <v-select
-                                :items="gameServers"
-                                item-text="name"
-                                item-value="_id"
-                                label="Select game server"
-                                v-model="createJob.game_server_id">
-                        </v-select>
-                        <v-select :items="tasks"
-                                  item-text="name"
-                                  item-value="id"
-                                  label="Select task"
-                                  return-object
-                                  single-line
-                                  v-model="createJob.task_id"
-                        ></v-select>
-                        <v-text-field label="Body"
-                                      v-model="createJob.body"></v-text-field>
-
-
-                        <v-btn @click="addJob()" class="ma-2" color="green" dark>Add job</v-btn>
-                    </v-card-text>
-                </v-card>
-            </v-col>
-            <v-col>
-
-                <v-card>
-                    <v-card-title>Jobs</v-card-title>
-                    <v-list>
-                        <v-list-item
-                                :key="job.name"
-                                v-for="job in jobs"
-                        >
-                            <v-list-item-content>
-                                <v-list-item-title v-text="job.name"></v-list-item-title>
-                            </v-list-item-content>
-                            <v-list-item-action>
-                                <v-btn @click="removeJob(job._id)">
-                                    DELETE
-                                </v-btn>
-                            </v-list-item-action>
-                        </v-list-item>
-                    </v-list>
-                </v-card>
-            </v-col>
-        </v-row>
         <v-snackbar
                 v-model="removeSnackbar"
         >
@@ -178,62 +124,8 @@
         data: () => ({
             host: {} as Host,
             metric: {} as Metric,
-            fileManager: {
-                current_dir: '/home/test',
-                directories: [
-                    {
-                        icon: 'fa-folder',
-                        title: 'plugins',
-                        last_modification: '04.01.2019 20:44:33'
-                    },
-                    {
-                        icon: 'fa-folder',
-                        title: 'logs',
-                        last_modification: '01.01.2019 19:43:00'
-                    },
-                    {
-                        icon: 'fa-folder',
-                        title: 'world',
-                        last_modification: '12.12.2018 12:13:41'
-                    }
-                ],
-                files: [
-                    {
-                        icon: 'fa-file',
-                        title: 'server.properties',
-                        last_modification: '14.12.2018 12:13:41'
-                    },
-                    {
-                        icon: 'fa-file',
-                        title: 'settings.yml',
-                        last_modification: '03.12.2018 12:13:41'
-                    }
-                ]
-            },
             removeSnackbar: false,
-            createJob: {
-                name: '',
-                cron_expression: '* * * * *',
-                task_id: {} as any,
-                body: '',
-                game_server_id: ''
-            },
-            tasks: [
-                {
-                    name: 'GAME_COMMAND',
-                    id: 2
-                },
-                {
-                    name: 'GAME_STOP_SIGKILL',
-                    id: 3,
-                },
-                {
-                    name: 'GAME_STOP_SIGTERM',
-                    id: 4,
-                }
-            ],
-            gameServers: [],
-            jobs: []
+            // gameServers: [],
         }),
         mounted(): void {
             this.$http.get('/v1/host/' + this.$route.params.id).then((res) => {
@@ -242,10 +134,10 @@
                 this.$auth.checkResponse(e.response.status);
             });
 
-            this.getGameServers();
-            this.getJobs();
+            //this.getGameServers();
 
             this.$http.get('/v1/host/' + this.$route.params.id + '/metric').then((res) => {
+                // FIXME metrics are empty!
                 this.metric = res.data.metrics[0];
 
                 this.metric.disk_free = +(this.metric.disk_free as number / 1024).toFixed(0);
@@ -276,6 +168,7 @@
                     this.$auth.checkResponse(e.response.status);
                 });
             },
+            /*
             getGameServers(): void {
                 this.$http.get('/v1/host/' + this.$route.params.id + '/server').then(res => {
                     this.gameServers = res.data.game_servers;
@@ -283,42 +176,7 @@
                     this.$auth.checkResponse(e.response.status);
                 });
             },
-            removeJob(jobId: string): void {
-                this.$http.delete('/v1/host/' + this.$route.params.id + '/job/' + jobId).then(res => {
-                    console.log(res);
-                    this.getJobs();
-                }).catch(e => {
-                    this.$auth.checkResponse(e.response.status);
-                });
-            },
-            getJobs(): void {
-                this.$http.get('/v1/host/' + this.$route.params.id + '/job').then(res => {
-                    this.jobs = res.data.jobs;
-                }).catch(e => {
-                    this.$auth.checkResponse(e.response.status);
-                });
-            },
-            addJob(): void {
-                this.$http.post('/v1/host/' + this.$route.params.id + '/job', {
-                    name: this.createJob.name,
-                    cron_expression: this.createJob.cron_expression,
-                    task_message: {
-                        task_id: this.createJob.task_id.id,
-                        game_server_id: this.createJob.game_server_id,
-                        body: this.createJob.body
-                    }
-                }).then(res => {
-                    console.log(res);
-                    this.createJob = {
-                        name: '',
-                        cron_expression: '* * * * *',
-                        task_id: 0,
-                        body: '',
-                        game_server_id: ''
-                    };
-                    this.getJobs();
-                });
-            }
+            */
         },
     });
 </script>

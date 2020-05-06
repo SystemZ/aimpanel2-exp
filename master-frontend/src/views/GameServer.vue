@@ -14,6 +14,9 @@
                 <v-tab>
                     File manager
                 </v-tab>
+                <v-tab>
+                    Scheduler
+                </v-tab>
             </v-tabs>
             <v-tabs-items v-model="tab">
                 <v-tab-item>
@@ -83,6 +86,9 @@
                         </v-col>
                     </v-row>
                 </v-tab-item>
+                <v-tab-item>
+                    <gs-scheduler :host-id="hostId" :server-id="serverId"/>
+                </v-tab-item>
             </v-tabs-items>
         </v-card>
 
@@ -118,12 +124,14 @@
     import Vue from 'vue';
     import GsConsole from '@/components/GsConsole.vue';
     import GsFileManager from '@/components/GsFileManager.vue';
+    import GsScheduler from '@/components/GsScheduler.vue';
 
     export default Vue.extend({
         name: 'game_server',
         components: {
             GsConsole,
-            GsFileManager
+            GsFileManager,
+            GsScheduler
         },
         data: () => ({
             tab: 0,
