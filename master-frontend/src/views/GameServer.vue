@@ -7,7 +7,6 @@
                     color="basil"
                     grow
                     :vertical="$vuetify.breakpoint.xsOnly"
-                    @change="tabChange"
             >
                 <v-tab left>
                     State & control
