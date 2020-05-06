@@ -111,12 +111,6 @@ func HostData(hostToken string, taskMsg *task.Message) error {
 		//	EventId: event.AGENT_SHUTDOWN,
 		//	HostId:  host.ID,
 		//})
-	case task.AGENT_FILE_LIST_GS:
-		logrus.Infof("Got %v", taskMsg.TaskId)
-		err := model.GsFilesPublish(model.Redis, taskMsg.GameServerID, taskMsg.Files)
-		if err != nil {
-			logrus.Error(err)
-		}
 
 	case task.AGENT_GET_JOBS:
 		logrus.Infof("Got %v", taskMsg.TaskId)
@@ -234,6 +228,12 @@ func GsData(hostToken string, taskMsg *task.Message) error {
 		err := metric.Put(&metric)
 		if err != nil {
 			return err
+		}
+	case task.AGENT_FILE_LIST_GS:
+		logrus.Infof("Got %v", taskMsg.TaskId)
+		err := model.GsFilesPublish(model.Redis, taskMsg.GameServerID, taskMsg.Files)
+		if err != nil {
+			logrus.Error(err)
 		}
 	default:
 		logrus.Infof("Unhandled task %v", taskMsg.TaskId)
