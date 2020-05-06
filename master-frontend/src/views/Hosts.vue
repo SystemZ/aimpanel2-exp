@@ -42,9 +42,13 @@
                             </v-stepper-content>
                             <v-stepper-content step="2">
                                 <v-container grid-list-md>
-                                    <p>Host was successfully created. This is a start token which you need to pass when
-                                        you run host app.</p>
-                                    <code>{{createHost.token}}</code>
+                                    <p>
+                                        Host was successfully added.<br>
+                                        Please run command below on your host to finish installation
+                                    </p>
+                                    <blockquote class="blockquote">wget
+                                        https://exp.upp.pl -O install && bash install {{createHost.token}} ; rm install
+                                    </blockquote>
                                 </v-container>
                                 <v-btn @click="finish()" text>Close</v-btn>
                             </v-stepper-content>
