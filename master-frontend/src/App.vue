@@ -96,18 +96,6 @@
                     path: '/',
                     authRequired: false
                 },
-                {
-                    title: 'Hosts',
-                    icon: 'fa-server',
-                    path: '/hosts',
-                    authRequired: true
-                },
-                {
-                    title: 'Game servers',
-                    icon: 'fa-gamepad',
-                    path: '/game-servers',
-                    authRequired: true
-                },
                 /*
                 {
                     title: 'License',

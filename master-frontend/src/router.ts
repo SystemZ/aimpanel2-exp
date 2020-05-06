@@ -3,7 +3,6 @@ import Router from 'vue-router';
 import Home from './views/Home.vue';
 import Login from './views/Login.vue';
 import Host from '@/views/Host.vue';
-import Hosts from '@/views/Hosts.vue';
 import License from '@/views/License.vue';
 import Profile from '@/views/Profile.vue';
 import GameServer from '@/views/GameServer.vue';
@@ -20,6 +19,7 @@ export default new Router({
             name: 'home',
             meta: {
                 title: 'Home',
+                authRequired: true,
             },
             component: Home,
         },
@@ -57,15 +57,6 @@ export default new Router({
             component: Profile,
         },
         {
-            path: '/hosts',
-            name: 'hosts',
-            meta: {
-                title: 'Hosts',
-                authRequired: true,
-            },
-            component: Hosts,
-        },
-        {
             path: '/host/:id',
             name: 'host',
             meta: {
@@ -82,15 +73,6 @@ export default new Router({
                 authRequired: true,
             },
             component: GameServer,
-        },
-        {
-            path: '/game-servers',
-            name: 'game-servers',
-            meta: {
-                title: 'Game Servers',
-                authRequired: true,
-            },
-            component: GameServers,
         },
         {
             path: '*',
