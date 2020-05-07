@@ -13,20 +13,24 @@ type GroupUser struct {
 	// ID of the group
 	//
 	// required: true
-	GroupId primitive.ObjectID `json:"group_id"`
+	GroupId primitive.ObjectID `bson:"group_id" json:"group_id"`
 
 	// ID of the user
 	//
 	// required: true
-	UserId primitive.ObjectID `json:"user_id"`
+	UserId primitive.ObjectID `bson:"user_id" json:"user_id"`
 }
 
 func (gu *GroupUser) GetCollectionName() string {
-	return "users_group"
+	return groupUserCollection
 }
 
 func (gu *GroupUser) GetID() primitive.ObjectID {
 	return gu.ID
+}
+
+func (gu *GroupUser) SetID(id primitive.ObjectID) {
+	gu.ID = id
 }
 
 func GetGroupUserByUserId(userId primitive.ObjectID) (*GroupUser, error) {

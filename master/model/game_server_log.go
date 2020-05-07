@@ -15,19 +15,23 @@ const (
 type GameServerLog struct {
 	ID primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty" example:"1238206236281802752"`
 
-	GameServerId primitive.ObjectID `json:"game_server_id"`
+	GameServerId primitive.ObjectID `bson:"game_server_id" json:"game_server_id"`
 
-	Type uint `json:"type"`
+	Type uint `bson:"type" json:"type"`
 
-	Log string `json:"log"`
+	Log string `bson:"log" json:"log"`
 }
 
 func (g *GameServerLog) GetCollectionName() string {
-	return "game_servers_log"
+	return gameServerLogCollection
 }
 
 func (g *GameServerLog) GetID() primitive.ObjectID {
 	return g.ID
+}
+
+func (g *GameServerLog) SetID(id primitive.ObjectID) {
+	g.ID = id
 }
 
 func GetLogsByGameServerId(gsId primitive.ObjectID, limit int64) (*[]GameServerLog, error) {

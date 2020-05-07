@@ -26,7 +26,12 @@ import (
 // @Security ApiKey
 func HostList(w http.ResponseWriter, r *http.Request) {
 	user := context.Get(r, "user").(model.User)
-	hosts := model.GetHostsByUserId(user.ID)
+	hosts, err := model.GetHostsByUserId(user.ID)
+	if err != nil {
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, nil)
+		return
+	}
+
 	lib.MustEncode(json.NewEncoder(w), response.HostList{Hosts: hosts})
 }
 
@@ -42,8 +47,18 @@ func HostList(w http.ResponseWriter, r *http.Request) {
 // @Security ApiKey
 func HostDetails(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	oid, _ := primitive.ObjectIDFromHex(params["id"])
-	h := model.GetHost(oid)
+	oid, err := primitive.ObjectIDFromHex(params["id"])
+	if err != nil {
+		lib.ReturnError(w, http.StatusBadRequest, ecode.OidError, nil)
+		return
+	}
+
+	h, err := model.GetHostById(oid)
+	if err != nil {
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, nil)
+		return
+	}
+
 	if h == nil {
 		lib.ReturnError(w, http.StatusBadRequest, ecode.HostNotFound, nil)
 		return
@@ -93,8 +108,18 @@ func HostCreate(w http.ResponseWriter, r *http.Request) {
 // @Security ApiKey
 func HostMetric(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	oid, _ := primitive.ObjectIDFromHex(params["id"])
-	metrics := model.GetHostMetrics(oid, 1)
+	oid, err := primitive.ObjectIDFromHex(params["id"])
+	if err != nil {
+		lib.ReturnError(w, http.StatusBadRequest, ecode.OidError, nil)
+		return
+	}
+
+	metrics, err := model.GetHostMetricsByHostId(oid, 1)
+	if err != nil {
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, nil)
+		return
+	}
+
 	lib.MustEncode(json.NewEncoder(w), response.HostMetrics{Metrics: metrics})
 }
 
@@ -205,7 +230,17 @@ func HostJobRemove(w http.ResponseWriter, r *http.Request) {
 
 func HostJobList(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	oid, _ := primitive.ObjectIDFromHex(params["id"])
-	jobs := model.GetHostJobs(oid)
+	oid, err := primitive.ObjectIDFromHex(params["id"])
+	if err != nil {
+		lib.ReturnError(w, http.StatusBadRequest, ecode.OidError, nil)
+		return
+	}
+
+	jobs, err := model.GetHostJobsByHostId(oid)
+	if err != nil {
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, nil)
+		return
+	}
+
 	lib.MustEncode(json.NewEncoder(w), response.HostJobList{Jobs: jobs})
 }

@@ -11,49 +11,53 @@ type Host struct {
 	ID primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty" example:"1238206236281802752"`
 
 	// User assigned name
-	Name string `json:"name" example:"My Great Linux server"`
+	Name string `bson:"name" json:"name" example:"My Great Linux server"`
 
 	// User ID
-	UserId primitive.ObjectID `json:"user_id" example:"100112233-4455-6677-8899-aabbccddeeff"`
+	UserId primitive.ObjectID `bson:"user_id" json:"user_id" example:"100112233-4455-6677-8899-aabbccddeeff"`
 
 	// User assigned ip
-	Ip string `json:"ip" example:"192.51.100.128"`
+	Ip string `bson:"ip" json:"ip" example:"192.51.100.128"`
 
 	// Generated token for host
-	Token string `json:"token" example:"VRAKKUBHNIMKLXSXLWTQAOFGOMSSCXOO"`
+	Token string `bson:"token" json:"token" example:"VRAKKUBHNIMKLXSXLWTQAOFGOMSSCXOO"`
 
 	// Metric frequency
-	MetricFrequency int `json:"metric_frequency" example:"30"`
+	MetricFrequency int `bson:"metric_frequency" json:"metric_frequency" example:"30"`
 
 	// Host OS
-	OS string `json:"os" example:"linux"`
+	OS string `bson:"os" json:"os" example:"linux"`
 
 	// Host platform
-	Platform string `json:"platform" example:"ubuntu"`
+	Platform string `bson:"platform" json:"platform" example:"ubuntu"`
 
 	// Host platform family
-	PlatformFamily string `json:"platform_family" example:"debian"`
+	PlatformFamily string `bson:"platform_family" json:"platform_family" example:"debian"`
 
 	// Host platform version
-	PlatformVersion string `json:"platform_version" example:"18.04"`
+	PlatformVersion string `bson:"platform_version" json:"platform_version" example:"18.04"`
 
 	// Host kernel version
-	KernelVersion string `json:"kernel_version" example:"5.3.0-1-generic"`
+	KernelVersion string `bson:"kernel_version" json:"kernel_version" example:"5.3.0-1-generic"`
 
 	// Host arch
-	KernelArch string `json:"kernel_arch" example:"x86_64"`
+	KernelArch string `bson:"kernel_arch" json:"kernel_arch" example:"x86_64"`
 
 	// State
 	// 0 off, 1 running
-	State uint `json:"state" example:"1"`
+	State uint `bson:"state" json:"state" example:"1"`
 }
 
 func (h *Host) GetCollectionName() string {
-	return "hosts"
+	return hostCollection
 }
 
 func (h *Host) GetID() primitive.ObjectID {
 	return h.ID
+}
+
+func (h *Host) SetID(id primitive.ObjectID) {
+	h.ID = id
 }
 
 func GetHosts() ([]Host, error) {

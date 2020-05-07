@@ -14,15 +14,19 @@ type Group struct {
 	// Name of the group
 	//
 	// required: true
-	Name string `json:"name"`
+	Name string `bson:"name" json:"name"`
 }
 
 func (g *Group) GetCollectionName() string {
-	return "groups"
+	return groupCollection
 }
 
 func (g *Group) GetID() primitive.ObjectID {
 	return g.ID
+}
+
+func (g *Group) SetID(id primitive.ObjectID) {
+	g.ID = id
 }
 
 func GetGroupByName(name string) (*Group, error) {

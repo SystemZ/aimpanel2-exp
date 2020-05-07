@@ -69,6 +69,7 @@ func PermissionMiddleware(handler http.Handler) http.Handler {
 
 		groupUser, err := model.GetGroupUserByUserId(user.ID)
 		if err != nil {
+			logrus.Error(err)
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}

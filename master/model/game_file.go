@@ -9,19 +9,23 @@ import (
 type GameFile struct {
 	ID primitive.ObjectID `bson:"_id,omitempty" json:"id" example:"1238206236281802752"`
 
-	GameId string `json:"game_id"`
+	GameId string `bson:"game_id" json:"game_id"`
 
-	GameVersion string `json:"game_version"`
+	GameVersion string `bson:"game_version" json:"game_version"`
 
-	DownloadUrl string `json:"download_url"`
+	DownloadUrl string `bson:"download_url" json:"download_url"`
 }
 
 func (g *GameFile) GetCollectionName() string {
-	return "games_file"
+	return gameFileCollection
 }
 
 func (g *GameFile) GetID() primitive.ObjectID {
 	return g.ID
+}
+
+func (g *GameFile) SetID(id primitive.ObjectID) {
+	g.ID = id
 }
 
 func GetGameFileByGameIdAndVersion(gameId uint, version string) (*GameFile, error) {

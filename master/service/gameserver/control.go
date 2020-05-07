@@ -46,7 +46,7 @@ func Start(gsId primitive.ObjectID) error {
 
 	taskMsg := task.Message{
 		TaskId:       task.AGENT_START_GS,
-		GameServerID: gsId.String(),
+		GameServerID: gsId.Hex(),
 		Game:         &gameDef,
 	}
 
@@ -85,7 +85,7 @@ func Stop(gsId primitive.ObjectID, stopType uint) error {
 	}
 
 	taskMsg := task.Message{
-		GameServerID: gsId.String(),
+		GameServerID: gsId.Hex(),
 	}
 	if stopType == 1 {
 		taskMsg.TaskId = task.GAME_STOP_SIGKILL
@@ -146,7 +146,7 @@ func Install(gsId primitive.ObjectID) error {
 	taskMsg := task.Message{
 		TaskId:       task.AGENT_INSTALL_GS,
 		Game:         &g,
-		GameServerID: gsId.String(),
+		GameServerID: gsId.Hex(),
 	}
 
 	taskMsgStr, err := taskMsg.Serialize()
@@ -185,7 +185,7 @@ func SendCommand(gsId primitive.ObjectID, command string) error {
 
 	taskMsg := task.Message{
 		TaskId:       task.GAME_COMMAND,
-		GameServerID: gsId.String(),
+		GameServerID: gsId.Hex(),
 		Body:         command,
 	}
 
@@ -231,7 +231,7 @@ func Restart(gsId primitive.ObjectID, stopType uint) error {
 
 	taskMsg := task.Message{
 		TaskId:       task.GAME_RESTART,
-		GameServerID: gsId.String(),
+		GameServerID: gsId.Hex(),
 		StopTimeout:  gameServer.StopTimeout,
 		Game:         &gameDef,
 	}
@@ -262,7 +262,7 @@ func Remove(gsId primitive.ObjectID) error {
 
 	if gameServer.State == 1 {
 		taskMsg := task.Message{
-			GameServerID: gsId.String(),
+			GameServerID: gsId.Hex(),
 			TaskId:       task.GAME_STOP_SIGKILL,
 		}
 		taskMsgStr, err := taskMsg.Serialize()
@@ -278,7 +278,7 @@ func Remove(gsId primitive.ObjectID) error {
 	}
 
 	taskMsg := task.Message{
-		GameServerID: gsId.String(),
+		GameServerID: gsId.Hex(),
 		TaskId:       task.AGENT_REMOVE_GS,
 	}
 	taskMsgStr, err := taskMsg.Serialize()
@@ -292,7 +292,7 @@ func Remove(gsId primitive.ObjectID) error {
 	}
 	channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
 
-	permissions, err := model.GetPermisionsByEndpointRegex("/v1/host/" + gameServer.HostId.String() + "/server/" + gsId.String() + "%")
+	permissions, err := model.GetPermisionsByEndpointRegex("/v1/host/" + gameServer.HostId.Hex() + "/server/" + gsId.Hex() + "%")
 	if err != nil {
 		return err
 	}
@@ -379,7 +379,7 @@ func FileList(gsId primitive.ObjectID) (*filemanager.Node, error) {
 
 	taskMsg := task.Message{
 		TaskId:       task.AGENT_FILE_LIST_GS,
-		GameServerID: gsId.String(),
+		GameServerID: gsId.Hex(),
 	}
 
 	taskMsgStr, err := taskMsg.Serialize()
@@ -390,7 +390,7 @@ func FileList(gsId primitive.ObjectID) (*filemanager.Node, error) {
 	channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
 
 	//wait for files
-	pubsub, err := model.GsFilesSubscribe(model.Redis, gsId.String())
+	pubsub, err := model.GsFilesSubscribe(model.Redis, gsId.Hex())
 	if err != nil {
 		return nil, err
 	}

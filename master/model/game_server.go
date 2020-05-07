@@ -11,43 +11,47 @@ type GameServer struct {
 	ID primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty" example:"1238206236281802752"`
 
 	// User assigned name
-	Name string `json:"name" example:"Ultra MC Server"`
+	Name string `bson:"name" json:"name" example:"Ultra MC Server"`
 
 	// Host ID
 	//
 	// required: true
-	HostId primitive.ObjectID `json:"host_id" example:"100112233-4455-6677-8899-aabbccddeeff"`
+	HostId primitive.ObjectID `bson:"host_id" json:"host_id" example:"100112233-4455-6677-8899-aabbccddeeff"`
 
 	// State
 	// 0 off, 1 running
-	State uint `json:"state" example:"0"`
+	State uint `bson:"state" json:"state" example:"0"`
 
 	// State Last Changed
 	//FIXME default current timestamp
-	StateLastChanged time.Time `json:"state_last_changed" example:"2019-09-29T03:16:27+02:00"`
+	StateLastChanged time.Time `bson:"state_last_changed" json:"state_last_changed" example:"2019-09-29T03:16:27+02:00"`
 
 	// Game ID
-	GameId uint `json:"game_id" example:"1"`
+	GameId uint `bson:"game_id" json:"game_id" example:"1"`
 
 	// Game Version
-	GameVersion string `json:"game_version" example:"1.14.2"`
+	GameVersion string `bson:"game_version" json:"game_version" example:"1.14.2"`
 
 	// Game
-	GameJson string `json:"game_json"`
+	GameJson string `bson:"game_json" json:"game_json"`
 
 	// Metric Frequency
-	MetricFrequency int `json:"metric_frequency" example:"30"`
+	MetricFrequency int `bson:"metric_frequency" json:"metric_frequency" example:"30"`
 
 	// Stop Timeout
-	StopTimeout int `json:"stop_timeout" example:"30"`
+	StopTimeout int `bson:"stop_timeout" json:"stop_timeout" example:"30"`
 }
 
 func (g *GameServer) GetCollectionName() string {
-	return "game_servers"
+	return gameServerCollection
 }
 
 func (g *GameServer) GetID() primitive.ObjectID {
 	return g.ID
+}
+
+func (g *GameServer) SetID(id primitive.ObjectID) {
+	g.ID = id
 }
 
 func GetGameServers() ([]GameServer, error) {

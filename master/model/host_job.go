@@ -11,24 +11,28 @@ type HostJob struct {
 	ID primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty" example:"1238206236281802752"`
 
 	//User assigned name
-	Name string `json:"name" example:"Restart server"`
+	Name string `bson:"name" json:"name" example:"Restart server"`
 
 	// Host ID
 	//
 	// required: true
-	HostId primitive.ObjectID `json:"host_id" example:"100112233-4455-6677-8899-aabbccddeeff"`
+	HostId primitive.ObjectID `bson:"host_id" json:"host_id" example:"100112233-4455-6677-8899-aabbccddeeff"`
 
-	CronExpression string `json:"cron_expression" example:"5 4 * * *"`
+	CronExpression string `bson:"cron_expression" json:"cron_expression" example:"5 4 * * *"`
 
-	TaskMessage task.Message `json:"task_message"`
+	TaskMessage task.Message `bson:"task_message" json:"task_message"`
 }
 
 func (h *HostJob) GetCollectionName() string {
-	return "hosts_job"
+	return hostJobCollection
 }
 
 func (h *HostJob) GetID() primitive.ObjectID {
 	return h.ID
+}
+
+func (h *HostJob) SetID(id primitive.ObjectID) {
+	h.ID = id
 }
 
 func GetHostJobsByHostId(hostId primitive.ObjectID) ([]HostJob, error) {

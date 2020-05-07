@@ -16,24 +16,28 @@ type Permission struct {
 	// Name of the permission
 	//
 	// required: true
-	Name string `gorm:"column:name" json:"name"`
+	Name string `bson:"name"  json:"name"`
 
 	// ID of the permission
 	//
 	// required: true
-	GroupId primitive.ObjectID `gorm:"column:group_id" json:"group_id"`
+	GroupId primitive.ObjectID `bson:"group_id"  json:"group_id"`
 
-	Verb uint8 `gorm:"column:verb" json:"verb"`
+	Verb uint8 `bson:"verb"  json:"verb"`
 
-	Endpoint string `gorm:"column:endpoint" json:"endpoint"`
+	Endpoint string `bson:"endpoint"  json:"endpoint"`
 }
 
 func (p *Permission) GetCollectionName() string {
-	return "permissions"
+	return permissionCollection
 }
 
 func (p *Permission) GetID() primitive.ObjectID {
 	return p.ID
+}
+
+func (p *Permission) SetID(id primitive.ObjectID) {
+	p.ID = id
 }
 
 //TODO verify it for security vulnerability
@@ -82,7 +86,7 @@ func CreatePermissionsForNewHost(groupId primitive.ObjectID, hostId primitive.Ob
 		Name:     "Get host",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
-		Endpoint: "/v1/host/" + hostId.String(),
+		Endpoint: "/v1/host/" + hostId.Hex(),
 	}
 	err := Put(perm)
 	if err != nil {
@@ -93,7 +97,7 @@ func CreatePermissionsForNewHost(groupId primitive.ObjectID, hostId primitive.Ob
 		Name:     "Delete host",
 		Verb:     lib.GetVerbByName("DELETE"),
 		GroupId:  groupId,
-		Endpoint: "/v1/host/" + hostId.String(),
+		Endpoint: "/v1/host/" + hostId.Hex(),
 	}
 	err = Put(perm)
 	if err != nil {
@@ -104,7 +108,7 @@ func CreatePermissionsForNewHost(groupId primitive.ObjectID, hostId primitive.Ob
 		Name:     "Create game server",
 		Verb:     lib.GetVerbByName("POST"),
 		GroupId:  groupId,
-		Endpoint: "/v1/host/" + hostId.String() + "/server",
+		Endpoint: "/v1/host/" + hostId.Hex() + "/server",
 	}
 	err = Put(perm)
 	if err != nil {
@@ -115,7 +119,7 @@ func CreatePermissionsForNewHost(groupId primitive.ObjectID, hostId primitive.Ob
 		Name:     "List game servers by host id",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
-		Endpoint: "/v1/host/" + hostId.String() + "/server",
+		Endpoint: "/v1/host/" + hostId.Hex() + "/server",
 	}
 	err = Put(perm)
 	if err != nil {
@@ -126,7 +130,7 @@ func CreatePermissionsForNewHost(groupId primitive.ObjectID, hostId primitive.Ob
 		Name:     "Get host metric",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
-		Endpoint: "/v1/host/" + hostId.String() + "/metric",
+		Endpoint: "/v1/host/" + hostId.Hex() + "/metric",
 	}
 	err = Put(perm)
 	if err != nil {
@@ -137,7 +141,7 @@ func CreatePermissionsForNewHost(groupId primitive.ObjectID, hostId primitive.Ob
 		Name:     "Update host",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
-		Endpoint: "/v1/host/" + hostId.String() + "/update",
+		Endpoint: "/v1/host/" + hostId.Hex() + "/update",
 	}
 	err = Put(perm)
 	if err != nil {
@@ -148,7 +152,7 @@ func CreatePermissionsForNewHost(groupId primitive.ObjectID, hostId primitive.Ob
 		Name:     "Create host job",
 		Verb:     lib.GetVerbByName("POST"),
 		GroupId:  groupId,
-		Endpoint: "/v1/host/" + hostId.String() + "/job",
+		Endpoint: "/v1/host/" + hostId.Hex() + "/job",
 	}
 	err = Put(perm)
 	if err != nil {
@@ -159,7 +163,7 @@ func CreatePermissionsForNewHost(groupId primitive.ObjectID, hostId primitive.Ob
 		Name:     "Get host jobs",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
-		Endpoint: "/v1/host/" + hostId.String() + "/job",
+		Endpoint: "/v1/host/" + hostId.Hex() + "/job",
 	}
 	err = Put(perm)
 	if err != nil {
@@ -173,7 +177,7 @@ func CreatePermissionsForNewGameServer(groupId primitive.ObjectID, hostId primit
 		Name:     "Get game server",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
-		Endpoint: "/v1/host/" + hostId.String() + "/server/" + gameServerId.String(),
+		Endpoint: "/v1/host/" + hostId.Hex() + "/server/" + gameServerId.Hex(),
 	}
 	err := Put(perm)
 	if err != nil {
@@ -184,7 +188,7 @@ func CreatePermissionsForNewGameServer(groupId primitive.ObjectID, hostId primit
 		Name:     "Delete game server",
 		Verb:     lib.GetVerbByName("DELETE"),
 		GroupId:  groupId,
-		Endpoint: "/v1/host/" + hostId.String() + "/server/" + gameServerId.String(),
+		Endpoint: "/v1/host/" + hostId.Hex() + "/server/" + gameServerId.Hex(),
 	}
 	err = Put(perm)
 	if err != nil {
@@ -195,7 +199,7 @@ func CreatePermissionsForNewGameServer(groupId primitive.ObjectID, hostId primit
 		Name:     "Install game server",
 		Verb:     lib.GetVerbByName("PUT"),
 		GroupId:  groupId,
-		Endpoint: "/v1/host/" + hostId.String() + "/server/" + gameServerId.String() + "/install",
+		Endpoint: "/v1/host/" + hostId.Hex() + "/server/" + gameServerId.Hex() + "/install",
 	}
 	err = Put(perm)
 	if err != nil {
@@ -206,7 +210,7 @@ func CreatePermissionsForNewGameServer(groupId primitive.ObjectID, hostId primit
 		Name:     "Start game server",
 		Verb:     lib.GetVerbByName("PUT"),
 		GroupId:  groupId,
-		Endpoint: "/v1/host/" + hostId.String() + "/server/" + gameServerId.String() + "/start",
+		Endpoint: "/v1/host/" + hostId.Hex() + "/server/" + gameServerId.Hex() + "/start",
 	}
 	err = Put(perm)
 	if err != nil {
@@ -217,7 +221,7 @@ func CreatePermissionsForNewGameServer(groupId primitive.ObjectID, hostId primit
 		Name:     "Restart game server",
 		Verb:     lib.GetVerbByName("PUT"),
 		GroupId:  groupId,
-		Endpoint: "/v1/host/" + hostId.String() + "/server/" + gameServerId.String() + "/restart",
+		Endpoint: "/v1/host/" + hostId.Hex() + "/server/" + gameServerId.Hex() + "/restart",
 	}
 	err = Put(perm)
 	if err != nil {
@@ -228,7 +232,7 @@ func CreatePermissionsForNewGameServer(groupId primitive.ObjectID, hostId primit
 		Name:     "Stop game server",
 		Verb:     lib.GetVerbByName("PUT"),
 		GroupId:  groupId,
-		Endpoint: "/v1/host/" + hostId.String() + "/server/" + gameServerId.String() + "/stop",
+		Endpoint: "/v1/host/" + hostId.Hex() + "/server/" + gameServerId.Hex() + "/stop",
 	}
 	err = Put(perm)
 	if err != nil {
@@ -239,7 +243,7 @@ func CreatePermissionsForNewGameServer(groupId primitive.ObjectID, hostId primit
 		Name:     "Send command to game server",
 		Verb:     lib.GetVerbByName("PUT"),
 		GroupId:  groupId,
-		Endpoint: "/v1/host/" + hostId.String() + "/server/" + gameServerId.String() + "/command",
+		Endpoint: "/v1/host/" + hostId.Hex() + "/server/" + gameServerId.Hex() + "/command",
 	}
 	err = Put(perm)
 	if err != nil {
@@ -250,7 +254,7 @@ func CreatePermissionsForNewGameServer(groupId primitive.ObjectID, hostId primit
 		Name:     "Get logs from game server",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
-		Endpoint: "/v1/host/" + hostId.String() + "/server/" + gameServerId.String() + "/logs",
+		Endpoint: "/v1/host/" + hostId.Hex() + "/server/" + gameServerId.Hex() + "/logs",
 	}
 	err = Put(perm)
 	if err != nil {
@@ -261,7 +265,7 @@ func CreatePermissionsForNewGameServer(groupId primitive.ObjectID, hostId primit
 		Name:     "Console feed",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
-		Endpoint: "/v1/host/" + hostId.String() + "/server/" + gameServerId.String() + "/console",
+		Endpoint: "/v1/host/" + hostId.Hex() + "/server/" + gameServerId.Hex() + "/console",
 	}
 	err = Put(perm)
 	if err != nil {
@@ -272,7 +276,7 @@ func CreatePermissionsForNewGameServer(groupId primitive.ObjectID, hostId primit
 		Name:     "File list",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
-		Endpoint: "/v1/host/" + hostId.String() + "/server/" + gameServerId.String() + "/file/list",
+		Endpoint: "/v1/host/" + hostId.Hex() + "/server/" + gameServerId.Hex() + "/file/list",
 	}
 	err = Put(perm)
 	if err != nil {
@@ -365,7 +369,7 @@ func CreatePermissionsForNewHostJob(groupId primitive.ObjectID, hostId primitive
 		Name:     "Remove host job",
 		Verb:     lib.GetVerbByName("DELETE"),
 		GroupId:  groupId,
-		Endpoint: "/v1/host/" + hostId.String() + "/job/" + jobId.String(),
+		Endpoint: "/v1/host/" + hostId.Hex() + "/job/" + jobId.Hex(),
 	}
 	err := Put(perm)
 	if err != nil {

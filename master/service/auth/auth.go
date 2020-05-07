@@ -38,7 +38,7 @@ func Register(data *request.AuthRegister) (string, int) {
 
 	//Create group
 	group := &model.Group{
-		Name: "USER-" + user.ID.String(),
+		Name: "USER-" + user.ID.Hex(),
 	}
 	err = model.Put(group)
 	if err != nil {

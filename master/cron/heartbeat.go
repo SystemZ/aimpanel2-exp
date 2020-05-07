@@ -10,7 +10,11 @@ func CheckHostsHeartbeat() {
 	for {
 		<-time.After(15 * time.Second)
 
-		hosts := model.GetHosts()
+		hosts, err := model.GetHosts()
+		if err != nil {
+			logrus.Error(err)
+			return
+		}
 
 		for _, host := range hosts {
 			lastTimestamp, err := model.Redis.Get("agent_heartbeat_token_" + host.Token).Int64()
@@ -46,10 +50,14 @@ func CheckGSHeartbeat() {
 	for {
 		<-time.After(15 * time.Second)
 
-		gameServers := model.GetGameServers()
+		gameServers, err := model.GetGameServers()
+		if err != nil {
+			logrus.Error(err)
+			return
+		}
 
 		for _, gs := range gameServers {
-			lastTimestamp, err := model.Redis.Get("wrapper_heartbeat_id_" + gs.ID.String()).Int64()
+			lastTimestamp, err := model.Redis.Get("wrapper_heartbeat_id_" + gs.ID.Hex()).Int64()
 			if err == nil {
 				heartbeatTime := time.Unix(lastTimestamp, 0)
 

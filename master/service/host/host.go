@@ -28,7 +28,7 @@ func Create(data *request.HostCreate, userId primitive.ObjectID) (*model.Host, i
 		return nil, ecode.DbSave
 	}
 
-	group, err := model.GetGroupByName("USER-" + userId.String())
+	group, err := model.GetGroupByName("USER-" + userId.Hex())
 	if err != nil {
 		return nil, ecode.DbError
 	}
@@ -62,7 +62,7 @@ func Remove(hostId primitive.ObjectID) int {
 		}
 	}
 
-	permissions, err := model.GetPermisionsByEndpointRegex("/v1/host/" + host.ID.String())
+	permissions, err := model.GetPermisionsByEndpointRegex("/v1/host/" + host.ID.Hex())
 	if err != nil {
 		return ecode.DbError
 	}
@@ -117,7 +117,7 @@ func CreateJob(data *request.HostCreateJob, userId primitive.ObjectID, hostId pr
 		return nil, ecode.DbSave
 	}
 
-	group, err := model.GetGroupByName("USER-" + userId.String())
+	group, err := model.GetGroupByName("USER-" + userId.Hex())
 	if err != nil {
 		return nil, ecode.DbError
 	}
@@ -143,7 +143,7 @@ func RemoveJob(hostId primitive.ObjectID, jobId primitive.ObjectID) int {
 		return ecode.DbError
 	}
 
-	permissions, err := model.GetPermisionsByEndpointRegex("/v1/host/" + hostId.String() + "/job/" + jobId.String())
+	permissions, err := model.GetPermisionsByEndpointRegex("/v1/host/" + hostId.Hex() + "/job/" + jobId.Hex())
 	if err != nil {
 		return ecode.DbError
 	}

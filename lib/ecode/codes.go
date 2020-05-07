@@ -19,6 +19,7 @@ const (
 	JsonEncode
 	DbSave
 	DbError
+	OidError
 	// auth/user
 	WrongUsernameOrPassword
 	WrongPassword

@@ -22,14 +22,17 @@ const (
 
 type Document interface {
 	GetID() primitive.ObjectID
+	SetID(id primitive.ObjectID)
 	GetCollectionName() string
 }
 
 func Put(d Document) error {
-	_, err := DB.Collection(d.GetCollectionName()).InsertOne(context.TODO(), d)
+	res, err := DB.Collection(d.GetCollectionName()).InsertOne(context.TODO(), d)
 	if err != nil {
 		return err
 	}
+
+	d.SetID(res.InsertedID.(primitive.ObjectID))
 
 	return nil
 }

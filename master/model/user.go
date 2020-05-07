@@ -15,18 +15,22 @@ import (
 type User struct {
 	ID primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty" example:"1238206236281802752"`
 
-	Username     string `json:"username"`
-	PasswordHash string `json:"password_hash"`
-	Email        string `json:"email"`
+	Username     string `bson:"username" json:"username"`
+	PasswordHash string `bson:"password_hash" json:"password_hash"`
+	Email        string `bson:"email" json:"email"`
 	//TODO: plan_id
 }
 
 func (u *User) GetCollectionName() string {
-	return "users"
+	return userCollection
 }
 
 func (u *User) GetID() primitive.ObjectID {
 	return u.ID
+}
+
+func (u *User) SetID(id primitive.ObjectID) {
+	u.ID = id
 }
 
 func (u *User) HashPassword(password string) string {
@@ -45,7 +49,7 @@ func (u *User) IsPasswordOk(password string) bool {
 func (u *User) GenerateJWT() (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"exp":      time.Now().Add(time.Hour * 24).Unix(),
-		"uid":      u.ID,
+		"uid":      u.ID.Hex(),
 		"username": u.Username,
 		"email":    u.Email,
 	})
