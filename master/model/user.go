@@ -59,7 +59,7 @@ func (u *User) GenerateJWT() (string, error) {
 
 func CheckIfUserExist(username string) bool {
 	count, err := DB.Collection(userCollection).CountDocuments(context.TODO(),
-		bson.D{{"username", username}})
+		bson.D{{Key: "username", Value: username}})
 	if err != nil {
 		logrus.Error(err)
 	}
@@ -74,7 +74,7 @@ func CheckIfUserExist(username string) bool {
 func GetUserById(id primitive.ObjectID) (*User, error) {
 	var user User
 
-	err := DB.Collection(userCollection).FindOne(context.TODO(), bson.D{{"_id", id}}).Decode(&user)
+	err := DB.Collection(userCollection).FindOne(context.TODO(), bson.D{{Key: "_id", Value: id}}).Decode(&user)
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +85,7 @@ func GetUserById(id primitive.ObjectID) (*User, error) {
 func GetUserByUsername(username string) (*User, error) {
 	var user User
 
-	err := DB.Collection(userCollection).FindOne(context.TODO(), bson.D{{"username", username}}).
+	err := DB.Collection(userCollection).FindOne(context.TODO(), bson.D{{Key: "username", Value: username}}).
 		Decode(&user)
 	if err != nil {
 		return nil, err

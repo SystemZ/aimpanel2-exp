@@ -33,10 +33,10 @@ func GetGameFileByGameIdAndVersion(gameId uint, version string) (*GameFile, erro
 	var gf GameFile
 
 	err := DB.Collection(gameFileCollection).FindOne(context.TODO(), bson.D{
-		{"game_id", fmt.Sprintf("%v", gameId)},
-		{"$or", []bson.D{
-			bson.D{{"game_version", version}},
-			bson.D{{"game_version", "0"}},
+		{Key: "game_id", Value: fmt.Sprintf("%v", gameId)},
+		{Key: "$or", Value: []bson.D{
+			bson.D{{Key: "game_version", Value: version}},
+			bson.D{{Key: "game_version", Value: "0"}},
 		}},
 	}).Decode(&gf)
 	if err != nil {

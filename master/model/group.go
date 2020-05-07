@@ -32,7 +32,7 @@ func (g *Group) SetID(id primitive.ObjectID) {
 func GetGroupByName(name string) (*Group, error) {
 	var group Group
 
-	err := DB.Collection(groupCollection).FindOne(context.TODO(), bson.D{{"name", name}}).
+	err := DB.Collection(groupCollection).FindOne(context.TODO(), bson.D{{Key: "name", Value: name}}).
 		Decode(&group)
 	if err != nil {
 		return nil, err

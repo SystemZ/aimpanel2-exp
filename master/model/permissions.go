@@ -45,7 +45,7 @@ func GetPermisionsByEndpointRegex(endpoint string) ([]Permission, error) {
 	var permissions []Permission
 
 	cur, err := DB.Collection(permissionCollection).Find(context.TODO(),
-		bson.D{{"endpoint", primitive.Regex{Pattern: endpoint, Options: ""}}})
+		bson.D{{Key: "endpoint", Value: primitive.Regex{Pattern: endpoint, Options: ""}}})
 	if err != nil {
 		return nil, err
 	}
@@ -64,9 +64,9 @@ func GetPermisionsByEndpointRegex(endpoint string) ([]Permission, error) {
 
 func CheckIfUserHasAccess(path string, verb uint8, groupId primitive.ObjectID) bool {
 	count, err := DB.Collection(permissionCollection).CountDocuments(context.TODO(), bson.D{
-		{"endpoint", path},
-		{"verb", verb},
-		{"group_id", groupId},
+		{Key: "endpoint", Value: path},
+		{Key: "verb", Value: verb},
+		{Key: "group_id", Value: groupId},
 	})
 	if err != nil {
 		logrus.Error(err)

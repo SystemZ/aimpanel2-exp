@@ -36,7 +36,7 @@ func (gu *GroupUser) SetID(id primitive.ObjectID) {
 func GetGroupUserByUserId(userId primitive.ObjectID) (*GroupUser, error) {
 	var gu GroupUser
 
-	err := DB.Collection(groupUserCollection).FindOne(context.TODO(), bson.D{{"user_id", userId}}).Decode(&gu)
+	err := DB.Collection(groupUserCollection).FindOne(context.TODO(), bson.D{{Key: "user_id", Value: userId}}).Decode(&gu)
 	if err != nil {
 		return nil, err
 	}

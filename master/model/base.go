@@ -40,8 +40,8 @@ func Put(d Document) error {
 func Update(d Document) error {
 	_, err := DB.Collection(d.GetCollectionName()).UpdateOne(
 		context.TODO(),
-		bson.D{{"_id", d.GetID()}},
-		bson.D{{"$set", d}})
+		bson.D{{Key: "_id", Value: d.GetID()}},
+		bson.D{{Key: "$set", Value: d}})
 	if err != nil {
 		return err
 	}
@@ -52,7 +52,7 @@ func Update(d Document) error {
 func Delete(d Document) error {
 	_, err := DB.Collection(d.GetCollectionName()).DeleteOne(
 		context.TODO(),
-		bson.D{{"_id", d.GetID()}})
+		bson.D{{Key: "_id", Value: d.GetID()}})
 	if err != nil {
 		return err
 	}

@@ -39,7 +39,7 @@ func GetHostJobsByHostId(hostId primitive.ObjectID) ([]HostJob, error) {
 	var hostJobs []HostJob
 
 	cur, err := DB.Collection(hostJobCollection).Find(context.TODO(),
-		bson.D{{"host_id", hostId}})
+		bson.D{{Key: "host_id", Value: hostId}})
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +59,7 @@ func GetHostJobsByHostId(hostId primitive.ObjectID) ([]HostJob, error) {
 func GetHostJobById(id primitive.ObjectID) (*HostJob, error) {
 	var hostJob HostJob
 
-	err := DB.Collection(hostJobCollection).FindOne(context.TODO(), bson.D{{"_id", id}}).Decode(&hostJob)
+	err := DB.Collection(hostJobCollection).FindOne(context.TODO(), bson.D{{Key: "_id", Value: id}}).Decode(&hostJob)
 	if err != nil {
 		return nil, err
 	}

@@ -41,7 +41,7 @@ func GetLogsByGameServerId(gsId primitive.ObjectID, limit int64) (*[]GameServerL
 	opts.SetLimit(limit)
 
 	cur, err := DB.Collection(gameServerLogCollection).Find(context.TODO(),
-		bson.D{{"game_server_id", gsId}}, opts)
+		bson.D{{Key: "game_server_id", Value: gsId}}, opts)
 	if err != nil {
 		return nil, err
 	}

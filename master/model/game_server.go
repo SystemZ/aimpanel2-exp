@@ -77,7 +77,7 @@ func GetGameServers() ([]GameServer, error) {
 
 func GetGameServerById(id primitive.ObjectID) (*GameServer, error) {
 	var gs GameServer
-	err := DB.Collection(gameServerCollection).FindOne(context.TODO(), bson.D{{"_id", id}}).Decode(&gs)
+	err := DB.Collection(gameServerCollection).FindOne(context.TODO(), bson.D{{Key: "_id", Value: id}}).Decode(&gs)
 	if err != nil {
 		return nil, err
 	}
@@ -89,8 +89,8 @@ func GetGameServerByGsIdAndHostId(gsId primitive.ObjectID, hostId primitive.Obje
 	var gs GameServer
 
 	err := DB.Collection(gameServerCollection).FindOne(context.TODO(), bson.D{
-		{"_id", gsId},
-		{"host_id", hostId},
+		{Key: "_id", Value: gsId},
+		{Key: "host_id", Value: hostId},
 	}).Decode(&gs)
 	if err != nil {
 		return nil, err
@@ -103,7 +103,7 @@ func GetGameServersByHostId(hostId primitive.ObjectID) (*[]GameServer, error) {
 	var gameServers []GameServer
 
 	cur, err := DB.Collection(gameServerCollection).Find(context.TODO(),
-		bson.D{{"host_id", hostId}})
+		bson.D{{Key: "host_id", Value: hostId}})
 	if err != nil {
 		return nil, err
 	}
@@ -129,13 +129,13 @@ func GetUserGameServers(userId primitive.ObjectID) (*[]GameServer, error) {
 
 	var hostsId []bson.D
 	for _, host := range hosts {
-		hostsId = append(hostsId, bson.D{{"host_id", host.ID}})
+		hostsId = append(hostsId, bson.D{{Key: "host_id", Value: host.ID}})
 	}
 
 	var gameServers []GameServer
 
 	cur, err := DB.Collection(gameServerCollection).Find(context.TODO(),
-		bson.D{{"$or", hostsId}})
+		bson.D{{Key: "$or", Value: hostsId}})
 	if err != nil {
 		return nil, err
 	}

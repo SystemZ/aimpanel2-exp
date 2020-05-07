@@ -84,7 +84,7 @@ func GetHosts() ([]Host, error) {
 func GetHostById(id primitive.ObjectID) (*Host, error) {
 	var host Host
 
-	err := DB.Collection(hostCollection).FindOne(context.TODO(), bson.D{{"_id", id}}).Decode(&host)
+	err := DB.Collection(hostCollection).FindOne(context.TODO(), bson.D{{Key: "_id", Value: id}}).Decode(&host)
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +95,7 @@ func GetHostById(id primitive.ObjectID) (*Host, error) {
 func GetHostTokenById(id primitive.ObjectID) (string, error) {
 	var host Host
 
-	err := DB.Collection(hostCollection).FindOne(context.TODO(), bson.D{{"_id", id}}).Decode(&host)
+	err := DB.Collection(hostCollection).FindOne(context.TODO(), bson.D{{Key: "_id", Value: id}}).Decode(&host)
 	if err != nil {
 		return "", err
 	}
@@ -106,7 +106,7 @@ func GetHostTokenById(id primitive.ObjectID) (string, error) {
 func GetHostByToken(token string) (*Host, error) {
 	var host Host
 
-	err := DB.Collection(hostCollection).FindOne(context.TODO(), bson.D{{"token", token}}).Decode(&host)
+	err := DB.Collection(hostCollection).FindOne(context.TODO(), bson.D{{Key: "token", Value: token}}).Decode(&host)
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +118,7 @@ func GetHostsByUserId(userId primitive.ObjectID) ([]Host, error) {
 	var hosts []Host
 
 	cur, err := DB.Collection(hostCollection).Find(context.TODO(),
-		bson.D{{"user_id", userId}})
+		bson.D{{Key: "user_id", Value: userId}})
 	if err != nil {
 		return nil, err
 	}
@@ -140,10 +140,10 @@ func GetHostMetricsByHostId(hostId primitive.ObjectID, limit int64) ([]MetricHos
 
 	opts := options.Find()
 	opts.SetLimit(limit)
-	opts.SetSort(bson.D{{"_id", -1}})
+	opts.SetSort(bson.D{{Key: "_id", Value: -1}})
 
 	cur, err := DB.Collection(metricHostCollection).Find(context.TODO(),
-		bson.D{{"host_id", hostId}}, opts)
+		bson.D{{Key: "host_id", Value: hostId}}, opts)
 	if err != nil {
 		return nil, err
 	}
