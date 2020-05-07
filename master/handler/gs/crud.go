@@ -187,7 +187,7 @@ func Get(w http.ResponseWriter, r *http.Request) {
 		lib.ReturnError(w, http.StatusBadRequest, ecode.OidError, err)
 		return
 	}
-	hostId, err := primitive.ObjectIDFromHex(params["hostId"])
+	hostId, err := primitive.ObjectIDFromHex(params["host_id"])
 	if err != nil {
 		lib.ReturnError(w, http.StatusBadRequest, ecode.OidError, err)
 		return

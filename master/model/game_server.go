@@ -66,7 +66,7 @@ func GetGameServers() ([]GameServer, error) {
 
 	for cur.Next(context.TODO()) {
 		var gameServer GameServer
-		if err := cur.Decode(gameServer); err != nil {
+		if err := cur.Decode(&gameServer); err != nil {
 			return nil, err
 		}
 		gameServers = append(gameServers, gameServer)
@@ -77,7 +77,6 @@ func GetGameServers() ([]GameServer, error) {
 
 func GetGameServerById(id primitive.ObjectID) (*GameServer, error) {
 	var gs GameServer
-
 	err := DB.Collection(gameServerCollection).FindOne(context.TODO(), bson.D{{"_id", id}}).Decode(&gs)
 	if err != nil {
 		return nil, err
@@ -112,7 +111,7 @@ func GetGameServersByHostId(hostId primitive.ObjectID) (*[]GameServer, error) {
 
 	for cur.Next(context.TODO()) {
 		var gameServer GameServer
-		if err := cur.Decode(gameServer); err != nil {
+		if err := cur.Decode(&gameServer); err != nil {
 			return nil, err
 		}
 		gameServers = append(gameServers, gameServer)
@@ -144,7 +143,7 @@ func GetUserGameServers(userId primitive.ObjectID) (*[]GameServer, error) {
 
 	for cur.Next(context.TODO()) {
 		var gameServer GameServer
-		if err := cur.Decode(gameServer); err != nil {
+		if err := cur.Decode(&gameServer); err != nil {
 			return nil, err
 		}
 		gameServers = append(gameServers, gameServer)

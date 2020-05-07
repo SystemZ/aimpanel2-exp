@@ -72,7 +72,7 @@ func GetHosts() ([]Host, error) {
 
 	for cur.Next(context.TODO()) {
 		var host Host
-		if err := cur.Decode(host); err != nil {
+		if err := cur.Decode(&host); err != nil {
 			return nil, err
 		}
 		hosts = append(hosts, host)
@@ -126,7 +126,7 @@ func GetHostsByUserId(userId primitive.ObjectID) ([]Host, error) {
 
 	for cur.Next(context.TODO()) {
 		var host Host
-		if err := cur.Decode(host); err != nil {
+		if err := cur.Decode(&host); err != nil {
 			return nil, err
 		}
 		hosts = append(hosts, host)
@@ -151,7 +151,7 @@ func GetHostMetricsByHostId(hostId primitive.ObjectID, limit int64) ([]MetricHos
 
 	for cur.Next(context.TODO()) {
 		var metric MetricHost
-		if err := cur.Decode(metric); err != nil {
+		if err := cur.Decode(&metric); err != nil {
 			return nil, err
 		}
 		metrics = append(metrics, metric)

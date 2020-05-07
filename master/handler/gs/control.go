@@ -51,9 +51,13 @@ func Start(w http.ResponseWriter, r *http.Request) {
 func Install(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	gsId := params["server_id"]
-	oid, _ := primitive.ObjectIDFromHex(gsId)
+	oid, err := primitive.ObjectIDFromHex(gsId)
+	if err != nil {
+		lib.ReturnError(w, http.StatusBadRequest, ecode.OidError, err)
+		return
+	}
 
-	err := gameserver.Install(oid)
+	err = gameserver.Install(oid)
 	if err != nil {
 		lib.ReturnError(w, http.StatusInternalServerError, ecode.GsInstall, err)
 		return

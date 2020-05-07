@@ -102,7 +102,7 @@
         }
 
         goToGameServer(row: GameServer): void {
-            this.$router.push('/host/' + row.host_id + '/server/' + row._id);
+            this.$router.push('/host/' + row.host_id + '/server/' + row.id);
         }
 
         getGameServers() {

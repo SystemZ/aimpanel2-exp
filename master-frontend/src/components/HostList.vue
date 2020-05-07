@@ -66,7 +66,7 @@
         },
         methods: {
             goToHost(row: Host): void {
-                this.$router.push('/host/' + row._id);
+                this.$router.push('/host/' + row.id);
             },
             getHosts(): void {
                 this.hostListLoading = true;

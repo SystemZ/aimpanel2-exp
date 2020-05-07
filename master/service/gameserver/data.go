@@ -204,8 +204,8 @@ func GsData(hostToken string, taskMsg *task.Message) error {
 		}
 
 		events.SSE.SendMessage(fmt.Sprintf("/v1/host/%s/server/%s/console",
-			host.ID,
-			gsLog.GameServerId),
+			host.ID.Hex(),
+			gsLog.GameServerId.Hex()),
 			sse.SimpleMessage(base64.StdEncoding.EncodeToString([]byte(gsLog.Log))))
 
 		err = model.Put(&gsLog)

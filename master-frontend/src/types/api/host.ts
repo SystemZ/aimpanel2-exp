@@ -1,5 +1,5 @@
 export interface Host {
-    _id: string,
+    id: string,
     name: string,
     user_id: string,
     ip: string,

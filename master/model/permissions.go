@@ -53,7 +53,7 @@ func GetPermisionsByEndpointRegex(endpoint string) ([]Permission, error) {
 
 	for cur.Next(context.TODO()) {
 		var perm Permission
-		if err := cur.Decode(perm); err != nil {
+		if err := cur.Decode(&perm); err != nil {
 			return nil, err
 		}
 		permissions = append(permissions, perm)

@@ -47,7 +47,7 @@ func GetHostJobsByHostId(hostId primitive.ObjectID) ([]HostJob, error) {
 
 	for cur.Next(context.TODO()) {
 		var hostJob HostJob
-		if err := cur.Decode(hostJob); err != nil {
+		if err := cur.Decode(&hostJob); err != nil {
 			return nil, err
 		}
 		hostJobs = append(hostJobs, hostJob)

@@ -26,7 +26,7 @@
                                         :disabled="hostsLoading"
                                         :items="hosts"
                                         item-text="name"
-                                        item-value="_id"
+                                        item-value="id"
                                         label="Host"
                                         v-model="createGameServer.selectedHost">
                                 </v-select>

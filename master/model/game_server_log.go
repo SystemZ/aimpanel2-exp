@@ -49,7 +49,7 @@ func GetLogsByGameServerId(gsId primitive.ObjectID, limit int64) (*[]GameServerL
 
 	for cur.Next(context.TODO()) {
 		var log GameServerLog
-		if err := cur.Decode(log); err != nil {
+		if err := cur.Decode(&log); err != nil {
 			return nil, err
 		}
 		logs = append(logs, log)

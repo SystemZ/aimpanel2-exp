@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -32,8 +33,8 @@ func GetGameFileByGameIdAndVersion(gameId uint, version string) (*GameFile, erro
 	var gf GameFile
 
 	err := DB.Collection(gameFileCollection).FindOne(context.TODO(), bson.D{
-		{"game_id", gameId},
-		{"$or", []interface{}{
+		{"game_id", fmt.Sprintf("%v", gameId)},
+		{"$or", []bson.D{
 			bson.D{{"game_version", version}},
 			bson.D{{"game_version", "0"}},
 		}},
