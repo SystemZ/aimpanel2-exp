@@ -1,7 +1,8 @@
 package model
 
 import (
-	"fmt"
+	"context"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -19,24 +20,23 @@ func (g *GameFile) GetCollectionName() string {
 	return "games_file"
 }
 
-func GetGameFileByGameIdAndVersion(gameId uint, version string) *GameFile {
+func (g *GameFile) GetID() primitive.ObjectID {
+	return g.ID
+}
+
+func GetGameFileByGameIdAndVersion(gameId uint, version string) (*GameFile, error) {
 	var gf GameFile
 
-	err := GetOneS(&gf, map[string]interface{}{
-		"doc_type": "game_file",
-		"game_id":  fmt.Sprint(gameId),
-		"$or": []map[string]interface{}{
-			{
-				"game_version": version,
-			},
-			{
-				"game_version": "0",
-			},
-		},
-	})
+	err := DB.Collection(gameFileCollection).FindOne(context.TODO(), bson.D{
+		{"game_id", gameId},
+		{"$or", []interface{}{
+			bson.D{{"game_version", version}},
+			bson.D{{"game_version", "0"}},
+		}},
+	}).Decode(&gf)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
-	return &gf
+	return &gf, nil
 }

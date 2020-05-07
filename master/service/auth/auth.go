@@ -16,13 +16,7 @@ func Register(data *request.AuthRegister) (string, int) {
 		return "", ecode.WrongEmail
 	}
 
-	count, err := model.Count(map[string]interface{}{
-		"selector": map[string]string{
-			"doc_type": "user",
-			"username": data.Username,
-		},
-	})
-	if count > 0 {
+	if model.CheckIfUserExist(data.Username) {
 		return "", ecode.DuplicateUsername
 	}
 
@@ -31,7 +25,7 @@ func Register(data *request.AuthRegister) (string, int) {
 	user.Email = data.Email
 	user.PasswordHash = user.HashPassword(data.Password)
 
-	err = model.Put(&user)
+	err := model.Put(&user)
 	if err != nil {
 		logrus.Error(err)
 		return "", ecode.DbSave
@@ -69,12 +63,9 @@ func Register(data *request.AuthRegister) (string, int) {
 }
 
 func Login(data *request.AuthLogin) (string, int) {
-	var user model.User
-	err := model.GetOneS(&user, map[string]interface{}{
-		"doc_type": "user",
-		"username": data.Username,
-	})
+	user, err := model.GetUserByUsername(data.Username)
 	if err != nil {
+		logrus.Error(err)
 		return "", ecode.DbError
 	}
 

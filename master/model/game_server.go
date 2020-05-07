@@ -1,6 +1,8 @@
 package model
 
 import (
+	"context"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
 )
@@ -44,80 +46,105 @@ func (g *GameServer) GetCollectionName() string {
 	return "game_servers"
 }
 
-func GetGameServers() []GameServer {
-	var gs []GameServer
-
-	err := GetS(&gs, map[string]interface{}{
-		"doc_type": "game_server",
-	})
-	if err != nil {
-		return nil
-	}
-
-	return gs
+func (g *GameServer) GetID() primitive.ObjectID {
+	return g.ID
 }
 
-func GetGameServer(gsId primitive.ObjectID) *GameServer {
+func GetGameServers() ([]GameServer, error) {
+	var gameServers []GameServer
+
+	cur, err := DB.Collection(gameServerCollection).Find(context.TODO(),
+		bson.D{})
+	if err != nil {
+		return nil, err
+	}
+	defer cur.Close(context.TODO())
+
+	for cur.Next(context.TODO()) {
+		var gameServer GameServer
+		if err := cur.Decode(gameServer); err != nil {
+			return nil, err
+		}
+		gameServers = append(gameServers, gameServer)
+	}
+
+	return gameServers, nil
+}
+
+func GetGameServerById(id primitive.ObjectID) (*GameServer, error) {
 	var gs GameServer
 
-	err := GetOneS(&gs, map[string]interface{}{
-		"doc_type": "game_server",
-		"_id":      gsId,
-	})
+	err := DB.Collection(gameServerCollection).FindOne(context.TODO(), bson.D{{"_id", id}}).Decode(&gs)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
-	return &gs
+	return &gs, nil
 }
 
-func GetGameServerByGsIdAndHostId(serverId primitive.ObjectID, hostId primitive.ObjectID) *GameServer {
+func GetGameServerByGsIdAndHostId(gsId primitive.ObjectID, hostId primitive.ObjectID) (*GameServer, error) {
 	var gs GameServer
 
-	err := GetOneS(&gs, map[string]interface{}{
-		"doc_type": "game_server",
-		"_id":      serverId,
-		"host_id":  hostId,
-	})
+	err := DB.Collection(gameServerCollection).FindOne(context.TODO(), bson.D{
+		{"_id", gsId},
+		{"host_id", hostId},
+	}).Decode(&gs)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
-	return &gs
+	return &gs, nil
 }
 
-func GetGameServersByHostId(hostId primitive.ObjectID) *[]GameServer {
-	var gs []GameServer
+func GetGameServersByHostId(hostId primitive.ObjectID) (*[]GameServer, error) {
+	var gameServers []GameServer
 
-	err := GetS(&gs, map[string]interface{}{
-		"doc_type": "game_server",
-		"host_id":  hostId,
-	})
+	cur, err := DB.Collection(gameServerCollection).Find(context.TODO(),
+		bson.D{{"host_id", hostId}})
 	if err != nil {
-		return nil
+		return nil, err
+	}
+	defer cur.Close(context.TODO())
+
+	for cur.Next(context.TODO()) {
+		var gameServer GameServer
+		if err := cur.Decode(gameServer); err != nil {
+			return nil, err
+		}
+		gameServers = append(gameServers, gameServer)
 	}
 
-	return &gs
+	return &gameServers, nil
 }
 
 //FIXME
-func GetUserGameServers(userId primitive.ObjectID) *[]GameServer {
-	hosts := GetHostsByUserId(userId)
-	var hostsId []interface{}
+func GetUserGameServers(userId primitive.ObjectID) (*[]GameServer, error) {
+	hosts, err := GetHostsByUserId(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	var hostsId []bson.D
 	for _, host := range hosts {
-		hostsId = append(hostsId, map[string]interface{}{
-			"host_id": host.ID,
-		})
+		hostsId = append(hostsId, bson.D{{"host_id", host.ID}})
 	}
 
 	var gameServers []GameServer
-	err := GetS(&gameServers, map[string]interface{}{
-		"doc_type": "game_server",
-		"$or":      hostsId,
-	})
+
+	cur, err := DB.Collection(gameServerCollection).Find(context.TODO(),
+		bson.D{{"$or", hostsId}})
 	if err != nil {
-		return nil
+		return nil, err
+	}
+	defer cur.Close(context.TODO())
+
+	for cur.Next(context.TODO()) {
+		var gameServer GameServer
+		if err := cur.Decode(gameServer); err != nil {
+			return nil, err
+		}
+		gameServers = append(gameServers, gameServer)
 	}
 
-	return &gameServers
+	return &gameServers, nil
 }

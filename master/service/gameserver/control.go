@@ -248,13 +248,13 @@ func Remove(gsId primitive.ObjectID) error {
 
 	permissions := model.GetPermisionsByEndpointRegex("/v1/host/" + gameServer.HostId.String() + "/server/" + gsId.String() + "%")
 	for _, perm := range permissions {
-		err := model.Delete(perm.ID, "")
+		err := model.Delete(&perm)
 		if err != nil {
 			return err
 		}
 	}
 
-	err = model.Delete(gameServer.ID, "")
+	err = model.Delete(gameServer)
 	if err != nil {
 		return err
 	}

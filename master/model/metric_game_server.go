@@ -15,3 +15,7 @@ type MetricGameServer struct {
 func (m *MetricGameServer) GetCollectionName() string {
 	return "metrics_game_server"
 }
+
+func (m *MetricGameServer) GetID() primitive.ObjectID {
+	return m.ID
+}

@@ -52,13 +52,13 @@ func Remove(hostId primitive.ObjectID) int {
 
 	permissions := model.GetPermisionsByEndpointRegex("/v1/host/" + host.ID.String())
 	for _, perm := range permissions {
-		err := model.Delete(perm.ID, "")
+		err := model.Delete(&perm)
 		if err != nil {
 			return ecode.DbError
 		}
 	}
 
-	err := model.Delete(host.ID, "")
+	err := model.Delete(host)
 	if err != nil {
 		return ecode.DbError
 	}
@@ -119,13 +119,13 @@ func RemoveJob(hostId primitive.ObjectID, jobId primitive.ObjectID) int {
 
 	permissions := model.GetPermisionsByEndpointRegex("/v1/host/" + hostId.String() + "/job/" + jobId.String())
 	for _, perm := range permissions {
-		err := model.Delete(perm.ID, "")
+		err := model.Delete(&perm)
 		if err != nil {
 			return ecode.DbError
 		}
 	}
 
-	err := model.Delete(hostJob.ID, "")
+	err := model.Delete(hostJob)
 	if err != nil {
 		return ecode.DbError
 	}

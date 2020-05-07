@@ -60,3 +60,7 @@ type MetricHost struct {
 func (m *MetricHost) GetCollectionName() string {
 	return "metrics_host"
 }
+
+func (m *MetricHost) GetID() primitive.ObjectID {
+	return m.ID
+}

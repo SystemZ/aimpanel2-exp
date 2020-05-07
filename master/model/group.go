@@ -1,6 +1,10 @@
 package model
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"context"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 // Group represents the group for this application
 // swagger:model group
@@ -17,14 +21,18 @@ func (g *Group) GetCollectionName() string {
 	return "groups"
 }
 
-func GetGroup(name string) *Group {
+func (g *Group) GetID() primitive.ObjectID {
+	return g.ID
+}
+
+func GetGroupByName(name string) (*Group, error) {
 	var group Group
-	err := GetOneS(&group, map[string]interface{}{
-		"name": name,
-	})
+
+	err := DB.Collection(groupCollection).FindOne(context.TODO(), bson.D{{"name", name}}).
+		Decode(&group)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
-	return &group
+	return &group, nil
 }

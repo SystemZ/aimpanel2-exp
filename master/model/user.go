@@ -1,7 +1,10 @@
 package model
 
 import (
+	"context"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/sirupsen/logrus"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
 	"log"
@@ -20,6 +23,10 @@ type User struct {
 
 func (u *User) GetCollectionName() string {
 	return "users"
+}
+
+func (u *User) GetID() primitive.ObjectID {
+	return u.ID
 }
 
 func (u *User) HashPassword(password string) string {
@@ -46,15 +53,39 @@ func (u *User) GenerateJWT() (string, error) {
 	return tokenString, err
 }
 
-func GetUser(id string) *User {
-	var user User
-	err := GetOneS(&user, map[string]interface{}{
-		"doc_type": "user",
-		"_id":      id,
-	})
+func CheckIfUserExist(username string) bool {
+	count, err := DB.Collection(userCollection).CountDocuments(context.TODO(),
+		bson.D{{"username", username}})
 	if err != nil {
-		return nil
+		logrus.Error(err)
 	}
 
-	return &user
+	if count > 0 {
+		return true
+	}
+
+	return false
+}
+
+func GetUserById(id primitive.ObjectID) (*User, error) {
+	var user User
+
+	err := DB.Collection(userCollection).FindOne(context.TODO(), bson.D{{"_id", id}}).Decode(&user)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func GetUserByUsername(username string) (*User, error) {
+	var user User
+
+	err := DB.Collection(userCollection).FindOne(context.TODO(), bson.D{{"username", username}}).
+		Decode(&user)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }

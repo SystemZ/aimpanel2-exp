@@ -1,6 +1,10 @@
 package model
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"context"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 // User group represents the group for this application
 // swagger:model userGroup
@@ -17,19 +21,21 @@ type GroupUser struct {
 	UserId primitive.ObjectID `json:"user_id"`
 }
 
-func (g *GroupUser) GetCollectionName() string {
+func (gu *GroupUser) GetCollectionName() string {
 	return "users_group"
 }
 
-func GetGroupUserByUserId(userId primitive.ObjectID) *GroupUser {
+func (gu *GroupUser) GetID() primitive.ObjectID {
+	return gu.ID
+}
+
+func GroupUserByUserId(userId primitive.ObjectID) (*GroupUser, error) {
 	var gu GroupUser
-	err := GetOneS(&gu, map[string]interface{}{
-		"doc_type": "group_user",
-		"user_id":  userId,
-	})
+
+	err := DB.Collection(groupUserCollection).FindOne(context.TODO(), bson.D{{"user_id", userId}}).Decode(&gu)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
-	return &gu
+	return &gu, nil
 }

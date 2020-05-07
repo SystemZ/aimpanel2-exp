@@ -1,6 +1,11 @@
 package model
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"context"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
+)
 
 type Host struct {
 	ID primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty" example:"1238206236281802752"`
@@ -47,88 +52,106 @@ func (h *Host) GetCollectionName() string {
 	return "hosts"
 }
 
-func GetHosts() []Host {
+func (h *Host) GetID() primitive.ObjectID {
+	return h.ID
+}
+
+func GetHosts() ([]Host, error) {
 	var hosts []Host
 
-	err := GetS(&hosts, map[string]interface{}{
-		"doc_type": "host",
-	})
+	cur, err := DB.Collection(hostCollection).Find(context.TODO(),
+		bson.D{})
 	if err != nil {
-		return nil
+		return nil, err
+	}
+	defer cur.Close(context.TODO())
+
+	for cur.Next(context.TODO()) {
+		var host Host
+		if err := cur.Decode(host); err != nil {
+			return nil, err
+		}
+		hosts = append(hosts, host)
 	}
 
-	return hosts
+	return hosts, nil
 }
 
-func GetHost(hostId primitive.ObjectID) *Host {
+func GetHostById(id primitive.ObjectID) (*Host, error) {
 	var host Host
-	err := GetOneS(&host, map[string]interface{}{
-		"doc_type": "host",
-		"_id":      hostId,
-	})
+
+	err := DB.Collection(hostCollection).FindOne(context.TODO(), bson.D{{"_id", id}}).Decode(&host)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
-	return &host
+	return &host, nil
 }
 
-func GetHostToken(hostId primitive.ObjectID) string {
+func GetHostTokenById(id primitive.ObjectID) (string, error) {
 	var host Host
-	err := GetOneS(&host, map[string]interface{}{
-		"doc_type": "host",
-		"_id":      hostId,
-	})
+
+	err := DB.Collection(hostCollection).FindOne(context.TODO(), bson.D{{"_id", id}}).Decode(&host)
 	if err != nil {
-		return ""
+		return "", err
 	}
 
-	return host.Token
+	return host.Token, nil
 }
 
-func GetHostByToken(token string) *Host {
+func GetHostByToken(token string) (*Host, error) {
 	var host Host
-	err := GetOneS(&host, map[string]interface{}{
-		"doc_type": "host",
-		"token":    token,
-	})
+
+	err := DB.Collection(hostCollection).FindOne(context.TODO(), bson.D{{"token", token}}).Decode(&host)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
-	return &host
+	return &host, nil
 }
 
-func GetHostsByUserId(userId primitive.ObjectID) []Host {
+func GetHostsByUserId(userId primitive.ObjectID) ([]Host, error) {
 	var hosts []Host
 
-	err := GetS(&hosts, map[string]interface{}{
-		"doc_type": "host",
-		"user_id":  userId,
-	})
+	cur, err := DB.Collection(hostCollection).Find(context.TODO(),
+		bson.D{{"user_id", userId}})
 	if err != nil {
-		return nil
+		return nil, err
+	}
+	defer cur.Close(context.TODO())
+
+	for cur.Next(context.TODO()) {
+		var host Host
+		if err := cur.Decode(host); err != nil {
+			return nil, err
+		}
+		hosts = append(hosts, host)
 	}
 
-	return hosts
+	return hosts, nil
 }
 
-func GetHostMetrics(hostId primitive.ObjectID, limit int) []MetricHost {
+func GetHostMetricsByHostId(hostId primitive.ObjectID, limit int64) ([]MetricHost, error) {
 	var metrics []MetricHost
 
-	err := Get(&metrics, map[string]interface{}{
-		"selector": map[string]string{
-			"doc_type": "metric_host",
-			"host_id":  hostId.String(),
-		},
-		"limit": limit,
-		"sort": []map[string]interface{}{
-			{"created_at": "desc"},
-		},
-	})
+	opts := options.Find()
+	opts.SetLimit(limit)
+	opts.SetSort(bson.D{{"_id", -1}})
+
+	cur, err := DB.Collection(metricHostCollection).Find(context.TODO(),
+		bson.D{{"host_id", hostId}}, opts)
 	if err != nil {
-		return nil
+		return nil, err
+	}
+	defer cur.Close(context.TODO())
+
+	for cur.Next(context.TODO()) {
+		var metric MetricHost
+		if err := cur.Decode(metric); err != nil {
+			return nil, err
+		}
+		metrics = append(metrics, metric)
 	}
 
-	return metrics
+	return metrics, nil
 }

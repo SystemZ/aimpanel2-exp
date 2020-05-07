@@ -91,36 +91,7 @@ var seedCmd = &cobra.Command{
 			logrus.Error(err)
 		}
 		logrus.Info("Added TS3Audiobot files successfully.")
-
 		logrus.Info("Added game files successfully.")
-
 		logrus.Info("Task seed finished successfully.")
-
-		//model.DB = model.InitMysql()
-		//
-		//var count int
-		//var users []model.User
-		//model.DB.Find(&users).Count(&count)
-		//if count == 0 {
-		//	file, err := os.Open("./dump/seed.sql")
-		//	if err != nil {
-		//		logrus.Fatal(err)
-		//	}
-		//	defer file.Close()
-		//
-		//	reader := bufio.NewReader(file)
-		//	var line string
-		//	for {
-		//		line, err = reader.ReadString('\n')
-		//
-		//		if len(line) > 1 {
-		//			model.DB.Exec(line)
-		//		}
-		//
-		//		if err != nil {
-		//			break
-		//		}
-		//	}
-		//}
 	},
 }

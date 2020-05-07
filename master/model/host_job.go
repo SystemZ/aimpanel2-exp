@@ -1,7 +1,9 @@
 package model
 
 import (
+	"context"
 	"gitlab.com/systemz/aimpanel2/lib/task"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -25,29 +27,38 @@ func (h *HostJob) GetCollectionName() string {
 	return "hosts_job"
 }
 
-func GetHostJobs(hostId primitive.ObjectID) []HostJob {
-	var hj []HostJob
-
-	err := GetS(&hj, map[string]interface{}{
-		"doc_type": "host_job",
-		"host_id":  hostId,
-	})
-	if err != nil {
-		return nil
-	}
-
-	return hj
+func (h *HostJob) GetID() primitive.ObjectID {
+	return h.ID
 }
 
-func GetHostJob(jobId primitive.ObjectID) *HostJob {
-	var hostJob HostJob
-	err := GetOneS(&hostJob, map[string]interface{}{
-		"doc_type": "host_job",
-		"_id":      jobId,
-	})
+func GetHostJobsByHostId(hostId primitive.ObjectID) ([]HostJob, error) {
+	var hostJobs []HostJob
+
+	cur, err := DB.Collection(hostJobCollection).Find(context.TODO(),
+		bson.D{{"host_id", hostId}})
 	if err != nil {
-		return nil
+		return nil, err
+	}
+	defer cur.Close(context.TODO())
+
+	for cur.Next(context.TODO()) {
+		var hostJob HostJob
+		if err := cur.Decode(hostJob); err != nil {
+			return nil, err
+		}
+		hostJobs = append(hostJobs, hostJob)
 	}
 
-	return &hostJob
+	return hostJobs, nil
+}
+
+func GetHostJobById(id primitive.ObjectID) (*HostJob, error) {
+	var hostJob HostJob
+
+	err := DB.Collection(hostJobCollection).FindOne(context.TODO(), bson.D{{"_id", id}}).Decode(&hostJob)
+	if err != nil {
+		return nil, err
+	}
+
+	return &hostJob, nil
 }

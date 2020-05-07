@@ -1,8 +1,10 @@
 package model
 
 import (
+	"context"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -30,22 +32,30 @@ func (p *Permission) GetCollectionName() string {
 	return "permissions"
 }
 
+func (p *Permission) GetID() primitive.ObjectID {
+	return p.ID
+}
+
 //TODO verify it for security vulnerability
-func GetPermisionsByEndpointRegex(endpoint string) []Permission {
+func GetPermisionsByEndpointRegex(endpoint string) ([]Permission, error) {
 	var permissions []Permission
-	err := Get(&permissions, map[string]interface{}{
-		"selector": map[string]interface{}{
-			"doc_type": "permission",
-			"endpoint": map[string]interface{}{
-				"$regex": endpoint,
-			},
-		},
-	})
+
+	cur, err := DB.Collection(permissionCollection).Find(context.TODO(),
+		bson.D{{"endpoint", primitive.Regex{Pattern: endpoint, Options: ""}}})
 	if err != nil {
-		return nil
+		return nil, err
+	}
+	defer cur.Close(context.TODO())
+
+	for cur.Next(context.TODO()) {
+		var perm Permission
+		if err := cur.Decode(perm); err != nil {
+			return nil, err
+		}
+		permissions = append(permissions, perm)
 	}
 
-	return permissions
+	return permissions, nil
 }
 
 // FIXME return errors
