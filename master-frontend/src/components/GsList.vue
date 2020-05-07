@@ -78,8 +78,8 @@
         getHostName(hostId: string): string {
             if (this.hosts && this.hosts.length > 0) {
                 let host = this.hosts.find(x => {
-                    const {_id} = x;
-                    return _id === hostId;
+                    const {id} = x;
+                    return id === hostId;
                 });
                 if (host) {
                     return host.name;
