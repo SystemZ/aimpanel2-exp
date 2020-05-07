@@ -1,417 +1,377 @@
 package model
 
 import (
+	"context"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // Group represents the group for this application
 // swagger:model group
 type Permission struct {
-	Base
+	ID primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty" example:"1238206236281802752"`
+
 	// Name of the permission
 	//
 	// required: true
-	Name string `gorm:"column:name" json:"name"`
+	Name string `bson:"name"  json:"name"`
 
 	// ID of the permission
 	//
 	// required: true
-	GroupId string `gorm:"column:group_id" json:"group_id"`
+	GroupId primitive.ObjectID `bson:"group_id"  json:"group_id"`
 
-	Verb uint8 `gorm:"column:verb" json:"verb"`
+	Verb uint8 `bson:"verb"  json:"verb"`
 
-	Endpoint string `gorm:"column:endpoint" json:"endpoint"`
+	Endpoint string `bson:"endpoint"  json:"endpoint"`
+}
+
+func (p *Permission) GetCollectionName() string {
+	return permissionCollection
+}
+
+func (p *Permission) GetID() primitive.ObjectID {
+	return p.ID
+}
+
+func (p *Permission) SetID(id primitive.ObjectID) {
+	p.ID = id
 }
 
 //TODO verify it for security vulnerability
-func GetPermisionsByEndpointRegex(endpoint string) []Permission {
+func GetPermisionsByEndpointRegex(endpoint string) ([]Permission, error) {
 	var permissions []Permission
-	err := Get(&permissions, map[string]interface{}{
-		"selector": map[string]interface{}{
-			"doc_type": "permission",
-			"endpoint": map[string]interface{}{
-				"$regex": endpoint,
-			},
-		},
-	})
+
+	cur, err := DB.Collection(permissionCollection).Find(context.TODO(),
+		bson.D{{Key: "endpoint", Value: primitive.Regex{Pattern: endpoint, Options: ""}}})
 	if err != nil {
-		return nil
+		return nil, err
+	}
+	defer cur.Close(context.TODO())
+
+	for cur.Next(context.TODO()) {
+		var perm Permission
+		if err := cur.Decode(&perm); err != nil {
+			return nil, err
+		}
+		permissions = append(permissions, perm)
 	}
 
-	return permissions
+	return permissions, nil
+}
+
+func CheckIfUserHasAccess(path string, verb uint8, groupId primitive.ObjectID) bool {
+	count, err := DB.Collection(permissionCollection).CountDocuments(context.TODO(), bson.D{
+		{Key: "endpoint", Value: path},
+		{Key: "verb", Value: verb},
+		{Key: "group_id", Value: groupId},
+	})
+	if err != nil {
+		logrus.Error(err)
+		return false
+	}
+
+	if count > 0 {
+		return true
+	}
+
+	return false
 }
 
 // FIXME return errors
-func CreatePermissionsForNewHost(groupId string, hostId string) {
+func CreatePermissionsForNewHost(groupId primitive.ObjectID, hostId primitive.ObjectID) {
 	perm := &Permission{
-		Base: Base{
-			DocType: "permission",
-		},
 		Name:     "Get host",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
-		Endpoint: "/v1/host/" + hostId,
+		Endpoint: "/v1/host/" + hostId.Hex(),
 	}
-	err := perm.Put(&perm)
+	err := Put(perm)
 	if err != nil {
 		logrus.Error(err)
 	}
 
 	perm = &Permission{
-		Base: Base{
-			DocType: "permission",
-		},
 		Name:     "Delete host",
 		Verb:     lib.GetVerbByName("DELETE"),
 		GroupId:  groupId,
-		Endpoint: "/v1/host/" + hostId,
+		Endpoint: "/v1/host/" + hostId.Hex(),
 	}
-	err = perm.Put(&perm)
+	err = Put(perm)
 	if err != nil {
 		logrus.Error(err)
 	}
 
 	perm = &Permission{
-		Base: Base{
-			DocType: "permission",
-		},
 		Name:     "Create game server",
 		Verb:     lib.GetVerbByName("POST"),
 		GroupId:  groupId,
-		Endpoint: "/v1/host/" + hostId + "/server",
+		Endpoint: "/v1/host/" + hostId.Hex() + "/server",
 	}
-	err = perm.Put(&perm)
+	err = Put(perm)
 	if err != nil {
 		logrus.Error(err)
 	}
 
 	perm = &Permission{
-		Base: Base{
-			DocType: "permission",
-		},
 		Name:     "List game servers by host id",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
-		Endpoint: "/v1/host/" + hostId + "/server",
+		Endpoint: "/v1/host/" + hostId.Hex() + "/server",
 	}
-	err = perm.Put(&perm)
+	err = Put(perm)
 	if err != nil {
 		logrus.Error(err)
 	}
 
 	perm = &Permission{
-		Base: Base{
-			DocType: "permission",
-		},
 		Name:     "Get host metric",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
-		Endpoint: "/v1/host/" + hostId + "/metric",
+		Endpoint: "/v1/host/" + hostId.Hex() + "/metric",
 	}
-	err = perm.Put(&perm)
+	err = Put(perm)
 	if err != nil {
 		logrus.Error(err)
 	}
 
 	perm = &Permission{
-		Base: Base{
-			DocType: "permission",
-		},
 		Name:     "Update host",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
-		Endpoint: "/v1/host/" + hostId + "/update",
+		Endpoint: "/v1/host/" + hostId.Hex() + "/update",
 	}
-	err = perm.Put(&perm)
+	err = Put(perm)
 	if err != nil {
 		logrus.Error(err)
 	}
 
 	perm = &Permission{
-		Base: Base{
-			DocType: "permission",
-		},
 		Name:     "Create host job",
 		Verb:     lib.GetVerbByName("POST"),
 		GroupId:  groupId,
-		Endpoint: "/v1/host/" + hostId + "/job",
+		Endpoint: "/v1/host/" + hostId.Hex() + "/job",
 	}
-	err = perm.Put(&perm)
+	err = Put(perm)
 	if err != nil {
 		logrus.Error(err)
 	}
 
 	perm = &Permission{
-		Base: Base{
-			DocType: "permission",
-		},
 		Name:     "Get host jobs",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
-		Endpoint: "/v1/host/" + hostId + "/job",
+		Endpoint: "/v1/host/" + hostId.Hex() + "/job",
 	}
-	err = perm.Put(&perm)
+	err = Put(perm)
 	if err != nil {
 		logrus.Error(err)
 	}
 }
 
 // FIXME return errors
-func CreatePermissionsForNewGameServer(groupId string, hostId string, gameServerId string) {
+func CreatePermissionsForNewGameServer(groupId primitive.ObjectID, hostId primitive.ObjectID, gameServerId primitive.ObjectID) {
 	perm := &Permission{
-		Base: Base{
-			DocType: "permission",
-		},
 		Name:     "Get game server",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
-		Endpoint: "/v1/host/" + hostId + "/server/" + gameServerId,
+		Endpoint: "/v1/host/" + hostId.Hex() + "/server/" + gameServerId.Hex(),
 	}
-	err := perm.Put(&perm)
+	err := Put(perm)
 	if err != nil {
 		logrus.Error(err)
 	}
 
 	perm = &Permission{
-		Base: Base{
-			DocType: "permission",
-		},
 		Name:     "Delete game server",
 		Verb:     lib.GetVerbByName("DELETE"),
 		GroupId:  groupId,
-		Endpoint: "/v1/host/" + hostId + "/server/" + gameServerId,
+		Endpoint: "/v1/host/" + hostId.Hex() + "/server/" + gameServerId.Hex(),
 	}
-	err = perm.Put(&perm)
+	err = Put(perm)
 	if err != nil {
 		logrus.Error(err)
 	}
 
 	perm = &Permission{
-		Base: Base{
-			DocType: "permission",
-		},
 		Name:     "Install game server",
 		Verb:     lib.GetVerbByName("PUT"),
 		GroupId:  groupId,
-		Endpoint: "/v1/host/" + hostId + "/server/" + gameServerId + "/install",
+		Endpoint: "/v1/host/" + hostId.Hex() + "/server/" + gameServerId.Hex() + "/install",
 	}
-	err = perm.Put(&perm)
+	err = Put(perm)
 	if err != nil {
 		logrus.Error(err)
 	}
 
 	perm = &Permission{
-		Base: Base{
-			DocType: "permission",
-		},
 		Name:     "Start game server",
 		Verb:     lib.GetVerbByName("PUT"),
 		GroupId:  groupId,
-		Endpoint: "/v1/host/" + hostId + "/server/" + gameServerId + "/start",
+		Endpoint: "/v1/host/" + hostId.Hex() + "/server/" + gameServerId.Hex() + "/start",
 	}
-	err = perm.Put(&perm)
+	err = Put(perm)
 	if err != nil {
 		logrus.Error(err)
 	}
 
 	perm = &Permission{
-		Base: Base{
-			DocType: "permission",
-		},
 		Name:     "Restart game server",
 		Verb:     lib.GetVerbByName("PUT"),
 		GroupId:  groupId,
-		Endpoint: "/v1/host/" + hostId + "/server/" + gameServerId + "/restart",
+		Endpoint: "/v1/host/" + hostId.Hex() + "/server/" + gameServerId.Hex() + "/restart",
 	}
-	err = perm.Put(&perm)
+	err = Put(perm)
 	if err != nil {
 		logrus.Error(err)
 	}
 
 	perm = &Permission{
-		Base: Base{
-			DocType: "permission",
-		},
 		Name:     "Stop game server",
 		Verb:     lib.GetVerbByName("PUT"),
 		GroupId:  groupId,
-		Endpoint: "/v1/host/" + hostId + "/server/" + gameServerId + "/stop",
+		Endpoint: "/v1/host/" + hostId.Hex() + "/server/" + gameServerId.Hex() + "/stop",
 	}
-	err = perm.Put(&perm)
+	err = Put(perm)
 	if err != nil {
 		logrus.Error(err)
 	}
 
 	perm = &Permission{
-		Base: Base{
-			DocType: "permission",
-		},
 		Name:     "Send command to game server",
 		Verb:     lib.GetVerbByName("PUT"),
 		GroupId:  groupId,
-		Endpoint: "/v1/host/" + hostId + "/server/" + gameServerId + "/command",
+		Endpoint: "/v1/host/" + hostId.Hex() + "/server/" + gameServerId.Hex() + "/command",
 	}
-	err = perm.Put(&perm)
+	err = Put(perm)
 	if err != nil {
 		logrus.Error(err)
 	}
 
 	perm = &Permission{
-		Base: Base{
-			DocType: "permission",
-		},
 		Name:     "Get logs from game server",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
-		Endpoint: "/v1/host/" + hostId + "/server/" + gameServerId + "/logs",
+		Endpoint: "/v1/host/" + hostId.Hex() + "/server/" + gameServerId.Hex() + "/logs",
 	}
-	err = perm.Put(&perm)
+	err = Put(perm)
 	if err != nil {
 		logrus.Error(err)
 	}
 
 	perm = &Permission{
-		Base: Base{
-			DocType: "permission",
-		},
 		Name:     "Console feed",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
-		Endpoint: "/v1/host/" + hostId + "/server/" + gameServerId + "/console",
+		Endpoint: "/v1/host/" + hostId.Hex() + "/server/" + gameServerId.Hex() + "/console",
 	}
-	err = perm.Put(&perm)
+	err = Put(perm)
 	if err != nil {
 		logrus.Error(err)
 	}
 
 	perm = &Permission{
-		Base: Base{
-			DocType: "permission",
-		},
 		Name:     "File list",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
-		Endpoint: "/v1/host/" + hostId + "/server/" + gameServerId + "/file/list",
+		Endpoint: "/v1/host/" + hostId.Hex() + "/server/" + gameServerId.Hex() + "/file/list",
 	}
-	err = perm.Put(&perm)
+	err = Put(perm)
 	if err != nil {
 		logrus.Error(err)
 	}
 }
 
 // FIXME return errors
-func CreatePermissionsForNewUser(groupId string) {
+func CreatePermissionsForNewUser(groupId primitive.ObjectID) {
 	perm := &Permission{
-		Base: Base{
-			DocType: "permission",
-		},
 		Name:     "List hosts",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
 		Endpoint: "/v1/host",
 	}
-	err := perm.Put(&perm)
+	err := Put(perm)
 	if err != nil {
 		logrus.Error(err)
 	}
 
 	perm = &Permission{
-		Base: Base{
-			DocType: "permission",
-		},
 		Name:     "Create host",
 		Verb:     lib.GetVerbByName("POST"),
 		GroupId:  groupId,
 		Endpoint: "/v1/host",
 	}
-	err = perm.Put(&perm)
+	err = Put(perm)
 	if err != nil {
 		logrus.Error(err)
 	}
 
 	perm = &Permission{
-		Base: Base{
-			DocType: "permission",
-		},
 		Name:     "List game servers by user id",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
 		Endpoint: "/v1/host/my/server",
 	}
-	err = perm.Put(&perm)
+	err = Put(perm)
 	if err != nil {
 		logrus.Error(err)
 	}
 
 	perm = &Permission{
-		Base: Base{
-			DocType: "permission",
-		},
 		Name:     "Change password",
 		Verb:     lib.GetVerbByName("POST"),
 		GroupId:  groupId,
 		Endpoint: "/v1/user/change_password",
 	}
-	err = perm.Put(&perm)
+	err = Put(perm)
 	if err != nil {
 		logrus.Error(err)
 	}
 
 	perm = &Permission{
-		Base: Base{
-			DocType: "permission",
-		},
 		Name:     "Change email",
 		Verb:     lib.GetVerbByName("POST"),
 		GroupId:  groupId,
 		Endpoint: "/v1/user/change_email",
 	}
-	err = perm.Put(&perm)
+	err = Put(perm)
 	if err != nil {
 		logrus.Error(err)
 	}
 
 	perm = &Permission{
-		Base: Base{
-			DocType: "permission",
-		},
 		Name:     "User profile",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
 		Endpoint: "/v1/user/profile",
 	}
-	err = perm.Put(&perm)
+	err = Put(perm)
 	if err != nil {
 		logrus.Error(err)
 	}
 
 	perm = &Permission{
-		Base: Base{
-			DocType: "permission",
-		},
 		Name:     "List games",
 		Verb:     lib.GetVerbByName("GET"),
 		GroupId:  groupId,
 		Endpoint: "/v1/game",
 	}
-	err = perm.Put(&perm)
+	err = Put(perm)
 	if err != nil {
 		logrus.Error(err)
 	}
 }
 
-func CreatePermissionsForNewHostJob(groupId string, hostId string, jobId string) {
+func CreatePermissionsForNewHostJob(groupId primitive.ObjectID, hostId primitive.ObjectID, jobId primitive.ObjectID) {
 	perm := &Permission{
-		Base: Base{
-			DocType: "permission",
-		},
 		Name:     "Remove host job",
 		Verb:     lib.GetVerbByName("DELETE"),
 		GroupId:  groupId,
-		Endpoint: "/v1/host/" + hostId + "/job/" + jobId,
+		Endpoint: "/v1/host/" + hostId.Hex() + "/job/" + jobId.Hex(),
 	}
-	err := perm.Put(&perm)
+	err := Put(perm)
 	if err != nil {
 		logrus.Error(err)
 	}

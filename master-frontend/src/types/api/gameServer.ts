@@ -1,5 +1,5 @@
 export interface GameServer {
-    _id: string,
+    id: string,
     name: string,
     host_id: string,
     state: number,

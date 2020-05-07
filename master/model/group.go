@@ -1,24 +1,42 @@
 package model
 
+import (
+	"context"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
+
 // Group represents the group for this application
 // swagger:model group
 type Group struct {
-	Base
+	ID primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty" example:"1238206236281802752"`
 
 	// Name of the group
 	//
 	// required: true
-	Name string `json:"name"`
+	Name string `bson:"name" json:"name"`
 }
 
-func GetGroup(name string) *Group {
+func (g *Group) GetCollectionName() string {
+	return groupCollection
+}
+
+func (g *Group) GetID() primitive.ObjectID {
+	return g.ID
+}
+
+func (g *Group) SetID(id primitive.ObjectID) {
+	g.ID = id
+}
+
+func GetGroupByName(name string) (*Group, error) {
 	var group Group
-	err := GetOneS(&group, map[string]interface{}{
-		"name": name,
-	})
+
+	err := DB.Collection(groupCollection).FindOne(context.TODO(), bson.D{{Key: "name", Value: name}}).
+		Decode(&group)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
-	return &group
+	return &group, nil
 }

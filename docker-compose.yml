@@ -17,16 +17,22 @@ services:
       - 8090:80
     depends_on:
       - redis
-  couchdb:
-    image: 'couchdb:3.0.0'
+  mongo:
+    image: mongo
     restart: always
-    environment:
-      - COUCHDB_USER=dev
-      - COUCHDB_PASSWORD=dev
     ports:
-      - 5984:5984
-      - 4369:4369
-      - 9100:9100
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: dev
+      MONGO_INITDB_ROOT_PASSWORD: dev
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: dev
+      ME_CONFIG_MONGODB_ADMINPASSWORD: dev
 volumes:
   redis_data:
     driver: local

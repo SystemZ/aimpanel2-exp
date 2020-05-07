@@ -78,8 +78,8 @@
         getHostName(hostId: string): string {
             if (this.hosts && this.hosts.length > 0) {
                 let host = this.hosts.find(x => {
-                    const {_id} = x;
-                    return _id === hostId;
+                    const {id} = x;
+                    return id === hostId;
                 });
                 if (host) {
                     return host.name;
@@ -102,7 +102,7 @@
         }
 
         goToGameServer(row: GameServer): void {
-            this.$router.push('/host/' + row.host_id + '/server/' + row._id);
+            this.$router.push('/host/' + row.host_id + '/server/' + row.id);
         }
 
         getGameServers() {

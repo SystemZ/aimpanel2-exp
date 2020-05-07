@@ -9,10 +9,15 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/master/events"
 	"gitlab.com/systemz/aimpanel2/master/model"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func HostData(hostToken string, taskMsg *task.Message) error {
-	host := model.GetHostByToken(hostToken)
+	host, err := model.GetHostByToken(hostToken)
+	if err != nil {
+		return err
+	}
+
 	if host == nil {
 		return errors.New("error when getting host from db")
 	}
@@ -32,7 +37,11 @@ func HostData(hostToken string, taskMsg *task.Message) error {
 	case task.AGENT_METRICS_FREQUENCY:
 		logrus.Infof("Got %v", taskMsg.TaskId)
 
-		host := model.GetHostByToken(hostToken)
+		host, err := model.GetHostByToken(hostToken)
+		if err != nil {
+			return err
+		}
+
 		if host == nil {
 			break
 		}
@@ -55,15 +64,16 @@ func HostData(hostToken string, taskMsg *task.Message) error {
 		channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
 	case task.AGENT_METRICS:
 		logrus.Infof("Got %v", taskMsg.TaskId)
-		host := model.GetHostByToken(hostToken)
+		host, err := model.GetHostByToken(hostToken)
+		if err != nil {
+			return err
+		}
+
 		if host == nil {
 			break
 		}
 
 		metric := &model.MetricHost{
-			Base: model.Base{
-				DocType: "metric_host",
-			},
 			HostId:    host.ID,
 			CpuUsage:  taskMsg.CpuUsage,
 			RamFree:   taskMsg.RamFree,
@@ -82,13 +92,17 @@ func HostData(hostToken string, taskMsg *task.Message) error {
 			Guest:     taskMsg.Guest,
 			GuestNice: taskMsg.GuestNice,
 		}
-		err := metric.Put(&metric)
+		err = model.Put(metric)
 		if err != nil {
 			return err
 		}
 	case task.AGENT_OS:
 		logrus.Infof("Got %v", taskMsg.TaskId)
-		host := model.GetHostByToken(hostToken)
+		host, err := model.GetHostByToken(hostToken)
+		if err != nil {
+			return err
+		}
+
 		if host == nil {
 			break
 		}
@@ -100,7 +114,7 @@ func HostData(hostToken string, taskMsg *task.Message) error {
 		host.KernelVersion = taskMsg.KernelVersion
 		host.KernelArch = taskMsg.KernelArch
 
-		err := host.Update(&host)
+		err = model.Update(host)
 		if err != nil {
 			return err
 		}
@@ -115,14 +129,22 @@ func HostData(hostToken string, taskMsg *task.Message) error {
 	case task.AGENT_GET_JOBS:
 		logrus.Infof("Got %v", taskMsg.TaskId)
 
-		host := model.GetHostByToken(hostToken)
+		host, err := model.GetHostByToken(hostToken)
+		if err != nil {
+			return err
+		}
+
 		if host == nil {
 			break
 		}
 
 		var jobs []task.Job
 
-		hostJobs := model.GetHostJobs(host.ID)
+		hostJobs, err := model.GetHostJobsByHostId(host.ID)
+		if err != nil {
+			return err
+		}
+
 		for _, job := range hostJobs {
 			jobs = append(jobs, task.Job{
 				Name:           job.Name,
@@ -163,8 +185,8 @@ func GsData(hostToken string, taskMsg *task.Message) error {
 	case task.GAME_SERVER_LOG:
 		logrus.Infof("Got %v", taskMsg.TaskId)
 		var gsLog model.GameServerLog
-		gsLog.Base.DocType = "game_server_log"
-		gsLog.GameServerId = taskMsg.GameServerID
+		oid, _ := primitive.ObjectIDFromHex(taskMsg.GameServerID)
+		gsLog.GameServerId = oid
 
 		if len(taskMsg.Stdout) > 0 {
 			gsLog.Log = taskMsg.Stdout
@@ -176,13 +198,17 @@ func GsData(hostToken string, taskMsg *task.Message) error {
 			gsLog.Type = model.STDERR
 		}
 
-		host := model.GetHostByToken(hostToken)
+		host, err := model.GetHostByToken(hostToken)
+		if err != nil {
+			return err
+		}
+
 		events.SSE.SendMessage(fmt.Sprintf("/v1/host/%s/server/%s/console",
-			host.ID,
-			gsLog.GameServerId),
+			host.ID.Hex(),
+			gsLog.GameServerId.Hex()),
 			sse.SimpleMessage(base64.StdEncoding.EncodeToString([]byte(gsLog.Log))))
 
-		err := gsLog.Put(&gsLog)
+		err = model.Put(&gsLog)
 		if err != nil {
 			logrus.Warn(err)
 		}
@@ -193,7 +219,16 @@ func GsData(hostToken string, taskMsg *task.Message) error {
 		logrus.Infof("Got %v", taskMsg.TaskId)
 		gameServerId := taskMsg.GameServerID
 
-		gs := model.GetGameServer(gameServerId)
+		oid, err := primitive.ObjectIDFromHex(taskMsg.GameServerID)
+		if err != nil {
+			return err
+		}
+
+		gs, err := model.GetGameServerById(oid)
+		if err != nil {
+			return err
+		}
+
 		if gs == nil {
 			break
 		}
@@ -217,15 +252,17 @@ func GsData(hostToken string, taskMsg *task.Message) error {
 		channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
 	case task.GAME_METRICS:
 		logrus.Infof("Got %v", taskMsg.TaskId)
+		oid, err := primitive.ObjectIDFromHex(taskMsg.GameServerID)
+		if err != nil {
+			return err
+		}
+
 		metric := &model.MetricGameServer{
-			Base: model.Base{
-				DocType: "metric_game_server",
-			},
-			GameServerId: taskMsg.GameServerID,
+			GameServerId: oid,
 			CpuUsage:     taskMsg.CpuUsage,
 			RamUsage:     taskMsg.RamUsage,
 		}
-		err := metric.Put(&metric)
+		err = model.Put(metric)
 		if err != nil {
 			return err
 		}

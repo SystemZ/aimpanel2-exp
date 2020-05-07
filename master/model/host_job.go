@@ -1,46 +1,68 @@
 package model
 
-import "gitlab.com/systemz/aimpanel2/lib/task"
+import (
+	"context"
+	"gitlab.com/systemz/aimpanel2/lib/task"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type HostJob struct {
-	Base
+	ID primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty" example:"1238206236281802752"`
 
 	//User assigned name
-	Name string `json:"name" example:"Restart server"`
+	Name string `bson:"name" json:"name" example:"Restart server"`
 
 	// Host ID
 	//
 	// required: true
-	HostId string `json:"host_id" example:"100112233-4455-6677-8899-aabbccddeeff"`
+	HostId primitive.ObjectID `bson:"host_id" json:"host_id" example:"100112233-4455-6677-8899-aabbccddeeff"`
 
-	CronExpression string `json:"cron_expression" example:"5 4 * * *"`
+	CronExpression string `bson:"cron_expression" json:"cron_expression" example:"5 4 * * *"`
 
-	TaskMessage task.Message `json:"task_message"`
+	TaskMessage task.Message `bson:"task_message" json:"task_message"`
 }
 
-func GetHostJobs(hostId string) []HostJob {
-	var hj []HostJob
+func (h *HostJob) GetCollectionName() string {
+	return hostJobCollection
+}
 
-	err := GetS(&hj, map[string]interface{}{
-		"doc_type": "host_job",
-		"host_id":  hostId,
-	})
+func (h *HostJob) GetID() primitive.ObjectID {
+	return h.ID
+}
+
+func (h *HostJob) SetID(id primitive.ObjectID) {
+	h.ID = id
+}
+
+func GetHostJobsByHostId(hostId primitive.ObjectID) ([]HostJob, error) {
+	var hostJobs []HostJob
+
+	cur, err := DB.Collection(hostJobCollection).Find(context.TODO(),
+		bson.D{{Key: "host_id", Value: hostId}})
 	if err != nil {
-		return nil
+		return nil, err
+	}
+	defer cur.Close(context.TODO())
+
+	for cur.Next(context.TODO()) {
+		var hostJob HostJob
+		if err := cur.Decode(&hostJob); err != nil {
+			return nil, err
+		}
+		hostJobs = append(hostJobs, hostJob)
 	}
 
-	return hj
+	return hostJobs, nil
 }
 
-func GetHostJob(jobId string) *HostJob {
+func GetHostJobById(id primitive.ObjectID) (*HostJob, error) {
 	var hostJob HostJob
-	err := GetOneS(&hostJob, map[string]interface{}{
-		"doc_type": "host_job",
-		"_id":      jobId,
-	})
+
+	err := DB.Collection(hostJobCollection).FindOne(context.TODO(), bson.D{{Key: "_id", Value: id}}).Decode(&hostJob)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
-	return &hostJob
+	return &hostJob, nil
 }

@@ -11,6 +11,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/master/response"
 	"gitlab.com/systemz/aimpanel2/master/service/gameserver"
 	"gitlab.com/systemz/aimpanel2/master/service/host"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
 )
 
@@ -25,7 +26,12 @@ import (
 // @Security ApiKey
 func HostList(w http.ResponseWriter, r *http.Request) {
 	user := context.Get(r, "user").(model.User)
-	hosts := model.GetHostsByUserId(user.ID)
+	hosts, err := model.GetHostsByUserId(user.ID)
+	if err != nil {
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, nil)
+		return
+	}
+
 	lib.MustEncode(json.NewEncoder(w), response.HostList{Hosts: hosts})
 }
 
@@ -41,8 +47,18 @@ func HostList(w http.ResponseWriter, r *http.Request) {
 // @Security ApiKey
 func HostDetails(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
+	oid, err := primitive.ObjectIDFromHex(params["id"])
+	if err != nil {
+		lib.ReturnError(w, http.StatusBadRequest, ecode.OidError, nil)
+		return
+	}
 
-	h := model.GetHost(params["id"])
+	h, err := model.GetHostById(oid)
+	if err != nil {
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, nil)
+		return
+	}
+
 	if h == nil {
 		lib.ReturnError(w, http.StatusBadRequest, ecode.HostNotFound, nil)
 		return
@@ -92,7 +108,18 @@ func HostCreate(w http.ResponseWriter, r *http.Request) {
 // @Security ApiKey
 func HostMetric(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	metrics := model.GetHostMetrics(params["id"], 1)
+	oid, err := primitive.ObjectIDFromHex(params["id"])
+	if err != nil {
+		lib.ReturnError(w, http.StatusBadRequest, ecode.OidError, nil)
+		return
+	}
+
+	metrics, err := model.GetHostMetricsByHostId(oid, 1)
+	if err != nil {
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, nil)
+		return
+	}
+
 	lib.MustEncode(json.NewEncoder(w), response.HostMetrics{Metrics: metrics})
 }
 
@@ -109,7 +136,8 @@ func HostMetric(w http.ResponseWriter, r *http.Request) {
 func HostRemove(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
-	errCode := host.Remove(params["id"])
+	oid, _ := primitive.ObjectIDFromHex(params["id"])
+	errCode := host.Remove(oid)
 	if errCode != ecode.NoError {
 		lib.ReturnError(w, http.StatusBadRequest, errCode, nil)
 		return
@@ -133,9 +161,8 @@ func HostAuth(w http.ResponseWriter, r *http.Request) {
 //TODO: Available for users?
 func HostUpdate(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	hostId := params["id"]
-
-	err := gameserver.Update(hostId)
+	oid, _ := primitive.ObjectIDFromHex(params["id"])
+	err := gameserver.Update(oid)
 	if err != nil {
 		lib.ReturnError(w, http.StatusInternalServerError, ecode.GsUpdate, err)
 		return
@@ -166,7 +193,8 @@ func HostCreateJob(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, errCode := host.CreateJob(data, user.ID, params["id"])
+	oid, _ := primitive.ObjectIDFromHex(params["id"])
+	_, errCode := host.CreateJob(data, user.ID, oid)
 	if errCode != ecode.NoError {
 		lib.ReturnError(w, http.StatusInternalServerError, errCode, nil)
 		return
@@ -189,7 +217,9 @@ func HostCreateJob(w http.ResponseWriter, r *http.Request) {
 func HostJobRemove(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
-	errCode := host.RemoveJob(params["id"], params["job_id"])
+	hostId, _ := primitive.ObjectIDFromHex(params["id"])
+	jobId, _ := primitive.ObjectIDFromHex(params["job_id"])
+	errCode := host.RemoveJob(hostId, jobId)
 	if errCode != ecode.NoError {
 		lib.ReturnError(w, http.StatusBadRequest, errCode, nil)
 		return
@@ -200,6 +230,17 @@ func HostJobRemove(w http.ResponseWriter, r *http.Request) {
 
 func HostJobList(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	jobs := model.GetHostJobs(params["id"])
+	oid, err := primitive.ObjectIDFromHex(params["id"])
+	if err != nil {
+		lib.ReturnError(w, http.StatusBadRequest, ecode.OidError, nil)
+		return
+	}
+
+	jobs, err := model.GetHostJobsByHostId(oid)
+	if err != nil {
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, nil)
+		return
+	}
+
 	lib.MustEncode(json.NewEncoder(w), response.HostJobList{Jobs: jobs})
 }

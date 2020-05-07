@@ -9,6 +9,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/master/exit"
 	"gitlab.com/systemz/aimpanel2/master/model"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"log"
 	"net/http"
 	"os"
@@ -39,7 +40,18 @@ func AuthMiddleware(handler http.Handler) http.Handler {
 			return
 		}
 
-		user := model.GetUser(token.Claims.(jwt.MapClaims)["uid"].(string))
+		oid, err := primitive.ObjectIDFromHex(token.Claims.(jwt.MapClaims)["uid"].(string))
+		if err != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		user, err := model.GetUserById(oid)
+		if err != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
 		if user == nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
@@ -55,21 +67,14 @@ func PermissionMiddleware(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user := context.Get(r, "user").(model.User)
 
-		groupUser := model.GetGroupUserByUserId(user.ID)
-		count, err := model.Count(map[string]interface{}{
-			"selector": map[string]interface{}{
-				"doc_type": "permission",
-				"endpoint": r.URL.Path,
-				"verb":     lib.GetVerbByName(r.Method),
-				"group_id": groupUser.GroupId,
-			},
-		})
+		groupUser, err := model.GetGroupUserByUserId(user.ID)
 		if err != nil {
+			logrus.Error(err)
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 
-		if count == 0 {
+		if !model.CheckIfUserHasAccess(r.URL.Path, lib.GetVerbByName(r.Method), groupUser.GroupId) {
 			logrus.Info("Access denied")
 			w.WriteHeader(http.StatusUnauthorized)
 			return
@@ -97,7 +102,13 @@ func SlavePermissionMiddleware(handler http.Handler) http.Handler {
 			return
 		}
 
-		host := model.GetHost(token.Claims.(jwt.MapClaims)["uid"].(string))
+		hostId, _ := primitive.ObjectIDFromHex(token.Claims.(jwt.MapClaims)["uid"].(string))
+		host, err := model.GetHostById(hostId)
+		if err != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
 		if host == nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
@@ -111,7 +122,17 @@ func SlavePermissionMiddleware(handler http.Handler) http.Handler {
 
 		gsId, ok := params["server_id"]
 		if ok {
-			gs := model.GetGameServer(gsId)
+			oid, err := primitive.ObjectIDFromHex(gsId)
+			if err != nil {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+			gs, err := model.GetGameServerById(oid)
+			if err != nil {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+
 			if gs == nil {
 				w.WriteHeader(http.StatusUnauthorized)
 				return

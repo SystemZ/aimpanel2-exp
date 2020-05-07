@@ -16,23 +16,16 @@ func Register(data *request.AuthRegister) (string, int) {
 		return "", ecode.WrongEmail
 	}
 
-	count, err := model.Count(map[string]interface{}{
-		"selector": map[string]string{
-			"doc_type": "user",
-			"username": data.Username,
-		},
-	})
-	if count > 0 {
+	if model.CheckIfUserExist(data.Username) {
 		return "", ecode.DuplicateUsername
 	}
 
 	var user model.User
-	user.Base.DocType = "user"
 	user.Username = data.Username
 	user.Email = data.Email
 	user.PasswordHash = user.HashPassword(data.Password)
 
-	err = user.Put(&user)
+	err := model.Put(&user)
 	if err != nil {
 		logrus.Error(err)
 		return "", ecode.DbSave
@@ -45,12 +38,9 @@ func Register(data *request.AuthRegister) (string, int) {
 
 	//Create group
 	group := &model.Group{
-		Base: model.Base{
-			DocType: "group",
-		},
-		Name: "USER-" + user.ID,
+		Name: "USER-" + user.ID.Hex(),
 	}
-	err = group.Put(&group)
+	err = model.Put(group)
 	if err != nil {
 		logrus.Error(err)
 		return "", ecode.DbError
@@ -58,13 +48,10 @@ func Register(data *request.AuthRegister) (string, int) {
 
 	//Add user to group
 	groupUser := &model.GroupUser{
-		Base: model.Base{
-			DocType: "group_user",
-		},
 		GroupId: group.ID,
 		UserId:  user.ID,
 	}
-	err = groupUser.Put(&groupUser)
+	err = model.Put(groupUser)
 	if err != nil {
 		logrus.Error(err)
 		return "", ecode.DbError
@@ -76,12 +63,9 @@ func Register(data *request.AuthRegister) (string, int) {
 }
 
 func Login(data *request.AuthLogin) (string, int) {
-	var user model.User
-	err := model.GetOneS(&user, map[string]interface{}{
-		"doc_type": "user",
-		"username": data.Username,
-	})
+	user, err := model.GetUserByUsername(data.Username)
 	if err != nil {
+		logrus.Error(err)
 		return "", ecode.DbError
 	}
 

@@ -1,29 +1,59 @@
 package model
 
+import (
+	"context"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
+)
+
 const (
 	STDOUT = iota
 	STDERR = iota
 )
 
 type GameServerLog struct {
-	Base
+	ID primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty" example:"1238206236281802752"`
 
-	GameServerId string `json:"game_server_id"`
+	GameServerId primitive.ObjectID `bson:"game_server_id" json:"game_server_id"`
 
-	Type uint `json:"type"`
+	Type uint `bson:"type" json:"type"`
 
-	Log string `json:"log"`
+	Log string `bson:"log" json:"log"`
 }
 
-func GetLogsByGameServer(gsId string, limit int) *[]GameServerLog {
+func (g *GameServerLog) GetCollectionName() string {
+	return gameServerLogCollection
+}
+
+func (g *GameServerLog) GetID() primitive.ObjectID {
+	return g.ID
+}
+
+func (g *GameServerLog) SetID(id primitive.ObjectID) {
+	g.ID = id
+}
+
+func GetLogsByGameServerId(gsId primitive.ObjectID, limit int64) (*[]GameServerLog, error) {
 	var logs []GameServerLog
 
-	err := GetSLimit(&logs, limit, map[string]string{
-		"game_server_id": gsId,
-	})
+	opts := options.Find()
+	opts.SetLimit(limit)
+
+	cur, err := DB.Collection(gameServerLogCollection).Find(context.TODO(),
+		bson.D{{Key: "game_server_id", Value: gsId}}, opts)
 	if err != nil {
-		return nil
+		return nil, err
+	}
+	defer cur.Close(context.TODO())
+
+	for cur.Next(context.TODO()) {
+		var log GameServerLog
+		if err := cur.Decode(&log); err != nil {
+			return nil, err
+		}
+		logs = append(logs, log)
 	}
 
-	return &logs
+	return &logs, nil
 }

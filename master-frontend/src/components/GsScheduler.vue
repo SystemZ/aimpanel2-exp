@@ -37,7 +37,7 @@
                                 <v-list-item-title v-text="job.name"></v-list-item-title>
                             </v-list-item-content>
                             <v-list-item-action>
-                                <v-btn @click="removeJob(job._id)">
+                                <v-btn @click="removeJob(job.id)">
                                     DELETE
                                 </v-btn>
                             </v-list-item-action>
