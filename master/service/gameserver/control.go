@@ -16,12 +16,19 @@ import (
 )
 
 func Start(gsId primitive.ObjectID) error {
-	gameServer := model.GetGameServer(gsId)
+	gameServer, err := model.GetGameServerById(gsId)
+	if err != nil {
+		return err
+	}
 	if gameServer == nil {
 		return errors.New("getting game server from db failed")
 	}
 
-	hostToken := model.GetHostToken(gameServer.HostId)
+	hostToken, err := model.GetHostTokenById(gameServer.HostId)
+	if err != nil {
+		return err
+	}
+
 	if hostToken == "" {
 		return errors.New("getting host token from db failed")
 	}
@@ -32,7 +39,7 @@ func Start(gsId primitive.ObjectID) error {
 	}
 
 	var gameDef game.Game
-	err := json.Unmarshal([]byte(gameServer.GameJson), &gameDef)
+	err = json.Unmarshal([]byte(gameServer.GameJson), &gameDef)
 	if err != nil {
 		return errors.New("error when getting game")
 	}
@@ -54,12 +61,20 @@ func Start(gsId primitive.ObjectID) error {
 }
 
 func Stop(gsId primitive.ObjectID, stopType uint) error {
-	gameServer := model.GetGameServer(gsId)
+	gameServer, err := model.GetGameServerById(gsId)
+	if err != nil {
+		return err
+	}
+
 	if gameServer == nil {
 		return errors.New("error when getting game server from db")
 	}
 
-	hostToken := model.GetHostToken(gameServer.HostId)
+	hostToken, err := model.GetHostTokenById(gameServer.HostId)
+	if err != nil {
+		return err
+	}
+
 	if hostToken == "" {
 		return errors.New("error when getting host token from db")
 	}
@@ -89,23 +104,35 @@ func Stop(gsId primitive.ObjectID, stopType uint) error {
 }
 
 func Install(gsId primitive.ObjectID) error {
-	gameServer := model.GetGameServer(gsId)
+	gameServer, err := model.GetGameServerById(gsId)
+	if err != nil {
+		return err
+	}
+
 	if gameServer == nil {
 		return errors.New("error when getting game server from db")
 	}
 
-	hostToken := model.GetHostToken(gameServer.HostId)
+	hostToken, err := model.GetHostTokenById(gameServer.HostId)
+	if err != nil {
+		return err
+	}
+
 	if hostToken == "" {
 		return errors.New("error when getting host token from db")
 	}
 
-	gameFile := model.GetGameFileByGameIdAndVersion(gameServer.GameId, gameServer.GameVersion)
+	gameFile, err := model.GetGameFileByGameIdAndVersion(gameServer.GameId, gameServer.GameVersion)
+	if err != nil {
+		return err
+	}
+
 	if gameFile == nil {
 		return errors.New("error when getting game file from db")
 	}
 
 	var g game.Game
-	err := json.Unmarshal([]byte(gameServer.GameJson), &g)
+	err = json.Unmarshal([]byte(gameServer.GameJson), &g)
 	if err != nil {
 		logrus.Error(err)
 	}
@@ -133,12 +160,20 @@ func Install(gsId primitive.ObjectID) error {
 }
 
 func SendCommand(gsId primitive.ObjectID, command string) error {
-	gameServer := model.GetGameServer(gsId)
+	gameServer, err := model.GetGameServerById(gsId)
+	if err != nil {
+		return err
+	}
+
 	if gameServer == nil {
 		return &lib.Error{ErrorCode: ecode.GsNotFound}
 	}
 
-	hostToken := model.GetHostToken(gameServer.HostId)
+	hostToken, err := model.GetHostTokenById(gameServer.HostId)
+	if err != nil {
+		return err
+	}
+
 	if hostToken == "" {
 		return errors.New("error when getting host token from db")
 	}
@@ -165,18 +200,26 @@ func SendCommand(gsId primitive.ObjectID, command string) error {
 }
 
 func Restart(gsId primitive.ObjectID, stopType uint) error {
-	gameServer := model.GetGameServer(gsId)
+	gameServer, err := model.GetGameServerById(gsId)
+	if err != nil {
+		return err
+	}
+
 	if gameServer == nil {
 		return &lib.Error{ErrorCode: ecode.GsNotFound}
 	}
 
-	hostToken := model.GetHostToken(gameServer.HostId)
+	hostToken, err := model.GetHostTokenById(gameServer.HostId)
+	if err != nil {
+		return err
+	}
+
 	if hostToken == "" {
 		return errors.New("error when getting host token from db")
 	}
 
 	var gameDef game.Game
-	err := json.Unmarshal([]byte(gameServer.GameJson), &gameDef)
+	err = json.Unmarshal([]byte(gameServer.GameJson), &gameDef)
 	if err != nil {
 		return errors.New("error when getting game")
 	}
@@ -204,12 +247,15 @@ func Restart(gsId primitive.ObjectID, stopType uint) error {
 }
 
 func Remove(gsId primitive.ObjectID) error {
-	gameServer := model.GetGameServer(gsId)
+	gameServer, err := model.GetGameServerById(gsId)
+	if err != nil {
+		return err
+	}
 	if gameServer == nil {
 		return &lib.Error{ErrorCode: ecode.GsNotFound}
 	}
 
-	hostToken := model.GetHostToken(gameServer.HostId)
+	hostToken, err := model.GetHostTokenById(gameServer.HostId)
 	if hostToken == "" {
 		return &lib.Error{ErrorCode: ecode.GameNotFound}
 	}
@@ -246,7 +292,11 @@ func Remove(gsId primitive.ObjectID) error {
 	}
 	channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
 
-	permissions := model.GetPermisionsByEndpointRegex("/v1/host/" + gameServer.HostId.String() + "/server/" + gsId.String() + "%")
+	permissions, err := model.GetPermisionsByEndpointRegex("/v1/host/" + gameServer.HostId.String() + "/server/" + gsId.String() + "%")
+	if err != nil {
+		return err
+	}
+
 	for _, perm := range permissions {
 		err := model.Delete(&perm)
 		if err != nil {
@@ -263,7 +313,11 @@ func Remove(gsId primitive.ObjectID) error {
 }
 
 func Update(hostId primitive.ObjectID) error {
-	hostToken := model.GetHostToken(hostId)
+	hostToken, err := model.GetHostTokenById(hostId)
+	if err != nil {
+		return err
+	}
+
 	if hostToken == "" {
 		return errors.New("error when getting host token from db")
 	}
@@ -300,12 +354,20 @@ func Update(hostId primitive.ObjectID) error {
 }
 
 func FileList(gsId primitive.ObjectID) (*filemanager.Node, error) {
-	gameServer := model.GetGameServer(gsId)
+	gameServer, err := model.GetGameServerById(gsId)
+	if err != nil {
+		return nil, err
+	}
+
 	if gameServer == nil {
 		return nil, errors.New("error when getting game server from db")
 	}
 
-	hostToken := model.GetHostToken(gameServer.HostId)
+	hostToken, err := model.GetHostTokenById(gameServer.HostId)
+	if err != nil {
+		return nil, err
+	}
+
 	if hostToken == "" {
 		return nil, errors.New("error when getting host token from db")
 	}

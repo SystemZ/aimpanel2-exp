@@ -28,7 +28,11 @@ func Create(data *request.HostCreate, userId primitive.ObjectID) (*model.Host, i
 		return nil, ecode.DbSave
 	}
 
-	group := model.GetGroup("USER-" + userId.String())
+	group, err := model.GetGroupByName("USER-" + userId.String())
+	if err != nil {
+		return nil, ecode.DbError
+	}
+
 	if group == nil {
 		return nil, ecode.GroupNotFound
 	}
@@ -41,8 +45,16 @@ func Create(data *request.HostCreate, userId primitive.ObjectID) (*model.Host, i
 
 //Removes host and linked game servers
 func Remove(hostId primitive.ObjectID) int {
-	host := model.GetHost(hostId)
-	gameServers := model.GetGameServersByHostId(hostId)
+	host, err := model.GetHostById(hostId)
+	if err != nil {
+		return ecode.DbError
+	}
+
+	gameServers, err := model.GetGameServersByHostId(hostId)
+	if err != nil {
+		return ecode.DbError
+	}
+
 	for _, gameServer := range *gameServers {
 		err := gameserver.Remove(gameServer.ID)
 		if err != nil {
@@ -50,7 +62,11 @@ func Remove(hostId primitive.ObjectID) int {
 		}
 	}
 
-	permissions := model.GetPermisionsByEndpointRegex("/v1/host/" + host.ID.String())
+	permissions, err := model.GetPermisionsByEndpointRegex("/v1/host/" + host.ID.String())
+	if err != nil {
+		return ecode.DbError
+	}
+
 	for _, perm := range permissions {
 		err := model.Delete(&perm)
 		if err != nil {
@@ -58,7 +74,7 @@ func Remove(hostId primitive.ObjectID) int {
 		}
 	}
 
-	err := model.Delete(host)
+	err = model.Delete(host)
 	if err != nil {
 		return ecode.DbError
 	}
@@ -67,7 +83,10 @@ func Remove(hostId primitive.ObjectID) int {
 }
 
 func Auth(t string) (string, int) {
-	host := model.GetHostByToken(t)
+	host, err := model.GetHostByToken(t)
+	if err != nil {
+		return "", ecode.DbError
+	}
 
 	if host == nil {
 		return "", ecode.HostNotFound
@@ -98,7 +117,11 @@ func CreateJob(data *request.HostCreateJob, userId primitive.ObjectID, hostId pr
 		return nil, ecode.DbSave
 	}
 
-	group := model.GetGroup("USER-" + userId.String())
+	group, err := model.GetGroupByName("USER-" + userId.String())
+	if err != nil {
+		return nil, ecode.DbError
+	}
+
 	if group == nil {
 		return nil, ecode.GroupNotFound
 	}
@@ -115,9 +138,16 @@ func CreateJob(data *request.HostCreateJob, userId primitive.ObjectID, hostId pr
 }
 
 func RemoveJob(hostId primitive.ObjectID, jobId primitive.ObjectID) int {
-	hostJob := model.GetHostJob(jobId)
+	hostJob, err := model.GetHostJobById(jobId)
+	if err != nil {
+		return ecode.DbError
+	}
 
-	permissions := model.GetPermisionsByEndpointRegex("/v1/host/" + hostId.String() + "/job/" + jobId.String())
+	permissions, err := model.GetPermisionsByEndpointRegex("/v1/host/" + hostId.String() + "/job/" + jobId.String())
+	if err != nil {
+		return ecode.DbError
+	}
+
 	for _, perm := range permissions {
 		err := model.Delete(&perm)
 		if err != nil {
@@ -125,7 +155,7 @@ func RemoveJob(hostId primitive.ObjectID, jobId primitive.ObjectID) int {
 		}
 	}
 
-	err := model.Delete(hostJob)
+	err = model.Delete(hostJob)
 	if err != nil {
 		return ecode.DbError
 	}
@@ -134,14 +164,22 @@ func RemoveJob(hostId primitive.ObjectID, jobId primitive.ObjectID) int {
 }
 
 func sendJobsToAgent(hostId primitive.ObjectID) int {
-	host := model.GetHost(hostId)
+	host, err := model.GetHostById(hostId)
+	if err != nil {
+		return ecode.DbError
+	}
+
 	if host == nil {
 		return ecode.HostNotFound
 	}
 
 	var jobs []task.Job
 
-	hostJobs := model.GetHostJobs(host.ID)
+	hostJobs, err := model.GetHostJobsByHostId(host.ID)
+	if err != nil {
+		return ecode.DbError
+	}
+
 	for _, job := range hostJobs {
 		jobs = append(jobs, task.Job{
 			Name:           job.Name,
