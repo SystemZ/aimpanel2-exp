@@ -29,7 +29,7 @@ func (gu *GroupUser) GetID() primitive.ObjectID {
 	return gu.ID
 }
 
-func GroupUserByUserId(userId primitive.ObjectID) (*GroupUser, error) {
+func GetGroupUserByUserId(userId primitive.ObjectID) (*GroupUser, error) {
 	var gu GroupUser
 
 	err := DB.Collection(groupUserCollection).FindOne(context.TODO(), bson.D{{"user_id", userId}}).Decode(&gu)

@@ -58,6 +58,24 @@ func GetPermisionsByEndpointRegex(endpoint string) ([]Permission, error) {
 	return permissions, nil
 }
 
+func CheckIfUserHasAccess(path string, verb uint8, groupId primitive.ObjectID) bool {
+	count, err := DB.Collection(permissionCollection).CountDocuments(context.TODO(), bson.D{
+		{"endpoint", path},
+		{"verb", verb},
+		{"group_id", groupId},
+	})
+	if err != nil {
+		logrus.Error(err)
+		return false
+	}
+
+	if count > 0 {
+		return true
+	}
+
+	return false
+}
+
 // FIXME return errors
 func CreatePermissionsForNewHost(groupId primitive.ObjectID, hostId primitive.ObjectID) {
 	perm := &Permission{
