@@ -33,7 +33,7 @@
 
                 <v-list-item-content>
                     <v-list-item-title v-text="item.info.name"></v-list-item-title>
-                    <v-list-item-subtitle v-text="item.info.size"></v-list-item-subtitle>
+                    <v-list-item-subtitle v-text="prettySize(item.info.size)"></v-list-item-subtitle>
                 </v-list-item-content>
 
                 <v-list-item-action>
@@ -59,7 +59,7 @@
 
                 <v-list-item-content>
                     <v-list-item-title v-text="item.info.name"></v-list-item-title>
-                    <v-list-item-subtitle v-text="item.info.size"></v-list-item-subtitle>
+                    <v-list-item-subtitle v-text="prettySize(item.info.size)"></v-list-item-subtitle>
                 </v-list-item-content>
 
                 <v-list-item-action>
@@ -121,6 +121,21 @@
                 }).catch(e => {
                     this.$auth.checkResponse(e.response.status);
                 });
+            },
+            // https://stackoverflow.com/a/18650828/1351857
+            prettySize(bytes: number): string {
+                if (bytes === 0) {
+                    return '0 B';
+                }
+
+                const decimals = 2;
+                const k = 1024;
+                const dm = decimals < 0 ? 0 : decimals;
+                const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
             },
             goToParentDirectory() {
                 if (this.files.selected.parent_name === this.files.root.info.name) {
