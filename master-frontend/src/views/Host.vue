@@ -100,6 +100,17 @@
                 </v-card>
             </v-col>
         </v-row>
+        <v-row>
+            <v-col>
+                <v-card>
+                    <v-card-title>Charts</v-card-title>
+                    <v-card-text>
+                        <host-performance-chart v-if="allMetrics.length > 0" :metrics="allMetrics"/>
+                        <v-progress-linear color="red" v-else indeterminate/>
+                    </v-card-text>
+                </v-card>
+            </v-col>
+        </v-row>
         <v-snackbar
                 v-model="removeSnackbar"
         >
@@ -118,12 +129,17 @@
 <script lang="ts">
     import Vue from 'vue';
     import {Host, Metric} from '@/types/api';
+    import HostPerformanceChart from '@/components/HostPerformanceChart.vue';
 
     export default Vue.extend({
         name: 'host',
+        components: {
+            HostPerformanceChart,
+        },
         data: () => ({
             host: {} as Host,
             metric: {} as Metric,
+            allMetrics: {} as Array<Metric>,
             removeSnackbar: false,
             // gameServers: [],
         }),
@@ -137,6 +153,7 @@
             //this.getGameServers();
 
             this.$http.get('/v1/host/' + this.$route.params.id + '/metric').then((res) => {
+                this.allMetrics = res.data.metrics;
                 // FIXME metrics are empty!
                 this.metric = res.data.metrics[0];
 

@@ -99,7 +99,7 @@ func HostCreate(w http.ResponseWriter, r *http.Request) {
 // @Router /host/{id}/metric [get]
 // @Summary Metric
 // @Tags Host
-// @Description Get last host metric with selected ID linked to the current signed-in account
+// @Description Get latest metrics for host with ID, linked to the current signed-in account
 // @Accept json
 // @Produce json
 // @Param id path string true "Host ID"
@@ -114,7 +114,7 @@ func HostMetric(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	metrics, err := model.GetHostMetricsByHostId(oid, 1)
+	metrics, err := model.GetHostMetricsByHostId(oid, 20)
 	if err != nil {
 		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, nil)
 		return

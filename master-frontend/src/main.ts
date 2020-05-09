@@ -9,6 +9,11 @@ import axios, {AxiosStatic} from 'axios';
 import auth, {AuthInterface} from './auth';
 // @ts-ignore
 import {EventSourcePolyfill} from 'event-source-polyfill';
+import VueApexCharts from 'vue-apexcharts';
+
+Vue.use(VueApexCharts);
+
+Vue.component('apexchart', VueApexCharts);
 
 Vue.config.productionTip = false;
 
