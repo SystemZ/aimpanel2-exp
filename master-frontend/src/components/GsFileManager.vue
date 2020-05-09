@@ -7,7 +7,7 @@
 
             <v-list-item
                     @click="goToParentDirectory()"
-                    v-if="files.selected.info.name !== files.root.info.name"
+                    v-if="files.selected.info && files.selected.info.name !== files.root.info.name"
             >
                 <v-list-item-avatar>
                     <v-icon class="grey lighten-1 white--text">
