@@ -10,12 +10,12 @@
                     v-if="files.selected.info && files.selected.info.name !== files.root.info.name"
             >
                 <v-list-item-avatar>
-                    <v-icon class="grey lighten-1 white--text">
-                        {{mdiArrowUp}}
+                    <v-icon class=" white--text">
+                        {{mdiArrowLeft}}
                     </v-icon>
                 </v-list-item-avatar>
                 <v-list-item-content>
-                    <v-list-item-title>Go to parent directory</v-list-item-title>
+                    <v-list-item-title>Go back</v-list-item-title>
                 </v-list-item-content>
             </v-list-item>
 
@@ -26,7 +26,7 @@
                     v-if="item.info.is_dir"
             >
                 <v-list-item-avatar>
-                    <v-icon class="grey lighten-1 white--text">
+                    <v-icon>
                         {{mdiFolder}}
                     </v-icon>
                 </v-list-item-avatar>
@@ -38,7 +38,7 @@
 
                 <v-list-item-action>
                     <v-btn icon>
-                        <v-icon color="grey lighten-1">{{mdiInformation}}</v-icon>
+                        <v-icon>{{mdiInformation}}</v-icon>
                     </v-btn>
                 </v-list-item-action>
             </v-list-item>
@@ -54,7 +54,7 @@
                     v-if="!item.info.is_dir"
             >
                 <v-list-item-avatar>
-                    <v-icon class="blue white--text">{{mdiFile}}</v-icon>
+                    <v-icon>{{mdiFile}}</v-icon>
                 </v-list-item-avatar>
 
                 <v-list-item-content>
@@ -64,7 +64,7 @@
 
                 <v-list-item-action>
                     <v-btn icon>
-                        <v-icon color="grey lighten-1">{{mdiInformation}}</v-icon>
+                        <v-icon>{{mdiInformation}}</v-icon>
                     </v-btn>
                 </v-list-item-action>
             </v-list-item>
@@ -75,7 +75,7 @@
 <script lang="ts">
     import Vue from 'vue';
     import {Node} from '@/types/files';
-    import {mdiArrowUp, mdiFile, mdiFolder, mdiInformation} from '@mdi/js';
+    import {mdiArrowLeft, mdiFile, mdiFolder, mdiInformation} from '@mdi/js';
 
     interface FileRow {
         icon: string,
@@ -107,7 +107,7 @@
             mdiInformation: mdiInformation,
             mdiFile: mdiFile,
             mdiFolder: mdiFolder,
-            mdiArrowUp: mdiArrowUp,
+            mdiArrowLeft: mdiArrowLeft,
         }),
         mounted() {
             this.serverUrl = '/v1/host/' + this.hostId + '/server/' + this.serverId;
