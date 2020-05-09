@@ -66,6 +66,7 @@
 
 
         mounted() {
+            this.getGameServers();
             this.refreshInterval = setInterval(() => {
                 this.getGameServers();
             }, 10 * 1000);
