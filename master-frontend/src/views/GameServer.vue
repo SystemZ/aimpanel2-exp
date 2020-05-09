@@ -165,7 +165,7 @@
         methods: {
             start() {
                 this.$http.put(this.serverUrl + '/start').then(res => {
-                    console.log(res);
+                    //console.log(res);
                 }).catch(e => {
                     this.$auth.checkResponse(e.response.status);
                 });
@@ -174,7 +174,7 @@
                 this.$http.put(this.serverUrl + '/stop', {
                     type: 1
                 }).then(res => {
-                    console.log(res);
+                    //console.log(res);
                 }).catch(e => {
                     this.$auth.checkResponse(e.response.status);
                 });
@@ -183,7 +183,7 @@
                 this.$http.put(this.serverUrl + '/restart', {
                     type: 1
                 }).then(res => {
-                    console.log(res);
+                    //console.log(res);
                 }).catch(e => {
                     this.$auth.checkResponse(e.response.status);
                 });

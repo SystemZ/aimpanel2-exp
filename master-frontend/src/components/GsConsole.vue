@@ -97,7 +97,6 @@
                 this.$http.put(this.serverUrl + '/command', {
                     command: this.message
                 }).then(res => {
-                    console.log(res);
                     this.message = '';
                     this.commandSending = false;
                 }).catch(e => {
