@@ -93,3 +93,71 @@ func PutMetric(metricType uint8, rid primitive.ObjectID, metric metric.Id, val i
 
 	return err
 }
+
+func GetAvgDayMetricForHost(hostId primitive.ObjectID, day time.Time, metricType metric.Id) (float64, error) {
+	agr := []bson.D{
+		{
+			{
+				Key: "$match",
+				Value: bson.D{
+					{Key: "metric", Value: metricType},
+					{Key: "r_id", Value: hostId},
+					{Key: "day", Value: day},
+					{Key: "type", Value: HostMetric},
+				},
+			},
+		},
+		{
+			{
+				Key: "$addFields",
+				Value: bson.D{
+					{
+						Key: "sampleAvg",
+						Value: bson.D{
+							{Key: "$avg", Value: "$samples.val"},
+						},
+					},
+				},
+			},
+		},
+		{
+			{
+				Key: "$group",
+				Value: bson.D{
+					{
+						Key: "sampleAvg",
+						Value: bson.D{
+							{Key: "$avg", Value: "$sampleAvg"},
+						},
+					},
+					{
+						Key:   "_id",
+						Value: nil,
+					},
+				},
+			},
+		},
+	}
+
+	cur, err := DB.Collection(metricCollection).Aggregate(context.TODO(), agr)
+	if err != nil {
+		return 0, err
+	}
+	defer cur.Close(context.TODO())
+
+	var output AggregateOutput
+	for cur.Next(context.TODO()) {
+		err := cur.Decode(&output)
+		if err != nil {
+			return 0, err
+		}
+		//cur.Current => {"_id": null,"sampleAvg": {"$numberDouble":"1601.1842105263158"}}
+	}
+
+	return output.SampleAvg, nil
+}
+
+type AggregateOutput struct {
+	ID        primitive.ObjectID `bson:"_id"`
+	SampleAvg float64            `bson:"sampleAvg"`
+}
