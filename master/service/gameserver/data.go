@@ -64,35 +64,8 @@ func HostData(hostToken string, taskMsg *task.Message) error {
 		channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
 	case task.AGENT_METRICS:
 		logrus.Infof("Got %v", taskMsg.TaskId)
-		host, err := model.GetHostByToken(hostToken)
-		if err != nil {
-			return err
-		}
 
-		if host == nil {
-			break
-		}
-
-		metric := &model.MetricHost{
-			HostId:    host.ID,
-			CpuUsage:  taskMsg.CpuUsage,
-			RamFree:   taskMsg.RamFree,
-			RamTotal:  taskMsg.RamTotal,
-			DiskFree:  taskMsg.DiskFree,
-			DiskUsed:  taskMsg.DiskUsed,
-			DiskTotal: taskMsg.DiskTotal,
-			User:      taskMsg.User,
-			System:    taskMsg.System,
-			Idle:      taskMsg.Idle,
-			Nice:      taskMsg.Nice,
-			Iowait:    taskMsg.Iowait,
-			Irq:       taskMsg.Irq,
-			Softirq:   taskMsg.Softirq,
-			Steal:     taskMsg.Steal,
-			Guest:     taskMsg.Guest,
-			GuestNice: taskMsg.GuestNice,
-		}
-		err = model.Put(metric)
+		err := AgentMetrics(hostToken, *taskMsg)
 		if err != nil {
 			return err
 		}
@@ -252,20 +225,11 @@ func GsData(hostToken string, taskMsg *task.Message) error {
 		channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
 	case task.GAME_METRICS:
 		logrus.Infof("Got %v", taskMsg.TaskId)
-		oid, err := primitive.ObjectIDFromHex(taskMsg.GameServerID)
+		err := GameServerMetrics(*taskMsg)
 		if err != nil {
 			return err
 		}
 
-		metric := &model.MetricGameServer{
-			GameServerId: oid,
-			CpuUsage:     taskMsg.CpuUsage,
-			RamUsage:     taskMsg.RamUsage,
-		}
-		err = model.Put(metric)
-		if err != nil {
-			return err
-		}
 	case task.AGENT_FILE_LIST_GS:
 		logrus.Infof("Got %v", taskMsg.TaskId)
 		err := model.GsFilesPublish(model.Redis, taskMsg.GameServerID, taskMsg.Files)

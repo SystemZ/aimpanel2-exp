@@ -18,6 +18,7 @@ const (
 	gameServerCollection       = "game_server"
 	gameServerLogCollection    = "game_server_log"
 	gameFileCollection         = "game_file"
+	metricCollection           = "metrics"
 )
 
 type Document interface {
