@@ -94,6 +94,88 @@ func PutMetric(metricType uint8, rid primitive.ObjectID, metric metric.Id, val i
 	return err
 }
 
+func GetTimeSeries(hostId primitive.ObjectID, from time.Time, to time.Time, metricType metric.Id) (res []TimeseriesOutput, err error) {
+	fromTs := from.Unix()
+	// we may need two froms and tos
+	// first for doc (day precision), second for values (second precision)
+	//toTs := from.Unix()
+	q := []bson.D{
+		{
+			{
+				Key: "$match",
+				Value: bson.D{
+					{Key: "metric", Value: metricType},
+					{Key: "r_id", Value: hostId},
+					{Key: "type", Value: HostMetric},
+				},
+			},
+		},
+		{
+			{
+				Key: "$match",
+				Value: bson.D{
+					{Key: "$or", Value: []bson.D{
+						{
+							{Key: "first", Value: bson.D{{Key: "$gte", Value: fromTs}}},
+							//{Key: "last", Value: bson.D{{Key: "$lte", Value: 1589101997}}},
+						},
+					}},
+				},
+			},
+		},
+		{
+			{
+				Key: "$unwind",
+				Value: bson.D{
+					{Key: "path", Value: "$samples"},
+				},
+			},
+		},
+		{
+			{
+				Key: "$match",
+				Value: bson.D{
+					{Key: "samples.time", Value: bson.D{
+						{Key: "$gte", Value: fromTs},
+						//{Key: "$lte", Value: toTs},
+					}},
+				},
+			},
+		},
+		{
+			{
+				Key: "$replaceRoot",
+				Value: bson.D{
+					{Key: "newRoot", Value: "$samples"},
+				},
+			},
+		},
+	}
+
+	cur, err := DB.Collection(metricCollection).Aggregate(context.TODO(), q)
+	if err != nil {
+		return res, err
+	}
+	defer cur.Close(context.TODO())
+
+	var output TimeseriesOutput
+	for cur.Next(context.TODO()) {
+		err := cur.Decode(&output)
+		if err != nil {
+			return res, err
+		}
+		//cur.Current => {"_id": null,"sampleAvg": {"$numberDouble":"1601.1842105263158"}}
+		res = append(res, output)
+	}
+
+	return
+}
+
+type TimeseriesOutput struct {
+	Val  float64 `bson:"val" json:"v"`
+	Time int     `bson:"time" json:"t"`
+}
+
 func GetAvgDayMetricForHost(hostId primitive.ObjectID, day time.Time, metricType metric.Id) (float64, error) {
 	agr := []bson.D{
 		{

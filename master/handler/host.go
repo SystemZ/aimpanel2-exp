@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/mux"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/ecode"
+	"gitlab.com/systemz/aimpanel2/lib/metric"
 	"gitlab.com/systemz/aimpanel2/lib/request"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"gitlab.com/systemz/aimpanel2/master/response"
@@ -13,6 +14,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/master/service/host"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
+	"time"
 )
 
 // @Router /host [get]
@@ -114,7 +116,10 @@ func HostMetric(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	metrics, err := model.GetHostMetricsByHostId(oid, 20)
+	now := time.Now()
+	from := time.Date(now.Year()-1, now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	to := time.Date(now.Year()+1, now.Month(), now.Day(), 23, 59, 0, 0, now.Location())
+	metrics, err := model.GetTimeSeries(oid, from, to, metric.RamFree)
 	if err != nil {
 		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, nil)
 		return

@@ -55,7 +55,7 @@ type HostList struct {
 
 type HostMetrics struct {
 	//Metric info
-	Metrics []model.MetricHost `json:"metrics"`
+	Metrics []model.TimeseriesOutput `json:"metrics"`
 }
 
 type HostJobList struct {

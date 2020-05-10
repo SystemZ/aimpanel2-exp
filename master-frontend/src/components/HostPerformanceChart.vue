@@ -109,24 +109,24 @@
             },
             updateChart(): void {
                 // @ts-ignore
-                let steal = [];
+                //let steal = [];
                 let user = [];
                 // @ts-ignore
                 for (let i = 0; i < this.metrics.length; i++) {
                     // @ts-ignore
-                    let ts = this.getTsFromId(this.metrics[i].id);
+                    //let ts = this.getTsFromId(this.metrics[i].id);
                     // @ts-ignore
-                    steal.push([ts, this.metrics[i].steal]);
+                    //steal.push([ts, this.metrics[i].steal]);
                     // @ts-ignore
-                    user.push([ts, this.metrics[i].user]);
+                    user.push([this.metrics[i].t * 1000, this.metrics[i].v]);
                 }
                 this.series = [
-                    {
-                        // @ts-ignore
-                        name: 'Steal',
-                        // @ts-ignore
-                        data: steal
-                    },
+                    // {
+                    //     // @ts-ignore
+                    //     name: 'Steal',
+                    //     // @ts-ignore
+                    //     data: steal
+                    // },
                     {
                         // @ts-ignore
                         name: 'User',
