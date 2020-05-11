@@ -68,7 +68,8 @@ func PutMetric(metricType uint8, rid primitive.ObjectID, metric metric.Id, val i
 	opts.SetUpsert(true)
 
 	now := time.Now()
-	day := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	// use UTC time zone for literal midnight
+	day := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
 
 	metricData := MetricData{
 		Val:  val,
@@ -79,6 +80,8 @@ func PutMetric(metricType uint8, rid primitive.ObjectID, metric metric.Id, val i
 		{Key: "type", Value: metricType},
 		{Key: "r_id", Value: rid},
 		{Key: "metric", Value: metric},
+		// use day as upsert filter to enforce one doc per day
+		{Key: "day", Value: day},
 	}
 
 	update := bson.D{
@@ -86,7 +89,6 @@ func PutMetric(metricType uint8, rid primitive.ObjectID, metric metric.Id, val i
 		{Key: "$min", Value: bson.D{{Key: "first", Value: metricData.Time}}},
 		{Key: "$max", Value: bson.D{{Key: "last", Value: metricData.Time}}},
 		{Key: "$inc", Value: bson.D{{Key: "nsamples", Value: 1}}},
-		{Key: "$set", Value: bson.D{{Key: "day", Value: day}}},
 	}
 
 	_, err := DB.Collection(metricCollection).UpdateOne(context.TODO(), filter, update, opts)
