@@ -101,6 +101,7 @@ func GetTimeSeries(hostId primitive.ObjectID, from time.Time, to time.Time, metr
 	// we may need two froms and tos
 	// first for doc (day precision), second for values (second precision)
 	//toTs := from.Unix()
+	// https://gitlab.com/SystemZ/aimpanel2/snippets/1975490
 	q := []bson.D{
 		{
 			{
@@ -109,13 +110,6 @@ func GetTimeSeries(hostId primitive.ObjectID, from time.Time, to time.Time, metr
 					{Key: "metric", Value: metricType},
 					{Key: "r_id", Value: hostId},
 					{Key: "type", Value: HostMetric},
-				},
-			},
-		},
-		{
-			{
-				Key: "$match",
-				Value: bson.D{
 					{Key: "$or", Value: []bson.D{
 						{
 							{Key: "first", Value: bson.D{{Key: "$gte", Value: fromTs}}},
@@ -146,9 +140,86 @@ func GetTimeSeries(hostId primitive.ObjectID, from time.Time, to time.Time, metr
 		},
 		{
 			{
-				Key: "$replaceRoot",
+				Key: "$set",
 				Value: bson.D{
-					{Key: "newRoot", Value: "$samples"},
+					{Key: "samples.date", Value: bson.D{
+						{Key: "$toDate", Value: bson.D{
+							{Key: "$multiply", Value: bson.A{
+								"$samples.time", 1000,
+							}},
+						}},
+					}},
+				},
+			},
+		},
+		{
+			{
+				Key: "$group",
+				Value: bson.D{
+					{Key: "_id", Value: bson.D{
+						{Key: "$dateToString", Value: bson.D{
+							{Key: "format", Value: "%Y-%m-%dT%H:%M"},
+							{Key: "date", Value: "$samples.date"},
+						}},
+					}},
+					{Key: "t", Value: bson.D{
+						{Key: "$first", Value: "$samples.time"},
+					}},
+					{Key: "min", Value: bson.D{
+						{Key: "$min", Value: "$samples.val"},
+					}},
+					{Key: "avg", Value: bson.D{
+						{Key: "$avg", Value: "$samples.val"},
+					}},
+					{Key: "max", Value: bson.D{
+						{Key: "$max", Value: "$samples.val"},
+					}},
+				},
+			},
+		},
+		{
+			{
+				Key: "$sort",
+				Value: bson.D{
+					{Key: "t", Value: 1},
+				},
+			},
+		},
+		{
+			{
+				Key: "$set",
+				Value: bson.D{
+					{Key: "t", Value: bson.D{
+						{Key: "$toLong", Value: bson.D{
+							{Key: "$dateFromString", Value: bson.D{
+								{Key: "dateString", Value: bson.D{
+									{Key: "$concat", Value: bson.A{
+										"$_id", ":00.000+00:00",
+									}},
+								}},
+							}},
+						}},
+					}},
+				},
+			},
+		},
+		{
+			{
+				Key: "$set",
+				Value: bson.D{
+					{Key: "t", Value: bson.D{
+						{Key: "$divide", Value: bson.A{
+							"$t", 1000,
+						}},
+					}},
+				},
+			},
+		},
+		{
+			{
+				Key: "$unset",
+				Value: bson.A{
+					"_id",
 				},
 			},
 		},
@@ -162,11 +233,11 @@ func GetTimeSeries(hostId primitive.ObjectID, from time.Time, to time.Time, metr
 
 	var output TimeseriesOutput
 	for cur.Next(context.TODO()) {
+		//log.Printf("%v", cur.Current)
 		err := cur.Decode(&output)
 		if err != nil {
 			return res, err
 		}
-		//cur.Current => {"_id": null,"sampleAvg": {"$numberDouble":"1601.1842105263158"}}
 		res = append(res, output)
 	}
 
@@ -174,8 +245,10 @@ func GetTimeSeries(hostId primitive.ObjectID, from time.Time, to time.Time, metr
 }
 
 type TimeseriesOutput struct {
-	Val  float64 `bson:"val" json:"v"`
-	Time int     `bson:"time" json:"t"`
+	Min float64 `bson:"min" json:"min"`
+	Avg float64 `bson:"avg" json:"avg"`
+	Max float64 `bson:"max" json:"max"`
+	T   int     `bson:"t" json:"t"`
 }
 
 func GetAvgDayMetricForHost(hostId primitive.ObjectID, day time.Time, metricType metric.Id) (float64, error) {

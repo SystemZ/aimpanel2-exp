@@ -118,7 +118,7 @@
                     // @ts-ignore
                     //steal.push([ts, this.metrics[i].steal]);
                     // @ts-ignore
-                    user.push([this.metrics[i].t * 1000, this.metrics[i].v]);
+                    user.push([this.metrics[i].t * 1000, this.metrics[i].avg]);
                 }
                 this.series = [
                     // {
