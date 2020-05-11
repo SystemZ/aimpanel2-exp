@@ -1,143 +1,81 @@
-<template>
-    <div>
-        <apexchart height="300px" :options="chartOptions" :series="series"></apexchart>
-    </div>
-</template>
 <script lang="ts">
-    import Vue from 'vue';
+    import {Vue, Component, Prop} from 'vue-property-decorator';
+    import {Metric} from '@/types/api';
+    import {Line} from 'vue-chartjs';
+    import moment from 'moment';
 
-    export default Vue.extend({
-        name: 'host-performance-chart',
-        props: {
-            metrics: {
-                // FIXME WTF is this ? how to even type this?
-                // type: Array<Metric>, // ? ? ?
-                required: true,
-            },
-        },
-        data: () => ({
-            chartOptions: {
-                theme: {
-                    mode: 'dark',
-                },
-                chart: {
-                    id: 'vuechart-example',
-                    type: 'area',
-                    stacked: false,
-                    height: 350,
-                    zoom: {
-                        type: 'x',
-                        enabled: true,
-                        autoScaleYaxis: true
-                    },
-                    toolbar: {
-                        autoSelected: 'zoom'
-                    },
-                },
-                stroke: {
-                    width: 1,
-                    curve: 'smooth',
-                },
-                grid: {
-                    borderColor: '#555',
-                    clipMarkers: false,
-                    yaxis: {
-                        lines: {
-                            show: true
-                        }
-                    }
-                },
-                dataLabels: {
-                    enabled: false
-                },
-                fill: {
-                    gradient: {
-                        enabled: true,
-                        opacityFrom: 0.55,
-                        opacityTo: 0
-                    }
-                },
-                // markers: {
-                //     size: 5,
-                //     colors: ['#000524'],
-                //     strokeColor: '#00BAEC',
-                //     strokeWidth: 3
-                // },
-                title: {
-                    text: 'Host performance',
-                    align: 'left'
-                },
-                yaxis: {
-                    min: 0,
-                    tickAmount: 4
-                },
-                /*
-                yaxis: {
-                    labels: {
-                        // @ts-ignore
-                        // formatter: function(val) {
-                        //     return (val / 1000000).toFixed(0);
-                        // },
-                    },
-                    title: {
-                        text: 'Price'
-                    },
-                },
-                 */
-                xaxis: {
-                    type: 'datetime',
-                },
-                tooltip: {
-                    theme: 'dark',
-                    // shared: true,
-                    x: {
-                        format: 'HH:mm:ss dd MMM yyyy',
-                    },
-                    // y: {
-                    // @ts-ignore
-                    // formatter: function(val) {
-                    //     return (val / 1000000).toFixed(0);
-                    // }
-                    // }
-                }
-            },
-            series: [],
-        }),
-        methods: {
-            getTsFromId(str: String): Number {
-                return parseInt(str.substring(0, 8), 16) * 1000;
-            },
-            updateChart(): void {
-                // @ts-ignore
-                //let steal = [];
-                let user = [];
-                // @ts-ignore
-                for (let i = 0; i < this.metrics.length; i++) {
-                    // @ts-ignore
-                    //let ts = this.getTsFromId(this.metrics[i].id);
-                    // @ts-ignore
-                    //steal.push([ts, this.metrics[i].steal]);
-                    // @ts-ignore
-                    user.push([this.metrics[i].t * 1000, this.metrics[i].avg]);
-                }
-                this.series = [
-                    // {
-                    //     // @ts-ignore
-                    //     name: 'Steal',
-                    //     // @ts-ignore
-                    //     data: steal
-                    // },
-                    {
-                        // @ts-ignore
-                        name: 'User',
-                        // @ts-ignore
-                        data: user
-                    }
-                ];
+    @Component({
+        extends: Line
+    })
+    export default class HostPerformanceChart extends Vue {
+        @Prop({
+            type: Array, required: true, default: () => {
+                return [];
             }
-        },
+        })
+        metrics !: Array<Metric>;
+
+        renderChart!: (chartData: any, options: any) => void;
+
+        options = {
+            responsive: true,
+            maintainAspectRatio: false,
+            legend: {
+                labels: {
+                    fontColor: 'white'
+                }
+            },
+            scales: {
+                yAxes: [{
+                    gridLines: {
+                        drawBorder: false,
+                    },
+                    scaleLabel: {
+                        display: true
+                    },
+                    ticks: {
+                        fontColor: 'white'
+                    }
+                }],
+                xAxes: [{
+                    type: 'time',
+                    distribution: 'series',
+                    offset: true,
+                    ticks: {
+                        major: {
+                            enabled: true,
+                            fontStyle: 'bold',
+                        },
+                        autoSkip: true,
+                        autoSkipPadding: 75,
+                        maxRotation: 0,
+                        sampleSize: 100,
+                        fontColor: 'white'
+                    },
+                }]
+            }
+        };
+
+        chartData = {
+            labels: this.metrics.map(m => moment.unix(m.t).toDate()),
+            datasets: [
+                {
+                    label: 'Ram free',
+                    backgroundColor: '#43a047',
+                    borderColor: '#43a047',
+                    data: this.metrics.map(m => m.avg),
+                    type: 'line',
+                    pointRadius: 0,
+                    fill: false,
+                    lineTension: 0,
+                    borderWidth: 2
+                }
+            ]
+        };
+
         mounted() {
-            this.updateChart();
+            this.renderChart(this.chartData, this.options);
         }
-    });
+
+    }
 </script>
