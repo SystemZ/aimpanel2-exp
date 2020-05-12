@@ -30,7 +30,7 @@ func HostList(w http.ResponseWriter, r *http.Request) {
 	user := context.Get(r, "user").(model.User)
 	hosts, err := model.GetHostsByUserId(user.ID)
 	if err != nil {
-		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, nil)
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, err)
 		return
 	}
 
@@ -51,13 +51,13 @@ func HostDetails(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	oid, err := primitive.ObjectIDFromHex(params["id"])
 	if err != nil {
-		lib.ReturnError(w, http.StatusBadRequest, ecode.OidError, nil)
+		lib.ReturnError(w, http.StatusBadRequest, ecode.OidError, err)
 		return
 	}
 
 	h, err := model.GetHostById(oid)
 	if err != nil {
-		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, nil)
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, err)
 		return
 	}
 
@@ -121,7 +121,7 @@ func HostMetric(w http.ResponseWriter, r *http.Request) {
 	to := time.Date(now.Year()+1, now.Month(), now.Day(), 23, 59, 0, 0, now.Location())
 	metrics, err := model.GetTimeSeries(oid, from, to, metric.RamFree)
 	if err != nil {
-		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, nil)
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, err)
 		return
 	}
 
@@ -237,13 +237,13 @@ func HostJobList(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	oid, err := primitive.ObjectIDFromHex(params["id"])
 	if err != nil {
-		lib.ReturnError(w, http.StatusBadRequest, ecode.OidError, nil)
+		lib.ReturnError(w, http.StatusBadRequest, ecode.OidError, err)
 		return
 	}
 
 	jobs, err := model.GetHostJobsByHostId(oid)
 	if err != nil {
-		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, nil)
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, err)
 		return
 	}
 
