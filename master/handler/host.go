@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/mux"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/ecode"
+	"gitlab.com/systemz/aimpanel2/lib/metric"
 	"gitlab.com/systemz/aimpanel2/lib/request"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"gitlab.com/systemz/aimpanel2/master/response"
@@ -13,6 +14,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/master/service/host"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
+	"time"
 )
 
 // @Router /host [get]
@@ -28,7 +30,7 @@ func HostList(w http.ResponseWriter, r *http.Request) {
 	user := context.Get(r, "user").(model.User)
 	hosts, err := model.GetHostsByUserId(user.ID)
 	if err != nil {
-		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, nil)
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, err)
 		return
 	}
 
@@ -49,13 +51,13 @@ func HostDetails(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	oid, err := primitive.ObjectIDFromHex(params["id"])
 	if err != nil {
-		lib.ReturnError(w, http.StatusBadRequest, ecode.OidError, nil)
+		lib.ReturnError(w, http.StatusBadRequest, ecode.OidError, err)
 		return
 	}
 
 	h, err := model.GetHostById(oid)
 	if err != nil {
-		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, nil)
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, err)
 		return
 	}
 
@@ -99,7 +101,7 @@ func HostCreate(w http.ResponseWriter, r *http.Request) {
 // @Router /host/{id}/metric [get]
 // @Summary Metric
 // @Tags Host
-// @Description Get last host metric with selected ID linked to the current signed-in account
+// @Description Get latest metrics for host with ID, linked to the current signed-in account
 // @Accept json
 // @Produce json
 // @Param id path string true "Host ID"
@@ -114,9 +116,12 @@ func HostMetric(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	metrics, err := model.GetHostMetricsByHostId(oid, 1)
+	now := time.Now()
+	from := time.Date(now.Year()-1, now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	to := time.Date(now.Year()+1, now.Month(), now.Day(), 23, 59, 0, 0, now.Location())
+	metrics, err := model.GetTimeSeries(oid, 60, from, to, metric.RamFree)
 	if err != nil {
-		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, nil)
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, err)
 		return
 	}
 
@@ -232,13 +237,13 @@ func HostJobList(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	oid, err := primitive.ObjectIDFromHex(params["id"])
 	if err != nil {
-		lib.ReturnError(w, http.StatusBadRequest, ecode.OidError, nil)
+		lib.ReturnError(w, http.StatusBadRequest, ecode.OidError, err)
 		return
 	}
 
 	jobs, err := model.GetHostJobsByHostId(oid)
 	if err != nil {
-		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, nil)
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, err)
 		return
 	}
 

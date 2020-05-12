@@ -36,4 +36,6 @@ export interface Metric {
     guest: number,
     guest_nice: number,
     created_at: Date,
+    avg: number,
+    t: number,
 }
