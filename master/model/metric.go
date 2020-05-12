@@ -96,12 +96,25 @@ func PutMetric(metricType uint8, rid primitive.ObjectID, metric metric.Id, val i
 	return err
 }
 
-func GetTimeSeries(hostId primitive.ObjectID, from time.Time, to time.Time, metricType metric.Id) (res []TimeseriesOutput, err error) {
+func GetTimeSeries(hostId primitive.ObjectID, intervalS int, from time.Time, to time.Time, metricType metric.Id) (res []TimeseriesOutput, err error) {
 	fromTs := from.Unix()
 	// we may need two froms and tos
 	// first for doc (day precision), second for values (second precision)
 	//toTs := from.Unix()
-	// https://gitlab.com/SystemZ/aimpanel2/snippets/1975490
+
+	// for X minutes
+	dateFormatTemplate := "%Y-%m-%dT%H:%M"
+	dateAppendTemplate := ":00.000+00:00"
+	if intervalS >= 3600 {
+		// for X hours
+		dateFormatTemplate = "%Y-%m-%dT%H"
+		dateAppendTemplate = ":00:00.000+00:00"
+	}
+
+	// JSON/JS version of whole aggregation pipe:
+	// current: https://gitlab.com/SystemZ/aimpanel2/snippets/1975954
+	// older: https://gitlab.com/SystemZ/aimpanel2/snippets/1975490
+
 	q := []bson.D{
 		{
 			{
@@ -140,30 +153,20 @@ func GetTimeSeries(hostId primitive.ObjectID, from time.Time, to time.Time, metr
 		},
 		{
 			{
-				Key: "$set",
-				Value: bson.D{
-					{Key: "samples.date", Value: bson.D{
-						{Key: "$toDate", Value: bson.D{
-							{Key: "$multiply", Value: bson.A{
-								"$samples.time", 1000,
-							}},
-						}},
-					}},
-				},
-			},
-		},
-		{
-			{
 				Key: "$group",
 				Value: bson.D{
 					{Key: "_id", Value: bson.D{
-						{Key: "$dateToString", Value: bson.D{
-							{Key: "format", Value: "%Y-%m-%dT%H:%M"},
-							{Key: "date", Value: "$samples.date"},
+						{Key: "$subtract", Value: bson.A{
+							"$samples.time",
+							bson.D{{Key: "$mod", Value: bson.A{
+								bson.D{{Key: "$subtract", Value: bson.A{
+									"$samples.time",
+									fromTs,
+								}}},
+								// interval in seconds
+								intervalS,
+							}}},
 						}},
-					}},
-					{Key: "t", Value: bson.D{
-						{Key: "$first", Value: "$samples.time"},
 					}},
 					{Key: "min", Value: bson.D{
 						{Key: "$min", Value: "$samples.val"},
@@ -181,7 +184,7 @@ func GetTimeSeries(hostId primitive.ObjectID, from time.Time, to time.Time, metr
 			{
 				Key: "$sort",
 				Value: bson.D{
-					{Key: "t", Value: 1},
+					{Key: "_id", Value: 1},
 				},
 			},
 		},
@@ -189,15 +192,27 @@ func GetTimeSeries(hostId primitive.ObjectID, from time.Time, to time.Time, metr
 			{
 				Key: "$set",
 				Value: bson.D{
-					{Key: "t", Value: bson.D{
-						{Key: "$toLong", Value: bson.D{
-							{Key: "$dateFromString", Value: bson.D{
-								{Key: "dateString", Value: bson.D{
+					{Key: "ts", Value: bson.D{
+						{Key: "$divide", Value: bson.A{
+							bson.D{{Key: "$toLong", Value: bson.D{
+								{Key: "$toDate", Value: bson.D{
 									{Key: "$concat", Value: bson.A{
-										"$_id", ":00.000+00:00",
+										bson.D{{Key: "$dateToString", Value: bson.D{
+											{Key: "date", Value: bson.D{
+												{Key: "$toDate", Value: bson.D{
+													{Key: "$multiply", Value: bson.A{
+														1000,
+														"$_id",
+													}},
+												}},
+											}},
+											{Key: "format", Value: dateFormatTemplate},
+										}}},
+										dateAppendTemplate,
 									}},
 								}},
-							}},
+							}}},
+							1000,
 						}},
 					}},
 				},
@@ -207,11 +222,7 @@ func GetTimeSeries(hostId primitive.ObjectID, from time.Time, to time.Time, metr
 			{
 				Key: "$set",
 				Value: bson.D{
-					{Key: "t", Value: bson.D{
-						{Key: "$divide", Value: bson.A{
-							"$t", 1000,
-						}},
-					}},
+					{Key: "t", Value: "$ts"},
 				},
 			},
 		},
@@ -219,7 +230,7 @@ func GetTimeSeries(hostId primitive.ObjectID, from time.Time, to time.Time, metr
 			{
 				Key: "$unset",
 				Value: bson.A{
-					"_id",
+					"ts", "_id",
 				},
 			},
 		},
