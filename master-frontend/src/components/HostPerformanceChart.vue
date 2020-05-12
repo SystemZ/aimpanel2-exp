@@ -39,7 +39,7 @@
                 }],
                 xAxes: [{
                     type: 'time',
-                    distribution: 'series',
+                    distribution: 'linear',
                     offset: true,
                     ticks: {
                         major: {
@@ -53,6 +53,15 @@
                         fontColor: 'white'
                     },
                 }]
+            },
+            showLines: false,
+            tooltips: {
+                mode: 'index',
+                intersect: false,
+            },
+            hover: {
+                mode: 'nearest',
+                intersect: true
             }
         };
 
@@ -65,10 +74,10 @@
                     borderColor: '#43a047',
                     data: this.metrics.map(m => m.avg),
                     type: 'line',
-                    pointRadius: 0,
+                    pointRadius: 1,
                     fill: false,
                     lineTension: 0,
-                    borderWidth: 2
+                    borderWidth: 2,
                 }
             ]
         };
