@@ -7,6 +7,7 @@ require (
 	github.com/alexandrevicenzi/go-sse v0.0.0-20191008221740-c629c4a96646
 	github.com/badoux/checkmail v0.0.0-20181210160741-9661bd69e9ad // indirect
 	github.com/bwmarrin/snowflake v0.3.0
+	github.com/coreos/go-systemd v0.0.0-20190321100706-95778dfbb74e
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-kivik/kivik/v3 v3.0.0
 	github.com/go-ole/go-ole v1.2.4 // indirect
