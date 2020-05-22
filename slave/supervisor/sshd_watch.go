@@ -5,7 +5,6 @@ import (
 	"github.com/m7shapan/ratelimit"
 	"github.com/sirupsen/logrus"
 	"github.com/vjeantet/grok"
-	"log"
 	"math"
 	"os"
 	"time"
@@ -17,7 +16,7 @@ var (
 
 func WatchSshd() {
 	logrus.Info("Creating ssh login rate limit...")
-	rl := ratelimit.CreateLimit("5r/h")
+	sshRateLimit := ratelimit.CreateLimit("5r/h")
 
 	logrus.Info("Loading ssh log patterns...")
 	LoadPatterns()
@@ -46,9 +45,10 @@ func WatchSshd() {
 			}
 
 			// count rate for parsed IP
-			err := rl.Hit(parsedEntry.ClientIp)
+			err := sshRateLimit.Hit(parsedEntry.ClientIp)
 			if err != nil {
-				log.Printf("%v needs block: %s", parsedEntry.ClientIp, entry.Fields["MESSAGE"])
+				// too much requests, report this
+				ReportIp(parsedEntry.ClientIp, entry.Fields["MESSAGE"])
 			}
 
 			// we don't need real output so skip it
