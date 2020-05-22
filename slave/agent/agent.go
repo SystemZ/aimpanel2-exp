@@ -1,8 +1,6 @@
 package agent
 
 import (
-	"fmt"
-	"github.com/coreos/go-systemd/sdjournal"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/ahttp"
@@ -12,8 +10,6 @@ import (
 	"gitlab.com/systemz/aimpanel2/slave/cron"
 	"gitlab.com/systemz/aimpanel2/slave/model"
 	"gitlab.com/systemz/aimpanel2/slave/tasks"
-	"math"
-	"os"
 	"time"
 )
 
@@ -75,65 +71,6 @@ func Start(hostToken string) {
 		if err != nil {
 			logrus.Error(err)
 		}
-	}()
-
-	go func() {
-		logrus.Info("Starting ssh log parsing...")
-		//journalInstance, err := sdjournal.NewJournal()
-		jr, err := sdjournal.NewJournalReader(sdjournal.JournalReaderConfig{
-			Since: -time.Duration(5) * time.Second,
-			//Since: 1 * time.Nanosecond,
-			Formatter: func(entry *sdjournal.JournalEntry) (string, error) {
-				logrus.WithFields(logrus.Fields{
-					"entry":   *entry,
-					"message": entry.Fields["MESSAGE"],
-				}).Debug("Message from journal received")
-				return fmt.Sprintln(entry.Fields["MESSAGE"]), nil
-			},
-			//Path:  "/var/log/journal",
-			//Path:  "/run/log/journal", // not for ubuntu
-			//NumFromTail: 10,
-			//Cursor:
-			Matches: []sdjournal.Match{
-				{
-					Field: sdjournal.SD_JOURNAL_FIELD_SYSTEMD_UNIT,
-					Value: "ssh.service",
-				},
-			},
-			//Matches: []sdjournal.Match{
-			//	{"SYSLOG_IDENTIFIER", "ssh.service"},
-			//},
-		})
-
-		if err != nil {
-			logrus.Error(err)
-		}
-
-		if jr == nil {
-			logrus.Error("nil journal reader")
-		}
-
-		defer jr.Close()
-		err = jr.Follow(time.After(time.Duration(math.MaxInt64)), os.Stdout)
-		if err != nil {
-			logrus.Error(err)
-		}
-
-		/*
-			b := make([]byte, 64*1<<(10)) // 64KB.
-			for {
-				c, err := jr.Read(b)
-				if err != nil {
-					if err == io.EOF {
-						break
-					}
-					panic(err)
-				}
-				logrus.Info(string(b[:c]))
-			}
-		*/
-
-		logrus.Info("Stopped ssh log parsing...")
 	}()
 
 	tasks.AgentSendOSInfo()

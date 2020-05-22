@@ -32,10 +32,10 @@ function update-hosts-slave {
 # should be called by IDE or script after file save in slave codebase
 function sync-slave {
     go build -o ./vagrant.slave.bin gitlab.com/systemz/aimpanel2/slave &
-    ssh -F vagrant.slave.ssh.config default 'sudo /bin/bash -c "service aimpanel stop"'
+    ssh -F vagrant.slave.ssh.config default 'sudo /bin/bash -c "service aimpanel stop && service aimpanel-supervisor stop"'
     wait
     rsync -e "ssh -F vagrant.slave.ssh.config" --rsync-path="sudo rsync" vagrant.slave.bin default:/opt/aimpanel/slave
-    ssh -F vagrant.slave.ssh.config default 'sudo /bin/bash -c "systemctl start aimpanel"'
+    ssh -F vagrant.slave.ssh.config default 'sudo /bin/bash -c "systemctl start aimpanel && systemctl start aimpanel-supervisor"'
 }
 
 # automatically rebuilds slave and copies binary to VM when slave code changes
