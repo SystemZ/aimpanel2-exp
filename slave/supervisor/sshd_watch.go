@@ -105,12 +105,15 @@ func LoadPatterns() {
 	patterns.AddPattern("SSHD_BAD_USERNAME_PASSWORD", `Invalid user %{USER:client_username} from %{IP:client_ip} port %{INT:client_port}`)
 	// Failed password for vagrant from 192.168.121.1 port 42270 ssh2
 	patterns.AddPattern("SSHD_BAD_PASSWORD", `Failed password for %{USER:client_username} from %{IP:client_ip} port %{INT:client_port} %{WORD:ssh_version}`)
+	// Invalid user gqh from 192.168.121.1 port 35340
+	patterns.AddPattern("SSHD_BAD_USERNAME", `Invalid user %{USER:client_username} from %{IP:client_ip} port %{INT:client_port}`)
 }
 
 func ParseLog(str string) (res ParsedSshLog) {
 	patternList := []string{
 		"%{SSHD_BAD_USERNAME_PASSWORD}",
 		"%{SSHD_BAD_PASSWORD}",
+		"%{SSHD_BAD_USERNAME}",
 	}
 	for _, v := range patternList {
 		parsedValues, err := patterns.Parse(v, str)
