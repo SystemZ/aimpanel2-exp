@@ -127,12 +127,15 @@ func GetUserGameServers(userId primitive.ObjectID) (*[]GameServer, error) {
 		return nil, err
 	}
 
-	var hostsId []bson.D
+	var hostsId = make([]bson.D, 0)
 	for _, host := range hosts {
 		hostsId = append(hostsId, bson.D{{Key: "host_id", Value: host.ID}})
 	}
 
-	var gameServers []GameServer
+	var gameServers = make([]GameServer, 0)
+	if len(hostsId) == 0 {
+		return &gameServers, nil
+	}
 
 	cur, err := DB.Collection(gameServerCollection).Find(context.TODO(),
 		bson.D{{Key: "$or", Value: hostsId}})
