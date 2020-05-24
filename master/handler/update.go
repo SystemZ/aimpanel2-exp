@@ -7,7 +7,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib/ecode"
 	"gitlab.com/systemz/aimpanel2/master/config"
 	"gitlab.com/systemz/aimpanel2/master/model"
-	"gitlab.com/systemz/aimpanel2/master/service/gameserver"
+	h "gitlab.com/systemz/aimpanel2/master/service/host"
 	"net/http"
 )
 
@@ -47,7 +47,7 @@ func NewVersion(w http.ResponseWriter, r *http.Request) {
 
 	go func() {
 		for _, host := range hosts {
-			err := gameserver.Update(host.ID)
+			err := h.Update(host.ID)
 			if err != nil {
 				logrus.Error(err)
 			}

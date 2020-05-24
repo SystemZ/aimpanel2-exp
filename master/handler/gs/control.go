@@ -8,6 +8,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib/request"
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/master/service/gameserver"
+	"gitlab.com/systemz/aimpanel2/master/service/host"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
 )
@@ -175,13 +176,13 @@ func Data(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if data.GameServerID != "" {
-		err = gameserver.GsData(hostToken, data)
+		err = gameserver.Data(hostToken, data)
 		if err != nil {
 			lib.ReturnError(w, http.StatusInternalServerError, ecode.GsData, err)
 			return
 		}
 	} else {
-		err = gameserver.HostData(hostToken, data)
+		err = host.Data(hostToken, data)
 		if err != nil {
 			lib.ReturnError(w, http.StatusInternalServerError, ecode.HostData, err)
 			return

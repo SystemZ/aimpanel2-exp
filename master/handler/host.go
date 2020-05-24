@@ -10,7 +10,6 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib/request"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"gitlab.com/systemz/aimpanel2/master/response"
-	"gitlab.com/systemz/aimpanel2/master/service/gameserver"
 	"gitlab.com/systemz/aimpanel2/master/service/host"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
@@ -167,7 +166,7 @@ func HostAuth(w http.ResponseWriter, r *http.Request) {
 func HostUpdate(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	oid, _ := primitive.ObjectIDFromHex(params["id"])
-	err := gameserver.Update(oid)
+	err := host.Update(oid)
 	if err != nil {
 		lib.ReturnError(w, http.StatusInternalServerError, ecode.GsUpdate, err)
 		return
