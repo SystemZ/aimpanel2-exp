@@ -3,14 +3,13 @@ package lib
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/cavaliercoder/grab"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib/ecode"
 	"gitlab.com/systemz/aimpanel2/lib/response"
-	"io"
 	"io/ioutil"
 	"math/rand"
 	goHttp "net/http"
-	"os"
 	"time"
 )
 
@@ -54,21 +53,7 @@ func (e *Error) Error() string {
 }
 
 func DownloadFile(url string, filepath string) error {
-	// Create the file
-	out, err := os.Create(filepath)
-	if err != nil {
-		return err
-	}
-	defer out.Close()
-
-	// Get the data
-	resp, err := goHttp.Get(url)
-	if err != nil {
-		return err
-	}
-
-	// Write the body to file
-	_, err = io.Copy(out, resp.Body)
+	_, err := grab.Get(filepath, url)
 	if err != nil {
 		return err
 	}
