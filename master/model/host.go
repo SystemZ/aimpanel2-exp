@@ -61,7 +61,7 @@ func (h *Host) SetID(id primitive.ObjectID) {
 }
 
 func GetHosts() ([]Host, error) {
-	var hosts []Host
+	var hosts = make([]Host, 0)
 
 	cur, err := DB.Collection(hostCollection).Find(context.TODO(),
 		bson.D{})
@@ -115,7 +115,7 @@ func GetHostByToken(token string) (*Host, error) {
 }
 
 func GetHostsByUserId(userId primitive.ObjectID) ([]Host, error) {
-	var hosts []Host
+	var hosts = make([]Host, 0)
 
 	cur, err := DB.Collection(hostCollection).Find(context.TODO(),
 		bson.D{{Key: "user_id", Value: userId}})
@@ -136,7 +136,7 @@ func GetHostsByUserId(userId primitive.ObjectID) ([]Host, error) {
 }
 
 func GetHostMetricsByHostId(hostId primitive.ObjectID, limit int64) ([]MetricHost, error) {
-	var metrics []MetricHost
+	var metrics = make([]MetricHost, 0)
 
 	opts := options.Find()
 	opts.SetLimit(limit)
