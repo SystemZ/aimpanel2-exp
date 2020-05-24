@@ -4,9 +4,11 @@ go 1.12
 
 require (
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
+	github.com/ahmedash95/ratelimit v0.0.0-20180306211640-c1fee8927478
 	github.com/alexandrevicenzi/go-sse v0.0.0-20191008221740-c629c4a96646
 	github.com/badoux/checkmail v0.0.0-20181210160741-9661bd69e9ad // indirect
 	github.com/bwmarrin/snowflake v0.3.0
+	github.com/coreos/go-systemd v0.0.0-20190321100706-95778dfbb74e
 	github.com/cavaliercoder/grab v2.0.0+incompatible
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-ole/go-ole v1.2.4 // indirect
@@ -21,6 +23,7 @@ require (
 	github.com/jinzhu/gorm v1.9.11
 	github.com/jpillora/backoff v1.0.0
 	github.com/klauspost/pgzip v1.2.1
+	github.com/m7shapan/ratelimit v0.0.0-20181106163723-dde43b0bdfbf
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/r3labs/sse v0.0.0-20191214223212-f0cc80f53f80
 	github.com/robfig/cron/v3 v3.0.1
@@ -31,6 +34,7 @@ require (
 	github.com/softbrewery/gojoi v0.0.0-20180423202125-34d5e1054ec7
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/viper v1.6.1
+	github.com/vjeantet/grok v1.0.0
 	go.mongodb.org/mongo-driver v1.3.3
 	golang.org/x/crypto v0.0.0-20191227163750-53104e6ec876
 	golang.org/x/net v0.0.0-20200501053045-e0ff5e5a1de5

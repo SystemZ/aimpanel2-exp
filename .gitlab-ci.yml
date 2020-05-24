@@ -41,7 +41,10 @@ backend:
     #- go build -race -ldflags "-extldflags '-static'" -o $CI_PROJECT_DIR/aimpanel-master
     #- go test -race $(go list ./... | grep -v /vendor/)
     - CGO_ENABLED=0 go build -ldflags "-X gitlab.com/systemz/aimpanel2/master/config.GIT_COMMIT=$CI_COMMIT_SHA" -o $CI_PROJECT_DIR/aimpanel-master gitlab.com/systemz/aimpanel2/master
-    - CGO_ENABLED=0 go build -ldflags "-X gitlab.com/systemz/aimpanel2/slave/config.GIT_COMMIT=$CI_COMMIT_SHA" -o $CI_PROJECT_DIR/aimpanel-slave gitlab.com/systemz/aimpanel2/slave
+    # requirements for journald integration
+    - apt-get update && apt-get install -q -y libsystemd-dev
+    - go build -ldflags "-X gitlab.com/systemz/aimpanel2/slave/config.GIT_COMMIT=$CI_COMMIT_SHA" -o $CI_PROJECT_DIR/aimpanel-slave gitlab.com/systemz/aimpanel2/slave
+    #- CGO_ENABLED=0 go build -ldflags "-X gitlab.com/systemz/aimpanel2/slave/config.GIT_COMMIT=$CI_COMMIT_SHA" -o $CI_PROJECT_DIR/aimpanel-slave gitlab.com/systemz/aimpanel2/slave
     # generate RESTful API spec
     - go get github.com/swaggo/swag/cmd/swag
     - bash Taskfile.sh ci-swagger-gen

@@ -87,8 +87,11 @@ ln -s /opt/aimpanel/slave /usr/local/bin/slave
 # optitonal java for MC
 echo "Updating OS packages..."
 apt-get update -q
+echo "Installing systemd integration..."
+apt-get install -q -y libsystemd-dev
 echo "Installing OpenJDK 11 JRE..."
 apt-get install -q -y openjdk-11-jre-headless
+
 # create service for redis
 echo "
 [Unit]
@@ -110,19 +113,11 @@ ExecStart=$REDIS_DIR/$REDIS_BINARY_NAME $REDIS_DIR/redis.conf
 WorkingDirectory=/opt/aimpanel/redis/
 Restart=always
 " > /etc/systemd/system/aimpanel-redis.service
-# reload files with services in systemd
-systemctl daemon-reload
-# start service
-systemctl restart aimpanel-redis
-# enable autostart
-systemctl enable aimpanel-redis
-# show status to user
-#systemctl status --no-pager aimpanel-redis.service
 
-# install service to run aimpanel agent
+# create service for aimpanel agent
 echo "
 [Unit]
-Description=Manage game servers
+Description=aimpanel agent
 After=network-online.target
 Wants=aimpanel-redis.service
 
@@ -147,11 +142,48 @@ Environment="TRASH_DIR=$AIMPANEL_DIR/trash/"
 Environment="HOST_TOKEN=$TOKEN"
 Environment="API_URL=$API_URL"
 " > /etc/systemd/system/aimpanel.service
+
+# create service for aimpanel supervisor
+echo "
+[Unit]
+Description=aimpanel supervisor
+After=network-online.target
+Wants=aimpanel-redis.service
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+Type=simple
+User=root
+StandardInput=tty-force
+TTYPath=/dev/tty20
+StandardOutput=journal
+KillMode=process
+ExecStart=$AIMPANEL_BINARY_DIR/$AIMPANEL_BINARY_NAME supervisor
+WorkingDirectory=/opt/aimpanel/
+Restart=always
+RestartSec=10
+ExecStop=$AIMPANEL_BINARY_DIR/$AIMPANEL_BINARY_NAME shutdown
+Environment="GS_DIR=$AIMPANEL_DIR/gs/"
+Environment="STORAGE_DIR=$AIMPANEL_DIR/storage/"
+Environment="TRASH_DIR=$AIMPANEL_DIR/trash/"
+" > /etc/systemd/system/aimpanel-supervisor.service
+
 # reload files with services in systemd
 systemctl daemon-reload
-# start service
+
+# start services
+systemctl restart aimpanel-redis
+systemctl restart aimpanel-supervisor
 systemctl restart aimpanel
+
 # enable autostart
+systemctl enable aimpanel-redis
+systemctl enable aimpanel-supervisor
 systemctl enable aimpanel
+
 # show status to user
+#systemctl status --no-pager aimpanel-redis.service
+#systemctl status --no-pager aimpanel-supervisor.service
 #systemctl status --no-pager aimpanel.service
