@@ -312,47 +312,6 @@ func Remove(gsId primitive.ObjectID) error {
 	return nil
 }
 
-func Update(hostId primitive.ObjectID) error {
-	hostToken, err := model.GetHostTokenById(hostId)
-	if err != nil {
-		return err
-	}
-
-	if hostToken == "" {
-		return errors.New("error when getting host token from db")
-	}
-
-	channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken)
-	if !ok {
-		return errors.New("host is not turned on")
-	}
-
-	commit, err := model.GetSlaveCommit(model.Redis)
-	if err != nil {
-		return err
-	}
-
-	url, err := model.GetSlaveUrl(model.Redis)
-	if err != nil {
-		return err
-	}
-
-	taskMsg := task.Message{
-		TaskId: task.AGENT_UPDATE,
-		Commit: commit,
-		Url:    url,
-	}
-
-	taskMsgStr, err := taskMsg.Serialize()
-	if err != nil {
-		return err
-	}
-
-	channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
-
-	return nil
-}
-
 func FileList(gsId primitive.ObjectID) (*filemanager.Node, error) {
 	gameServer, err := model.GetGameServerById(gsId)
 	if err != nil {

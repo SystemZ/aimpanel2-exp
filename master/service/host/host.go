@@ -1,6 +1,7 @@
 package host
 
 import (
+	"errors"
 	"github.com/alexandrevicenzi/go-sse"
 	"github.com/dgrijalva/jwt-go"
 	"gitlab.com/systemz/aimpanel2/lib"
@@ -206,4 +207,45 @@ func sendJobsToAgent(hostId primitive.ObjectID) int {
 	channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
 
 	return ecode.NoError
+}
+
+func Update(hostId primitive.ObjectID) error {
+	hostToken, err := model.GetHostTokenById(hostId)
+	if err != nil {
+		return err
+	}
+
+	if hostToken == "" {
+		return errors.New("error when getting host token from db")
+	}
+
+	channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken)
+	if !ok {
+		return errors.New("host is not turned on")
+	}
+
+	commit, err := model.GetSlaveCommit(model.Redis)
+	if err != nil {
+		return err
+	}
+
+	url, err := model.GetSlaveUrl(model.Redis)
+	if err != nil {
+		return err
+	}
+
+	taskMsg := task.Message{
+		TaskId: task.AGENT_UPDATE,
+		Commit: commit,
+		Url:    url,
+	}
+
+	taskMsgStr, err := taskMsg.Serialize()
+	if err != nil {
+		return err
+	}
+
+	channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
+
+	return nil
 }
