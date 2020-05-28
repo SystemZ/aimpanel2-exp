@@ -87,8 +87,8 @@ ln -s /opt/aimpanel/slave /usr/local/bin/slave
 # optitonal java for MC
 echo "Updating OS packages..."
 apt-get update -q
-echo "Installing systemd integration..."
-apt-get install -q -y libsystemd-dev
+#echo "Installing systemd integration..."
+#apt-get install -q -y libsystemd-dev
 echo "Installing OpenJDK 11 JRE..."
 apt-get install -q -y openjdk-11-jre-headless
 
