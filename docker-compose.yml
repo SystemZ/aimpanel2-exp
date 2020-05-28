@@ -19,7 +19,6 @@ services:
       - redis
   mongo:
     image: mongo
-    restart: always
     ports:
       - 27017:27017
     environment:
@@ -27,7 +26,6 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: dev
   mongo-express:
     image: mongo-express
-    restart: always
     ports:
       - 8081:8081
     environment:
