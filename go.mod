@@ -6,10 +6,12 @@ require (
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
 	github.com/ahmedash95/ratelimit v0.0.0-20180306211640-c1fee8927478
 	github.com/alexandrevicenzi/go-sse v0.0.0-20191008221740-c629c4a96646
+	github.com/aporeto-inc/go-ipset v1.5.3-0.20200404011611-ee48e4a898a6
+	github.com/arduino/go-apt-client v0.0.0-20190812130613-5613f843fdc8
 	github.com/badoux/checkmail v0.0.0-20181210160741-9661bd69e9ad // indirect
 	github.com/bwmarrin/snowflake v0.3.0
-	github.com/coreos/go-systemd v0.0.0-20190321100706-95778dfbb74e
 	github.com/cavaliercoder/grab v2.0.0+incompatible
+	github.com/coreos/go-systemd v0.0.0-20190321100706-95778dfbb74e
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/go-redis/redis v6.15.6+incompatible
@@ -30,7 +32,7 @@ require (
 	github.com/rs/cors v1.7.0
 	github.com/shirou/gopsutil v2.19.11+incompatible
 	github.com/shirou/w32 v0.0.0-20160930032740-bb4de0191aa4 // indirect
-	github.com/sirupsen/logrus v1.4.2
+	github.com/sirupsen/logrus v1.5.0
 	github.com/softbrewery/gojoi v0.0.0-20180423202125-34d5e1054ec7
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/viper v1.6.1
