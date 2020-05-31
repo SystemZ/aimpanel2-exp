@@ -8,19 +8,22 @@ import (
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/master/config"
 
-	"github.com/bwmarrin/snowflake"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var (
-	Redis     *redis.Client
-	DB        *mongo.Database
-	Snowflake *snowflake.Node
+	Redis *redis.Client
+	DB    *mongo.Database
 )
 
 func InitDB() *mongo.Database {
-	clientOptions := options.Client().ApplyURI(fmt.Sprintf("mongodb://%s:%s@%s:%s/?authSource=admin", config.DB_USERNAME, config.DB_PASSWORD, config.DB_HOST, config.DB_PORT))
+	clientOptions := options.Client()
+	clientOptions.ApplyURI(fmt.Sprintf("mongodb://%s:%s@%s:%s/?authSource=admin", config.DB_USERNAME, config.DB_PASSWORD, config.DB_HOST, config.DB_PORT))
+
+	if config.DEV_MODE {
+		clientOptions.SetDirect(true)
+	}
 
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
@@ -59,14 +62,4 @@ func InitRedis() {
 	}
 
 	logrus.Info("Connection to Redis seems OK!")
-}
-
-func InitSnowflake() *snowflake.Node {
-	node, err := snowflake.NewNode(config.NODE_ID)
-	if err != nil {
-		logrus.Error(err.Error())
-		panic("Failed to set snowflake node")
-	}
-
-	return node
 }

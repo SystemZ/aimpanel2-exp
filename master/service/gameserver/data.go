@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"github.com/alexandrevicenzi/go-sse"
 	"github.com/sirupsen/logrus"
+	"gitlab.com/systemz/aimpanel2/lib"
+	"gitlab.com/systemz/aimpanel2/lib/ecode"
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/master/events"
 	"gitlab.com/systemz/aimpanel2/master/model"
@@ -72,6 +74,7 @@ func Log(hostToken string, taskMsg *task.Message) error {
 		return err
 	}
 
+	//TODO: Handle this with mongo events collection
 	events.SSE.SendMessage(fmt.Sprintf("/v1/host/%s/server/%s/console",
 		host.ID.Hex(),
 		gsLog.GameServerId.Hex()),
@@ -88,6 +91,11 @@ func Log(hostToken string, taskMsg *task.Message) error {
 func GameMetricsFrequency(hostToken string, taskMsg *task.Message) error {
 	gameServerId := taskMsg.GameServerID
 
+	host, err := model.GetHostByToken(hostToken)
+	if err != nil {
+		return &lib.Error{ErrorCode: ecode.HostNotFound}
+	}
+
 	oid, err := primitive.ObjectIDFromHex(taskMsg.GameServerID)
 	if err != nil {
 		return err
@@ -102,23 +110,16 @@ func GameMetricsFrequency(hostToken string, taskMsg *task.Message) error {
 		return errors.New("game server not found")
 	}
 
-	channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken)
-	if !ok {
-		return errors.New("game server is not turned on")
-	}
-
 	taskMessage := task.Message{
 		TaskId:          task.GAME_METRICS_FREQUENCY,
 		GameServerID:    gameServerId,
 		MetricFrequency: gs.MetricFrequency,
 	}
 
-	taskMsgStr, err := taskMessage.Serialize()
+	err = model.SendEvent(host.ID, taskMessage)
 	if err != nil {
-		return err
+		return &lib.Error{ErrorCode: ecode.DbSave}
 	}
-
-	channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMessage.TaskId.StringValue()))
 
 	return nil
 }

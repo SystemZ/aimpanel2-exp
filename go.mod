@@ -4,7 +4,6 @@ go 1.12
 
 require (
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
-	github.com/ahmedash95/ratelimit v0.0.0-20180306211640-c1fee8927478
 	github.com/alexandrevicenzi/go-sse v0.0.0-20191008221740-c629c4a96646
 	github.com/aporeto-inc/go-ipset v1.5.3-0.20200404011611-ee48e4a898a6
 	github.com/arduino/go-apt-client v0.0.0-20190812130613-5613f843fdc8
