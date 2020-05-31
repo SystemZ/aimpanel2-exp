@@ -8,7 +8,6 @@ require (
 	github.com/aporeto-inc/go-ipset v1.5.3-0.20200404011611-ee48e4a898a6
 	github.com/arduino/go-apt-client v0.0.0-20190812130613-5613f843fdc8
 	github.com/badoux/checkmail v0.0.0-20181210160741-9661bd69e9ad // indirect
-	github.com/coreos/go-systemd v0.0.0-20190321100706-95778dfbb74e
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/cavaliercoder/grab v2.0.0+incompatible
 	github.com/coreos/go-systemd v0.0.0-20190321100706-95778dfbb74e
