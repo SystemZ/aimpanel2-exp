@@ -1,14 +1,11 @@
 package host
 
 import (
-	"errors"
-	"github.com/alexandrevicenzi/go-sse"
 	"github.com/dgrijalva/jwt-go"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/ecode"
 	"gitlab.com/systemz/aimpanel2/lib/request"
 	"gitlab.com/systemz/aimpanel2/lib/task"
-	"gitlab.com/systemz/aimpanel2/master/events"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"gitlab.com/systemz/aimpanel2/master/service/gameserver"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -189,39 +186,23 @@ func sendJobsToAgent(hostId primitive.ObjectID) int {
 		})
 	}
 
-	channel, ok := events.SSE.GetChannel("/v1/events/" + host.Token)
-	if !ok {
-		return ecode.HostNotTurnedOn
-	}
-
 	taskMsg := task.Message{
 		TaskId: task.AGENT_GET_JOBS,
 		Jobs:   &jobs,
 	}
 
-	taskMsgStr, err := taskMsg.Serialize()
+	err = model.SendEvent(host.ID, taskMsg)
 	if err != nil {
-		return ecode.Unknown
+		return ecode.DbSave
 	}
-
-	channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
 
 	return ecode.NoError
 }
 
 func Update(hostId primitive.ObjectID) error {
-	hostToken, err := model.GetHostTokenById(hostId)
+	host, err := model.GetHostById(hostId)
 	if err != nil {
-		return err
-	}
-
-	if hostToken == "" {
-		return errors.New("error when getting host token from db")
-	}
-
-	channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken)
-	if !ok {
-		return errors.New("host is not turned on")
+		return &lib.Error{ErrorCode: ecode.HostNotFound}
 	}
 
 	commit, err := model.GetSlaveCommit(model.Redis)
@@ -240,12 +221,10 @@ func Update(hostId primitive.ObjectID) error {
 		Url:    url,
 	}
 
-	taskMsgStr, err := taskMsg.Serialize()
+	err = model.SendEvent(host.ID, taskMsg)
 	if err != nil {
-		return err
+		return &lib.Error{ErrorCode: ecode.DbSave}
 	}
-
-	channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
 
 	return nil
 }

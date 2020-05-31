@@ -2,10 +2,10 @@ package host
 
 import (
 	"errors"
-	"github.com/alexandrevicenzi/go-sse"
 	"github.com/sirupsen/logrus"
+	"gitlab.com/systemz/aimpanel2/lib"
+	"gitlab.com/systemz/aimpanel2/lib/ecode"
 	"gitlab.com/systemz/aimpanel2/lib/task"
-	"gitlab.com/systemz/aimpanel2/master/events"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -76,22 +76,15 @@ func AgentStarted(hostId primitive.ObjectID) error {
 }
 
 func AgentMetricsFrequency(host *model.Host) error {
-	channel, ok := events.SSE.GetChannel("/v1/events/" + host.Token)
-	if !ok {
-		return errors.New("host is not turned on")
-	}
-
 	taskMsg := task.Message{
 		TaskId:          task.AGENT_METRICS_FREQUENCY,
 		MetricFrequency: host.MetricFrequency,
 	}
 
-	taskMsgStr, err := taskMsg.Serialize()
+	err := model.SendEvent(host.ID, taskMsg)
 	if err != nil {
-		return err
+		return &lib.Error{ErrorCode: ecode.DbSave}
 	}
-
-	channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
 
 	return nil
 }
@@ -128,22 +121,15 @@ func AgentGetJobs(host *model.Host) error {
 		})
 	}
 
-	channel, ok := events.SSE.GetChannel("/v1/events/" + host.Token)
-	if !ok {
-		return errors.New("host is not turned on")
-	}
-
 	taskMsg := task.Message{
 		TaskId: task.AGENT_GET_JOBS,
 		Jobs:   &jobs,
 	}
 
-	taskMsgStr, err := taskMsg.Serialize()
+	err = model.SendEvent(host.ID, taskMsg)
 	if err != nil {
-		return err
+		return &lib.Error{ErrorCode: ecode.DbSave}
 	}
-
-	channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
 
 	return nil
 }

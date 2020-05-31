@@ -3,14 +3,12 @@ package gameserver
 import (
 	"encoding/json"
 	"errors"
-	"github.com/alexandrevicenzi/go-sse"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/ecode"
 	"gitlab.com/systemz/aimpanel2/lib/filemanager"
 	"gitlab.com/systemz/aimpanel2/lib/game"
 	"gitlab.com/systemz/aimpanel2/lib/task"
-	"gitlab.com/systemz/aimpanel2/master/events"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -24,18 +22,9 @@ func Start(gsId primitive.ObjectID) error {
 		return errors.New("getting game server from db failed")
 	}
 
-	hostToken, err := model.GetHostTokenById(gameServer.HostId)
+	host, err := model.GetHostById(gameServer.HostId)
 	if err != nil {
-		return err
-	}
-
-	if hostToken == "" {
-		return errors.New("getting host token from db failed")
-	}
-
-	channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken)
-	if !ok {
-		return errors.New("host is not turned on")
+		return &lib.Error{ErrorCode: ecode.HostNotFound}
 	}
 
 	var gameDef game.Game
@@ -50,12 +39,10 @@ func Start(gsId primitive.ObjectID) error {
 		Game:         &gameDef,
 	}
 
-	taskMsgStr, err := taskMsg.Serialize()
+	err = model.SendEvent(host.ID, taskMsg)
 	if err != nil {
-		return err
+		return &lib.Error{ErrorCode: ecode.DbSave}
 	}
-
-	channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
 
 	return nil
 }
@@ -70,18 +57,9 @@ func Stop(gsId primitive.ObjectID, stopType uint) error {
 		return errors.New("error when getting game server from db")
 	}
 
-	hostToken, err := model.GetHostTokenById(gameServer.HostId)
+	host, err := model.GetHostById(gameServer.HostId)
 	if err != nil {
-		return err
-	}
-
-	if hostToken == "" {
-		return errors.New("error when getting host token from db")
-	}
-
-	channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken)
-	if !ok {
-		return errors.New("host is not turned on")
+		return &lib.Error{ErrorCode: ecode.HostNotFound}
 	}
 
 	taskMsg := task.Message{
@@ -93,12 +71,10 @@ func Stop(gsId primitive.ObjectID, stopType uint) error {
 		taskMsg.TaskId = task.GAME_STOP_SIGTERM
 	}
 
-	taskMsgStr, err := taskMsg.Serialize()
+	err = model.SendEvent(host.ID, taskMsg)
 	if err != nil {
-		return err
+		return &lib.Error{ErrorCode: ecode.DbSave}
 	}
-
-	channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
 
 	return nil
 }
@@ -113,13 +89,9 @@ func Install(gsId primitive.ObjectID) error {
 		return errors.New("error when getting game server from db")
 	}
 
-	hostToken, err := model.GetHostTokenById(gameServer.HostId)
+	host, err := model.GetHostById(gameServer.HostId)
 	if err != nil {
-		return err
-	}
-
-	if hostToken == "" {
-		return errors.New("error when getting host token from db")
+		return &lib.Error{ErrorCode: ecode.HostNotFound}
 	}
 
 	gameFile, err := model.GetGameFileByGameIdAndVersion(gameServer.GameId, gameServer.GameVersion)
@@ -138,23 +110,16 @@ func Install(gsId primitive.ObjectID) error {
 	}
 	g.DownloadUrl = gameFile.DownloadUrl
 
-	channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken)
-	if !ok {
-		return errors.New("host is not turned on")
-	}
-
 	taskMsg := task.Message{
 		TaskId:       task.AGENT_INSTALL_GS,
 		Game:         &g,
 		GameServerID: gsId.Hex(),
 	}
 
-	taskMsgStr, err := taskMsg.Serialize()
+	err = model.SendEvent(host.ID, taskMsg)
 	if err != nil {
-		return err
+		return &lib.Error{ErrorCode: ecode.DbSave}
 	}
-
-	channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
 
 	return nil
 }
@@ -169,18 +134,9 @@ func SendCommand(gsId primitive.ObjectID, command string) error {
 		return &lib.Error{ErrorCode: ecode.GsNotFound}
 	}
 
-	hostToken, err := model.GetHostTokenById(gameServer.HostId)
+	host, err := model.GetHostById(gameServer.HostId)
 	if err != nil {
-		return err
-	}
-
-	if hostToken == "" {
-		return errors.New("error when getting host token from db")
-	}
-
-	channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken)
-	if !ok {
-		return errors.New("game server is not turned on")
+		return &lib.Error{ErrorCode: ecode.HostNotFound}
 	}
 
 	taskMsg := task.Message{
@@ -189,12 +145,10 @@ func SendCommand(gsId primitive.ObjectID, command string) error {
 		Body:         command,
 	}
 
-	taskMsgStr, err := taskMsg.Serialize()
+	err = model.SendEvent(host.ID, taskMsg)
 	if err != nil {
-		return err
+		return &lib.Error{ErrorCode: ecode.DbSave}
 	}
-
-	channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
 
 	return nil
 }
@@ -209,24 +163,15 @@ func Restart(gsId primitive.ObjectID, stopType uint) error {
 		return &lib.Error{ErrorCode: ecode.GsNotFound}
 	}
 
-	hostToken, err := model.GetHostTokenById(gameServer.HostId)
+	host, err := model.GetHostById(gameServer.HostId)
 	if err != nil {
-		return err
-	}
-
-	if hostToken == "" {
-		return errors.New("error when getting host token from db")
+		return &lib.Error{ErrorCode: ecode.HostNotFound}
 	}
 
 	var gameDef game.Game
 	err = json.Unmarshal([]byte(gameServer.GameJson), &gameDef)
 	if err != nil {
 		return errors.New("error when getting game")
-	}
-
-	channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken)
-	if !ok {
-		return errors.New("game server is not turned on")
 	}
 
 	taskMsg := task.Message{
@@ -236,12 +181,10 @@ func Restart(gsId primitive.ObjectID, stopType uint) error {
 		Game:         &gameDef,
 	}
 
-	taskMsgStr, err := taskMsg.Serialize()
+	err = model.SendEvent(host.ID, taskMsg)
 	if err != nil {
-		return err
+		return &lib.Error{ErrorCode: ecode.DbSave}
 	}
-
-	channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
 
 	return nil
 }
@@ -255,9 +198,9 @@ func Remove(gsId primitive.ObjectID) error {
 		return &lib.Error{ErrorCode: ecode.GsNotFound}
 	}
 
-	hostToken, err := model.GetHostTokenById(gameServer.HostId)
-	if hostToken == "" {
-		return &lib.Error{ErrorCode: ecode.GameNotFound}
+	host, err := model.GetHostById(gameServer.HostId)
+	if err != nil {
+		return &lib.Error{ErrorCode: ecode.HostNotFound}
 	}
 
 	if gameServer.State == 1 {
@@ -265,32 +208,22 @@ func Remove(gsId primitive.ObjectID) error {
 			GameServerID: gsId.Hex(),
 			TaskId:       task.GAME_STOP_SIGKILL,
 		}
-		taskMsgStr, err := taskMsg.Serialize()
-		if err != nil {
-			return err
-		}
 
-		channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken)
-		if !ok {
-			return errors.New("game server is not turned on")
+		err = model.SendEvent(host.ID, taskMsg)
+		if err != nil {
+			return &lib.Error{ErrorCode: ecode.DbSave}
 		}
-		channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
 	}
 
 	taskMsg := task.Message{
 		GameServerID: gsId.Hex(),
 		TaskId:       task.AGENT_REMOVE_GS,
 	}
-	taskMsgStr, err := taskMsg.Serialize()
-	if err != nil {
-		return err
-	}
 
-	channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken)
-	if !ok {
-		return errors.New("host is not turned on")
+	err = model.SendEvent(host.ID, taskMsg)
+	if err != nil {
+		return &lib.Error{ErrorCode: ecode.DbSave}
 	}
-	channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
 
 	permissions, err := model.GetPermisionsByEndpointRegex("/v1/host/" + gameServer.HostId.Hex() + "/server/" + gsId.Hex() + "%")
 	if err != nil {
@@ -322,18 +255,9 @@ func FileList(gsId primitive.ObjectID) (*filemanager.Node, error) {
 		return nil, errors.New("error when getting game server from db")
 	}
 
-	hostToken, err := model.GetHostTokenById(gameServer.HostId)
+	host, err := model.GetHostById(gameServer.HostId)
 	if err != nil {
-		return nil, err
-	}
-
-	if hostToken == "" {
-		return nil, errors.New("error when getting host token from db")
-	}
-
-	channel, ok := events.SSE.GetChannel("/v1/events/" + hostToken)
-	if !ok {
-		return nil, errors.New("host is not turned on")
+		return nil, &lib.Error{ErrorCode: ecode.HostNotFound}
 	}
 
 	taskMsg := task.Message{
@@ -341,13 +265,12 @@ func FileList(gsId primitive.ObjectID) (*filemanager.Node, error) {
 		GameServerID: gsId.Hex(),
 	}
 
-	taskMsgStr, err := taskMsg.Serialize()
+	err = model.SendEvent(host.ID, taskMsg)
 	if err != nil {
-		return nil, err
+		return nil, &lib.Error{ErrorCode: ecode.DbSave}
 	}
 
-	channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
-
+	//TODO: not working on many master instances
 	//wait for files
 	pubsub, err := model.GsFilesSubscribe(model.Redis, gsId.Hex())
 	if err != nil {
