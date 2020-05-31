@@ -32,7 +32,7 @@ func InstallPackage(nameInPath string, packageName string) {
 	}
 	_, err = exec.LookPath(nameInPath)
 	if err != nil {
-		log.Errorf("%v package installation failed")
+		log.Errorf("%v package installation failed", err)
 		return
 	}
 	log.Infof("%v is installed", packageName)
