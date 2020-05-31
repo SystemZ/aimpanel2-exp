@@ -33,7 +33,6 @@ services:
       start_period: 30s
   mongo-express:
     image: mongo-express
-    restart: always
     ports:
       - 8081:8081
     environment:
