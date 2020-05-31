@@ -27,7 +27,8 @@ var serverCmd = &cobra.Command{
 		exit.CheckForExitSignal()
 
 		model.DB = model.InitDB()
-		model.Snowflake = model.InitSnowflake()
+		go model.EventChanges()
+
 		model.InitRedis()
 		events.SSE = events.InitSSE()
 

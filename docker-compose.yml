@@ -19,12 +19,18 @@ services:
       - redis
   mongo:
     image: mongo
+    hostname: mongodb
     restart: always
     ports:
       - 27017:27017
     environment:
       MONGO_INITDB_ROOT_USERNAME: dev
       MONGO_INITDB_ROOT_PASSWORD: dev
+    command: "--bind_ip_all --replSet rs0"
+    healthcheck:
+      test: test $$(echo "rs.initiate().ok || rs.status().ok" | mongo -u dev -p dev --quiet) -eq 1
+      interval: 10s
+      start_period: 30s
   mongo-express:
     image: mongo-express
     restart: always
@@ -33,6 +39,8 @@ services:
     environment:
       ME_CONFIG_MONGODB_ADMINUSERNAME: dev
       ME_CONFIG_MONGODB_ADMINPASSWORD: dev
+    depends_on:
+      - mongo
 volumes:
   redis_data:
     driver: local

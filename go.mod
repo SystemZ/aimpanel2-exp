@@ -4,10 +4,8 @@ go 1.12
 
 require (
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
-	github.com/ahmedash95/ratelimit v0.0.0-20180306211640-c1fee8927478
 	github.com/alexandrevicenzi/go-sse v0.0.0-20191008221740-c629c4a96646
 	github.com/badoux/checkmail v0.0.0-20181210160741-9661bd69e9ad // indirect
-	github.com/bwmarrin/snowflake v0.3.0
 	github.com/coreos/go-systemd v0.0.0-20190321100706-95778dfbb74e
 	github.com/cavaliercoder/grab v2.0.0+incompatible
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
