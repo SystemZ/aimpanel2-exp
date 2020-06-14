@@ -35,6 +35,12 @@ var Fingerprints = []string{
 	"67d08017c05e2bca29f404947491b9055aad84da17b45951e3b9c1fa7f5126a4",
 }
 
+var currentHost = 0
+var Hosts = []string{
+	"http://localhost:9001",
+	"http://localhost:9000",
+}
+
 func InitHttpClient() *http.Client {
 	client := &http.Client{}
 	client.Transport = &http.Transport{
@@ -76,9 +82,10 @@ func VerifyPinTLSContext(ctx context.Context, network, addr string) (net.Conn, e
 
 func Get(path string, output interface{}) (*http.Response, error) {
 	for {
-		logrus.Info("Request to " + path)
+		url := Hosts[currentHost] + path
+		logrus.Info("Request to " + url)
 
-		resp, err := HttpClient.Get(path)
+		resp, err := HttpClient.Get(url)
 		if err != nil {
 			if _, ok := err.(net.Error); !ok {
 				return nil, err
@@ -89,7 +96,8 @@ func Get(path string, output interface{}) (*http.Response, error) {
 			}
 		}
 
-		if resp != nil && !isServerUnavailable(resp.StatusCode) {
+		serverUnavailable := isServerUnavailable(resp.StatusCode)
+		if resp != nil && !serverUnavailable {
 			defer resp.Body.Close()
 			if output == nil {
 				return resp, nil
@@ -98,12 +106,19 @@ func Get(path string, output interface{}) (*http.Response, error) {
 			}
 		}
 
+		if serverUnavailable {
+			nextHost()
+		}
+
 		time.Sleep(b.Duration())
 	}
 }
 
 func Post(path, token, jsonStr string) (*http.Response, error) {
-	req, err := http.NewRequest("POST", path, bytes.NewBufferString(jsonStr))
+	url := Hosts[currentHost] + path
+	logrus.Info("Request to " + url)
+
+	req, err := http.NewRequest("POST", url, bytes.NewBufferString(jsonStr))
 	if err != nil {
 		return nil, err
 	}
@@ -122,12 +137,24 @@ func Post(path, token, jsonStr string) (*http.Response, error) {
 			}
 		}
 
-		if resp != nil && !isServerUnavailable(resp.StatusCode) {
+		serverUnavailable := isServerUnavailable(resp.StatusCode)
+		if resp != nil && !serverUnavailable {
 			defer resp.Body.Close()
 			return resp, nil
 		}
 
+		if serverUnavailable {
+			nextHost()
+		}
+
 		time.Sleep(b.Duration())
+	}
+}
+
+func nextHost() {
+	currentHost = currentHost + 1
+	if currentHost > (len(Hosts) - 1) {
+		currentHost = 0
 	}
 }
 
