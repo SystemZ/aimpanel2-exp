@@ -32,6 +32,8 @@ var serverCmd = &cobra.Command{
 		model.InitRedis()
 		events.SSE = events.InitSSE()
 
+		router.InitRateLimit()
+
 		go cron.CheckHostsHeartbeat()
 		go cron.CheckGSHeartbeat()
 
@@ -42,14 +44,16 @@ var serverCmd = &cobra.Command{
 		if config.DEV_MODE {
 			logrus.Fatal(http.ListenAndServe(
 				":"+args[0],
-				router.CorsMiddleware(
-					handlers.LoggingHandler(os.Stdout, r),
-				),
+				router.Limiter.RateLimit(
+					router.CorsMiddleware(
+						handlers.LoggingHandler(os.Stdout, r),
+					)),
 			))
 		} else {
 			logrus.Fatal(http.ListenAndServe(
 				":"+args[0],
-				handlers.LoggingHandler(os.Stdout, r),
+				router.Limiter.RateLimit(
+					handlers.LoggingHandler(os.Stdout, r)),
 			))
 		}
 	},
