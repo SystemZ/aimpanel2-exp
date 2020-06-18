@@ -54,7 +54,7 @@ func redisTaskHandler(taskCh string, taskBody string) {
 			tasks.GsStartGame(taskMsg)
 			model.DelGsStart(taskMsg.GameServerID)
 
-			_, err = ahttp.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
+			_, err = ahttp.SendTaskData("/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
 			if err != nil {
 				logrus.Error(err)
 			}
@@ -63,7 +63,7 @@ func redisTaskHandler(taskCh string, taskBody string) {
 	case task.GAME_SHUTDOWN:
 		logrus.Info("Agent got " + taskMsg.TaskId.String())
 
-		_, err = ahttp.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
+		_, err = ahttp.SendTaskData("/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
 		if err != nil {
 			logrus.Error(err)
 		}
@@ -80,21 +80,21 @@ func redisTaskHandler(taskCh string, taskBody string) {
 	case task.GAME_SERVER_LOG:
 		logrus.Info("Agent got " + taskMsg.TaskId.String())
 
-		_, err = ahttp.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
+		_, err = ahttp.SendTaskData("/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
 		if err != nil {
 			logrus.Error(err)
 		}
 	case task.GAME_METRICS:
 		logrus.Info("Agent got " + taskMsg.TaskId.String())
 
-		_, err = ahttp.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
+		_, err = ahttp.SendTaskData("/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
 		if err != nil {
 			logrus.Error(err)
 		}
 	case task.GAME_METRICS_FREQUENCY:
 		logrus.Info("Agent got " + taskMsg.TaskId.String())
 
-		_, err = ahttp.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
+		_, err = ahttp.SendTaskData("/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
 		if err != nil {
 			logrus.Error(err)
 		}

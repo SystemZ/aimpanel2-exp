@@ -39,6 +39,7 @@ var currentHost = 0
 var Hosts = []string{
 	"http://localhost:9001",
 	"http://localhost:9000",
+	"https://aimpanel.local",
 }
 
 func InitHttpClient() *http.Client {
@@ -83,6 +84,7 @@ func VerifyPinTLSContext(ctx context.Context, network, addr string) (net.Conn, e
 func Get(path string, output interface{}) (*http.Response, error) {
 	for {
 		url := Hosts[currentHost] + path
+
 		logrus.Info("Request to " + url)
 
 		resp, err := HttpClient.Get(url)
@@ -95,9 +97,8 @@ func Get(path string, output interface{}) (*http.Response, error) {
 				return nil, err
 			}
 		}
-
-		serverUnavailable := isServerUnavailable(resp.StatusCode)
-		if resp != nil && !serverUnavailable {
+		serverUnavailable := isServerUnavailable(resp)
+		if !serverUnavailable {
 			defer resp.Body.Close()
 			if output == nil {
 				return resp, nil
@@ -107,6 +108,7 @@ func Get(path string, output interface{}) (*http.Response, error) {
 		}
 
 		if serverUnavailable {
+			logrus.Infof("Host %v unavailable. Switching to next one", Hosts[currentHost])
 			nextHost()
 		}
 
@@ -137,8 +139,8 @@ func Post(path, token, jsonStr string) (*http.Response, error) {
 			}
 		}
 
-		serverUnavailable := isServerUnavailable(resp.StatusCode)
-		if resp != nil && !serverUnavailable {
+		serverUnavailable := isServerUnavailable(resp)
+		if !serverUnavailable {
 			defer resp.Body.Close()
 			return resp, nil
 		}
@@ -156,10 +158,16 @@ func nextHost() {
 	if currentHost > (len(Hosts) - 1) {
 		currentHost = 0
 	}
+
+	logrus.Infof("Switching host to %v", Hosts[currentHost])
 }
 
-func isServerUnavailable(code int) bool {
-	switch code {
+func isServerUnavailable(resp *http.Response) bool {
+	if resp == nil {
+		return true
+	}
+
+	switch resp.StatusCode {
 	case http.StatusServiceUnavailable, http.StatusGatewayTimeout, http.StatusRequestTimeout:
 		return true
 	default:
