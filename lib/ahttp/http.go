@@ -37,9 +37,8 @@ var Fingerprints = []string{
 
 var CurrentHost = 0
 var Hosts = []string{
-	"http://localhost:9001",
-	"http://localhost:9000",
 	"https://aimpanel.local",
+	"https://my-lab.aimpanel.pro",
 }
 
 func InitHttpClient() *http.Client {
