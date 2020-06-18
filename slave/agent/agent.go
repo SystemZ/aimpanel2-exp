@@ -22,7 +22,7 @@ func Start(hostToken string) {
 	config.HOST_TOKEN = hostToken
 
 	var token response.Token
-	_, err := ahttp.Get(config.API_URL+"/v1/host/auth/"+config.HOST_TOKEN, &token)
+	_, err := ahttp.Get("/v1/host/auth/"+config.HOST_TOKEN, &token)
 	if err != nil {
 		lib.FailOnError(err, "Failed to get host token")
 	}
@@ -37,13 +37,12 @@ func Start(hostToken string) {
 
 	<-sseStarted
 	<-redisStarted
-
 	logrus.Info("Send AGENT_STARTED")
 	taskMsg := task.Message{
 		TaskId: task.AGENT_STARTED,
 	}
 	//TODO: do something with status code
-	_, err = ahttp.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
+	_, err = ahttp.SendTaskData("/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
 	if err != nil {
 		logrus.Error(err)
 	}
@@ -53,7 +52,7 @@ func Start(hostToken string) {
 		TaskId: task.AGENT_METRICS_FREQUENCY,
 	}
 	//TODO: do something with status code
-	_, err = ahttp.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
+	_, err = ahttp.SendTaskData("/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
 	if err != nil {
 		logrus.Error(err)
 	}
@@ -67,7 +66,7 @@ func Start(hostToken string) {
 		}
 
 		//TODO: do something with status code
-		_, err = ahttp.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
+		_, err = ahttp.SendTaskData("/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
 		if err != nil {
 			logrus.Error(err)
 		}

@@ -201,7 +201,7 @@ func GsFileList(gsId string) {
 		Files:        node,
 	}
 
-	_, err = ahttp.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
+	_, err = ahttp.SendTaskData("/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
 	if err != nil {
 		logrus.Error(err)
 	}
@@ -216,7 +216,7 @@ func AgentShutdown() {
 	}
 
 	//TODO: do something with status code
-	_, err := ahttp.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
+	_, err := ahttp.SendTaskData("/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
 	if err != nil {
 		logrus.Error(err)
 	}
@@ -281,7 +281,7 @@ func AgentMetrics(metricsFrequency int) {
 			GuestNice: int(cpuTimes[0].GuestNice),
 		}
 		//TODO: do something with status code
-		_, err := ahttp.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
+		_, err := ahttp.SendTaskData("/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
 		if err != nil {
 			logrus.Error(err)
 		}
@@ -302,7 +302,7 @@ func AgentSendOSInfo() {
 		KernelArch:      h.KernelArch,
 	}
 	//TODO: do something with status code
-	_, err := ahttp.SendTaskData(config.API_URL+"/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
+	_, err := ahttp.SendTaskData("/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
 	if err != nil {
 		logrus.Error(err)
 	}

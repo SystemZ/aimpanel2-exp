@@ -5,7 +5,6 @@ import (
 )
 
 var (
-	API_URL                  string
 	GS_DIR                   string
 	STORAGE_DIR              string
 	TRASH_DIR                string
@@ -20,9 +19,6 @@ var (
 
 func init() {
 	viper.AutomaticEnv()
-
-	viper.SetDefault("API_URL", "http://localhost:9000")
-	API_URL = viper.GetString("API_URL")
 
 	viper.SetDefault("GS_DIR", "/opt/aimpanel/gs/")
 	GS_DIR = viper.GetString("GS_DIR")

@@ -35,6 +35,12 @@ var Fingerprints = []string{
 	"67d08017c05e2bca29f404947491b9055aad84da17b45951e3b9c1fa7f5126a4",
 }
 
+var CurrentHost = 0
+var Hosts = []string{
+	"https://aimpanel.local",
+	"https://my-lab.aimpanel.pro",
+}
+
 func InitHttpClient() *http.Client {
 	client := &http.Client{}
 	client.Transport = &http.Transport{
@@ -76,9 +82,11 @@ func VerifyPinTLSContext(ctx context.Context, network, addr string) (net.Conn, e
 
 func Get(path string, output interface{}) (*http.Response, error) {
 	for {
-		logrus.Info("Request to " + path)
+		url := Hosts[CurrentHost] + path
 
-		resp, err := HttpClient.Get(path)
+		logrus.Info("Request to " + url)
+
+		resp, err := HttpClient.Get(url)
 		if err != nil {
 			if _, ok := err.(net.Error); !ok {
 				return nil, err
@@ -88,8 +96,8 @@ func Get(path string, output interface{}) (*http.Response, error) {
 				return nil, err
 			}
 		}
-
-		if resp != nil && !isServerUnavailable(resp.StatusCode) {
+		serverUnavailable := isServerUnavailable(resp)
+		if !serverUnavailable {
 			defer resp.Body.Close()
 			if output == nil {
 				return resp, nil
@@ -98,12 +106,20 @@ func Get(path string, output interface{}) (*http.Response, error) {
 			}
 		}
 
+		if serverUnavailable {
+			logrus.Infof("Host %v unavailable. Switching to next one", Hosts[CurrentHost])
+			nextHost()
+		}
+
 		time.Sleep(b.Duration())
 	}
 }
 
 func Post(path, token, jsonStr string) (*http.Response, error) {
-	req, err := http.NewRequest("POST", path, bytes.NewBufferString(jsonStr))
+	url := Hosts[CurrentHost] + path
+	logrus.Info("Request to " + url)
+
+	req, err := http.NewRequest("POST", url, bytes.NewBufferString(jsonStr))
 	if err != nil {
 		return nil, err
 	}
@@ -122,17 +138,36 @@ func Post(path, token, jsonStr string) (*http.Response, error) {
 			}
 		}
 
-		if resp != nil && !isServerUnavailable(resp.StatusCode) {
+		serverUnavailable := isServerUnavailable(resp)
+		if !serverUnavailable {
 			defer resp.Body.Close()
 			return resp, nil
+		}
+
+		if serverUnavailable {
+			logrus.Infof("Host %v unavailable. Switching to next one", Hosts[CurrentHost])
+			nextHost()
 		}
 
 		time.Sleep(b.Duration())
 	}
 }
 
-func isServerUnavailable(code int) bool {
-	switch code {
+func nextHost() {
+	CurrentHost = CurrentHost + 1
+	if CurrentHost > (len(Hosts) - 1) {
+		CurrentHost = 0
+	}
+
+	logrus.Infof("Switching host to %v", Hosts[CurrentHost])
+}
+
+func isServerUnavailable(resp *http.Response) bool {
+	if resp == nil {
+		return true
+	}
+
+	switch resp.StatusCode {
 	case http.StatusServiceUnavailable, http.StatusGatewayTimeout, http.StatusRequestTimeout:
 		return true
 	default:
