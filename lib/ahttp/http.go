@@ -35,7 +35,7 @@ var Fingerprints = []string{
 	"67d08017c05e2bca29f404947491b9055aad84da17b45951e3b9c1fa7f5126a4",
 }
 
-var currentHost = 0
+var CurrentHost = 0
 var Hosts = []string{
 	"http://localhost:9001",
 	"http://localhost:9000",
@@ -83,7 +83,7 @@ func VerifyPinTLSContext(ctx context.Context, network, addr string) (net.Conn, e
 
 func Get(path string, output interface{}) (*http.Response, error) {
 	for {
-		url := Hosts[currentHost] + path
+		url := Hosts[CurrentHost] + path
 
 		logrus.Info("Request to " + url)
 
@@ -108,7 +108,7 @@ func Get(path string, output interface{}) (*http.Response, error) {
 		}
 
 		if serverUnavailable {
-			logrus.Infof("Host %v unavailable. Switching to next one", Hosts[currentHost])
+			logrus.Infof("Host %v unavailable. Switching to next one", Hosts[CurrentHost])
 			nextHost()
 		}
 
@@ -117,7 +117,7 @@ func Get(path string, output interface{}) (*http.Response, error) {
 }
 
 func Post(path, token, jsonStr string) (*http.Response, error) {
-	url := Hosts[currentHost] + path
+	url := Hosts[CurrentHost] + path
 	logrus.Info("Request to " + url)
 
 	req, err := http.NewRequest("POST", url, bytes.NewBufferString(jsonStr))
@@ -146,7 +146,7 @@ func Post(path, token, jsonStr string) (*http.Response, error) {
 		}
 
 		if serverUnavailable {
-			logrus.Infof("Host %v unavailable. Switching to next one", Hosts[currentHost])
+			logrus.Infof("Host %v unavailable. Switching to next one", Hosts[CurrentHost])
 			nextHost()
 		}
 
@@ -155,12 +155,12 @@ func Post(path, token, jsonStr string) (*http.Response, error) {
 }
 
 func nextHost() {
-	currentHost = currentHost + 1
-	if currentHost > (len(Hosts) - 1) {
-		currentHost = 0
+	CurrentHost = CurrentHost + 1
+	if CurrentHost > (len(Hosts) - 1) {
+		CurrentHost = 0
 	}
 
-	logrus.Infof("Switching host to %v", Hosts[currentHost])
+	logrus.Infof("Switching host to %v", Hosts[CurrentHost])
 }
 
 func isServerUnavailable(resp *http.Response) bool {
