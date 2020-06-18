@@ -13,7 +13,7 @@ import (
 )
 
 func listenerSse(done chan bool) {
-	client := sse.NewClient(config.API_URL + "/v1/events/" + config.HOST_TOKEN)
+	client := sse.NewClient("/v1/events/" + config.HOST_TOKEN)
 	client.Headers = map[string]string{
 		"Authorization": "Bearer " + config.API_TOKEN,
 	}
