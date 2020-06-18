@@ -4,7 +4,6 @@
 
 # variables
 TOKEN="CHANGE_ME"
-API_URL="https://api-lab.aimpanel.pro"
 REPO_URL="https://storage.gra.cloud.ovh.net/v1/AUTH_23b9e96be2fc431d93deedba1b8c87d2/aimpanel-updates"
 AIMPANEL_BINARY_NAME=slave
 AIMPANEL_BINARY_DIR=/opt/aimpanel
@@ -140,7 +139,6 @@ Environment="GS_DIR=$AIMPANEL_DIR/gs/"
 Environment="STORAGE_DIR=$AIMPANEL_DIR/storage/"
 Environment="TRASH_DIR=$AIMPANEL_DIR/trash/"
 Environment="HOST_TOKEN=$TOKEN"
-Environment="API_URL=$API_URL"
 " > /etc/systemd/system/aimpanel.service
 
 # create service for aimpanel supervisor

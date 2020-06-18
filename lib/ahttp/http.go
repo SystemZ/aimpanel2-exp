@@ -146,6 +146,7 @@ func Post(path, token, jsonStr string) (*http.Response, error) {
 		}
 
 		if serverUnavailable {
+			logrus.Infof("Host %v unavailable. Switching to next one", Hosts[currentHost])
 			nextHost()
 		}
 
