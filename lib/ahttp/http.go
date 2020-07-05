@@ -84,6 +84,10 @@ func Get(path string, output interface{}) (*http.Response, error) {
 	for {
 		url := Hosts[CurrentHost] + path
 
+		if !strings.HasPrefix(url, "https://") {
+			return nil, errors.New("url is not secure. ignoring")
+		}
+
 		logrus.Info("Request to " + url)
 
 		resp, err := HttpClient.Get(url)
@@ -117,6 +121,11 @@ func Get(path string, output interface{}) (*http.Response, error) {
 
 func Post(path, token, jsonStr string) (*http.Response, error) {
 	url := Hosts[CurrentHost] + path
+
+	if !strings.HasPrefix(url, "https://") {
+		return nil, errors.New("url is not secure. ignoring")
+	}
+
 	logrus.Info("Request to " + url)
 
 	req, err := http.NewRequest("POST", url, bytes.NewBufferString(jsonStr))
