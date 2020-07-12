@@ -26,17 +26,10 @@ func Create(data *request.HostCreate, userId primitive.ObjectID) (*model.Host, i
 		return nil, ecode.DbSave
 	}
 
-	group, err := model.GetGroupByName("USER-" + userId.Hex())
+	err = model.CreatePermissionsForNewHost(userId, host.ID)
 	if err != nil {
-		return nil, ecode.DbError
+		return nil, ecode.DbSave
 	}
-
-	if group == nil {
-		return nil, ecode.GroupNotFound
-	}
-
-	// FIXME handle errors
-	model.CreatePermissionsForNewHost(group.ID, host.ID)
 
 	return host, ecode.NoError
 }
@@ -115,17 +108,10 @@ func CreateJob(data *request.HostCreateJob, userId primitive.ObjectID, hostId pr
 		return nil, ecode.DbSave
 	}
 
-	group, err := model.GetGroupByName("USER-" + userId.Hex())
+	err = model.CreatePermissionsForNewHostJob(userId, hostId, hostJob.ID)
 	if err != nil {
-		return nil, ecode.DbError
+		return nil, ecode.DbSave
 	}
-
-	if group == nil {
-		return nil, ecode.GroupNotFound
-	}
-
-	// FIXME handle errors
-	model.CreatePermissionsForNewHostJob(group.ID, hostId, hostJob.ID)
 
 	ec := sendJobsToAgent(hostId)
 	if ec != ecode.NoError {

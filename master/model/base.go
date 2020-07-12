@@ -8,9 +8,7 @@ import (
 
 const (
 	userCollection             = "user"
-	groupCollection            = "group"
-	groupUserCollection        = "group_user"
-	permissionCollection       = "permission"
+	permissionCollection       = "user_permission"
 	hostJobCollection          = "host_job"
 	hostCollection             = "host"
 	metricHostCollection       = "metric_host"

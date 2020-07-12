@@ -48,7 +48,7 @@ func HostList(w http.ResponseWriter, r *http.Request) {
 // @Security ApiKey
 func HostDetails(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	oid, err := primitive.ObjectIDFromHex(params["id"])
+	oid, err := primitive.ObjectIDFromHex(params["hostId"])
 	if err != nil {
 		lib.ReturnError(w, http.StatusBadRequest, ecode.OidError, err)
 		return
@@ -109,7 +109,7 @@ func HostCreate(w http.ResponseWriter, r *http.Request) {
 // @Security ApiKey
 func HostMetric(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	oid, err := primitive.ObjectIDFromHex(params["id"])
+	oid, err := primitive.ObjectIDFromHex(params["hostId"])
 	if err != nil {
 		lib.ReturnError(w, http.StatusBadRequest, ecode.OidError, nil)
 		return
@@ -140,7 +140,7 @@ func HostMetric(w http.ResponseWriter, r *http.Request) {
 func HostRemove(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
-	oid, _ := primitive.ObjectIDFromHex(params["id"])
+	oid, _ := primitive.ObjectIDFromHex(params["hostId"])
 	errCode := host.Remove(oid)
 	if errCode != ecode.NoError {
 		lib.ReturnError(w, http.StatusBadRequest, errCode, nil)
@@ -165,7 +165,7 @@ func HostAuth(w http.ResponseWriter, r *http.Request) {
 //TODO: Available for users?
 func HostUpdate(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	oid, _ := primitive.ObjectIDFromHex(params["id"])
+	oid, _ := primitive.ObjectIDFromHex(params["hostId"])
 	err := host.Update(oid)
 	if err != nil {
 		lib.ReturnError(w, http.StatusInternalServerError, ecode.GsUpdate, err)
@@ -197,7 +197,7 @@ func HostCreateJob(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	oid, _ := primitive.ObjectIDFromHex(params["id"])
+	oid, _ := primitive.ObjectIDFromHex(params["hostId"])
 	_, errCode := host.CreateJob(data, user.ID, oid)
 	if errCode != ecode.NoError {
 		lib.ReturnError(w, http.StatusInternalServerError, errCode, nil)
@@ -221,8 +221,8 @@ func HostCreateJob(w http.ResponseWriter, r *http.Request) {
 func HostJobRemove(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
-	hostId, _ := primitive.ObjectIDFromHex(params["id"])
-	jobId, _ := primitive.ObjectIDFromHex(params["job_id"])
+	hostId, _ := primitive.ObjectIDFromHex(params["hostId"])
+	jobId, _ := primitive.ObjectIDFromHex(params["jobId"])
 	errCode := host.RemoveJob(hostId, jobId)
 	if errCode != ecode.NoError {
 		lib.ReturnError(w, http.StatusBadRequest, errCode, nil)
@@ -234,7 +234,7 @@ func HostJobRemove(w http.ResponseWriter, r *http.Request) {
 
 func HostJobList(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	oid, err := primitive.ObjectIDFromHex(params["id"])
+	oid, err := primitive.ObjectIDFromHex(params["hostId"])
 	if err != nil {
 		lib.ReturnError(w, http.StatusBadRequest, ecode.OidError, err)
 		return

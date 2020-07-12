@@ -36,28 +36,11 @@ func Register(data *request.AuthRegister) (string, int) {
 		return "", ecode.JwtGenerate
 	}
 
-	//Create group
-	group := &model.Group{
-		Name: "USER-" + user.ID.Hex(),
-	}
-	err = model.Put(group)
+	err = model.CreatePermissionsForNewUser(user.ID)
 	if err != nil {
 		logrus.Error(err)
-		return "", ecode.DbError
+		return "", ecode.DbSave
 	}
-
-	//Add user to group
-	groupUser := &model.GroupUser{
-		GroupId: group.ID,
-		UserId:  user.ID,
-	}
-	err = model.Put(groupUser)
-	if err != nil {
-		logrus.Error(err)
-		return "", ecode.DbError
-	}
-	// FIXME error handling
-	model.CreatePermissionsForNewUser(group.ID)
 
 	return token, ecode.NoError
 }
