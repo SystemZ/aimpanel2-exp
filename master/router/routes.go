@@ -97,7 +97,7 @@ var routes = Routes{
 	Route{
 		"Host events",
 		"GET",
-		"/events/{host_token}",
+		"/events/{hostToken}",
 		events.Handler,
 		true,
 		true,
@@ -105,7 +105,7 @@ var routes = Routes{
 	Route{
 		"Game server events",
 		"GET",
-		"/events/{host_token}/{server_id}",
+		"/events/{hostToken}/{gsId}",
 		events.Handler,
 		true,
 		true,
@@ -113,7 +113,7 @@ var routes = Routes{
 	Route{
 		"Host data",
 		"POST",
-		"/events/{host_token}",
+		"/events/{hostToken}",
 		gs.Data,
 		true,
 		true,
@@ -121,7 +121,7 @@ var routes = Routes{
 	Route{
 		"Game server data",
 		"POST",
-		"/events/{host_token}/{server_id}",
+		"/events/{hostToken}/{gsId}",
 		gs.Data,
 		true,
 		true,
@@ -165,7 +165,7 @@ var routes = Routes{
 	Route{
 		"Host Details",
 		"GET",
-		"/host/{id}",
+		"/host/{hostId}",
 		handler.HostDetails,
 		true,
 		false,
@@ -173,7 +173,7 @@ var routes = Routes{
 	Route{
 		"Host Remove",
 		"DELETE",
-		"/host/{id}",
+		"/host/{hostId}",
 		handler.HostRemove,
 		true,
 		false,
@@ -189,7 +189,7 @@ var routes = Routes{
 	Route{
 		"Host Update",
 		"GET",
-		"/host/{id}/update",
+		"/host/{hostId}/update",
 		handler.HostUpdate,
 		true,
 		false,
@@ -197,7 +197,7 @@ var routes = Routes{
 	Route{
 		"Host Metric",
 		"GET",
-		"/host/{id}/metric",
+		"/host/{hostId}/metric",
 		handler.HostMetric,
 		true,
 		false,
@@ -205,7 +205,7 @@ var routes = Routes{
 	Route{
 		"Host Create Job",
 		"POST",
-		"/host/{id}/job",
+		"/host/{hostId}/job",
 		handler.HostCreateJob,
 		true,
 		false,
@@ -213,7 +213,7 @@ var routes = Routes{
 	Route{
 		"Host Jobs",
 		"GET",
-		"/host/{id}/job",
+		"/host/{hostId}/job",
 		handler.HostJobList,
 		true,
 		false,
@@ -221,7 +221,7 @@ var routes = Routes{
 	Route{
 		"Host Job Remove",
 		"DELETE",
-		"/host/{id}/job/{job_id}",
+		"/host/{hostId}/job/{jobId}",
 		handler.HostJobRemove,
 		true,
 		false,
@@ -239,7 +239,7 @@ var routes = Routes{
 	Route{
 		"GameServer Details",
 		"GET",
-		"/host/{host_id}/server/{server_id}",
+		"/host/{hostId}/server/{gsId}",
 		gs.Get,
 		true,
 		false,
@@ -247,7 +247,7 @@ var routes = Routes{
 	Route{
 		"GameServer Remove",
 		"DELETE",
-		"/host/{host_id}/server/{server_id}",
+		"/host/{hostId}/server/{gsId}",
 		gs.Remove,
 		true,
 		false,
@@ -255,7 +255,7 @@ var routes = Routes{
 	Route{
 		"GameServer Create",
 		"POST",
-		"/host/{host_id}/server",
+		"/host/{hostId}/server",
 		gs.Create,
 		true,
 		false,
@@ -263,7 +263,7 @@ var routes = Routes{
 	Route{
 		"GameServer ListByHostId",
 		"GET",
-		"/host/{id}/server",
+		"/host/{hostId}/server",
 		gs.ListByHostId,
 		true,
 		false,
@@ -271,7 +271,7 @@ var routes = Routes{
 	Route{
 		"GameServer Install",
 		"PUT",
-		"/host/{host_id}/server/{server_id}/install",
+		"/host/{hostId}/server/{gsId}/install",
 		gs.Install,
 		true,
 		false,
@@ -279,7 +279,7 @@ var routes = Routes{
 	Route{
 		"GameServer Start",
 		"PUT",
-		"/host/{host_id}/server/{server_id}/start",
+		"/host/{hostId}/server/{gsId}/start",
 		gs.Start,
 		true,
 		false,
@@ -287,7 +287,7 @@ var routes = Routes{
 	Route{
 		"GameServer Restart",
 		"PUT",
-		"/host/{host_id}/server/{server_id}/restart",
+		"/host/{hostId}/server/{gsId}/restart",
 		gs.Restart,
 		true,
 		false,
@@ -295,7 +295,7 @@ var routes = Routes{
 	Route{
 		"GameServer Stop",
 		"PUT",
-		"/host/{host_id}/server/{server_id}/stop",
+		"/host/{hostId}/server/{gsId}/stop",
 		gs.Stop,
 		true,
 		false,
@@ -303,7 +303,7 @@ var routes = Routes{
 	Route{
 		"GameServer Send Command",
 		"PUT",
-		"/host/{host_id}/server/{server_id}/command",
+		"/host/{hostId}/server/{gsId}/command",
 		gs.SendCommand,
 		true,
 		false,
@@ -311,7 +311,7 @@ var routes = Routes{
 	Route{
 		"GameServer Console Log",
 		"GET",
-		"/host/{host_id}/server/{server_id}/logs",
+		"/host/{hostId}/server/{gsId}/logs",
 		gs.ConsoleLog,
 		true,
 		false,
@@ -319,7 +319,7 @@ var routes = Routes{
 	Route{
 		"GameServer Put Logs",
 		"PUT",
-		"/host/{host_id}/server/{server_id}/logs",
+		"/host/{hostId}/server/{gsId}/logs",
 		gs.PutLogs,
 		true,
 		true,
@@ -327,7 +327,7 @@ var routes = Routes{
 	Route{
 		"GameServer Console",
 		"GET",
-		"/host/{host_id}/server/{server_id}/console",
+		"/host/{hostId}/server/{gsId}/console",
 		events.Handler,
 		true,
 		false,
@@ -337,7 +337,7 @@ var routes = Routes{
 	Route{
 		"GameServer File list",
 		"GET",
-		"/host/{host_id}/server/{server_id}/file/list",
+		"/host/{hostId}/server/{gsId}/file/list",
 		gs.FileList,
 		true,
 		false,

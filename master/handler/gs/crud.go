@@ -27,7 +27,7 @@ import (
 // @Security ApiKey
 func Create(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	hostId := params["host_id"]
+	hostId := params["hostId"]
 	oid, err := primitive.ObjectIDFromHex(hostId)
 	if err != nil {
 		lib.ReturnError(w, http.StatusBadRequest, ecode.OidError, nil)
@@ -79,21 +79,14 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//TODO: create array of permissions?
 	user := context.Get(r, "user").(model.User)
-	group, err := model.GetGroupByName("USER-" + user.ID.Hex())
-	if err != nil {
-		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, nil)
-		return
-	}
-
-	if group == nil {
-		lib.ReturnError(w, http.StatusInternalServerError, ecode.GroupNotFound, nil)
-		return
-	}
 
 	// FIXME handle errors
-	model.CreatePermissionsForNewGameServer(group.ID, host.ID, gameServer.ID)
+	err = model.CreatePermissionsForNewGameServer(user.ID, host.ID, gameServer.ID)
+	if err != nil {
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbSave, nil)
+		return
+	}
 
 	lib.MustEncode(json.NewEncoder(w),
 		response.ID{ID: gameServer.ID.Hex()})
@@ -110,7 +103,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 // @Security ApiKey
 func ListByHostId(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	hostId := params["id"]
+	hostId := params["hostId"]
 	oid, err := primitive.ObjectIDFromHex(hostId)
 	if err != nil {
 		lib.ReturnError(w, http.StatusBadRequest, ecode.OidError, err)
@@ -182,12 +175,12 @@ func ListByUser(w http.ResponseWriter, r *http.Request) {
 // @Security ApiKey
 func Get(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	serverId, err := primitive.ObjectIDFromHex(params["server_id"])
+	serverId, err := primitive.ObjectIDFromHex(params["gsId"])
 	if err != nil {
 		lib.ReturnError(w, http.StatusBadRequest, ecode.OidError, err)
 		return
 	}
-	hostId, err := primitive.ObjectIDFromHex(params["host_id"])
+	hostId, err := primitive.ObjectIDFromHex(params["hostId"])
 	if err != nil {
 		lib.ReturnError(w, http.StatusBadRequest, ecode.OidError, err)
 		return
@@ -204,7 +197,7 @@ func Get(w http.ResponseWriter, r *http.Request) {
 
 func ConsoleLog(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	serverId, err := primitive.ObjectIDFromHex(params["server_id"])
+	serverId, err := primitive.ObjectIDFromHex(params["gsId"])
 	if err != nil {
 		lib.ReturnError(w, http.StatusBadRequest, ecode.OidError, err)
 		return
@@ -241,7 +234,7 @@ func PutLogs(w http.ResponseWriter, r *http.Request) {
 // @Security ApiKey
 func Remove(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	gameServerId, _ := primitive.ObjectIDFromHex(params["server_id"])
+	gameServerId, _ := primitive.ObjectIDFromHex(params["gsId"])
 	err := gameserver.Remove(gameServerId)
 	if err != nil {
 		lib.ReturnError(w, http.StatusInternalServerError, ecode.GsRemove, err)

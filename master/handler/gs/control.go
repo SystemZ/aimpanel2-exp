@@ -26,7 +26,7 @@ import (
 // @Security ApiKey
 func Start(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	gsId := params["server_id"]
+	gsId := params["gsId"]
 	oid, _ := primitive.ObjectIDFromHex(gsId)
 
 	err := gameserver.Start(oid)
@@ -51,7 +51,7 @@ func Start(w http.ResponseWriter, r *http.Request) {
 // @Security ApiKey
 func Install(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	gsId := params["server_id"]
+	gsId := params["gsId"]
 	oid, err := primitive.ObjectIDFromHex(gsId)
 	if err != nil {
 		lib.ReturnError(w, http.StatusBadRequest, ecode.OidError, err)
@@ -80,7 +80,7 @@ func Install(w http.ResponseWriter, r *http.Request) {
 // @Security ApiKey
 func Restart(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	gsId := params["server_id"]
+	gsId := params["gsId"]
 	oid, _ := primitive.ObjectIDFromHex(gsId)
 
 	data := &request.GameServerStop{}
@@ -112,7 +112,7 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 // @Security ApiKey
 func Stop(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	gsId := params["server_id"]
+	gsId := params["gsId"]
 	oid, _ := primitive.ObjectIDFromHex(gsId)
 
 	data := &request.GameServerStop{}
@@ -145,7 +145,7 @@ func Stop(w http.ResponseWriter, r *http.Request) {
 // @Security ApiKey
 func SendCommand(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	gsId := params["server_id"]
+	gsId := params["gsId"]
 	oid, _ := primitive.ObjectIDFromHex(gsId)
 
 	data := &request.GameServerSendCommand{}
@@ -166,7 +166,7 @@ func SendCommand(w http.ResponseWriter, r *http.Request) {
 
 func Data(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	hostToken := params["host_token"]
+	hostToken := params["hostToken"]
 
 	data := &task.Message{}
 	err := json.NewDecoder(r.Body).Decode(data)
@@ -194,7 +194,7 @@ func Data(w http.ResponseWriter, r *http.Request) {
 
 func FileList(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	gsId := params["server_id"]
+	gsId := params["gsId"]
 	oid, _ := primitive.ObjectIDFromHex(gsId)
 
 	files, err := gameserver.FileList(oid)

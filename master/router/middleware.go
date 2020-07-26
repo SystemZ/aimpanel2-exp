@@ -6,7 +6,6 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 	"github.com/sirupsen/logrus"
-	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/master/exit"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -67,14 +66,10 @@ func PermissionMiddleware(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user := context.Get(r, "user").(model.User)
 
-		groupUser, err := model.GetGroupUserByUserId(user.ID)
-		if err != nil {
-			logrus.Error(err)
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
+		route := mux.CurrentRoute(r)
+		pathTemplate, _ := route.GetPathTemplate()
 
-		if !model.CheckIfUserHasAccess(r.URL.Path, lib.GetVerbByName(r.Method), groupUser.GroupId) {
+		if !model.CheckIfUserHasAccess(r.URL.Path, r.Method, pathTemplate, user.ID) {
 			logrus.Info("Access denied")
 			w.WriteHeader(http.StatusUnauthorized)
 			return
@@ -91,6 +86,7 @@ func SlavePermissionMiddleware(handler http.Handler) http.Handler {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
+
 		tokenString = strings.Replace(tokenString, "Bearer ", "", 1)
 
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
@@ -115,12 +111,12 @@ func SlavePermissionMiddleware(handler http.Handler) http.Handler {
 		}
 
 		params := mux.Vars(r)
-		if params["host_token"] != host.Token {
+		if params["hostToken"] != host.Token {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 
-		gsId, ok := params["server_id"]
+		gsId, ok := params["gsId"]
 		if ok {
 			oid, err := primitive.ObjectIDFromHex(gsId)
 			if err != nil {
