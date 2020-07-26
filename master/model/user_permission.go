@@ -60,23 +60,31 @@ func GetPermisionsByEndpointRegex(endpoint string) ([]UserPermission, error) {
 func CheckIfUserHasAccess(path string, method string, pathTemplate string, userId primitive.ObjectID) bool {
 	permId, p := perm.GetByUrlAndMethod(pathTemplate, method)
 
-	var userPerm UserPermission
-	err := DB.Collection(permissionCollection).FindOne(context.TODO(), bson.D{
+	cur, err := DB.Collection(permissionCollection).Find(context.TODO(), bson.D{
 		{Key: "user_id", Value: userId},
 		{Key: "perm_id", Value: permId},
-	}).Decode(&userPerm)
+	})
 	if err != nil {
 		logrus.Error(err)
 		return false
 	}
 
-	if p.URL == pathTemplate && p.Method == method {
-		p.URL = strings.ReplaceAll(p.URL, "{hostId}", userPerm.HostId.Hex())
-		p.URL = strings.ReplaceAll(p.URL, "{gsId}", userPerm.GameServerId.Hex())
-		p.URL = strings.ReplaceAll(p.URL, "{jobId}", userPerm.HostJobId.Hex())
+	for cur.Next(context.TODO()) {
+		var userPerm UserPermission
+		if err := cur.Decode(&userPerm); err != nil {
+			logrus.Info(err)
+			return false
+		}
 
-		if p.URL == path {
-			return true
+		if p.URL == pathTemplate && p.Method == method {
+			pt := p.URL
+			pt = strings.ReplaceAll(pt, "{hostId}", userPerm.HostId.Hex())
+			pt = strings.ReplaceAll(pt, "{gsId}", userPerm.GameServerId.Hex())
+			pt = strings.ReplaceAll(pt, "{jobId}", userPerm.HostJobId.Hex())
+
+			if pt == path {
+				return true
+			}
 		}
 	}
 

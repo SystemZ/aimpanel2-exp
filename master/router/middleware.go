@@ -86,6 +86,7 @@ func SlavePermissionMiddleware(handler http.Handler) http.Handler {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
+
 		tokenString = strings.Replace(tokenString, "Bearer ", "", 1)
 
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
@@ -110,12 +111,12 @@ func SlavePermissionMiddleware(handler http.Handler) http.Handler {
 		}
 
 		params := mux.Vars(r)
-		if params["host_token"] != host.Token {
+		if params["hostToken"] != host.Token {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 
-		gsId, ok := params["server_id"]
+		gsId, ok := params["gsId"]
 		if ok {
 			oid, err := primitive.ObjectIDFromHex(gsId)
 			if err != nil {
