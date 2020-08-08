@@ -59,6 +59,10 @@ func VerifyPinTLSContext(ctx context.Context, network, addr string) (net.Conn, e
 	keyPinValid := false
 	connState := conn.ConnectionState()
 
+	if !connState.HandshakeComplete {
+		return nil, errors.New("handshake not completed")
+	}
+
 	for _, peerCert := range connState.PeerCertificates {
 		der, err := x509.MarshalPKIXPublicKey(peerCert.PublicKey)
 		hash := sha256.Sum256(der)
@@ -83,10 +87,6 @@ func VerifyPinTLSContext(ctx context.Context, network, addr string) (net.Conn, e
 func Get(path string, output interface{}) (*http.Response, error) {
 	for {
 		url := Hosts[CurrentHost] + path
-
-		if !strings.HasPrefix(url, "https://") {
-			return nil, errors.New("url is not secure. ignoring")
-		}
 
 		logrus.Info("Request to " + url)
 
@@ -121,10 +121,6 @@ func Get(path string, output interface{}) (*http.Response, error) {
 
 func Post(path, token, jsonStr string) (*http.Response, error) {
 	url := Hosts[CurrentHost] + path
-
-	if !strings.HasPrefix(url, "https://") {
-		return nil, errors.New("url is not secure. ignoring")
-	}
 
 	logrus.Info("Request to " + url)
 
