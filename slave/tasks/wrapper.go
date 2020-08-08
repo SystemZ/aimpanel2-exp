@@ -21,6 +21,8 @@ func WrapperTaskHandler(taskMsg task.Message) {
 		GsRestart(taskMsg)
 	case task.GAME_METRICS_FREQUENCY:
 		model.SendTask(config.REDIS_PUB_SUB_WRAPPER_CH, taskMsg)
+	case task.GAME_SHUTDOWN:
+		GsShutdown(taskMsg)
 	}
 }
 
@@ -83,6 +85,39 @@ func GsRestart(taskMsg task.Message) {
 
 		if val == 1 {
 			model.SetGsRestart(taskMsg.GameServerID, -1)
+		}
+	}()
+}
+
+func GsShutdown(taskMsg task.Message) {
+	GsCmd(taskMsg.GameServerID, taskMsg.Game.StopCommand)
+
+	go func() {
+		<-time.After(time.Duration(taskMsg.Game.StopTimeout) * time.Second)
+
+		running, err := model.GetGsRunning(taskMsg.GameServerID)
+		if err != nil {
+			return
+		}
+
+		if running == 1 {
+			logrus.Infof("GS %s running - sending sigterm", taskMsg.GameServerID)
+			GsStop(taskMsg.GameServerID)
+		}
+	}()
+
+	go func() {
+		<-time.After(time.Duration(taskMsg.Game.StopHardTimeout) * time.Second)
+
+		running, err := model.GetGsRunning(taskMsg.GameServerID)
+		if err != nil {
+			return
+		}
+
+		if running == 1 {
+			logrus.Infof("GS %s still running - sending sigkill", taskMsg.GameServerID)
+
+			GsKill(taskMsg.GameServerID)
 		}
 	}()
 }

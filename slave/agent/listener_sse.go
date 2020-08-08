@@ -32,10 +32,6 @@ func listenerSse(done chan bool) {
 	done <- true
 
 	for msg := range events {
-		logrus.Info(msg.ID)
-		logrus.Info(string(msg.Data))
-		logrus.Info(string(msg.Event))
-
 		taskMsg := task.Message{}
 		err := taskMsg.Deserialize(string(msg.Data))
 		if err != nil {

@@ -206,3 +206,32 @@ func FileList(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	lib.MustEncode(json.NewEncoder(w), files)
 }
+
+// @Router /host/{host_id}/server/{server_id}/shutdown [put]
+// @Summary Shutdown
+// @Tags Game Server
+// @Description Shutdown selected game server
+// @Accept json
+// @Produce json
+// @Param host_id path string true "Host ID"
+// @Param server_id path string true "Game Server ID"
+// @Success 204 ""
+// @Failure 400 {object} response.JsonError
+// @Security ApiKey
+func Shutdown(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	gsId := params["gsId"]
+	oid, err := primitive.ObjectIDFromHex(gsId)
+	if err != nil {
+		lib.ReturnError(w, http.StatusBadRequest, ecode.OidError, err)
+		return
+	}
+
+	err = gameserver.Shutdown(oid)
+	if err != nil {
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.GsInstall, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
