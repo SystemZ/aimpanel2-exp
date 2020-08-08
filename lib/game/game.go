@@ -18,9 +18,10 @@ const (
 )
 
 type GameDefinition struct {
-	Id       uint     `json:"id"`
-	Name     string   `json:"name"`
-	Versions []string `json:"versions"`
+	Id          uint     `json:"id"`
+	Name        string   `json:"name"`
+	Versions    []string `json:"versions"`
+	StopCommand string   `json:"stop_command"`
 }
 
 var Games = []GameDefinition{
@@ -69,6 +70,10 @@ type Game struct {
 	RamMinM     int    `json:"ram_min_m,omitempty"`
 	RamMaxM     int    `json:"ram_max_m,omitempty"`
 	JarFilename string `json:"jar_filename,omitempty"`
+
+	StopCommand     string `json:"stop_command,omitempty"`
+	StopTimeout     int    `json:"stop_timeout,omitempty"`
+	StopHardTimeout int    `json:"stop_hard_timeout,omitempty"`
 }
 
 func (game *Game) SetDefaults() {
@@ -77,10 +82,16 @@ func (game *Game) SetDefaults() {
 		game.RamMinM = 1024
 		game.RamMaxM = 2048
 		game.JarFilename = "spigot.jar"
+		game.StopCommand = "stop"
+		game.StopTimeout = 15
+		game.StopHardTimeout = 30
 	case GAME_BUNGEECORD:
 		game.RamMinM = 1024
 		game.RamMaxM = 2048
 		game.JarFilename = "BungeeCord.jar"
+		game.StopCommand = "end"
+		game.StopTimeout = 15
+		game.StopHardTimeout = 30
 	}
 }
 

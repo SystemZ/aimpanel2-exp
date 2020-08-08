@@ -332,6 +332,14 @@ var routes = Routes{
 		true,
 		false,
 	},
+	Route{
+		"GameServer Shutdown",
+		"PUT",
+		"/host/{hostId}/server/{gsId}/shutdown",
+		gs.Shutdown,
+		true,
+		false,
+	},
 
 	//GameServer Files
 	Route{

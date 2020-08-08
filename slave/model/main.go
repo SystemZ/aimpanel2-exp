@@ -81,3 +81,11 @@ func GetGsStart(gsId string) (int64, error) {
 func DelGsStart(gsId string) {
 	Redis.Del("gs_start_id_" + gsId)
 }
+
+func SetGsRunning(gsId string, running int) {
+	Redis.Set("gs_running_id_"+gsId, running, 0)
+}
+
+func GetGsRunning(gsId string) (int64, error) {
+	return Redis.Get("gs_running_id_" + gsId).Int64()
+}

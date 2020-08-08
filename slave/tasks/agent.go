@@ -82,6 +82,8 @@ func StartWrapper(taskMsg task.Message) {
 		logrus.Error(err)
 	}
 
+	model.SetGsRunning(taskMsg.GameServerID, 1)
+
 	go func() {
 		_, err := process.Wait()
 		if err != nil {
@@ -93,6 +95,8 @@ func StartWrapper(taskMsg task.Message) {
 			GameServerID: taskMsg.GameServerID,
 		}
 		model.SendTask(config.REDIS_PUB_SUB_AGENT_CH, taskMsg)
+
+		model.SetGsRunning(taskMsg.GameServerID, 0)
 	}()
 }
 

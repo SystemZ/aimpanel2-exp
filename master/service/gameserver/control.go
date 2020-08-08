@@ -293,3 +293,38 @@ func FileList(gsId primitive.ObjectID) (*filemanager.Node, error) {
 
 	return &files, err
 }
+
+func Shutdown(gsId primitive.ObjectID) error {
+	gameServer, err := model.GetGameServerById(gsId)
+	if err != nil {
+		return err
+	}
+
+	if gameServer == nil {
+		return errors.New("error when getting game server from db")
+	}
+
+	host, err := model.GetHostById(gameServer.HostId)
+	if err != nil {
+		return &lib.Error{ErrorCode: ecode.HostNotFound}
+	}
+
+	var g game.Game
+	err = json.Unmarshal([]byte(gameServer.GameJson), &g)
+	if err != nil {
+		logrus.Error(err)
+	}
+
+	taskMsg := task.Message{
+		TaskId:       task.GAME_SHUTDOWN,
+		Game:         &g,
+		GameServerID: gsId.Hex(),
+	}
+
+	err = model.SendEvent(host.ID, taskMsg)
+	if err != nil {
+		return &lib.Error{ErrorCode: ecode.DbSave}
+	}
+
+	return nil
+}

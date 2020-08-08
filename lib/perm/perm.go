@@ -42,8 +42,9 @@ var Perms = map[int]Perm{
 	23: {URL: "/v1/host/{hostId}/server/{gsId}/logs", Method: "GET", Group: GroupNewGameServer},
 	24: {URL: "/v1/host/{hostId}/server/{gsId}/console", Method: "GET", Group: GroupNewGameServer},
 	25: {URL: "/v1/host/{hostId}/server/{gsId}/file/list", Method: "GET", Group: GroupNewGameServer},
+	26: {URL: "/v1/host/{hostId}/server/{gsId}/shutdown", Method: "PUT", Group: GroupNewGameServer},
 	//Host job
-	26: {URL: "/v1/host/{hostId}/job/{jobId}", Method: "DELETE", Group: GroupNewHostJob},
+	27: {URL: "/v1/host/{hostId}/job/{jobId}", Method: "DELETE", Group: GroupNewHostJob},
 }
 
 func GetByUrlAndMethod(url string, method string) (int, Perm) {
