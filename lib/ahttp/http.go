@@ -45,11 +45,18 @@ func InitHttpClient() *http.Client {
 	client := &http.Client{}
 	client.Transport = &http.Transport{
 		DialTLSContext: VerifyPinTLSContext,
+		DialContext:    DialContext,
 	}
 
 	return client
 }
 
+// DialContext is used for http requests
+func DialContext(ctx context.Context, network, addr string) (net.Conn, error) {
+	return nil, errors.New("http is not allowed here")
+}
+
+// VerifyPinTLSContext is used for ssl requests to check if pin is valid
 func VerifyPinTLSContext(ctx context.Context, network, addr string) (net.Conn, error) {
 	conn, err := tls.Dial(network, addr, &tls.Config{InsecureSkipVerify: true})
 	if err != nil {
@@ -58,10 +65,6 @@ func VerifyPinTLSContext(ctx context.Context, network, addr string) (net.Conn, e
 
 	keyPinValid := false
 	connState := conn.ConnectionState()
-
-	if !connState.HandshakeComplete {
-		return nil, errors.New("handshake not completed")
-	}
 
 	for _, peerCert := range connState.PeerCertificates {
 		der, err := x509.MarshalPKIXPublicKey(peerCert.PublicKey)
@@ -171,7 +174,6 @@ func isServerUnavailable(resp *http.Response) bool {
 	if resp == nil {
 		return true
 	}
-
 	switch resp.StatusCode {
 	case http.StatusServiceUnavailable, http.StatusGatewayTimeout, http.StatusRequestTimeout:
 		return true
