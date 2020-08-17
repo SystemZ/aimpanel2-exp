@@ -2,6 +2,7 @@ package router
 
 import (
 	"github.com/gorilla/mux"
+	"gitlab.com/systemz/aimpanel2/master/config"
 	"gitlab.com/systemz/aimpanel2/master/events"
 	"gitlab.com/systemz/aimpanel2/master/handler"
 	"gitlab.com/systemz/aimpanel2/master/handler/gs"
@@ -12,9 +13,30 @@ func NewRouter() *mux.Router {
 	router := mux.NewRouter()
 	//router.StrictSlash(true)
 
-	v1 := router.PathPrefix("/v1").Subrouter()
+	// frontend
+	frontendDir := config.HTTP_FRONTEND_DIR
+	// frontend home
+	// FIXME make sure to allow only needed HTTP verbs
+	router.HandleFunc("/", handler.Index).Methods("GET")
+	// FIXME add route for service-worker.js
+	// frontend assets
+	// FIXME make sure to allow only needed HTTP verbs
+	frontendAssetDirs := []string{"css", "js", "fonts", "img"}
+	for _, fAssetDir := range frontendAssetDirs {
+		dir := "/" + fAssetDir + "/"
+		// FIXME e2e test for FS disclosure bugs
+		router.PathPrefix(dir).Handler(
+			http.StripPrefix(dir,
+				http.FileServer(
+					http.Dir(frontendDir+dir),
+				),
+			),
+		)
+	}
 
-	for _, route := range routes {
+	// API endpoints
+	v1 := router.PathPrefix("/v1").Subrouter()
+	for _, route := range v1Routes {
 		var h http.Handler
 		h = CommonMiddleware(ExitMiddleware(route.HandlerFunc))
 
@@ -43,12 +65,22 @@ type Route struct {
 
 type Routes []Route
 
-var routes = Routes{
+// /v1/*
+var v1Routes = Routes{
+	// API docs
+	Route{
+		"Index",
+		"GET",
+		"",
+		handler.GetDocsRedirect,
+		false,
+		false,
+	},
 	Route{
 		"Index",
 		"GET",
 		"/",
-		handler.Index,
+		handler.GetDocsRedirect,
 		false,
 		false,
 	},

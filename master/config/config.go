@@ -2,6 +2,8 @@ package config
 
 import (
 	"github.com/spf13/viper"
+	"os"
+	"path/filepath"
 )
 
 var (
@@ -21,6 +23,9 @@ var (
 	UPDATE_TOKEN string
 
 	NODE_ID int64
+
+	HTTP_DOCS_DIR     string
+	HTTP_FRONTEND_DIR string
 )
 
 func init() {
@@ -55,4 +60,10 @@ func init() {
 
 	viper.SetDefault("NODE_ID", 0)
 	NODE_ID = viper.GetInt64("NODE_ID")
+
+	binaryDir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
+	viper.SetDefault("HTTP_DOCS_DIR", binaryDir+"/docs/")
+	HTTP_DOCS_DIR = viper.GetString("HTTP_DOCS_DIR")
+	viper.SetDefault("HTTP_FRONTEND_DIR", binaryDir+"/frontend/")
+	HTTP_FRONTEND_DIR = viper.GetString("HTTP_FRONTEND_DIR")
 }
