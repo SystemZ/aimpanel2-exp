@@ -95,7 +95,7 @@ redis:
     - docker
   when: manual
 
-docker-images:
+docker-image:
   stage: build
   image: docker:stable
   services:
@@ -106,12 +106,8 @@ docker-images:
     DOCKER_TLS_CERTDIR: "/certs"
   script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - docker build --tag $CI_REGISTRY_IMAGE/master:pipeline-$CI_PIPELINE_ID -f master.Dockerfile .
-    - docker push $CI_REGISTRY_IMAGE/master:pipeline-$CI_PIPELINE_ID
-    - docker build --tag $CI_REGISTRY_IMAGE/frontend:pipeline-$CI_PIPELINE_ID -f frontend.Dockerfile .
-    - docker push $CI_REGISTRY_IMAGE/frontend:pipeline-$CI_PIPELINE_ID
-    #- docker build --tag $CI_REGISTRY_IMAGE/slave:pipeline-$CI_PIPELINE_ID -f slave.Dockerfile .
-    #- docker push $CI_REGISTRY_IMAGE/slave:pipeline-$CI_PIPELINE_ID
+    - docker build --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA .
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
   only:
     - master
     - merge_requests
