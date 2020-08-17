@@ -8,8 +8,10 @@ USER root
 # add non-root group and user account called "go"
 RUN apk add --no-cache ca-certificates bash \
  && mkdir /exp \
- && groupadd -r go \
- && useradd --no-log-init -r -g go go
+ # alpine way https://stackoverflow.com/questions/49955097/how-do-i-add-a-user-when-im-using-alpine-as-a-base-image
+ && addgroup -S go && adduser -S go -G go \
+ # debian/ubuntu way
+ #&& groupadd -r go && useradd --no-log-init -r -g go go
 
 # extras for main binary
 ADD ../swagger.json /exp/swagger.json
