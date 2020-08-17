@@ -27,6 +27,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: dev
       MONGO_INITDB_ROOT_PASSWORD: dev
     #command: "--bind_ip_all --replSet rs0"
+    # https://stackoverflow.com/questions/15758507/how-to-force-preallocation-in-mongodb
     command: "--bind_ip_all --smallfiles"
     healthcheck:
       test: test $$(echo "rs.initiate().ok || rs.status().ok" | mongo -u dev -p dev --quiet) -eq 1
