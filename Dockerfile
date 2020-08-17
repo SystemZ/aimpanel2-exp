@@ -28,7 +28,7 @@ ADD aimpanel-slave /exp/slave
 ADD aimpanel-master /exp/master
 # set proper permissions for binary and extras
 RUN chmod +x /exp/master \
- && chown -r go:root /exp
+ && chown -R go:root /exp
 
 # list files added to container as debug
 RUN ls -alh /exp/
