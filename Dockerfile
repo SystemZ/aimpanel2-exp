@@ -14,9 +14,9 @@ RUN apk add --no-cache ca-certificates bash \
  #&& groupadd -r go && useradd --no-log-init -r -g go go
 
 # extras for main binary
-ADD ../swagger.json /exp/swagger.json
-ADD ../master/redoc.html /exp/redoc.html
-ADD ../master/swagger.html /exp/swagger.html
+ADD swagger.json /exp/swagger.json
+ADD master/redoc.html /exp/redoc.html
+ADD master/swagger.html /exp/swagger.html
 
 # frontend dir to be served by main binary
 ADD aimpanel-master-frontend /exp/frontend
