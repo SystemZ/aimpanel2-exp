@@ -118,7 +118,7 @@ docker-images:
   tags:
     - docker
 
-deploy:
+.deploy:
   stage: deploy
   image: alpine:latest
   script:
