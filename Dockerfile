@@ -7,16 +7,16 @@ USER root
 # install OS dependencies
 # add non-root group and user account called "go"
 RUN apk add --no-cache ca-certificates bash \
- && mkdir /exp \
+ && mkdir -p /exp/docs \
  # alpine way https://stackoverflow.com/questions/49955097/how-do-i-add-a-user-when-im-using-alpine-as-a-base-image
  && addgroup -S go && adduser -S go -G go
  # debian/ubuntu way
  #&& groupadd -r go && useradd --no-log-init -r -g go go
 
 # extras for main binary
-ADD swagger.json /exp/swagger.json
-ADD master/redoc.html /exp/redoc.html
-ADD master/swagger.html /exp/swagger.html
+ADD swagger.json /exp/docs/swagger.json
+ADD master/redoc.html /exp/docs/redoc.html
+ADD master/swagger.html /exp/docs/swagger.html
 
 # frontend dir to be served by main binary
 ADD aimpanel-master-frontend /exp/frontend
