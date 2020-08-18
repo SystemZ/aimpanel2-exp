@@ -42,8 +42,10 @@ var serverCmd = &cobra.Command{
 
 		// enable CORS only in dev mode
 		if config.DEV_MODE {
-			logrus.Fatal(http.ListenAndServe(
+			logrus.Fatal(http.ListenAndServeTLS(
 				":"+args[0],
+				config.HTTP_TLS_CERT_PATH,
+				config.HTTP_TLS_KEY_PATH,
 				router.Limiter.RateLimit(
 					router.CorsMiddleware(
 						handlers.LoggingHandler(os.Stdout, r),

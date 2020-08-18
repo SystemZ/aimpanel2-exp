@@ -24,8 +24,10 @@ var (
 
 	NODE_ID int64
 
-	HTTP_DOCS_DIR     string
-	HTTP_FRONTEND_DIR string
+	HTTP_DOCS_DIR      string
+	HTTP_FRONTEND_DIR  string
+	HTTP_TLS_CERT_PATH string
+	HTTP_TLS_KEY_PATH  string
 )
 
 func init() {
@@ -66,4 +68,9 @@ func init() {
 	HTTP_DOCS_DIR = viper.GetString("HTTP_DOCS_DIR")
 	viper.SetDefault("HTTP_FRONTEND_DIR", binaryDir+"/frontend/")
 	HTTP_FRONTEND_DIR = viper.GetString("HTTP_FRONTEND_DIR")
+
+	HTTP_TLS_CERT_PATH = viper.GetString("HTTP_TLS_CERT_PATH")
+	viper.SetDefault("HTTP_TLS_CERT_PATH", "crt.pem")
+	HTTP_TLS_KEY_PATH = viper.GetString("HTTP_TLS_KEY_PATH")
+	viper.SetDefault("HTTP_TLS_KEY_PATH", "key.pem")
 }
