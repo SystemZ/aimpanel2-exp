@@ -30,8 +30,8 @@ var Fingerprints = []string{
 	//local
 	"C0:5D:55:E1:A7:60:5D:EE:48:7A:01:B2:4F:E6:B7:EF:AC:E3:B4:FC:C2:0B:B2:EE:F8:28:60:89:3A:8D:8C:C2",
 
-	//my-lab.aimpanel.pro
-	"67d08017c05e2bca29f404947491b9055aad84da17b45951e3b9c1fa7f5126a4",
+	//*.lvlup.pro CF
+	"70:D7:10:D5:15:B5:C7:07:D4:22:0D:58:8E:F9:E8:EE:EF:67:13:77:6B:26:4B:D3:B7:94:CB:F4:98:9B:0A:1D",
 }
 
 var CurrentHost = 0
