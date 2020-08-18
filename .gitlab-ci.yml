@@ -38,9 +38,13 @@ backend:
   stage: compile
   image: golang:latest
   script:
+    - apt-get update
+    - apt-get install -y upx
     #- go build -race -ldflags "-extldflags '-static'" -o $CI_PROJECT_DIR/aimpanel-master
     #- go test -race $(go list ./... | grep -v /vendor/)
-    - CGO_ENABLED=0 go build -ldflags "-X gitlab.com/systemz/aimpanel2/master/config.GIT_COMMIT=$CI_COMMIT_SHA" -o $CI_PROJECT_DIR/aimpanel-master gitlab.com/systemz/aimpanel2/master
+    - CGO_ENABLED=0 go build -ldflags "-X gitlab.com/systemz/aimpanel2/master/config.GIT_COMMIT=$CI_COMMIT_SHA" -o $CI_PROJECT_DIR/aimpanel-master-raw gitlab.com/systemz/aimpanel2/master
+    # pack master binary for smaller disk footprint
+    - upx --brute -o $CI_PROJECT_DIR/aimpanel-master $CI_PROJECT_DIR/aimpanel-master-raw
     # requirements for journald integration
     - apt-get update && apt-get install -q -y libsystemd-dev
     - go build -ldflags "-X gitlab.com/systemz/aimpanel2/slave/config.GIT_COMMIT=$CI_COMMIT_SHA" -o $CI_PROJECT_DIR/aimpanel-slave gitlab.com/systemz/aimpanel2/slave
