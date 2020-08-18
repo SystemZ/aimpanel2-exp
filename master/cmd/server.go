@@ -27,9 +27,9 @@ var serverCmd = &cobra.Command{
 		exit.CheckForExitSignal()
 
 		model.DB = model.InitDB()
-		go model.EventChanges()
+		//go model.EventChanges()
 
-		model.InitRedis()
+		//model.InitRedis()
 		events.SSE = events.InitSSE()
 
 		router.InitRateLimit()
