@@ -61,7 +61,12 @@
                 <v-card>
                     <v-card-title>Performance</v-card-title>
                     <v-card-text align="center">
-                        <v-row>
+                        <v-row v-if="noMetricsYet">
+                          <v-col>
+                            <p>No metrics gathered yet</p>
+                          </v-col>
+                        </v-row>
+                        <v-row v-else>
                             <v-col xs3>
                                 <v-progress-circular
                                         :rotate="-90"
@@ -104,7 +109,12 @@
             <v-col>
                 <v-card>
                     <v-card-title>Charts</v-card-title>
-                    <v-card-text>
+                    <v-card-text v-if="noChartsYet">
+                      <p>
+                        No data to show on charts :(
+                      </p>
+                    </v-card-text>
+                    <v-card-text v-else>
                         <host-performance-chart v-if="allMetrics.length > 0" :metrics="allMetrics"/>
                         <v-progress-linear color="red" v-else indeterminate/>
                     </v-card-text>
@@ -141,6 +151,8 @@
             metric: {} as Metric,
             allMetrics: {} as Array<Metric>,
             removeSnackbar: false,
+            noMetricsYet: false,
+            noChartsYet: false,
             // gameServers: [],
         }),
         mounted(): void {
@@ -155,6 +167,14 @@
             this.$http.get('/v1/host/' + this.$route.params.id + '/metric').then((res) => {
                 this.allMetrics = res.data.metrics;
                 // FIXME metrics are empty!
+
+                if (res.data.metrics.length < 1 ) {
+                  // no data, skip assigning
+                  this.noMetricsYet = true
+                  this.noChartsYet = true
+                  return
+                }
+
                 this.metric = res.data.metrics[0];
 
                 this.metric.disk_free = +(this.metric.disk_free as number / 1024).toFixed(0);

@@ -124,6 +124,10 @@ func HostMetric(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if metrics == nil {
+		metrics = make([]model.TimeseriesOutput, 0)
+	}
+
 	lib.MustEncode(json.NewEncoder(w), response.HostMetrics{Metrics: metrics})
 }
 
