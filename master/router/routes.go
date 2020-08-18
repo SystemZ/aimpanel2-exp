@@ -17,6 +17,7 @@ func NewRouter() *mux.Router {
 	frontendDir := config.HTTP_FRONTEND_DIR
 	// frontend home
 	router.HandleFunc("/", handler.Index).Methods("GET", "HEAD")
+	router.HandleFunc("/robots.txt", handler.RobotsTxt).Methods("GET", "HEAD")
 	router.HandleFunc("/service-worker.js", handler.ServiceWorker).Methods("GET", "HEAD")
 	// frontend assets
 	frontendAssetDirs := []string{"css", "js", "fonts", "img"}

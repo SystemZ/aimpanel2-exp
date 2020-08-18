@@ -15,3 +15,8 @@ func ServiceWorker(w http.ResponseWriter, r *http.Request) {
 	//w.Header().Set("Content-Type", "text/javascript; charset=utf-8")
 	http.ServeFile(w, r, config.HTTP_FRONTEND_DIR+"service-worker.js")
 }
+
+func RobotsTxt(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/plain")
+	http.ServeFile(w, r, config.HTTP_FRONTEND_DIR+"robots.txt")
+}
