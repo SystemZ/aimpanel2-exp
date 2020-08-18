@@ -14,7 +14,9 @@ Remember to open `master-frontend/tslint.json` with IntelliJ and apply rules to 
 
 ### Master backend
 
-Generate TLS cert for local dev env
+Generate TLS cert for local dev env.  
+Remember to visit `https://127.0.0.1:3000` and accept self signed cert in a browser at least once.  
+If you don't do this, visiting frontend via webpack server will not work.
 
 ```bash
 # generate private key and self signed TLS certificate
