@@ -44,8 +44,10 @@ var serverCmd = &cobra.Command{
 		if config.DEV_MODE {
 			logrus.Fatal(http.ListenAndServe(
 				":"+args[0],
-				router.CorsMiddleware(
-					handlers.LoggingHandler(os.Stdout, r),
+				router.Limiter.RateLimit(
+					router.CorsMiddleware(
+						handlers.LoggingHandler(os.Stdout, r),
+					),
 				),
 			))
 		} else {
