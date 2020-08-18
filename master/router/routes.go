@@ -16,11 +16,9 @@ func NewRouter() *mux.Router {
 	// frontend
 	frontendDir := config.HTTP_FRONTEND_DIR
 	// frontend home
-	// FIXME make sure to allow only needed HTTP verbs
-	router.HandleFunc("/", handler.Index).Methods("GET")
-	// FIXME add route for service-worker.js
+	router.HandleFunc("/", handler.Index).Methods("GET", "HEAD")
+	router.HandleFunc("/service-worker.js", handler.ServiceWorker).Methods("GET", "HEAD")
 	// frontend assets
-	// FIXME make sure to allow only needed HTTP verbs
 	frontendAssetDirs := []string{"css", "js", "fonts", "img"}
 	for _, fAssetDir := range frontendAssetDirs {
 		dir := "/" + fAssetDir + "/"
@@ -31,7 +29,7 @@ func NewRouter() *mux.Router {
 					http.Dir(frontendDir+dir),
 				),
 			),
-		)
+		).Methods("GET", "HEAD")
 	}
 
 	// API endpoints
