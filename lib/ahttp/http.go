@@ -5,14 +5,12 @@ import (
 	"context"
 	"crypto/sha256"
 	"crypto/tls"
-	"crypto/x509"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"github.com/jpillora/backoff"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib/task"
-	"log"
 	"net"
 	"net/http"
 	"strings"
@@ -29,7 +27,7 @@ var b = &backoff.Backoff{
 var HttpClient *http.Client
 var Fingerprints = []string{
 	//local
-	"74439d64c7d7c6d30fc1fbad056ded5c19674fec425d181a9207b6cb1891ccbd",
+	"C0:5D:55:E1:A7:60:5D:EE:48:7A:01:B2:4F:E6:B7:EF:AC:E3:B4:FC:C2:0B:B2:EE:F8:28:60:89:3A:8D:8C:C2",
 
 	//my-lab.aimpanel.pro
 	"67d08017c05e2bca29f404947491b9055aad84da17b45951e3b9c1fa7f5126a4",
@@ -37,8 +35,7 @@ var Fingerprints = []string{
 
 var CurrentHost = 0
 var Hosts = []string{
-	"https://aimpanel.local",
-	"https://my-lab.aimpanel.pro",
+	"https://aimpanel.local:3000",
 }
 
 func InitHttpClient() *http.Client {
@@ -67,14 +64,8 @@ func VerifyPinTLSContext(ctx context.Context, network, addr string) (net.Conn, e
 	connState := conn.ConnectionState()
 
 	for _, peerCert := range connState.PeerCertificates {
-		der, err := x509.MarshalPKIXPublicKey(peerCert.PublicKey)
-		hash := sha256.Sum256(der)
-		if err != nil {
-			log.Fatal(err)
-		}
-
 		for _, f := range Fingerprints {
-			if f == hex.EncodeToString(hash[:]) {
+			if f == GenerateCertFingerprint(peerCert.Raw) {
 				keyPinValid = true
 			}
 		}
@@ -194,4 +185,16 @@ func SendTaskData(url string, token string, taskMsg task.Message) (int, error) {
 	}
 
 	return resp.StatusCode, nil
+}
+
+func GenerateCertFingerprint(peerCertRaw []byte) (hash string) {
+	// https://stackoverflow.com/a/38065844/1351857
+	hashRaw := sha256.Sum256(peerCertRaw)
+	hash = strings.ToUpper(hex.EncodeToString(hashRaw[:]))
+	// https://stackoverflow.com/questions/33633168/how-to-insert-a-character-every-x-characters-in-a-string-in-golang
+	for i := 2; i < len(hash); i += 3 {
+		// make sure that output is 1:1 with openssl CLI tool
+		hash = hash[:i] + ":" + hash[i:]
+	}
+	return
 }
