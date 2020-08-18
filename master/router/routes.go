@@ -31,6 +31,8 @@ func NewRouter() *mux.Router {
 			),
 		).Methods("GET", "HEAD")
 	}
+	// slave deployment
+	router.HandleFunc("/i/{hostToken}", handler.DeploymentScript).Methods("GET", "HEAD")
 
 	// API endpoints
 	v1 := router.PathPrefix("/v1").Subrouter()

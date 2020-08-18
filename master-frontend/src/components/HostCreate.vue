@@ -1,5 +1,5 @@
 <template>
-    <v-dialog max-width="600px" v-model="createHost.dialog">
+    <v-dialog max-width="800px" v-model="createHost.dialog">
         <template v-slot:activator="{ on }">
             <v-btn color="info" v-on="on" class="mt-2 mb-2">
                 <v-icon class="mr-2">{{mdiPlus}}</v-icon>
@@ -43,9 +43,7 @@
                             Host was successfully added.<br>
                             Please run command below on your host to finish installation
                         </p>
-                        <blockquote class="blockquote">wget
-                            https://exp.upp.pl -O install && bash install {{createHost.token}} ; rm install
-                        </blockquote>
+                        <kbd>wget https://{{apiHostname}}/i/{{createHost.token}} -O- | bash -</kbd>
                     </v-container>
                     <v-btn @click="finish()" text>Close</v-btn>
                 </v-stepper-content>
@@ -73,6 +71,17 @@
             //icons
             mdiPlus: mdiPlus,
         }),
+        computed: {
+          apiHostname(): string {
+            // FIXME get this from backend
+            // console.log(window.location.port)
+            // let port = ""
+            // if (window.location.port !== 443) {
+            //   port = location.port
+            // }
+            return window.location.hostname
+          }
+        },
         methods: {
             createHostCancel(): void {
                 this.createHost.dialog = false;

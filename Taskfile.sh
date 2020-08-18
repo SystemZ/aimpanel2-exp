@@ -102,9 +102,10 @@ function ci-slave-upload {
 
     ci-install-rclone-latest
 
+    # we don't need this in distributed version with separate instances
     # install.sh is in customer's docs how to install aimpanel
-    echo "Uploading install script"
-    rclone -v --stats-one-line-date --config rclone.conf copyto install.sh ovh-bucket:aimpanel-updates/install.sh
+    #echo "Uploading install script"
+    #rclone -v --stats-one-line-date --config rclone.conf copyto install.sh ovh-bucket:aimpanel-updates/install.sh
 
     # upload as stable link for install.sh
     echo "Uploading binary with \"latest\" name"
@@ -114,14 +115,15 @@ function ci-slave-upload {
     echo "Uploading binary with SHA1 name"
     rclone -v --stats-one-line-date --config rclone.conf copyto aimpanel-slave ovh-bucket:aimpanel-updates/aimpanel/$CI_COMMIT_SHA
 
-    # we don't need older versions that 1h
-    echo "Cleaning binaries older than 1h"
-    rclone -v --stats-one-line-date --config rclone.conf delete --min-age 1h ovh-bucket:aimpanel-updates/aimpanel/
+    # we don't need older versions than 30d
+    echo "Cleaning binaries older than 30d"
+    rclone -v --stats-one-line-date --config rclone.conf delete --min-age 30d ovh-bucket:aimpanel-updates/aimpanel/
 
+    # we don't need this in distributed version with separate instances
     # notify master about new slave version
     # starts all slaves update procedure to be compatible with new master
     # new master will be deployed few minutes after that
-    curl -XPOST -H "Token: $AIMPANEL_UPDATE_TOKEN" -H "Content-type: application/json" -d "{\"commit\": \"$CI_COMMIT_SHA\", \"url\": \"https://storage.gra.cloud.ovh.net/v1/AUTH_23b9e96be2fc431d93deedba1b8c87d2/aimpanel-updates/aimpanel/$CI_COMMIT_SHA\"}" 'https://api-lab.aimpanel.pro/v1/version'
+    #curl -XPOST -H "Token: $AIMPANEL_UPDATE_TOKEN" -H "Content-type: application/json" -d "{\"commit\": \"$CI_COMMIT_SHA\", \"url\": \"https://storage.gra.cloud.ovh.net/v1/AUTH_23b9e96be2fc431d93deedba1b8c87d2/aimpanel-updates/aimpanel/$CI_COMMIT_SHA\"}" 'https://api-lab.aimpanel.pro/v1/version'
 }
 
 function ci-redis-compile {

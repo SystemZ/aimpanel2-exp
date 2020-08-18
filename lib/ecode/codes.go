@@ -49,4 +49,5 @@ const (
 	GameNotFound
 	///agent
 	///wrapper
+	TemplateGenerationFailed
 )

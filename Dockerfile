@@ -8,6 +8,7 @@ USER root
 # add non-root group and user account called "go"
 RUN apk add --no-cache ca-certificates bash \
  && mkdir -p /exp/docs \
+ && mkdir -p /exp/templates \
  # alpine way https://stackoverflow.com/questions/49955097/how-do-i-add-a-user-when-im-using-alpine-as-a-base-image
  && addgroup -S go && adduser -S go -G go
  # debian/ubuntu way
@@ -17,6 +18,7 @@ RUN apk add --no-cache ca-certificates bash \
 ADD swagger.json /exp/docs/swagger.json
 ADD master/redoc.html /exp/docs/redoc.html
 ADD master/swagger.html /exp/docs/swagger.html
+ADD master/templates/install.sh /exp/templates/install.sh
 
 # frontend dir to be served by main binary
 ADD aimpanel-master-frontend /exp/frontend

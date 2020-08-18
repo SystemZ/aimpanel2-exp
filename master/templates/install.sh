@@ -3,9 +3,9 @@
 # you can use this to repair or upgrade too :)
 
 # variables
-TOKEN="QLIFYQNLUMRSFDBRYDNBMEGSMJOOOVTU"
-REPO_URL="https://storage.gra.cloud.ovh.net/v1/AUTH_23b9e96be2fc431d93deedba1b8c87d2/aimpanel-updates"
-API_URL=""
+TOKEN="{{.Token}}"
+REPO_URL="{{.UrlRepo}}"
+API_URL="{{.UrlApi}}"
 AIMPANEL_BINARY_NAME=slave
 AIMPANEL_BINARY_DIR=/opt/aimpanel
 AIMPANEL_DIR=/opt/aimpanel
@@ -27,18 +27,7 @@ while getopts ':dv' flag; do
        exit 1 ;;
   esac
 done
-# mode of install
-if [ -z "$d_flag" ]
-then
-  # standard mode
-  [ -z "$1" ] && echo "Provide token as 1st argument" >&2 && exit 1
-  TOKEN=$1
-else
-  # developer mode
-  echo "Dev mode.."
-  # overwrite default API_URL with local one
-  API_URL="http://192.168.122.1:3000"
-fi
+
 # debug output
 if [ -z "$verbose" ]
 then
