@@ -5,7 +5,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"gitlab.com/systemz/aimpanel2/master/config"
-	"gitlab.com/systemz/aimpanel2/master/cron"
 	"gitlab.com/systemz/aimpanel2/master/events"
 	"gitlab.com/systemz/aimpanel2/master/exit"
 	"gitlab.com/systemz/aimpanel2/master/model"
@@ -27,25 +26,29 @@ var serverCmd = &cobra.Command{
 		exit.CheckForExitSignal()
 
 		model.DB = model.InitDB()
-		go model.EventChanges()
+		//go model.EventChanges()
 
-		model.InitRedis()
+		//model.InitRedis()
 		events.SSE = events.InitSSE()
 
 		router.InitRateLimit()
 
-		go cron.CheckHostsHeartbeat()
-		go cron.CheckGSHeartbeat()
+		//go cron.CheckHostsHeartbeat()
+		//go cron.CheckGSHeartbeat()
 
 		logrus.Info("Starting API on port :" + args[0])
 		r := router.NewRouter()
 
 		// enable CORS only in dev mode
 		if config.DEV_MODE {
-			logrus.Fatal(http.ListenAndServe(
+			logrus.Fatal(http.ListenAndServeTLS(
 				":"+args[0],
-				router.CorsMiddleware(
-					handlers.LoggingHandler(os.Stdout, r),
+				config.HTTP_TLS_CERT_PATH,
+				config.HTTP_TLS_KEY_PATH,
+				router.Limiter.RateLimit(
+					router.CorsMiddleware(
+						handlers.LoggingHandler(os.Stdout, r),
+					),
 				),
 			))
 		} else {

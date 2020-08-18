@@ -2,13 +2,10 @@ package cmd
 
 import (
 	"context"
-	"crypto/sha256"
 	"crypto/tls"
-	"crypto/x509"
-	"encoding/hex"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"log"
+	"gitlab.com/systemz/aimpanel2/lib/ahttp"
 	"net"
 	"net/http"
 )
@@ -20,10 +17,12 @@ func init() {
 var fingerPrintCmd = &cobra.Command{
 	Use:     "fingerprint [addr]",
 	Short:   "Get fingerprint for specific address",
-	Long:    "",
-	Example: "fingerprint https://aimpanel.local",
+	Example: "fingerprint https://127.0.0.1:3000",
 	Args:    cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		logrus.Info("You can use bash for this too:")
+		logrus.Info("openssl x509 -noout -in crt.pem -fingerprint -sha256")
+		logrus.Info("echo | openssl s_client -connect example.com:443 |& openssl x509 -fingerprint -sha256 -noout")
 		client := &http.Client{}
 		client.Transport = &http.Transport{
 			DialTLSContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
@@ -33,13 +32,9 @@ var fingerPrintCmd = &cobra.Command{
 				}
 				connState := conn.ConnectionState()
 				for _, peerCert := range connState.PeerCertificates {
-					der, err := x509.MarshalPKIXPublicKey(peerCert.PublicKey)
-					if err != nil {
-						log.Fatal(err)
-					}
-					hash := sha256.Sum256(der)
 					logrus.Info(peerCert.Issuer)
-					logrus.Info("Fingerprint: " + hex.EncodeToString(hash[:]))
+					hash := ahttp.GenerateCertFingerprint(peerCert.Raw)
+					logrus.Info("Fingerprint: " + hash)
 					logrus.Info("")
 				}
 				return conn, nil

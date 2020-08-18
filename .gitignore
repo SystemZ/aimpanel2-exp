@@ -7,3 +7,4 @@ slave/slave
 swagger.json
 report.xml
 .vagrant
+*.pem

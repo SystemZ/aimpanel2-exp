@@ -1,24 +1,24 @@
 version: "3.7"
 services:
-  redis:
-    image: 'redis:5-alpine'
-    environment:
-      - ALLOW_EMPTY_PASSWORD=yes
-      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
-    ports:
-      - 6379:6379
-    volumes:
-      - 'redis_data:/bitnami/redis/data'
-  phpredmin:
-    image: 'sasanrose/phpredmin'
-    environment:
-      - PHPREDMIN_DATABASE_REDIS_0_HOST=redis
-    ports:
-      - 8090:80
-    depends_on:
-      - redis
+#  redis:
+  #    image: 'redis:5-alpine'
+  #    environment:
+  #      - ALLOW_EMPTY_PASSWORD=yes
+  #      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+  #    ports:
+  #      - 6379:6379
+  #    volumes:
+  #      - 'redis_data:/bitnami/redis/data'
+  #  phpredmin:
+  #    image: 'sasanrose/phpredmin'
+  #    environment:
+  #      - PHPREDMIN_DATABASE_REDIS_0_HOST=redis
+  #    ports:
+  #      - 8090:80
+  #    depends_on:
+  #      - redis
   mongo:
-    image: mongo
+    image: mongo:4.4.0
     hostname: mongodb
     restart: always
     ports:
@@ -26,11 +26,14 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: dev
       MONGO_INITDB_ROOT_PASSWORD: dev
-    command: "--bind_ip_all --replSet rs0"
+    #command: "--bind_ip_all --replSet rs0"
+    command: "--bind_ip_all"
     healthcheck:
       test: test $$(echo "rs.initiate().ok || rs.status().ok" | mongo -u dev -p dev --quiet) -eq 1
       interval: 10s
       start_period: 30s
+    volumes:
+      - 'mongo_data:/data/db'
   mongo-express:
     image: mongo-express
     ports:
@@ -41,5 +44,7 @@ services:
     depends_on:
       - mongo
 volumes:
-  redis_data:
+  #  redis_data:
+  #    driver: local
+  mongo_data:
     driver: local

@@ -12,6 +12,26 @@ Remember to open `master-frontend/tslint.json` with IntelliJ and apply rules to 
 ./Taskfile.sh frontend
 ```
 
+### Master backend
+
+Generate TLS cert for local dev env.  
+Remember to visit `https://127.0.0.1:3000` and accept self signed cert in a browser at least once.  
+If you don't do this, visiting frontend via webpack server will not work.
+
+```bash
+# generate private key and self signed TLS certificate
+./Taskfile.sh dev-tls-crt
+# show generated cert and key
+ls -alh *.pem
+
+# use local TLS cert fingerprint to whitelist slave connection to master
+openssl x509 -noout -in crt.pem -fingerprint -sha256
+
+# get remote TLS cert fingerprint
+# https://askubuntu.com/questions/156620/how-to-verify-the-ssl-fingerprint-by-command-line-wget-curl
+echo | openssl s_client -connect example.com:443 |& openssl x509 -fingerprint -sha256 -noout
+```
+
 ### Slave VM via Vagrant
 
 Tested on Kubuntu 18.04

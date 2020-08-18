@@ -13,7 +13,10 @@ func InitRateLimit() error {
 		return err
 	}
 
-	quota := throttled.RateQuota{MaxRate: throttled.PerMin(180)}
+	quota := throttled.RateQuota{
+		MaxBurst: 360,
+		MaxRate:  throttled.PerMin(180),
+	}
 	rateLimiter, err := throttled.NewGCRARateLimiter(store, quota)
 	if err != nil {
 		return err

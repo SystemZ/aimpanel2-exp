@@ -15,6 +15,7 @@ var (
 	REDIS_HOST               string
 	REDIS_PUB_SUB_AGENT_CH   string
 	REDIS_PUB_SUB_WRAPPER_CH string
+	MASTER_URLS              []string
 )
 
 func init() {
@@ -46,4 +47,8 @@ func init() {
 
 	viper.SetDefault("REDIS_PUB_SUB_WRAPPER_CH", "aimpanel_wrapper")
 	REDIS_PUB_SUB_WRAPPER_CH = viper.GetString("REDIS_PUB_SUB_WRAPPER_CH")
+
+	// use multiple URLs by separating them with space
+	viper.SetDefault("MASTER_URLS", "https://aimpanel.local:3000")
+	MASTER_URLS = viper.GetStringSlice("MASTER_URLS")
 }

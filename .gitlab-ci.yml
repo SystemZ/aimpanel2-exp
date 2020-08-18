@@ -17,7 +17,7 @@ frontend:
     - cd master-frontend
     - apk add yarn
     - yarn install --frozen-lockfile
-    - VUE_APP_API_URL=https://my-lab.aimpanel.pro yarn build
+    - VUE_APP_API_URL=/ yarn build
     - ls -alh dist
     - mv dist $CI_PROJECT_DIR/aimpanel-master-frontend
   cache:
@@ -38,13 +38,16 @@ backend:
   stage: compile
   image: golang:latest
   script:
+    - apt-get update
+    - apt-get install -y upx
     #- go build -race -ldflags "-extldflags '-static'" -o $CI_PROJECT_DIR/aimpanel-master
     #- go test -race $(go list ./... | grep -v /vendor/)
     - CGO_ENABLED=0 go build -ldflags "-X gitlab.com/systemz/aimpanel2/master/config.GIT_COMMIT=$CI_COMMIT_SHA" -o $CI_PROJECT_DIR/aimpanel-master gitlab.com/systemz/aimpanel2/master
     # requirements for journald integration
     - apt-get update && apt-get install -q -y libsystemd-dev
-    - go build -ldflags "-X gitlab.com/systemz/aimpanel2/slave/config.GIT_COMMIT=$CI_COMMIT_SHA" -o $CI_PROJECT_DIR/aimpanel-slave gitlab.com/systemz/aimpanel2/slave
-    #- CGO_ENABLED=0 go build -ldflags "-X gitlab.com/systemz/aimpanel2/slave/config.GIT_COMMIT=$CI_COMMIT_SHA" -o $CI_PROJECT_DIR/aimpanel-slave gitlab.com/systemz/aimpanel2/slave
+    - go build -ldflags "-X gitlab.com/systemz/aimpanel2/slave/config.GIT_COMMIT=$CI_COMMIT_SHA" -o $CI_PROJECT_DIR/aimpanel-slave-raw gitlab.com/systemz/aimpanel2/slave
+    # pack slave binary for smaller disk footprint
+    - upx -9 -o $CI_PROJECT_DIR/aimpanel-slave $CI_PROJECT_DIR/aimpanel-slave-raw
     # generate RESTful API spec
     - go get github.com/swaggo/swag/cmd/swag
     - bash Taskfile.sh ci-swagger-gen
@@ -95,7 +98,7 @@ redis:
     - docker
   when: manual
 
-docker-images:
+docker-image:
   stage: build
   image: docker:stable
   services:
@@ -106,12 +109,8 @@ docker-images:
     DOCKER_TLS_CERTDIR: "/certs"
   script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - docker build --tag $CI_REGISTRY_IMAGE/master:pipeline-$CI_PIPELINE_ID -f master.Dockerfile .
-    - docker push $CI_REGISTRY_IMAGE/master:pipeline-$CI_PIPELINE_ID
-    - docker build --tag $CI_REGISTRY_IMAGE/frontend:pipeline-$CI_PIPELINE_ID -f frontend.Dockerfile .
-    - docker push $CI_REGISTRY_IMAGE/frontend:pipeline-$CI_PIPELINE_ID
-    #- docker build --tag $CI_REGISTRY_IMAGE/slave:pipeline-$CI_PIPELINE_ID -f slave.Dockerfile .
-    #- docker push $CI_REGISTRY_IMAGE/slave:pipeline-$CI_PIPELINE_ID
+    - docker build --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA .
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
   only:
     - master
     - merge_requests

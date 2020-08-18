@@ -24,10 +24,11 @@ func Data(hostToken string, taskMsg *task.Message) error {
 	case task.AGENT_STARTED:
 		logrus.Infof("Got %v", taskMsg.TaskId)
 
-		err := AgentStarted(host.ID)
-		if err != nil {
-			return err
-		}
+		// FIXME check for updates
+		//err := AgentStarted(host.ID)
+		//if err != nil {
+		//	return err
+		//}
 	case task.AGENT_METRICS_FREQUENCY:
 		logrus.Infof("Got %v", taskMsg.TaskId)
 

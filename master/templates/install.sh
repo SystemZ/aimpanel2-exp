@@ -3,8 +3,9 @@
 # you can use this to repair or upgrade too :)
 
 # variables
-TOKEN="CHANGE_ME"
-REPO_URL="https://storage.gra.cloud.ovh.net/v1/AUTH_23b9e96be2fc431d93deedba1b8c87d2/aimpanel-updates"
+TOKEN="{{.Token}}"
+REPO_URL="{{.UrlRepo}}"
+API_URL="{{.UrlApi}}"
 AIMPANEL_BINARY_NAME=slave
 AIMPANEL_BINARY_DIR=/opt/aimpanel
 AIMPANEL_DIR=/opt/aimpanel
@@ -26,18 +27,7 @@ while getopts ':dv' flag; do
        exit 1 ;;
   esac
 done
-# mode of install
-if [ -z "$d_flag" ]
-then
-  # standard mode
-  [ -z "$1" ] && echo "Provide token as 1st argument" >&2 && exit 1
-  TOKEN=$1
-else
-  # developer mode
-  echo "Dev mode.."
-  # overwrite default API_URL with local one
-  API_URL="http://192.168.122.1:3000"
-fi
+
 # debug output
 if [ -z "$verbose" ]
 then
@@ -130,7 +120,7 @@ StandardInput=tty-force
 TTYPath=/dev/tty20
 StandardOutput=journal
 KillMode=process
-ExecStart=$AIMPANEL_BINARY_DIR/$AIMPANEL_BINARY_NAME agent $TOKEN
+ExecStart=$AIMPANEL_BINARY_DIR/$AIMPANEL_BINARY_NAME agent
 WorkingDirectory=/opt/aimpanel/
 Restart=always
 RestartSec=10
@@ -139,6 +129,7 @@ Environment="GS_DIR=$AIMPANEL_DIR/gs/"
 Environment="STORAGE_DIR=$AIMPANEL_DIR/storage/"
 Environment="TRASH_DIR=$AIMPANEL_DIR/trash/"
 Environment="HOST_TOKEN=$TOKEN"
+Environment="MASTER_URLS=$API_URL"
 " > /etc/systemd/system/aimpanel.service
 
 # create service for aimpanel supervisor
