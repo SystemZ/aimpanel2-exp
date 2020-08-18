@@ -16,6 +16,8 @@ function up {
 function frontend {
     cd master-frontend
     VUE_APP_API_URL=https://127.0.0.1:3000 npm run serve
+    # for production use empty "" as API_URL
+    #VUE_APP_API_URL="" npm run serve
 }
 
 # launch this first
