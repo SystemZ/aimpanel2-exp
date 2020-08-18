@@ -11,6 +11,7 @@ import (
 	"github.com/jpillora/backoff"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib/task"
+	"gitlab.com/systemz/aimpanel2/slave/config"
 	"net"
 	"net/http"
 	"strings"
@@ -34,9 +35,7 @@ var Fingerprints = []string{
 }
 
 var CurrentHost = 0
-var Hosts = []string{
-	"https://aimpanel.local:3000",
-}
+var Hosts = config.MASTER_URLS
 
 func InitHttpClient() *http.Client {
 	client := &http.Client{}
