@@ -3,7 +3,7 @@
 # you can use this to repair or upgrade too :)
 
 # variables
-TOKEN="CHANGE_ME"
+TOKEN="QLIFYQNLUMRSFDBRYDNBMEGSMJOOOVTU"
 REPO_URL="https://storage.gra.cloud.ovh.net/v1/AUTH_23b9e96be2fc431d93deedba1b8c87d2/aimpanel-updates"
 API_URL=""
 AIMPANEL_BINARY_NAME=slave
