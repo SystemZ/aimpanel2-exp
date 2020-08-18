@@ -24,6 +24,10 @@ function up-slave {
     vagrant ssh-config > vagrant.slave.ssh.config
 }
 
+function dev-tls-crt {
+  openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout key.pem -out crt.pem -config tls.cnf -sha256
+}
+
 function update-hosts-slave {
   ssh -F vagrant.slave.ssh.config default "sudo sed -i '/aimpanel.local/d' /etc/hosts"
   ssh -F vagrant.slave.ssh.config default "echo "$(hostname -I | cut -d' ' -f1) aimpanel.local" | sudo tee -a /etc/hosts > /dev/null"
