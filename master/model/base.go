@@ -49,6 +49,24 @@ func Update(d Document) error {
 	return nil
 }
 
+/*
+func Upsert(d Document) error {
+	upsert := true
+	_, err := DB.Collection(d.GetCollectionName()).UpdateOne(
+		context.TODO(),
+		bson.D{{Key: "$set", Value: d}},
+		&options.UpdateOptions{
+			Upsert: &upsert,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+*/
+
 func Delete(d Document) error {
 	_, err := DB.Collection(d.GetCollectionName()).DeleteOne(
 		context.TODO(),
