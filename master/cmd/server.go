@@ -26,6 +26,7 @@ var serverCmd = &cobra.Command{
 		exit.CheckForExitSignal()
 
 		model.DB = model.InitDB()
+		// helper for sending slave tasks via SSE
 		model.EmitterInit()
 		//go model.EventChanges()
 
