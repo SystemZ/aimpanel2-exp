@@ -78,9 +78,7 @@ function update-todo-issue {
     FIXME_CONTENT=$(git grep -n FIXME | awk -F':' '{ print "https://gitlab.com/SystemZ/aimpanel2/tree/master/"$1"#L"$2; $1=$2=""; print $0; print "" }' | sed -e 's/^[ \t]*//' | grep -v "Taskfile.sh")
 
     ISSUE_CONTENT="
-    ## FIXME
     $FIXME_CONTENT
-    ## TODO
     $TODO_CONTENT
     "
 
