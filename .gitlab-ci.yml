@@ -10,6 +10,15 @@ stages:
 # https://docs.gitlab.com/ee/user/project/merge_requests/code_quality.html#example-configuration
 # https://gitlab.com/gitlab-org/security-products/codequality
 
+update-todo:
+  stage: compile
+  image: alpine:latest
+  script:
+    - apk add --no-cache curl git bash gawk
+    - bash Taskfile.sh update-todo-issue
+  only:
+    - master
+
 frontend:
   stage: compile
   image: node:10-alpine
@@ -123,6 +132,6 @@ docker-image:
   script:
     - apk add --no-cache curl git bash gawk
     - curl -X POST -F token=$INFRA_TOKEN -F "ref=master" -F "variables[SERVICE_NAME]=aimpanel-lab" -F "variables[SERVICE_VERSION]=pipeline-$CI_PIPELINE_ID" https://gitlab.com/api/v4/projects/6986946/trigger/pipeline
-    - bash Taskfile.sh update-todo-issue
+    #- bash Taskfile.sh update-todo-issue
   only:
     - master
