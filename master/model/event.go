@@ -34,20 +34,70 @@ func (e *Event) SetID(id primitive.ObjectID) {
 	e.ID = id
 }
 
-func SendEvent(hostId primitive.ObjectID, taskMsg task.Message) error {
+func SendEvent(hostId primitive.ObjectID, taskMsg task.Message) (err error) {
+	logrus.Info("SendEvent() got event")
 	event := &Event{
 		HostId:      hostId,
 		TaskMessage: taskMsg,
 	}
-	err := Put(event)
+
+	// put copy of event in DB for later audit
+	err = Put(event)
 	if err != nil {
 		return err
 	}
 
-	return nil
+	// decide if we need to trigger actions
+
+	// skip action for empty hostId
+	if hostId == primitive.NilObjectID {
+		logrus.Warn("SendEvent() HostId is empty, ignoring")
+		return
+	}
+
+	// skip action for nonexistent hosts
+	host, err := GetHostById(hostId)
+	if err != nil {
+		logrus.Info("SendEvent() host not found, ignoring")
+		return
+	}
+
+	// skip action for disconnected hosts
+	// TODO retry few times before giving up
+	availableHosts := events.SSE.Channels()
+	channelName := fmt.Sprintf("/v1/events/%s", host.Token)
+	if !lib.StringInSlice(channelName, availableHosts) {
+		logrus.Warn("SendEvent() host dc, ignoring")
+		return
+	}
+
+	// prepare message for sending to slave as a task
+	channel, _ := events.SSE.GetChannel(channelName)
+	taskMsgStr, err := taskMsg.Serialize()
+	if err != nil {
+		logrus.Error("SendEvent() serialization of task message failed, ignoring")
+	}
+
+	// send task to slave
+	channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
+	logrus.Infof("SendEvent() Task sent to host %v", host.ID.Hex())
+	return
 }
 
-func EventChanges() {
+func SendMongoEvent(hostId primitive.ObjectID, taskMsg task.Message) (err error) {
+	event := &Event{
+		HostId:      hostId,
+		TaskMessage: taskMsg,
+	}
+	err = Put(event)
+	if err != nil {
+		return err
+	}
+
+	return
+}
+
+func ListenEventChangesFromMongo() {
 	pipeline := bson.D{
 		{
 			Key: "$match",
