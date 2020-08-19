@@ -16,6 +16,7 @@ const (
 	GAME_TEAMSPEAK3
 	GAME_TS3AUDIOBOT
 	GAME_MC_VANILLA
+	GAME_FACTORIO
 )
 
 type GameDefinition struct {
@@ -65,6 +66,13 @@ var Games = []GameDefinition{
 		Name: "Minecraft Java Edition Vanilla",
 		Versions: []string{
 			"1.16.2",
+		},
+	},
+	{
+		Id:   GAME_FACTORIO,
+		Name: "Factorio",
+		Versions: []string{
+			"1.0.0",
 		},
 	},
 }
@@ -180,7 +188,6 @@ func (game *Game) GetCmd() (cmd string, err error) {
 			game.JarFilename,
 			"nogui",
 		}
-
 	case GAME_BUNGEECORD:
 		command = []string{
 			"java",
@@ -190,18 +197,22 @@ func (game *Game) GetCmd() (cmd string, err error) {
 			"-jar",
 			game.JarFilename,
 		}
-
 	case GAME_TEAMSPEAK3:
 		command = []string{
 			"sh",
 			"ts3server_minimal_runscript.sh",
 		}
-
 	case GAME_TS3AUDIOBOT:
 		command = []string{
 			"mono",
 			"TS3AudioBot.exe",
 			"--non-interactive",
+		}
+	case GAME_FACTORIO:
+		command = []string{
+			"./bin/x64/factorio",
+			"--start-server-load-latest",
+			//"--start-server",
 		}
 	}
 
@@ -283,6 +294,17 @@ func (game *Game) Install(storagePath string, gsPath string) (err error) {
 		err = lib.DownloadFile(game.DownloadUrl, storageFilePath)
 
 		cmd := exec.Command("unzip", storageFilePath, "-d", gsPath)
+		if err = cmd.Run(); err != nil {
+			return err
+		}
+		cmd.Wait()
+	case GAME_FACTORIO:
+		storageFilePath := storagePath + "/factorio_headless_x64_" + game.Version + ".tar.xz"
+		if _, err := os.Stat(storageFilePath); os.IsNotExist(err) {
+			err = lib.DownloadFile(game.DownloadUrl, storageFilePath)
+		}
+
+		cmd := exec.Command("tar", "xfv", storageFilePath, "--strip-components=1", "--directory="+gsPath)
 		if err = cmd.Run(); err != nil {
 			return err
 		}

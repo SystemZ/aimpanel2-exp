@@ -64,8 +64,10 @@ func GetGameFileByGameIdAndVersion(gameId uint, version string) (gameFile *GameF
 		case "1.16.2":
 			downloadUrl = "https://launcher.mojang.com/v1/objects/c5f6fb23c3876461d46ec380421e42b289789530/server.jar"
 		}
-		// bedrock
-		// https://www.minecraft.net/en-us/download/server/bedrock
+	// bedrock
+	// https://www.minecraft.net/en-us/download/server/bedrock
+	case game.GAME_FACTORIO:
+		downloadUrl = fmt.Sprintf("https://www.factorio.com/get-download/%s/headless/linux64", version)
 	}
 
 	gameFile = &GameFile{
