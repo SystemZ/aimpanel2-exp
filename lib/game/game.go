@@ -15,6 +15,7 @@ const (
 
 	GAME_TEAMSPEAK3
 	GAME_TS3AUDIOBOT
+	GAME_MC_VANILLA
 )
 
 type GameDefinition struct {
@@ -59,6 +60,13 @@ var Games = []GameDefinition{
 			"master", "develop",
 		},
 	},
+	{
+		Id:   GAME_MC_VANILLA,
+		Name: "Minecraft Java Edition Vanilla",
+		Versions: []string{
+			"1.16.2",
+		},
+	},
 }
 
 type Game struct {
@@ -92,6 +100,13 @@ func (game *Game) SetDefaults() {
 		game.StopCommand = "end"
 		game.StopTimeout = 15
 		game.StopHardTimeout = 30
+	case GAME_MC_VANILLA:
+		game.RamMinM = 1024
+		game.RamMaxM = 2048
+		game.JarFilename = "minecraft_server.jar"
+		game.StopCommand = "stop"
+		game.StopTimeout = 15
+		game.StopHardTimeout = 30
 	}
 }
 
@@ -110,6 +125,18 @@ func (game *Game) Validate() (err error) {
 
 		return joi.Validate(game.JarFilename, joi.String().Min(3))
 	case GAME_BUNGEECORD:
+		err = joi.Validate(game.RamMinM, joi.Int().Min(16))
+		if err != nil {
+			return err
+		}
+
+		err = joi.Validate(game.RamMaxM, joi.Int().Min(64))
+		if err != nil {
+			return err
+		}
+
+		return joi.Validate(game.JarFilename, joi.String().Min(3))
+	case GAME_MC_VANILLA:
 		err = joi.Validate(game.RamMinM, joi.Int().Min(16))
 		if err != nil {
 			return err
@@ -142,6 +169,16 @@ func (game *Game) GetCmd() (cmd string, err error) {
 			"-Djline.terminal=jline.UnsupportedTerminal",
 			"-jar",
 			game.JarFilename,
+		}
+	case GAME_MC_VANILLA:
+		command = []string{
+			"java",
+			"-Xms" + strconv.Itoa(game.RamMinM) + "M",
+			"-Xmx" + strconv.Itoa(game.RamMaxM) + "M",
+			"-Djline.terminal=jline.UnsupportedTerminal",
+			"-jar",
+			game.JarFilename,
+			"nogui",
 		}
 
 	case GAME_BUNGEECORD:
@@ -200,7 +237,6 @@ func (game *Game) Install(storagePath string, gsPath string) (err error) {
 		if err != nil {
 			return err
 		}
-
 	case GAME_BUNGEECORD:
 		if _, err := os.Stat(storagePath + "/BungeeCord-" + game.Version + ".jar"); os.IsNotExist(err) {
 			err = lib.DownloadFile(game.DownloadUrl, storagePath+"/BungeeCord-"+game.Version+".jar")
@@ -210,6 +246,18 @@ func (game *Game) Install(storagePath string, gsPath string) (err error) {
 		}
 
 		err = lib.CopyFile(storagePath+"/BungeeCord-"+game.Version+".jar", gsPath+"/"+game.JarFilename)
+		if err != nil {
+			return err
+		}
+	case GAME_MC_VANILLA:
+		if _, err := os.Stat(storagePath + "/minecraft_server." + game.Version + ".jar"); os.IsNotExist(err) {
+			err = lib.DownloadFile(game.DownloadUrl, storagePath+"/minecraft_server."+game.Version+".jar")
+			if err != nil {
+				return err
+			}
+		}
+
+		err = lib.CopyFile(storagePath+"/minecraft_server."+game.Version+".jar", gsPath+"/"+game.JarFilename)
 		if err != nil {
 			return err
 		}
