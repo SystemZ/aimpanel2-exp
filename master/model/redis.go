@@ -24,7 +24,7 @@ func GsFilesSubscribe(redis *redis.Client, gsId string) (*redis.PubSub, error) {
 	return pubsub, nil
 }
 
-func GsFilesPublish(redis *redis.Client, gsId string, files *filemanager.Node) error {
+func GsFilesPublishRedis(redis *redis.Client, gsId string, files *filemanager.Node) error {
 	err := redis.Publish("gs_files_"+gsId, files.String()).Err()
 	if err != nil {
 		return err

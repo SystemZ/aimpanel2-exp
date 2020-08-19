@@ -26,6 +26,7 @@ var serverCmd = &cobra.Command{
 		exit.CheckForExitSignal()
 
 		model.DB = model.InitDB()
+		model.EmitterInit()
 		//go model.EventChanges()
 
 		//model.InitRedis()

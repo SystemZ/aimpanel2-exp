@@ -43,7 +43,7 @@ func Data(hostToken string, taskMsg *task.Message) error {
 
 	case task.AGENT_FILE_LIST_GS:
 		logrus.Infof("Got %v", taskMsg.TaskId)
-		err := model.GsFilesPublish(model.Redis, taskMsg.GameServerID, taskMsg.Files)
+		err := model.GsFilesPublish(taskMsg.GameServerID, taskMsg.Files)
 		if err != nil {
 			logrus.Error(err)
 		}

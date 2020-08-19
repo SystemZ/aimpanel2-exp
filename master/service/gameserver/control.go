@@ -11,6 +11,8 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"sync"
+	"time"
 )
 
 func Start(gsId primitive.ObjectID) error {
@@ -245,10 +247,10 @@ func Remove(gsId primitive.ObjectID) error {
 	return nil
 }
 
-func FileList(gsId primitive.ObjectID) (*filemanager.Node, error) {
+func FileList(gsId primitive.ObjectID) (res *filemanager.Node, err error) {
 	gameServer, err := model.GetGameServerById(gsId)
 	if err != nil {
-		return nil, err
+		return
 	}
 
 	if gameServer == nil {
@@ -265,33 +267,46 @@ func FileList(gsId primitive.ObjectID) (*filemanager.Node, error) {
 		GameServerID: gsId.Hex(),
 	}
 
+	// FIXME make safe for concurrent requests
+	fileListId := "gs-" + gsId.Hex() + "-filelist"
+	logrus.Infof("waiting for %v", fileListId)
+	model.GlobalEmitter[fileListId] = make(chan string)
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+	// cancel after 10 seconds of waiting
+	go func() {
+		time.Sleep(time.Second * 10)
+		return
+	}()
+
+	// wait for slave to provide result
+	go func() {
+		for {
+			select {
+			case msg := <-model.GlobalEmitter[fileListId]:
+				var files filemanager.Node
+				err = json.Unmarshal([]byte(msg), &files)
+				if err != nil {
+					wg.Done()
+					return
+				}
+				res = &files
+				wg.Done()
+			}
+		}
+	}()
+
+	// send task to slave
 	err = model.SendEvent(host.ID, taskMsg)
 	if err != nil {
-		return nil, &lib.Error{ErrorCode: ecode.DbSave}
+		err = &lib.Error{ErrorCode: ecode.DbSave}
+		wg.Done()
 	}
 
-	//TODO: not working on many master instances
-	//wait for files
-	pubsub, err := model.GsFilesSubscribe(model.Redis, gsId.Hex())
-	if err != nil {
-		return nil, err
-	}
-	ch := pubsub.Channel()
-
-	var filesStr string
-	for msg := range ch {
-		filesStr = msg.Payload
-		break
-	}
-	_ = pubsub.Close()
-
-	var files filemanager.Node
-	err = json.Unmarshal([]byte(filesStr), &files)
-	if err != nil {
-		return nil, err
-	}
-
-	return &files, err
+	// wait for result or 10 seconds, whatever comes first
+	wg.Wait()
+	return
 }
 
 func Shutdown(gsId primitive.ObjectID) error {
