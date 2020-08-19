@@ -200,7 +200,7 @@ export default Vue.extend({
       this.$http.delete(this.serverUrl).then(res => {
         this.removeSnackbar = true;
         console.log(res);
-        this.$router.push('/game-servers');
+        this.$router.push('/');
       }).catch(e => {
         this.$auth.checkResponse(e.response.status);
       });
