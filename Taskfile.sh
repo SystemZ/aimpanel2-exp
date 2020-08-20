@@ -13,6 +13,11 @@ function up {
     npm run serve
 }
 
+function generate {
+    # for "invalid array index" errors
+    stringer -type=Id lib/task/task.go
+}
+
 function frontend {
     cd master-frontend
     VUE_APP_API_URL=https://127.0.0.1:3000 npm run serve

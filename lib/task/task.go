@@ -9,6 +9,7 @@ import (
 
 type Id int
 
+//go:generate stringer -type=Id
 const (
 	//WRAPPER
 	GAME_START Id = iota + 1

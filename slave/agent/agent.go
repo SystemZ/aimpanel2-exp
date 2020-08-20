@@ -56,6 +56,14 @@ func Start(hostToken string) {
 		logrus.Error(err)
 	}
 
+	// TODO request jobs after every SSE DC
+	// current way can desync jobs after slave is disconnected prolonged time
+	// we can clear some redis key value when SSE disconnects in client.OnDisconnect()
+	// then do endless loop with sleep and ask master when this key is empty
+	// set timestamp after successful retrieval to skip gathering again
+	// do it at start of slave regardless of timestamp
+	// AGENT_METRICS_FREQUENCY probably need this too
+	// AGENT_RECONNECTED event would be useful
 	go func() {
 		time.Sleep(time.Duration(lib.RandInt(200, 2000)) * time.Millisecond)
 

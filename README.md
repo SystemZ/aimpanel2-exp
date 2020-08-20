@@ -32,6 +32,15 @@ openssl x509 -noout -in crt.pem -fingerprint -sha256
 echo | openssl s_client -connect example.com:443 |& openssl x509 -fingerprint -sha256 -noout
 ```
 
+### Code generation
+
+If you change some iota ints or whatever, just run this to regenerate all syntax sugar:
+```bash
+./Taskfile.sh generate
+```
+You will need this if you encounter error like:  
+> "invalid array index" compiler error signifies that the constant values have changed
+
 ### Slave VM via Vagrant
 
 Tested on Kubuntu 18.04
