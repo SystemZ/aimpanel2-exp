@@ -12,7 +12,6 @@ func (p *Process) LogStdout(msg string) {
 		GameServerID: p.GameServerID,
 		Stdout:       msg,
 	}
-
 	model.SendTask(config.REDIS_PUB_SUB_AGENT_CH, taskMsg)
 }
 
@@ -22,6 +21,5 @@ func (p *Process) LogStderr(msg string) {
 		GameServerID: p.GameServerID,
 		Stderr:       msg,
 	}
-
 	model.SendTask(config.REDIS_PUB_SUB_AGENT_CH, taskMsg)
 }

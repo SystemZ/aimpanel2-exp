@@ -79,6 +79,7 @@ func (p *Process) Run() {
 		if err := p.Cmd.Wait(); err != nil {
 			if exiterr, ok := err.(*exec.ExitError); ok {
 				if status, ok := exiterr.Sys().(syscall.WaitStatus); ok {
+					// FIXME verify launched app exit code and report it to agent
 					/*
 						Exit status: 143 == SIGTERM
 						Exit status: -1  == SIGKILL?

@@ -81,7 +81,6 @@ func (p *Process) RedisTaskHandler(taskCh string, taskBody string) {
 		go p.Metrics()
 	default:
 		logrus.Warningf("Unhandled task %v!", taskMsg.TaskId)
-		// report this to master
-
+		// TODO report unhandled task to master
 	}
 }
