@@ -26,4 +26,7 @@ const (
 	Steal
 	Guest
 	GuestNice
+	RamCache
+	RamBuffers
+	RamAvailable
 )

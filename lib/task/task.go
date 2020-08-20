@@ -60,6 +60,9 @@ type Message struct {
 	CpuUsage        int `json:"cpu_usage,omitempty"`
 	RamUsage        int `json:"ram_usage,omitempty"`
 	RamFree         int `json:"ram_free,omitempty"`
+	RamCache        int `json:"ram_cache,omitempty"`
+	RamBuffers      int `json:"ram_buffers,omitempty"`
+	RamAvailable    int `json:"ram_available,omitempty"`
 	RamTotal        int `json:"ram_total,omitempty"`
 	DiskFree        int `json:"disk_free,omitempty"`
 	DiskTotal       int `json:"disk_total,omitempty"`

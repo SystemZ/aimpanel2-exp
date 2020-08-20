@@ -69,7 +69,7 @@
             labels: this.metrics.map(m => moment.unix(m.t).toDate()),
             datasets: [
                 {
-                    label: 'Ram free',
+                    label: 'RAM Available',
                     backgroundColor: '#43a047',
                     borderColor: '#43a047',
                     data: this.metrics.map(m => m.avg),

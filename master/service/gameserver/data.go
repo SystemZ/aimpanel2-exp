@@ -18,7 +18,6 @@ func Data(hostToken string, taskMsg *task.Message) error {
 	switch taskMsg.TaskId {
 	case task.GAME_STARTED:
 		logrus.Infof("Got %v", taskMsg.TaskId)
-
 	case task.GAME_SERVER_LOG:
 		logrus.Infof("Got %v", taskMsg.TaskId)
 		err := Log(hostToken, taskMsg)
@@ -27,7 +26,6 @@ func Data(hostToken string, taskMsg *task.Message) error {
 		}
 	case task.GAME_SHUTDOWN:
 		logrus.Infof("Got %v", taskMsg.TaskId)
-
 	case task.GAME_METRICS_FREQUENCY:
 		logrus.Infof("Got %v", taskMsg.TaskId)
 		err := GameMetricsFrequency(hostToken, taskMsg)
@@ -40,7 +38,6 @@ func Data(hostToken string, taskMsg *task.Message) error {
 		if err != nil {
 			return err
 		}
-
 	case task.AGENT_FILE_LIST_GS:
 		logrus.Infof("Got %v", taskMsg.TaskId)
 		err := model.GsFilesPublish(taskMsg.GameServerID, taskMsg.Files)

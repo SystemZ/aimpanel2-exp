@@ -257,6 +257,9 @@ func AgentMetrics(metricsFrequency int) {
 		virtualMemory, _ := mem.VirtualMemory()
 		ramFree := virtualMemory.Free / 1024 / 1024
 		ramTotal := virtualMemory.Total / 1024 / 1024
+		ramCache := virtualMemory.Cached / 1024 / 1024
+		ramBuffers := virtualMemory.Buffers / 1024 / 1024
+		ramAvailable := virtualMemory.Available / 1024 / 1024
 		cpuPercent, _ := cpu.Percent(time.Duration(1)*time.Second, false)
 		cpuTimes, _ := cpu.Times(false)
 
@@ -266,23 +269,26 @@ func AgentMetrics(metricsFrequency int) {
 		diskUsed := diskUsage.Used / 1024 / 1024
 
 		taskMsg := task.Message{
-			TaskId:    task.AGENT_METRICS,
-			CpuUsage:  int(cpuPercent[0]),
-			RamFree:   int(ramFree),
-			RamTotal:  int(ramTotal),
-			DiskFree:  int(diskFree),
-			DiskTotal: int(diskTotal),
-			DiskUsed:  int(diskUsed),
-			User:      int(cpuTimes[0].User),
-			System:    int(cpuTimes[0].System),
-			Idle:      int(cpuTimes[0].Idle),
-			Nice:      int(cpuTimes[0].Nice),
-			Iowait:    int(cpuTimes[0].Iowait),
-			Irq:       int(cpuTimes[0].Irq),
-			Softirq:   int(cpuTimes[0].Softirq),
-			Steal:     int(cpuTimes[0].Steal),
-			Guest:     int(cpuTimes[0].Guest),
-			GuestNice: int(cpuTimes[0].GuestNice),
+			TaskId:       task.AGENT_METRICS,
+			CpuUsage:     int(cpuPercent[0]),
+			RamFree:      int(ramFree),
+			RamCache:     int(ramCache),
+			RamBuffers:   int(ramBuffers),
+			RamTotal:     int(ramTotal),
+			RamAvailable: int(ramAvailable),
+			DiskFree:     int(diskFree),
+			DiskTotal:    int(diskTotal),
+			DiskUsed:     int(diskUsed),
+			User:         int(cpuTimes[0].User),
+			System:       int(cpuTimes[0].System),
+			Idle:         int(cpuTimes[0].Idle),
+			Nice:         int(cpuTimes[0].Nice),
+			Iowait:       int(cpuTimes[0].Iowait),
+			Irq:          int(cpuTimes[0].Irq),
+			Softirq:      int(cpuTimes[0].Softirq),
+			Steal:        int(cpuTimes[0].Steal),
+			Guest:        int(cpuTimes[0].Guest),
+			GuestNice:    int(cpuTimes[0].GuestNice),
 		}
 		//TODO: do something with status code
 		_, err := ahttp.SendTaskData("/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
