@@ -7,6 +7,9 @@ import (
 
 func ProcessTask(taskMsg task.Message) {
 	switch taskMsg.TaskId {
+	case task.PING:
+		// empty, don't take any action
+		// we don't need to log it
 	case task.GAME_COMMAND, task.GAME_STOP_SIGKILL,
 		task.GAME_STOP_SIGTERM, task.GAME_RESTART, task.GAME_METRICS_FREQUENCY,
 		task.GAME_SHUTDOWN:
