@@ -1,11 +1,11 @@
 Vagrant.configure("2") do |config|
   config.vm.box = "generic/ubuntu1804"
   config.vm.box_check_update = false
-  config.vm.provision "shell" do |s|
+  #config.vm.provision "shell" do |s|
       # remember to change token in install.sh
-      s.path = "install.sh"
-      s.args = ["-d"]
-  end
+      #s.path = "install.sh"
+      #s.args = ["-d"]
+  #end
   config.vm.provider :libvirt do |libvirt|
     libvirt.cpus = 4
     libvirt.memory = 2048
