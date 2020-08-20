@@ -6,6 +6,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib/ecode"
 	"gitlab.com/systemz/aimpanel2/lib/request"
 	"gitlab.com/systemz/aimpanel2/lib/task"
+	"gitlab.com/systemz/aimpanel2/master/config"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"gitlab.com/systemz/aimpanel2/master/service/gameserver"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -191,20 +192,12 @@ func Update(hostId primitive.ObjectID) error {
 		return &lib.Error{ErrorCode: ecode.HostNotFound}
 	}
 
-	commit, err := model.GetSlaveCommit(model.Redis)
-	if err != nil {
-		return err
-	}
-
-	url, err := model.GetSlaveUrl(model.Redis)
-	if err != nil {
-		return err
-	}
-
+	binaryUrl := config.HTTP_REPO_URL + "/aimpanel/latest"
 	taskMsg := task.Message{
 		TaskId: task.AGENT_UPDATE,
-		Commit: commit,
-		Url:    url,
+		// TODO in DEV mode just use some random string
+		Commit: "new", // FIXME set git commit ID in master when building in CI
+		Url:    binaryUrl,
 	}
 
 	err = model.SendEvent(host.ID, taskMsg)

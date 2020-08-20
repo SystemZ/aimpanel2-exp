@@ -126,12 +126,15 @@ func GsInstall(taskMsg task.Message) {
 
 func SelfUpdate(taskMsg task.Message) {
 	if config.GIT_COMMIT == taskMsg.Commit {
+		logrus.Warning("version of new slave is same as current, ignoring update")
 		return
 	}
-	if config.GIT_COMMIT == "" {
+	if taskMsg.Commit == "" {
+		logrus.Warning("version of new slave is empty, ignoring update")
 		return
 	}
 
+	logrus.Infof("downloading new version %v from %v", taskMsg.Commit, taskMsg.Url)
 	resp, err := http.Get(taskMsg.Url)
 	if err != nil {
 		logrus.Error(err)
