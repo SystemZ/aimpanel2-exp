@@ -22,8 +22,6 @@ var (
 
 	UPDATE_TOKEN string
 
-	NODE_ID int64
-
 	HTTP_DOCS_DIR     string
 	HTTP_FRONTEND_DIR string
 	HTTP_TEMPLATE_DIR string
@@ -65,9 +63,6 @@ func init() {
 
 	viper.SetDefault("UPDATE_TOKEN", "")
 	UPDATE_TOKEN = viper.GetString("UPDATE_TOKEN")
-
-	viper.SetDefault("NODE_ID", 0)
-	NODE_ID = viper.GetInt64("NODE_ID")
 
 	binaryDir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
 	viper.SetDefault("HTTP_DOCS_DIR", binaryDir+"/docs/")
