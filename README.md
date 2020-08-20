@@ -4,6 +4,8 @@ The most easy to use game panel as a service
 
 ## Dev
 
+How to run this repo after cloning?
+
 ### Frontend
 
 Remember to open `master-frontend/tslint.json` with IntelliJ and apply rules to automatic formatting in popup!
@@ -12,7 +14,22 @@ Remember to open `master-frontend/tslint.json` with IntelliJ and apply rules to 
 ./Taskfile.sh frontend
 ```
 
-### Master backend
+### Backend
+
+#### ENV variables
+
+You need to build and run master binary with something like this to make it work locally:
+
+```
+DEV_MODE=true
+HTTP_FRONTEND_DIR=/home/user/Projects/aimpanel2/master-frontend/dist/
+HTTP_DOCS_DIR=/home/user/Projects/aimpanel2/master/
+HTTP_TLS_KEY_PATH=/home/user/Projects/aimpanel2/key.pem
+HTTP_TLS_CERT_PATH=/home/user/Projects/aimpanel2/crt.pem
+HTTP_TEMPLATE_DIR=/home/user/Projects/aimpanel2/master/templates/
+```
+
+#### Cert
 
 Generate TLS cert for local dev env.  
 Remember to visit `https://127.0.0.1:3000` and accept self signed cert in a browser at least once.  
@@ -32,7 +49,7 @@ openssl x509 -noout -in crt.pem -fingerprint -sha256
 echo | openssl s_client -connect example.com:443 |& openssl x509 -fingerprint -sha256 -noout
 ```
 
-### Code generation
+#### Code generation
 
 If you change some iota ints or whatever, just run this to regenerate all syntax sugar:
 ```bash
