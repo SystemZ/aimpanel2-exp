@@ -126,36 +126,48 @@ var v1Routes = Routes{
 		false,
 		false,
 	},
-
+	// SSE endpoint for browser
+	Route{
+		"GameServer Console",
+		"GET",
+		"/host/{hostId}/server/{gsId}/console",
+		events.Handler,
+		true,
+		false,
+	},
+	// SSE endpoint for slave
 	Route{
 		"Host events",
 		"GET",
 		"/events/{hostToken}",
-		events.Handler, //SSE
+		events.Handler,
 		true,
 		true,
 	},
+	// SSE endpoint for slave
 	Route{
 		"Game server events",
 		"GET",
 		"/events/{hostToken}/{gsId}",
-		events.Handler, //SSE
+		events.Handler,
 		true,
 		true,
 	},
+	// internal, not documented in API docs
 	Route{
 		"Host data",
 		"POST",
 		"/events/{hostToken}",
-		gs.Data,
+		handler.ReceiveData,
 		true,
 		true,
 	},
+	// internal, not documented in API docs
 	Route{
-		"Game server data",
+		"Batch host data",
 		"POST",
-		"/events/{hostToken}/{gsId}",
-		gs.Data,
+		"/events/{hostToken}/batch",
+		handler.ReceiveBatchData,
 		true,
 		true,
 	},
@@ -356,14 +368,6 @@ var v1Routes = Routes{
 		gs.PutLogs,
 		true,
 		true,
-	},
-	Route{
-		"GameServer Console",
-		"GET",
-		"/host/{hostId}/server/{gsId}/console",
-		events.Handler,
-		true,
-		false,
 	},
 	Route{
 		"GameServer Shutdown",

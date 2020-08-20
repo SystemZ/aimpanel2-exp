@@ -45,6 +45,8 @@ func (i Id) StringValue() string {
 	return strconv.Itoa(int(i))
 }
 
+type Messages []Message
+
 type Message struct {
 	// task id
 	TaskId       Id         `json:"task_id,omitempty"`
@@ -103,6 +105,14 @@ type Job struct {
 }
 
 func (m *Message) Serialize() (string, error) {
+	data, err := json.Marshal(&m)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
+}
+
+func (m *Messages) Serialize() (string, error) {
 	data, err := json.Marshal(&m)
 	if err != nil {
 		return "", err

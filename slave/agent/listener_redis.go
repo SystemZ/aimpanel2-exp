@@ -8,11 +8,55 @@ import (
 	"gitlab.com/systemz/aimpanel2/slave/cron"
 	"gitlab.com/systemz/aimpanel2/slave/model"
 	"gitlab.com/systemz/aimpanel2/slave/tasks"
+	"sync"
+	"time"
 )
+
+var (
+	QueuedMsgs []task.Message
+	QueueMutex sync.Mutex
+)
+
+func QueueSendTaskData(msgRaw task.Message) {
+	QueueMutex.Lock()
+	QueuedMsgs = append(QueuedMsgs, msgRaw)
+	QueueMutex.Unlock()
+}
+
+// gather all messages in specified time and send them in batches
+// prevent massive number of HTTP requests which wrongfully can look like DoS
+func SendMessagesToMaster() {
+	for {
+		// wait between sending batches
+		time.Sleep(time.Millisecond * 300)
+		// lock for consistency
+		QueueMutex.Lock()
+		// no messages, no need to send them
+		if len(QueuedMsgs) < 1 {
+			QueueMutex.Unlock()
+			continue
+		}
+
+		// send all messages in queue
+		// FIXME handle task send retry
+		_, err := ahttp.SendTaskBatchData("/v1/events/"+config.HOST_TOKEN+"/batch", config.API_TOKEN, QueuedMsgs)
+		if err != nil {
+			logrus.Error(err)
+		}
+
+		// clean queue
+		QueuedMsgs = []task.Message{}
+		// allow to add new messages for a second
+		QueueMutex.Unlock()
+	}
+}
 
 func listenerRedis(done chan bool) {
 	// start connection to redis
 	model.InitRedis()
+
+	// start batch processing
+	go SendMessagesToMaster()
 
 	// subscribe tasks
 	// https://godoc.org/github.com/go-redis/redis#PubSub
@@ -79,11 +123,7 @@ func redisTaskHandler(taskCh string, taskBody string) {
 
 	case task.GAME_SERVER_LOG:
 		logrus.Info("Agent got " + taskMsg.TaskId.String())
-
-		_, err = ahttp.SendTaskData("/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
-		if err != nil {
-			logrus.Error(err)
-		}
+		QueueSendTaskData(taskMsg)
 	case task.GAME_METRICS:
 		logrus.Info("Agent got " + taskMsg.TaskId.String())
 

@@ -186,6 +186,20 @@ func SendTaskData(url string, token string, taskMsg task.Message) (int, error) {
 	return resp.StatusCode, nil
 }
 
+func SendTaskBatchData(url string, token string, taskMsg task.Messages) (int, error) {
+	jsonStr, err := taskMsg.Serialize()
+	if err != nil {
+		return 0, err
+	}
+
+	resp, err := Post(url, token, jsonStr)
+	if err != nil {
+		return 0, err
+	}
+
+	return resp.StatusCode, nil
+}
+
 func GenerateCertFingerprint(peerCertRaw []byte) (hash string) {
 	// https://stackoverflow.com/a/38065844/1351857
 	hashRaw := sha256.Sum256(peerCertRaw)
