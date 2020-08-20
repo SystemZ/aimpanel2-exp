@@ -6,7 +6,7 @@ The most easy to use game panel as a service
 
 ### Frontend
 
-Remember to open `master-frontend/tslint.json` with IntelliJ and apply rules to formatting in popup!
+Remember to open `master-frontend/tslint.json` with IntelliJ and apply rules to automatic formatting in popup!
 
 ```bash
 ./Taskfile.sh frontend
