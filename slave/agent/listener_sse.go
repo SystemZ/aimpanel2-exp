@@ -21,6 +21,10 @@ func listenerSse(done chan bool) {
 	client.Connection.Transport = &http.Transport{
 		DialTLSContext: ahttp.VerifyPinTLSContext,
 	}
+	client.ReconnectStrategy = NewUnlimitedRetry(true, "sse")
+	client.OnDisconnect(func(c *sse.Client) {
+		logrus.Warn("SSE disconnected")
+	})
 
 	events := make(chan *sse.Event)
 	err := client.SubscribeChan("", events)
