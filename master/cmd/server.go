@@ -35,6 +35,7 @@ var serverCmd = &cobra.Command{
 
 		router.InitRateLimit()
 
+		//go cron.SseHeartbeat()
 		//go cron.CheckHostsHeartbeat()
 		//go cron.CheckGSHeartbeat()
 

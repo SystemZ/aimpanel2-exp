@@ -9,10 +9,10 @@
     >
         <template v-slot:item.state="{ item }">
                         <span v-if="item.state === 1">
-                            <v-icon class="green--text" small>{{mdiCheckboxBlankCircle}}</v-icon> Active
+                            <v-icon class="green--text" small>{{mdiCheckboxBlankCircle}}</v-icon> -
                         </span>
             <span v-else>
-                            <v-icon class="red--text" small>{{mdiCheckboxBlankCircle}}</v-icon> Locked
+                            <v-icon class="red--text" small>{{mdiCheckboxBlankCircle}}</v-icon> -
                         </span>
         </template>
 

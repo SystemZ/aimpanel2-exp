@@ -2,9 +2,18 @@ package cron
 
 import (
 	"github.com/sirupsen/logrus"
+	"gitlab.com/systemz/aimpanel2/master/events"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"time"
 )
+
+func SseHeartbeat() {
+	for {
+		channels := events.SSE.Channels()
+		logrus.Infof("SSE channels: %v", channels)
+		time.Sleep(time.Second * 30)
+	}
+}
 
 func CheckHostsHeartbeat() {
 	for {

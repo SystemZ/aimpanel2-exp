@@ -2,9 +2,12 @@ package model
 
 import (
 	"context"
+	"gitlab.com/systemz/aimpanel2/master/events"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"strings"
+	"time"
 )
 
 type Host struct {
@@ -46,6 +49,9 @@ type Host struct {
 	// State
 	// 0 off, 1 running
 	State uint `bson:"state" json:"state" example:"1"`
+
+	// Last successful heartbeat received
+	LastHeartbeat time.Time `bson:"last_heartbeat" json:"last_heartbeat" example:"2019-09-29T03:16:27+02:00"`
 }
 
 func (h *Host) GetCollectionName() string {
@@ -124,10 +130,23 @@ func GetHostsByUserId(userId primitive.ObjectID) ([]Host, error) {
 	}
 	defer cur.Close(context.TODO())
 
+	// get currently connected hosts (and browsers)
+	sseChannels := events.SSE.Channels()
+
+	// loop through all hosts from DB for this user
 	for cur.Next(context.TODO()) {
 		var host Host
 		if err := cur.Decode(&host); err != nil {
 			return nil, err
+		}
+		// by default mark host as disconnected
+		host.State = 0
+		for _, chRaw := range sseChannels {
+			ch := strings.Replace(chRaw, "/v1/events/", "", 1)
+			if ch == host.Token {
+				// SSE channel with host's token means that host is currently connected
+				host.State = 1
+			}
 		}
 		hosts = append(hosts, host)
 	}

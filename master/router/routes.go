@@ -131,7 +131,7 @@ var v1Routes = Routes{
 		"Host events",
 		"GET",
 		"/events/{hostToken}",
-		events.Handler,
+		events.Handler, //SSE
 		true,
 		true,
 	},
@@ -139,7 +139,7 @@ var v1Routes = Routes{
 		"Game server events",
 		"GET",
 		"/events/{hostToken}/{gsId}",
-		events.Handler,
+		events.Handler, //SSE
 		true,
 		true,
 	},
