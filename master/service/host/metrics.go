@@ -17,84 +17,35 @@ func Metrics(hostToken string, taskMsg task.Message) error {
 		return nil
 	}
 
-	err = model.PutMetric(model.HostMetric, host.ID, metric.CpuUsage, taskMsg.CpuUsage, time.Now().Unix())
-	if err != nil {
-		return err
+	type mList struct {
+		metricId       metric.Id
+		taskPropertyId int
+	}
+	metricList := []mList{
+		{metricId: metric.RamFree, taskPropertyId: taskMsg.RamFree},
+		{metricId: metric.CpuUsage, taskPropertyId: taskMsg.CpuUsage},
+		{metricId: metric.RamTotal, taskPropertyId: taskMsg.RamTotal},
+		{metricId: metric.DiskFree, taskPropertyId: taskMsg.DiskFree},
+		{metricId: metric.DiskUsed, taskPropertyId: taskMsg.DiskUsed},
+		{metricId: metric.DiskTotal, taskPropertyId: taskMsg.DiskTotal},
+		{metricId: metric.User, taskPropertyId: taskMsg.User},
+		{metricId: metric.System, taskPropertyId: taskMsg.System},
+		{metricId: metric.Idle, taskPropertyId: taskMsg.Idle},
+		{metricId: metric.Nice, taskPropertyId: taskMsg.Nice},
+		{metricId: metric.Iowait, taskPropertyId: taskMsg.Iowait},
+		{metricId: metric.Irq, taskPropertyId: taskMsg.Irq},
+		{metricId: metric.Softirq, taskPropertyId: taskMsg.Softirq},
+		{metricId: metric.Steal, taskPropertyId: taskMsg.Steal},
+		{metricId: metric.Guest, taskPropertyId: taskMsg.Guest},
+		{metricId: metric.GuestNice, taskPropertyId: taskMsg.GuestNice},
 	}
 
-	err = model.PutMetric(model.HostMetric, host.ID, metric.RamFree, taskMsg.RamFree, time.Now().Unix())
-	if err != nil {
-		return err
-	}
-
-	err = model.PutMetric(model.HostMetric, host.ID, metric.RamTotal, taskMsg.RamTotal, time.Now().Unix())
-	if err != nil {
-		return err
-	}
-
-	err = model.PutMetric(model.HostMetric, host.ID, metric.DiskFree, taskMsg.DiskFree, time.Now().Unix())
-	if err != nil {
-		return err
-	}
-
-	err = model.PutMetric(model.HostMetric, host.ID, metric.DiskUsed, taskMsg.DiskUsed, time.Now().Unix())
-	if err != nil {
-		return err
-	}
-
-	err = model.PutMetric(model.HostMetric, host.ID, metric.DiskTotal, taskMsg.DiskTotal, time.Now().Unix())
-	if err != nil {
-		return err
-	}
-
-	err = model.PutMetric(model.HostMetric, host.ID, metric.User, taskMsg.User, time.Now().Unix())
-	if err != nil {
-		return err
-	}
-
-	err = model.PutMetric(model.HostMetric, host.ID, metric.System, taskMsg.System, time.Now().Unix())
-	if err != nil {
-		return err
-	}
-
-	err = model.PutMetric(model.HostMetric, host.ID, metric.Idle, taskMsg.Idle, time.Now().Unix())
-	if err != nil {
-		return err
-	}
-
-	err = model.PutMetric(model.HostMetric, host.ID, metric.Nice, taskMsg.Nice, time.Now().Unix())
-	if err != nil {
-		return err
-	}
-
-	err = model.PutMetric(model.HostMetric, host.ID, metric.Iowait, taskMsg.Iowait, time.Now().Unix())
-	if err != nil {
-		return err
-	}
-
-	err = model.PutMetric(model.HostMetric, host.ID, metric.Irq, taskMsg.Irq, time.Now().Unix())
-	if err != nil {
-		return err
-	}
-
-	err = model.PutMetric(model.HostMetric, host.ID, metric.Softirq, taskMsg.Softirq, time.Now().Unix())
-	if err != nil {
-		return err
-	}
-
-	err = model.PutMetric(model.HostMetric, host.ID, metric.Steal, taskMsg.Steal, time.Now().Unix())
-	if err != nil {
-		return err
-	}
-
-	err = model.PutMetric(model.HostMetric, host.ID, metric.Guest, taskMsg.Guest, time.Now().Unix())
-	if err != nil {
-		return err
-	}
-
-	err = model.PutMetric(model.HostMetric, host.ID, metric.GuestNice, taskMsg.GuestNice, time.Now().Unix())
-	if err != nil {
-		return err
+	// loop over all metrics for write in DB
+	for _, v := range metricList {
+		err = model.PutMetric(model.HostMetric, host.ID, v.metricId, v.taskPropertyId, time.Now().Unix())
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
