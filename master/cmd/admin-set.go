@@ -25,7 +25,7 @@ var adminSetCmd = &cobra.Command{
 			logrus.Info(arg)
 			user, err := model.GetUserByUsername(arg)
 			if err != nil {
-				logrus.Warning("user %v not found, skipping...", arg)
+				logrus.Warningf("user %v not found, skipping...", arg)
 				continue
 			}
 			logrus.Infof("before update: admin=%v", user.Admin)

@@ -33,7 +33,7 @@ var serverCmd = &cobra.Command{
 		logrus.Info("Applying migrations...")
 		err := migrations.MigrateUp()
 		if err != nil {
-			logrus.Error("problem during migration, exiting: %v", err)
+			logrus.Errorf("problem during migration, exiting: %v", err)
 		}
 
 		// helper for sending slave tasks via SSE
