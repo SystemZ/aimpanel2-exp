@@ -27,7 +27,7 @@ import (
 // @Security ApiKey
 func HostList(w http.ResponseWriter, r *http.Request) {
 	user := context.Get(r, "user").(model.User)
-	hosts, err := model.GetHostsByUserId(user.ID)
+	hosts, err := model.GetHostsByUser(user)
 	if err != nil {
 		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, err)
 		return

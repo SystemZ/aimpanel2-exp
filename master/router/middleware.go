@@ -69,13 +69,21 @@ func PermissionMiddleware(handler http.Handler) http.Handler {
 		route := mux.CurrentRoute(r)
 		pathTemplate, _ := route.GetPathTemplate()
 
-		if !model.CheckIfUserHasAccess(r.URL.Path, r.Method, pathTemplate, user.ID) {
-			logrus.Info("Access denied")
-			w.WriteHeader(http.StatusUnauthorized)
+		// override all permission system for instance admin
+		if user.Admin {
+			handler.ServeHTTP(w, r)
 			return
 		}
 
-		handler.ServeHTTP(w, r)
+		// standard check for standard user
+		if model.CheckIfUserHasAccess(r.URL.Path, r.Method, pathTemplate, user.ID) {
+			handler.ServeHTTP(w, r)
+			return
+		}
+
+		logrus.Info("Access denied")
+		w.WriteHeader(http.StatusUnauthorized)
+		return
 	})
 }
 

@@ -121,8 +121,8 @@ func GetGameServersByHostId(hostId primitive.ObjectID) (*[]GameServer, error) {
 }
 
 //FIXME
-func GetUserGameServers(userId primitive.ObjectID) (*[]GameServer, error) {
-	hosts, err := GetHostsByUserId(userId)
+func GetUserGameServers(user User) (*[]GameServer, error) {
+	hosts, err := GetHostsByUser(user)
 	if err != nil {
 		return nil, err
 	}

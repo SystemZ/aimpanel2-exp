@@ -148,7 +148,7 @@ func ListByHostId(w http.ResponseWriter, r *http.Request) {
 func ListByUser(w http.ResponseWriter, r *http.Request) {
 	user := context.Get(r, "user").(model.User)
 
-	gameServers, err := model.GetUserGameServers(user.ID)
+	gameServers, err := model.GetUserGameServers(user)
 	if err != nil {
 		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, err)
 		return

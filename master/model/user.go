@@ -18,6 +18,7 @@ type User struct {
 	Username     string `bson:"username" json:"username"`
 	PasswordHash string `bson:"password_hash" json:"password_hash"`
 	Email        string `bson:"email" json:"email"`
+	Admin        bool   `bson:"admin" json:"admin"`
 	//TODO: plan_id
 }
 

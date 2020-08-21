@@ -120,11 +120,17 @@ func GetHostByToken(token string) (*Host, error) {
 	return &host, nil
 }
 
-func GetHostsByUserId(userId primitive.ObjectID) ([]Host, error) {
+func GetHostsByUser(user User) ([]Host, error) {
 	var hosts = make([]Host, 0)
 
-	cur, err := DB.Collection(hostCollection).Find(context.TODO(),
-		bson.D{{Key: "user_id", Value: userId}})
+	// show hosts that belong to user
+	searchTerms := bson.D{{Key: "user_id", Value: user.ID}}
+	// admin have access to all hosts
+	if user.Admin {
+		searchTerms = bson.D{}
+	}
+
+	cur, err := DB.Collection(hostCollection).Find(context.TODO(), searchTerms)
 	if err != nil {
 		return nil, err
 	}
