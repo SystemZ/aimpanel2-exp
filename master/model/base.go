@@ -18,6 +18,7 @@ const (
 	gameFileCollection         = "game_file"
 	metricCollection           = "metrics"
 	eventCollection            = "event"
+	configCollection           = "config"
 )
 
 type Document interface {

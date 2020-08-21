@@ -9,6 +9,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/master/events"
 	"gitlab.com/systemz/aimpanel2/master/exit"
 	"gitlab.com/systemz/aimpanel2/master/model"
+	"gitlab.com/systemz/aimpanel2/master/model/migrations"
 	"gitlab.com/systemz/aimpanel2/master/router"
 	"net/http"
 	"os"
@@ -26,7 +27,12 @@ var serverCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		exit.CheckForExitSignal()
 
+		logrus.Info("Connecting to DB...")
 		model.DB = model.InitDB()
+
+		logrus.Info("Applying migrations...")
+		migrations.MigrateUp()
+
 		// helper for sending slave tasks via SSE
 		model.EmitterInit()
 		//go model.EventChanges()
