@@ -2,9 +2,33 @@
 
 The most easy to use game panel as a service
 
-## Dev
+## Dev launch
 
-How to run this repo after cloning?
+If your setup is ready...
+
+Run MongoDB and web interface for it (PMA like)
+```bash
+docker-compose up
+```
+
+Run frontend in WebStorm, then visit http://127.0.0.1:8080
+```bash
+./Taskfile.sh frontend
+# preferably in WebStorm
+```
+
+Run VM for slave
+```bash
+vagrant up
+vagrant ssh
+sudo -i
+```
+
+.
+
+## Dev deployment
+
+First time? We got you covered :)
 
 ### Frontend
 
