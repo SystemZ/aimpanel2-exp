@@ -8,17 +8,15 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/slave/config"
 	"gitlab.com/systemz/aimpanel2/slave/cron"
-	"gitlab.com/systemz/aimpanel2/slave/model"
 	"gitlab.com/systemz/aimpanel2/slave/tasks"
 	"time"
 )
 
 func Start(hostToken string) {
-	model.InitRedis()
+	//model.InitRedis()
+	logrus.Info("starting agent version " + config.GIT_COMMIT)
 	cron.InitCron()
 	ahttp.HttpClient = ahttp.InitHttpClient()
-
-	logrus.Info("Starting Agent Version." + config.GIT_COMMIT)
 
 	var token response.Token
 	_, err := ahttp.Get("/v1/host/auth/"+hostToken, &token)
@@ -36,6 +34,18 @@ func Start(hostToken string) {
 
 	<-sseStarted
 	<-redisStarted
+	// FIXME handle redis in offline mode without master
+
+	// tasks which needs just redis connected
+	//
+
+	// tasks which needs just SSE connected
+	//
+
+	// task which needs API token but SSE and redis isn't necessary
+	//
+
+	// tasks which needs both SSE and redis already connected
 	logrus.Info("Send AGENT_STARTED")
 	taskMsg := task.Message{
 		TaskId: task.AGENT_STARTED,
