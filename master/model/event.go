@@ -23,7 +23,7 @@ type Event struct {
 }
 
 func (e *Event) GetCollectionName() string {
-	return eventCollection
+	return EventCollection
 }
 
 func (e *Event) GetID() primitive.ObjectID {
@@ -107,7 +107,7 @@ func ListenEventChangesFromMongo() {
 		},
 	}
 
-	changeStream, err := DB.Collection(eventCollection).Watch(context.TODO(), mongo.Pipeline{pipeline})
+	changeStream, err := DB.Collection(EventCollection).Watch(context.TODO(), mongo.Pipeline{pipeline})
 	if err != nil {
 		log.Fatal(err)
 	}

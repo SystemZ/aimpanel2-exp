@@ -24,7 +24,7 @@ type UserPermission struct {
 }
 
 func (p *UserPermission) GetCollectionName() string {
-	return permissionCollection
+	return PermissionCollection
 }
 
 func (p *UserPermission) GetID() primitive.ObjectID {
@@ -60,7 +60,7 @@ func GetPermisionsByEndpointRegex(endpoint string) ([]UserPermission, error) {
 func CheckIfUserHasAccess(path string, method string, pathTemplate string, userId primitive.ObjectID) bool {
 	permId, p := perm.GetByUrlAndMethod(pathTemplate, method)
 
-	cur, err := DB.Collection(permissionCollection).Find(context.TODO(), bson.D{
+	cur, err := DB.Collection(PermissionCollection).Find(context.TODO(), bson.D{
 		{Key: "user_id", Value: userId},
 		{Key: "perm_id", Value: permId},
 	})

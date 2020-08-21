@@ -27,10 +27,12 @@ func Create(data *request.HostCreate, userId primitive.ObjectID) (*model.Host, i
 		return nil, ecode.DbSave
 	}
 
-	err = model.CreatePermissionsForNewHost(userId, host.ID)
-	if err != nil {
-		return nil, ecode.DbSave
-	}
+	/*
+		err = model.CreatePermissionsForNewHost(userId, host.ID)
+		if err != nil {
+			return nil, ecode.DbSave
+		}
+	*/
 
 	return host, ecode.NoError
 }
@@ -54,17 +56,19 @@ func Remove(hostId primitive.ObjectID) int {
 		}
 	}
 
-	permissions, err := model.GetPermisionsByEndpointRegex("/v1/host/" + host.ID.Hex())
-	if err != nil {
-		return ecode.DbError
-	}
-
-	for _, perm := range permissions {
-		err := model.Delete(&perm)
+	/*
+		permissions, err := model.GetPermisionsByEndpointRegex("/v1/host/" + host.ID.Hex())
 		if err != nil {
 			return ecode.DbError
 		}
-	}
+
+		for _, perm := range permissions {
+			err := model.Delete(&perm)
+			if err != nil {
+				return ecode.DbError
+			}
+		}
+	*/
 
 	err = model.Delete(host)
 	if err != nil {
@@ -109,10 +113,12 @@ func CreateJob(data *request.HostCreateJob, userId primitive.ObjectID, hostId pr
 		return nil, ecode.DbSave
 	}
 
-	err = model.CreatePermissionsForNewHostJob(userId, hostId, hostJob.ID)
-	if err != nil {
-		return nil, ecode.DbSave
-	}
+	/*
+		err = model.CreatePermissionsForNewHostJob(userId, hostId, hostJob.ID)
+		if err != nil {
+			return nil, ecode.DbSave
+		}
+	*/
 
 	ec := sendJobsToAgent(hostId)
 	if ec != ecode.NoError {

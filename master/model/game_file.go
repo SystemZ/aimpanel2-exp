@@ -20,7 +20,7 @@ type GameFile struct {
 }
 
 func (g *GameFile) GetCollectionName() string {
-	return gameFileCollection
+	return GameFileCollection
 }
 
 func (g *GameFile) GetID() primitive.ObjectID {
@@ -34,7 +34,7 @@ func (g *GameFile) SetID(id primitive.ObjectID) {
 func GetGameFileByGameIdAndVersionFromMongo(gameId uint, version string) (*GameFile, error) {
 	var gf GameFile
 
-	err := DB.Collection(gameFileCollection).FindOne(context.TODO(), bson.D{
+	err := DB.Collection(GameFileCollection).FindOne(context.TODO(), bson.D{
 		{Key: "game_id", Value: fmt.Sprintf("%v", gameId)},
 		{Key: "$or", Value: []bson.D{
 			bson.D{{Key: "game_version", Value: version}},

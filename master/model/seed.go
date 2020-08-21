@@ -9,7 +9,7 @@ import (
 )
 
 func CheckGameInfoInDb(gf GameFile) (needInsert bool, needUpdate bool, id string) {
-	count, err := DB.Collection(userCollection).CountDocuments(context.TODO(),
+	count, err := DB.Collection(UserCollection).CountDocuments(context.TODO(),
 		bson.D{
 			{Key: "game_id", Value: gf.GameId},
 			{Key: "game_version", Value: gf.GameVersion},

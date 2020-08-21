@@ -31,7 +31,10 @@ var serverCmd = &cobra.Command{
 		model.DB = model.InitDB()
 
 		logrus.Info("Applying migrations...")
-		migrations.MigrateUp()
+		err := migrations.MigrateUp()
+		if err != nil {
+			logrus.Error("problem during migration, exiting: %v", err)
+		}
 
 		// helper for sending slave tasks via SSE
 		model.EmitterInit()

@@ -23,7 +23,7 @@ type User struct {
 }
 
 func (u *User) GetCollectionName() string {
-	return userCollection
+	return UserCollection
 }
 
 func (u *User) GetID() primitive.ObjectID {
@@ -59,7 +59,7 @@ func (u *User) GenerateJWT() (string, error) {
 }
 
 func CheckIfUserExist(username string) bool {
-	count, err := DB.Collection(userCollection).CountDocuments(context.TODO(),
+	count, err := DB.Collection(UserCollection).CountDocuments(context.TODO(),
 		bson.D{{Key: "username", Value: username}})
 	if err != nil {
 		logrus.Error(err)
@@ -75,7 +75,7 @@ func CheckIfUserExist(username string) bool {
 func GetUserById(id primitive.ObjectID) (*User, error) {
 	var user User
 
-	err := DB.Collection(userCollection).FindOne(context.TODO(), bson.D{{Key: "_id", Value: id}}).Decode(&user)
+	err := DB.Collection(UserCollection).FindOne(context.TODO(), bson.D{{Key: "_id", Value: id}}).Decode(&user)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +86,7 @@ func GetUserById(id primitive.ObjectID) (*User, error) {
 func GetUserByUsername(username string) (*User, error) {
 	var user User
 
-	err := DB.Collection(userCollection).FindOne(context.TODO(), bson.D{{Key: "username", Value: username}}).
+	err := DB.Collection(UserCollection).FindOne(context.TODO(), bson.D{{Key: "username", Value: username}}).
 		Decode(&user)
 	if err != nil {
 		return nil, err

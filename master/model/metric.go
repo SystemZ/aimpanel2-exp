@@ -51,7 +51,7 @@ type Metric struct {
 }
 
 func (m *Metric) GetCollectionName() string {
-	return metricCollection
+	return MetricCollection
 }
 
 func (m *Metric) GetID() primitive.ObjectID {
@@ -91,7 +91,7 @@ func PutMetric(metricType uint8, rid primitive.ObjectID, metric metric.Id, val i
 		{Key: "$inc", Value: bson.D{{Key: "nsamples", Value: 1}}},
 	}
 
-	_, err := DB.Collection(metricCollection).UpdateOne(context.TODO(), filter, update, opts)
+	_, err := DB.Collection(MetricCollection).UpdateOne(context.TODO(), filter, update, opts)
 
 	return err
 }
@@ -236,7 +236,7 @@ func GetTimeSeries(hostId primitive.ObjectID, intervalS int, from time.Time, to 
 		},
 	}
 
-	cur, err := DB.Collection(metricCollection).Aggregate(context.TODO(), q)
+	cur, err := DB.Collection(MetricCollection).Aggregate(context.TODO(), q)
 	if err != nil {
 		return res, err
 	}
@@ -307,7 +307,7 @@ func GetAvgDayMetricForHost(hostId primitive.ObjectID, day time.Time, metricType
 		},
 	}
 
-	cur, err := DB.Collection(metricCollection).Aggregate(context.TODO(), agr)
+	cur, err := DB.Collection(MetricCollection).Aggregate(context.TODO(), agr)
 	if err != nil {
 		return 0, err
 	}

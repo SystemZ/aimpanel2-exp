@@ -78,15 +78,15 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, err)
 		return
 	}
-
-	user := context.Get(r, "user").(model.User)
-
-	// FIXME handle errors
-	err = model.CreatePermissionsForNewGameServer(user.ID, host.ID, gameServer.ID)
-	if err != nil {
+	/*
+		user := context.Get(r, "user").(model.User)
+		// FIXME handle errors
+		err = model.CreatePermissionsForNewGameServer(user.ID, host.ID, gameServer.ID)
+		if err != nil {
 		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbSave, nil)
 		return
-	}
+		}
+	*/
 
 	lib.MustEncode(json.NewEncoder(w),
 		response.ID{ID: gameServer.ID.Hex()})

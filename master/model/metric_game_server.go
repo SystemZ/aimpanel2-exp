@@ -13,7 +13,7 @@ type MetricGameServer struct {
 }
 
 func (m *MetricGameServer) GetCollectionName() string {
-	return metricGameServerCollection
+	return MetricGameServerCollection
 }
 
 func (m *MetricGameServer) GetID() primitive.ObjectID {

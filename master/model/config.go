@@ -15,7 +15,7 @@ type Config struct {
 }
 
 func (u *Config) GetCollectionName() string {
-	return configCollection
+	return ConfigCollection
 }
 
 func (u *Config) GetID() primitive.ObjectID {
@@ -27,12 +27,12 @@ func (u *Config) SetID(id primitive.ObjectID) {
 }
 
 func GetConfig() (config Config, err error) {
-	err = DB.Collection(configCollection).FindOne(context.TODO(), bson.D{}).Decode(&config)
+	err = DB.Collection(ConfigCollection).FindOne(context.TODO(), bson.D{}).Decode(&config)
 	return
 }
 
 func IsConfigDocPresent() (exists bool, err error) {
-	count, err := DB.Collection(configCollection).CountDocuments(context.TODO(), bson.D{})
+	count, err := DB.Collection(ConfigCollection).CountDocuments(context.TODO(), bson.D{})
 	if err != nil {
 		logrus.Error(err)
 		return

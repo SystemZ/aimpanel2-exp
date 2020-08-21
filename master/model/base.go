@@ -7,18 +7,18 @@ import (
 )
 
 const (
-	userCollection             = "user"
-	permissionCollection       = "user_permission"
-	hostJobCollection          = "host_job"
-	hostCollection             = "host"
-	metricHostCollection       = "metric_host"
-	metricGameServerCollection = "metric_game_server"
-	gameServerCollection       = "game_server"
-	gameServerLogCollection    = "game_server_log"
-	gameFileCollection         = "game_file"
-	metricCollection           = "metrics"
-	eventCollection            = "event"
-	configCollection           = "config"
+	UserCollection             = "user"
+	PermissionCollection       = "user_permission"
+	HostJobCollection          = "host_job"
+	HostCollection             = "host"
+	MetricHostCollection       = "metric_host"
+	MetricGameServerCollection = "metric_game_server"
+	GameServerCollection       = "game_server"
+	GameServerLogCollection    = "game_server_log"
+	GameFileCollection         = "game_file"
+	MetricCollection           = "metrics"
+	EventCollection            = "event"
+	ConfigCollection           = "config"
 )
 
 type Document interface {

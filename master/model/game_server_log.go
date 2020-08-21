@@ -23,7 +23,7 @@ type GameServerLog struct {
 }
 
 func (g *GameServerLog) GetCollectionName() string {
-	return gameServerLogCollection
+	return GameServerLogCollection
 }
 
 func (g *GameServerLog) GetID() primitive.ObjectID {
@@ -40,7 +40,7 @@ func GetLogsByGameServerId(gsId primitive.ObjectID, limit int64) (*[]GameServerL
 	opts := options.Find()
 	opts.SetLimit(limit)
 
-	cur, err := DB.Collection(gameServerLogCollection).Find(context.TODO(),
+	cur, err := DB.Collection(GameServerLogCollection).Find(context.TODO(),
 		bson.D{{Key: "game_server_id", Value: gsId}}, opts)
 	if err != nil {
 		return nil, err

@@ -36,11 +36,13 @@ func Register(data *request.AuthRegister) (string, int) {
 		return "", ecode.JwtGenerate
 	}
 
-	err = model.CreatePermissionsForNewUser(user.ID)
-	if err != nil {
-		logrus.Error(err)
-		return "", ecode.DbSave
-	}
+	/*
+		err = model.CreatePermissionsForNewUser(user.ID)
+		if err != nil {
+			logrus.Error(err)
+			return "", ecode.DbSave
+		}
+	*/
 
 	return token, ecode.NoError
 }

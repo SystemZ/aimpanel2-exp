@@ -43,7 +43,7 @@ type GameServer struct {
 }
 
 func (g *GameServer) GetCollectionName() string {
-	return gameServerCollection
+	return GameServerCollection
 }
 
 func (g *GameServer) GetID() primitive.ObjectID {
@@ -57,7 +57,7 @@ func (g *GameServer) SetID(id primitive.ObjectID) {
 func GetGameServers() ([]GameServer, error) {
 	var gameServers []GameServer
 
-	cur, err := DB.Collection(gameServerCollection).Find(context.TODO(),
+	cur, err := DB.Collection(GameServerCollection).Find(context.TODO(),
 		bson.D{})
 	if err != nil {
 		return nil, err
@@ -77,7 +77,7 @@ func GetGameServers() ([]GameServer, error) {
 
 func GetGameServerById(id primitive.ObjectID) (*GameServer, error) {
 	var gs GameServer
-	err := DB.Collection(gameServerCollection).FindOne(context.TODO(), bson.D{{Key: "_id", Value: id}}).Decode(&gs)
+	err := DB.Collection(GameServerCollection).FindOne(context.TODO(), bson.D{{Key: "_id", Value: id}}).Decode(&gs)
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +88,7 @@ func GetGameServerById(id primitive.ObjectID) (*GameServer, error) {
 func GetGameServerByGsIdAndHostId(gsId primitive.ObjectID, hostId primitive.ObjectID) (*GameServer, error) {
 	var gs GameServer
 
-	err := DB.Collection(gameServerCollection).FindOne(context.TODO(), bson.D{
+	err := DB.Collection(GameServerCollection).FindOne(context.TODO(), bson.D{
 		{Key: "_id", Value: gsId},
 		{Key: "host_id", Value: hostId},
 	}).Decode(&gs)
@@ -102,7 +102,7 @@ func GetGameServerByGsIdAndHostId(gsId primitive.ObjectID, hostId primitive.Obje
 func GetGameServersByHostId(hostId primitive.ObjectID) (*[]GameServer, error) {
 	var gameServers []GameServer
 
-	cur, err := DB.Collection(gameServerCollection).Find(context.TODO(),
+	cur, err := DB.Collection(GameServerCollection).Find(context.TODO(),
 		bson.D{{Key: "host_id", Value: hostId}})
 	if err != nil {
 		return nil, err
@@ -137,7 +137,7 @@ func GetUserGameServers(user User) (*[]GameServer, error) {
 		return &gameServers, nil
 	}
 
-	cur, err := DB.Collection(gameServerCollection).Find(context.TODO(),
+	cur, err := DB.Collection(GameServerCollection).Find(context.TODO(),
 		bson.D{{Key: "$or", Value: hostsId}})
 	if err != nil {
 		return nil, err
