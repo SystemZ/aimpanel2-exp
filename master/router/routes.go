@@ -290,6 +290,14 @@ var v1Routes = Routes{
 		false,
 	},
 	Route{
+		"GameServer Edit",
+		"PUT",
+		"/host/{hostId}/server/{gsId}",
+		gs.Edit,
+		true,
+		false,
+	},
+	Route{
 		"GameServer Remove",
 		"DELETE",
 		"/host/{hostId}/server/{gsId}",

@@ -40,6 +40,9 @@ type GameServer struct {
 
 	// Stop Timeout
 	StopTimeout int `bson:"stop_timeout" json:"stop_timeout" example:"30"`
+
+	// Custom launch cmd
+	CustomCmdStart string `bson:"custom_cmd_start" json:"custom_cmd_start" example:"java -jar mc.jar"`
 }
 
 func (g *GameServer) GetCollectionName() string {

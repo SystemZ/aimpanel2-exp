@@ -28,6 +28,9 @@ type GameServerCreate struct {
 
 	//Selected game version
 	GameVersion string `json:"game_version" example:"1.14.2"`
+
+	//Custom cmd for starting game server
+	CustomCmdStart string `json:"custom_cmd_start" example:"java -jar mc.jar"`
 }
 
 type GameServerStop struct {

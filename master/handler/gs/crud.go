@@ -195,6 +195,53 @@ func Get(w http.ResponseWriter, r *http.Request) {
 	lib.MustEncode(json.NewEncoder(w), response.GameServer{GameServer: *gameServer})
 }
 
+// FIXME API docs are incomplete
+// @Router /host/{host_id}/server/{server_id} [get]
+// @Summary Edit
+// @Tags Game Server
+// @Description Edit Game server with selected ID
+// @Accept json
+// @Produce json
+// @Param host_id path string true "Host ID"
+// @Param server_id path string true "Game Server ID"
+// @Success 200 {object} response.GameServer
+// @Failure 400 {object} response.JsonError
+// @Security ApiKey
+func Edit(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	serverId, err := primitive.ObjectIDFromHex(params["gsId"])
+	if err != nil {
+		lib.ReturnError(w, http.StatusBadRequest, ecode.OidError, err)
+		return
+	}
+	hostId, err := primitive.ObjectIDFromHex(params["hostId"])
+	if err != nil {
+		lib.ReturnError(w, http.StatusBadRequest, ecode.OidError, err)
+		return
+	}
+	gameServer, err := model.GetGameServerByGsIdAndHostId(serverId, hostId)
+	if err != nil {
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, err)
+		return
+	}
+
+	//Decode json
+	data := &request.GameServerCreate{}
+	err = json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		lib.ReturnError(w, http.StatusBadRequest, ecode.JsonDecode, nil)
+		return
+	}
+
+	// save custom CMD only
+	// FIXME validate custom CMD
+	// FIXME move to service
+	gameServer.CustomCmdStart = data.CustomCmdStart
+	model.Update(gameServer)
+
+	lib.MustEncode(json.NewEncoder(w), response.GameServer{GameServer: *gameServer})
+}
+
 func ConsoleLog(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	serverId, err := primitive.ObjectIDFromHex(params["gsId"])

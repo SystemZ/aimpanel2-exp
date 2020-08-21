@@ -49,11 +49,12 @@ type Messages []Message
 
 type Message struct {
 	// task id
-	TaskId       Id         `json:"task_id,omitempty"`
-	Game         *game.Game `json:"game,omitempty"`
-	GameServerID string     `json:"game_server_id,omitempty"`
-	Body         string     `json:"body,omitempty"`
-	StopTimeout  int        `json:"stop_timeout,omitempty"`
+	TaskId             Id         `json:"task_id,omitempty"`
+	Game               *game.Game `json:"game,omitempty"`
+	GameServerID       string     `json:"game_server_id,omitempty"`
+	GameCustomCmdStart string     `json:"game_custom_cmd_start"`
+	Body               string     `json:"body,omitempty"`
+	StopTimeout        int        `json:"stop_timeout,omitempty"`
 
 	// task progress
 	Stdout string `json:"stdout,omitempty"`

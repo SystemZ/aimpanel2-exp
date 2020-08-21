@@ -35,6 +35,9 @@ func Start(gsId primitive.ObjectID) error {
 		return errors.New("error when getting game")
 	}
 
+	// FIXME validate if current plan allows custom cmd, throw HTTP error if plan is too low
+	gameDef.CustomCommandStart = gameServer.CustomCmdStart
+
 	taskMsg := task.Message{
 		TaskId:       task.AGENT_START_GS,
 		GameServerID: gsId.Hex(),

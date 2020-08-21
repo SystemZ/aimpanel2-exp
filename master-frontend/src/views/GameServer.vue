@@ -17,6 +17,9 @@
         <v-tab>
           Scheduler
         </v-tab>
+        <v-tab>
+          Settings
+        </v-tab>
       </v-tabs>
       <v-tabs-items v-model="tab">
         <v-tab-item>
@@ -38,14 +41,14 @@
                   <v-card-text>
                     <v-list-item two-line>
                       <v-list-item-content>
-                        <v-list-item-title>{{game_server.name}}</v-list-item-title>
+                        <v-list-item-title>{{ game_server.name }}</v-list-item-title>
                         <v-list-item-subtitle>Name</v-list-item-subtitle>
                       </v-list-item-content>
                     </v-list-item>
 
                     <v-list-item two-line>
                       <v-list-item-content>
-                        <v-list-item-title>{{game_server.state == 1 ? 'Active' : 'Locked'}}
+                        <v-list-item-title>{{ game_server.state == 1 ? 'Active' : 'Locked' }}
                         </v-list-item-title>
                         <v-list-item-subtitle>Status</v-list-item-subtitle>
                       </v-list-item-content>
@@ -53,21 +56,21 @@
 
                     <v-list-item two-line>
                       <v-list-item-content>
-                        <v-list-item-title>{{game_server.metric_frequency}}s</v-list-item-title>
+                        <v-list-item-title>{{ game_server.metric_frequency }}s</v-list-item-title>
                         <v-list-item-subtitle>Metric frequency</v-list-item-subtitle>
                       </v-list-item-content>
                     </v-list-item>
 
                     <v-list-item two-line>
                       <v-list-item-content>
-                        <v-list-item-title>{{game_server.stop_timeout}}s</v-list-item-title>
+                        <v-list-item-title>{{ game_server.stop_timeout }}s</v-list-item-title>
                         <v-list-item-subtitle>Stop timeout</v-list-item-subtitle>
                       </v-list-item-content>
                     </v-list-item>
                   </v-card-text>
                   <v-card-actions>
                     <v-btn @click="remove()" color="red darken-3">
-                      <v-icon class="mr-2">{{mdiTrashCan}}</v-icon>
+                      <v-icon class="mr-2">{{ mdiTrashCan }}</v-icon>
                       Remove game server
                     </v-btn>
                   </v-card-actions>
@@ -89,6 +92,9 @@
         </v-tab-item>
         <v-tab-item>
           <gs-scheduler :host-id="hostId" :server-id="serverId"/>
+        </v-tab-item>
+        <v-tab-item>
+          <gs-settings :host-id="hostId" :server-id="serverId"/>
         </v-tab-item>
       </v-tabs-items>
     </v-card>
@@ -126,6 +132,7 @@ import Vue from 'vue';
 import GsConsole from '@/components/GsConsole.vue';
 import GsFileManager from '@/components/GsFileManager.vue';
 import GsScheduler from '@/components/GsScheduler.vue';
+import GsSettings from '@/components/GsSettings.vue';
 import {mdiTrashCan} from '@mdi/js';
 
 export default Vue.extend({
@@ -133,7 +140,8 @@ export default Vue.extend({
   components: {
     GsConsole,
     GsFileManager,
-    GsScheduler
+    GsScheduler,
+    GsSettings,
   },
   data: () => ({
     tab: 0,

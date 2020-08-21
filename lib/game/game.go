@@ -87,9 +87,10 @@ type Game struct {
 	RamMaxM     int    `json:"ram_max_m,omitempty"`
 	JarFilename string `json:"jar_filename,omitempty"`
 
-	StopCommand     string `json:"stop_command,omitempty"`
-	StopTimeout     int    `json:"stop_timeout,omitempty"`
-	StopHardTimeout int    `json:"stop_hard_timeout,omitempty"`
+	CustomCommandStart string `json:"custom_command_start,omitempty"`
+	StopCommand        string `json:"stop_command,omitempty"`
+	StopTimeout        int    `json:"stop_timeout,omitempty"`
+	StopHardTimeout    int    `json:"stop_hard_timeout,omitempty"`
 }
 
 func (game *Game) SetDefaults() {
@@ -214,6 +215,11 @@ func (game *Game) GetCmd() (cmd string, err error) {
 			"--start-server-load-latest",
 			//"--start-server",
 		}
+	}
+
+	// overwrite start command if necessary
+	if len(game.CustomCommandStart) > 0 {
+		command = strings.Split(game.CustomCommandStart, " ")
 	}
 
 	return strings.Join(command, " "), nil

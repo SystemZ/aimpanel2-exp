@@ -73,6 +73,7 @@ func StartWrapper(taskMsg task.Message) {
 		Sys: sysproc,
 	}
 
+	// TODO test this for very long running GS
 	attr.Env = append(attr.Env, "HOST_TOKEN="+config.HOST_TOKEN)
 	attr.Env = append(attr.Env, "API_TOKEN="+config.API_TOKEN)
 
