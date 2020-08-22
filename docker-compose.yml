@@ -20,7 +20,6 @@ services:
   mongo:
     image: mongo:4.4.0
     hostname: mongodb
-    restart: always
     ports:
       - 27017:27017
     environment:
