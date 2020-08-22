@@ -24,7 +24,7 @@ func RemoveContainer(client client.APIClient, containerName string) (err error) 
 		Force:         true,
 	})
 	if err != nil {
-		logrus.Error("%v", err)
+		logrus.Errorf("%v", err)
 	}
 	return
 }
@@ -192,12 +192,12 @@ func StartWrapperInDocker(gsId string) {
 		containerName,
 	)
 	if err != nil {
-		logrus.Error("%v", err)
+		logrus.Errorf("%v", err)
 	}
 	logrus.Infof("%v", containerCreateRes)
 
 	err = cli.ContainerStart(context.Background(), containerName, types.ContainerStartOptions{})
 	if err != nil {
-		logrus.Error("%v", err)
+		logrus.Errorf("%v", err)
 	}
 }
