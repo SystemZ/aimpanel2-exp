@@ -3,7 +3,6 @@ package model
 import (
 	"context"
 	"fmt"
-	"github.com/go-redis/redis"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/master/config"
@@ -13,8 +12,7 @@ import (
 )
 
 var (
-	Redis *redis.Client
-	DB    *mongo.Database
+	DB *mongo.Database
 )
 
 func InitDB() *mongo.Database {
@@ -41,25 +39,4 @@ func InitDB() *mongo.Database {
 	db := client.Database(config.DB_NAME)
 
 	return db
-}
-
-func InitRedis() {
-	if len(config.REDIS_PASSWORD) > 1 {
-		Redis = redis.NewClient(&redis.Options{
-			Addr:     config.REDIS_HOST + ":6379",
-			Password: config.REDIS_PASSWORD,
-		})
-	} else {
-		Redis = redis.NewClient(&redis.Options{
-			Addr: config.REDIS_HOST + ":6379",
-		})
-	}
-
-	_, err := Redis.Ping().Result()
-	if err != nil {
-		logrus.Error(err.Error())
-		logrus.Panic("Ping to Redis failed")
-	}
-
-	logrus.Info("Connection to Redis seems OK!")
 }

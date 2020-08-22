@@ -13,9 +13,6 @@ var (
 	DB_PASSWORD string
 	DB_NAME     string
 
-	REDIS_HOST     string
-	REDIS_PASSWORD string
-
 	GIT_COMMIT string
 
 	DEV_MODE bool
@@ -51,12 +48,6 @@ func init() {
 
 	viper.SetDefault("DB_NAME", "dev")
 	DB_NAME = viper.GetString("DB_NAME")
-
-	viper.SetDefault("REDIS_HOST", "localhost")
-	REDIS_HOST = viper.GetString("REDIS_HOST")
-
-	viper.SetDefault("REDIS_PASSWORD", "")
-	REDIS_PASSWORD = viper.GetString("REDIS_PASSWORD")
 
 	viper.SetDefault("DEV_MODE", false)
 	DEV_MODE = viper.GetBool("DEV_MODE")
