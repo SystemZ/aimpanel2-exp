@@ -35,7 +35,6 @@ func (e *Event) SetID(id primitive.ObjectID) {
 }
 
 func SendEvent(hostId primitive.ObjectID, taskMsg task.Message) (err error) {
-	logrus.Info("SendEvent() got event")
 	event := &Event{
 		HostId:      hostId,
 		TaskMessage: taskMsg,
@@ -80,7 +79,7 @@ func SendEvent(hostId primitive.ObjectID, taskMsg task.Message) (err error) {
 
 	// send task to slave
 	channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
-	logrus.Infof("SendEvent() Task sent to host %v", host.ID.Hex())
+	logrus.Infof("SendEvent() Task %v sent to host %v", taskMsg.TaskId.String(), host.ID.Hex())
 	return
 }
 

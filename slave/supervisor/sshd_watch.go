@@ -2,7 +2,6 @@ package supervisor
 
 import (
 	"github.com/coreos/go-systemd/sdjournal"
-	"github.com/m7shapan/ratelimit"
 	"github.com/sirupsen/logrus"
 	"github.com/vjeantet/grok"
 	"math"
@@ -15,8 +14,8 @@ var (
 )
 
 func WatchSshd() {
-	logrus.Info("Creating ssh login rate limit...")
-	sshRateLimit := ratelimit.CreateLimit("5r/h")
+	//logrus.Info("Creating ssh login rate limit...")
+	//sshRateLimit := ratelimit.CreateLimit("5r/h")
 
 	logrus.Info("Loading ssh log patterns...")
 	LoadPatterns()
@@ -45,11 +44,11 @@ func WatchSshd() {
 			}
 
 			// count rate for parsed IP
-			err := sshRateLimit.Hit(parsedEntry.ClientIp)
-			if err != nil {
-				// too much requests, report this
-				ReportIp(parsedEntry.ClientIp, entry.Fields["MESSAGE"])
-			}
+			//err := sshRateLimit.Hit(parsedEntry.ClientIp)
+			//if err != nil {
+			// too much requests, report this
+			ReportIp(parsedEntry.ClientIp, entry.Fields["MESSAGE"])
+			//}
 
 			// we don't need real output so skip it
 			return "", nil
