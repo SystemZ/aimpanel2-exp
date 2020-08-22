@@ -75,7 +75,7 @@ maxmemory 50M
 maxmemory-policy allkeys-lru
 tcp-keepalive 30
 save ""
-save 60 1
+save 60 100
 " > $REDIS_DIR/redis.conf
 
 chmod +x $REDIS_DIR/$REDIS_BINARY_NAME
