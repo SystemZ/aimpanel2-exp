@@ -1,6 +1,7 @@
 package agent
 
 import (
+	"context"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib/ahttp"
 	"gitlab.com/systemz/aimpanel2/lib/task"
@@ -60,10 +61,10 @@ func listenerRedis(done chan bool) {
 
 	// subscribe tasks
 	// https://godoc.org/github.com/go-redis/redis#PubSub
-	pubsub := model.Redis.Subscribe(config.REDIS_PUB_SUB_AGENT_CH)
+	pubsub := model.Redis.Subscribe(context.TODO(), config.REDIS_PUB_SUB_AGENT_CH)
 
 	// Wait for confirmation that subscription is created before publishing anything.
-	_, err := pubsub.Receive()
+	_, err := pubsub.Receive(context.TODO())
 	if err != nil {
 		// FIXME don't panic on redis pub/sub error
 		panic(err)
@@ -115,7 +116,6 @@ func redisTaskHandler(taskCh string, taskBody string) {
 		//Start wrapper if gs is restarting
 		val, _ := model.GetGsRestart(taskMsg.GameServerID)
 		if val == 1 {
-			logrus.Info("no to cyk")
 			model.SetGsRestart(taskMsg.GameServerID, 2)
 			tasks.StartWrapper(taskMsg)
 			model.DelGsRestart(taskMsg.GameServerID)

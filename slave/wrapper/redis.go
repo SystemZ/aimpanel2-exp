@@ -1,6 +1,7 @@
 package wrapper
 
 import (
+	"context"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/slave/config"
@@ -17,10 +18,10 @@ func (p *Process) RedisListener(done chan bool) {
 
 	// subscribe tasks
 	// https://godoc.org/github.com/go-redis/redis#PubSub
-	pubsub := model.Redis.Subscribe(config.REDIS_PUB_SUB_WRAPPER_CH)
+	pubsub := model.Redis.Subscribe(context.TODO(), config.REDIS_PUB_SUB_WRAPPER_CH)
 
 	// Wait for confirmation that subscription is created before publishing anything.
-	_, err := pubsub.Receive()
+	_, err := pubsub.Receive(context.TODO())
 	if err != nil {
 		// FIXME don't panic on redis pub/sub error
 		panic(err)

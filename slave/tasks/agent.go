@@ -1,6 +1,7 @@
 package tasks
 
 import (
+	"context"
 	"github.com/inconshreveable/go-update"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/disk"
@@ -17,7 +18,6 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"syscall"
 	"time"
 )
 
@@ -171,7 +171,7 @@ func GsBackupTrigger(gsId string) {
 		logrus.Errorf("preparing msg failed: %v", err)
 		return
 	}
-	res, err := model.Redis.Publish(config.REDIS_PUB_SUB_AGENT_CH, taskMsgStr).Result()
+	res, err := model.Redis.Publish(context.TODO(), config.REDIS_PUB_SUB_AGENT_CH, taskMsgStr).Result()
 	if err != nil {
 		logrus.Errorf("sending msg failed: %v", err)
 	}
@@ -247,7 +247,7 @@ func AgentShutdownTrigger() {
 		return
 	}
 
-	res, err := model.Redis.Publish(config.REDIS_PUB_SUB_AGENT_CH, taskMsgStr).Result()
+	res, err := model.Redis.Publish(context.TODO(), config.REDIS_PUB_SUB_AGENT_CH, taskMsgStr).Result()
 	if err != nil {
 		logrus.Errorf("sending msg failed: %v", err)
 	}
