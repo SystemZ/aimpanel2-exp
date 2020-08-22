@@ -117,7 +117,10 @@ func redisTaskHandler(taskCh string, taskBody string) {
 		val, _ := model.GetGsRestart(taskMsg.GameServerID)
 		if val == 1 {
 			model.SetGsRestart(taskMsg.GameServerID, 2)
-			tasks.StartWrapper(taskMsg)
+			tasks.StartWrapperInDocker(taskMsg.GameServerID)
+			if false {
+				tasks.StartWrapperExecRaw(taskMsg)
+			}
 			model.DelGsRestart(taskMsg.GameServerID)
 		}
 
