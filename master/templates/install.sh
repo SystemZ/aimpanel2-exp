@@ -87,13 +87,6 @@ wget -q $REPO_URL/aimpanel/latest -O $AIMPANEL_BINARY_DIR/$AIMPANEL_BINARY_NAME
 chmod +x $AIMPANEL_BINARY_DIR/$AIMPANEL_BINARY_NAME
 # for launching wrapper
 ln -s /opt/aimpanel/slave /usr/local/bin/slave
-# optitonal java for MC
-echo "Updating OS packages..."
-apt-get update -q
-#echo "Installing systemd integration..."
-#apt-get install -q -y libsystemd-dev
-echo "Installing OpenJDK 11 JRE..."
-apt-get install -q -y openjdk-11-jre-headless
 
 # create service for redis
 echo "
