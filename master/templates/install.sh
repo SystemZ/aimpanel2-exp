@@ -9,7 +9,7 @@ API_URL="{{.UrlApi}}"
 AIMPANEL_BINARY_NAME=slave
 AIMPANEL_BINARY_DIR=/opt/aimpanel
 AIMPANEL_DIR=/opt/aimpanel
-REDIS_VERSION="5.0.7"
+REDIS_VERSION="6.0.6"
 REDIS_BINARY_NAME=redis-server
 REDIS_DIR=/opt/aimpanel/redis
 
@@ -34,6 +34,17 @@ then
   set -x
 fi
 
+# detect docker
+if ! command -v docker &> /dev/null
+then
+    echo "Docker not found. Please install docker first:"
+    echo "wget https://get.docker.com -O- | bash -"
+    echo ""
+    echo "After docker installation, run it again and at the end run:"
+    echo "usermod -aG docker aimpanel"
+    exit
+fi
+
 # for security we use separate user to run aimpanel and all games
 #adduser --system --no-create-home aimpanel
 #use add home folder for buildtools and other stuff
@@ -46,6 +57,9 @@ mkdir -p $AIMPANEL_DIR/trash
 # install redis
 mkdir -p $REDIS_DIR
 echo "Downloading redis..."
+# turn off redis if already installed
+systemctl stop aimpanel-redis
+# download redis
 wget -q "$REPO_URL/redis/$REDIS_VERSION-redis-server-linux-amd64" -O $REDIS_DIR/$REDIS_BINARY_NAME
 # configure redis
 echo "
