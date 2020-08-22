@@ -3,18 +3,24 @@ module gitlab.com/systemz/aimpanel2
 go 1.12
 
 require (
+	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
+	github.com/Microsoft/hcsshim v0.8.9 // indirect
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
 	github.com/alexandrevicenzi/go-sse v0.0.0-20191008221740-c629c4a96646
 	github.com/aporeto-inc/go-ipset v1.5.3-0.20200404011611-ee48e4a898a6
 	github.com/arduino/go-apt-client v0.0.0-20190812130613-5613f843fdc8
 	github.com/badoux/checkmail v0.0.0-20181210160741-9661bd69e9ad // indirect
 	github.com/cavaliercoder/grab v2.0.0+incompatible
+	github.com/containerd/continuity v0.0.0-20200710164510-efbc4488d8fe // indirect
 	github.com/coreos/go-systemd v0.0.0-20190321100706-95778dfbb74e
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/docker/distribution v2.7.1+incompatible // indirect
+	github.com/docker/docker v17.12.0-ce-rc1.0.20200731103033-88820a4793ea+incompatible
+	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/go-ole/go-ole v1.2.4 // indirect
-	github.com/go-redis/redis v6.15.6+incompatible
-	github.com/go-redis/redis/v7 v7.0.0-beta.4
+	github.com/go-redis/redis/v8 v8.0.0-beta.7
 	github.com/gofrs/uuid v3.2.0+incompatible
+	github.com/gomodule/redigo v1.8.2 // indirect
 	github.com/gopherjs/gopherjs v0.0.0-20200209144316-f9cef593def5 // indirect
 	github.com/gorilla/context v1.1.1
 	github.com/gorilla/handlers v1.4.2
@@ -23,8 +29,10 @@ require (
 	github.com/jinzhu/gorm v1.9.11
 	github.com/jpillora/backoff v1.0.0
 	github.com/klauspost/pgzip v1.2.1
-	github.com/m7shapan/ratelimit v0.0.0-20181106163723-dde43b0bdfbf
-	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
+	github.com/morikuni/aec v1.0.0 // indirect
+	github.com/opencontainers/go-digest v1.0.0 // indirect
+	github.com/opencontainers/image-spec v1.0.1 // indirect
+	github.com/opencontainers/runc v0.1.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/r3labs/sse v0.0.0-20191214223212-f0cc80f53f80
 	github.com/robfig/cron/v3 v3.0.1
@@ -39,9 +47,7 @@ require (
 	github.com/vjeantet/grok v1.0.0
 	go.mongodb.org/mongo-driver v1.3.3
 	golang.org/x/crypto v0.0.0-20191227163750-53104e6ec876
-	golang.org/x/net v0.0.0-20200501053045-e0ff5e5a1de5
-	golang.org/x/oauth2 v0.0.0-20190226205417-e64efc72b421
+	golang.org/x/net v0.0.0-20200501053045-e0ff5e5a1de5 // indirect
 	golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a // indirect
 	golang.org/x/time v0.0.0-20200416051211-89c76fbcd5d1 // indirect
-	google.golang.org/api v0.3.1
 )
