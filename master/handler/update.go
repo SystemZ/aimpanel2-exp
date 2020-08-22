@@ -29,15 +29,17 @@ func NewVersion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = model.Redis.Set("slave_commit", data.Commit, 0).Err()
-	if err != nil {
-		logrus.Error(err)
-	}
+	/*
+		err = model.Redis.Set("slave_commit", data.Commit, 0).Err()
+		if err != nil {
+			logrus.Error(err)
+		}
 
-	err = model.Redis.Set("slave_url", data.Url, 0).Err()
-	if err != nil {
-		logrus.Error(err)
-	}
+		err = model.Redis.Set("slave_url", data.Url, 0).Err()
+		if err != nil {
+			logrus.Error(err)
+		}
+	*/
 
 	//TODO: Find better way to update all hosts
 	hosts, err := model.GetHosts()
