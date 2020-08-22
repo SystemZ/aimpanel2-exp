@@ -51,7 +51,7 @@ function sync-slave {
 
 # automatically rebuilds slave and copies binary to VM when slave code changes
 # sudo apt-get install -y inotify-tools
-function auto-slave {
+function sync-slave-auto {
     inotifywait -e close_write,moved_to,create -r -m ./slave/ |
     while read -r directory events filename; do
       SECONDS=0

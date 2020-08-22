@@ -24,8 +24,6 @@ vagrant ssh
 sudo -i
 ```
 
-.
-
 ## Dev deployment
 
 First time? We got you covered :)
@@ -103,18 +101,34 @@ rm vagrant_2.2.6_x86_64.deb
 sudo apt-get install -y libxslt-dev libxml2-dev libvirt-dev zlib1g-dev ruby-dev
 vagrant plugin install vagrant-libvirt
 
-# remember to tune up Vagranfile and install_dev.sh
+# remember to tune up Vagrantfile with resources if necessary
 
 # Run VM
-vagrant up
+./Taskfile.sh up-slave
+
+# Configure hosts
+# if this doesn't work just put your local LAN ip in /etc/hosts like this
+# 192.168.X.XXX aimpanel.local
+./Taskfile.sh update-hosts-slave
 
 # Access via SSH
 vagrant ssh
 
+# run this in VM as root to deploy slave
+wget --no-check-certificate https://aimpanel.local:3000/i/<HOST TOKEN> -O- | bash -
+
+# WIP
 # Apply changes to install.sh (token change etc)
-vagrant provision
+#vagrant provision
+
+# if you are developing slave, use this to sync binary on VM
+./Taskfile.sh sync-slave
+# or this to auto build, sync and restart slave on VM on slave/* files change
+./Taskfile.sh sync-slave-auto
+```
 
 # Destroy VM
+```
 vagrant destroy -f
 ```
 
