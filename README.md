@@ -6,6 +6,12 @@ The most easy to use game panel as a service
 
 If your setup is ready...
 
+### Full auto
+
+Just install tmux and run `./Taskfile.sh up`.
+
+### Manual
+
 Run MongoDB and web interface for it (PMA like)
 ```bash
 docker-compose up

@@ -8,9 +8,26 @@ function help {
 }
 
 function up {
-    docker-compose up -d
-    cd master-frontend
-    npm run serve
+    # start tmux session with all tools besides running master
+    # https://smartosadmin.wordpress.com/2015/03/15/automating-development-workflow-with-tmux/
+    SESSION_NAME="exp"
+    tmux has-session -t $SESSION_NAME
+    if [[ $? != 0 ]]; then
+      tmux new-session -s $SESSION_NAME -n dev -d
+      # frontend
+      #tmux split-window -h -t $SESSION_NAME:0
+      tmux send-keys -t $session:0 "./Taskfile.sh frontend" C-m
+      # backend deps (mongo + ui) - docker-compose
+      tmux split-window -v -t $SESSION_NAME:0.0
+      tmux send-keys -t $session:0.1 "docker-compose up" C-m
+      # Vagrant VM sync slave
+      tmux split-window -v -t $SESSION_NAME:0.1
+      tmux send-keys -t $session:0.2 "./Taskfile.sh sync-slave-auto" C-m
+      # Vagrant VM
+      tmux split-window -v -t $SESSION_NAME:0.2
+      tmux send-keys -t $session:0.3 "./Taskfile.sh up-slave; vagrant ssh" C-m
+    fi
+    tmux a
 }
 
 function generate {
