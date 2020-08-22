@@ -116,6 +116,10 @@ func (game *Game) SetDefaults() {
 		game.StopCommand = "stop"
 		game.StopTimeout = 15
 		game.StopHardTimeout = 30
+	case GAME_FACTORIO:
+		game.StopCommand = "/quit"
+		game.StopTimeout = 15
+		game.StopHardTimeout = 30
 	}
 }
 
