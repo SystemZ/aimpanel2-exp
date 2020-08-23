@@ -86,7 +86,6 @@ backend:
     paths:
       - aimpanel-master
       - aimpanel-slave
-      - install.sh
       - swagger.json
       - report.xml
     when: always
