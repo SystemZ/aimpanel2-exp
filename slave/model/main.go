@@ -17,8 +17,10 @@ var (
 
 func InitRedis() {
 	Redis = redis.NewClient(&redis.Options{
-		Network: "unix",
-		Addr:    config.REDIS_HOST,
+		Network:  "unix",
+		Addr:     config.REDIS_HOST,
+		Username: config.REDIS_USERNAME,
+		Password: config.REDIS_PASSWORD,
 	})
 	_, err := Redis.Ping(context.Background()).Result()
 	if err != nil {
