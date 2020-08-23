@@ -98,9 +98,9 @@ sudo adduser `id -un` libvirt-qemu
 
 # Vagrant
 #https://www.vagrantup.com/downloads.html
-wget https://releases.hashicorp.com/vagrant/2.2.6/vagrant_2.2.6_x86_64.deb
-sudo dpkg -i vagrant_2.2.6_x86_64.deb
-rm vagrant_2.2.6_x86_64.deb
+wget https://releases.hashicorp.com/vagrant/2.2.9/vagrant_2.2.9_x86_64.deb
+sudo dpkg -i vagrant_2.2.9_x86_64.deb
+rm vagrant_2.2.9_x86_64.deb
 
 # Vagrant KVM plugin
 #https://github.com/vagrant-libvirt/vagrant-libvirt
