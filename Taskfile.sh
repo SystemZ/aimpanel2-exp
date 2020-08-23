@@ -85,13 +85,14 @@ function stop {
 function swagger-gen-dev {
     cd master
     #swagger generate spec -m -o ../swagger.json
-    swag init
+    swag init --parseDependency
     mv docs/swagger.json .
     rm -rf docs
     cd ../
 }
 
 function swagger-serve {
+    cd master
     swagger serve --flavor=swagger --port=9090 swagger.json
 }
 
