@@ -92,8 +92,7 @@ function swagger-gen-dev {
 }
 
 function swagger-serve {
-    cd master
-    swagger serve --flavor=swagger --port=9090 swagger.json
+    swagger serve --flavor=swagger --port=9090 master/swagger.json
 }
 
 function update-todo-issue {
