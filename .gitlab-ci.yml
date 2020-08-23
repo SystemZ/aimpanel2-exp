@@ -4,6 +4,9 @@ stages:
   - build
   - deploy
 
+include:
+  - template: "SAST.gitlab-ci"
+
 #include:
 #  - template: Code-Quality.gitlab-ci.yml
 # this doesn't support Go right now (2019-10-17)
