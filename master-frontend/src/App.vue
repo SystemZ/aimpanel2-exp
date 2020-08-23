@@ -50,6 +50,7 @@
         </v-navigation-drawer>
 
         <v-app-bar app color="red darken-2">
+            <v-app-bar-nav-icon @click.stop="drawer = !drawer"/>
             <v-toolbar-title>
                 {{$route.meta.title}}
             </v-toolbar-title>
