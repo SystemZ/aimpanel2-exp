@@ -196,14 +196,15 @@ func Get(w http.ResponseWriter, r *http.Request) {
 }
 
 // FIXME API docs are incomplete
-// @Router /host/{host_id}/server/{server_id} [get]
+// @Router /host/{hostId}/server/{gsId} [get]
 // @Summary Edit
 // @Tags Game Server
 // @Description Edit Game server with selected ID
 // @Accept json
 // @Produce json
-// @Param host_id path string true "Host ID"
-// @Param server_id path string true "Game Server ID"
+// @Param hostId path string true "Host ID"
+// @Param gsId path string true "Game Server ID"
+// @Param host body request.GameServerCreate true " "
 // @Success 200 {object} response.GameServer
 // @Failure 400 {object} response.JsonError
 // @Security ApiKey

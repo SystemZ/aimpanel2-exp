@@ -39,8 +39,6 @@ func MustEncode(enc *json.Encoder, v interface{}) {
 	err := enc.Encode(v)
 	if err != nil {
 		log.Printf("ecode: %v", ecode.JsonEncode)
-		// FIXME this should not panic
-		panic(err)
 	}
 }
 

@@ -30,6 +30,9 @@ var Fingerprints = []string{
 	//local
 	"C0:5D:55:E1:A7:60:5D:EE:48:7A:01:B2:4F:E6:B7:EF:AC:E3:B4:FC:C2:0B:B2:EE:F8:28:60:89:3A:8D:8C:C2",
 
+	//local-kacper
+	"48:B5:7C:F0:1B:0E:CB:5E:18:42:06:BF:A7:A8:FE:E0:BF:30:6E:8B:F0:6A:45:0A:3A:D5:7F:E8:54:01:64:C1",
+
 	//*.lvlup.pro CF
 	"70:D7:10:D5:15:B5:C7:07:D4:22:0D:58:8E:F9:E8:EE:EF:67:13:77:6B:26:4B:D3:B7:94:CB:F4:98:9B:0A:1D",
 }
