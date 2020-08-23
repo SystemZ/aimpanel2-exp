@@ -15,37 +15,35 @@ import (
 )
 
 func Data(hostToken string, taskMsg *task.Message) error {
+	str, _ := taskMsg.Serialize()
+	logrus.Infof("Got %s L:%v from GS %s", taskMsg.TaskId.String(), len(str), taskMsg.GameServerID)
+	logrus.Tracef("%s", str)
 	switch taskMsg.TaskId {
 	case task.GAME_STARTED:
-		logrus.Infof("Got %v", taskMsg.TaskId)
 	case task.GAME_SERVER_LOG:
-		logrus.Infof("Got %v", taskMsg.TaskId)
 		err := Log(hostToken, taskMsg)
 		if err != nil {
 			return err
 		}
 	case task.GAME_SHUTDOWN:
-		logrus.Infof("Got %v", taskMsg.TaskId)
 	case task.GAME_METRICS_FREQUENCY:
-		logrus.Infof("Got %v", taskMsg.TaskId)
 		err := GameMetricsFrequency(hostToken, taskMsg)
 		if err != nil {
 			return err
 		}
 	case task.GAME_METRICS:
-		logrus.Infof("Got %v", taskMsg.TaskId)
 		err := Metrics(*taskMsg)
 		if err != nil {
 			return err
 		}
 	case task.AGENT_FILE_LIST_GS:
-		logrus.Infof("Got %v", taskMsg.TaskId)
 		err := model.GsFilesPublish(taskMsg.GameServerID, taskMsg.Files)
 		if err != nil {
 			logrus.Error(err)
 		}
 	default:
-		logrus.Infof("Unhandled task %v", taskMsg.TaskId)
+		logrus.Warnf("Unhandled task %s", taskMsg.TaskId.String())
+		logrus.Debugf("%s", str)
 	}
 
 	return nil
