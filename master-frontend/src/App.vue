@@ -38,34 +38,24 @@
                         <v-list-item-title>Login</v-list-item-title>
                     </v-list-item-content>
                 </v-list-item>
+                <v-list-item v-else @click="$auth.logout()">
+                    <v-list-item-action>
+                        <v-icon>{{mdiLogout}}</v-icon>
+                    </v-list-item-action>
+                    <v-list-item-content>
+                        <v-list-item-title>Logout</v-list-item-title>
+                    </v-list-item-content>
+                </v-list-item>
             </v-list>
         </v-navigation-drawer>
 
         <v-app-bar app color="red darken-2">
+            <v-app-bar-nav-icon @click.stop="drawer = !drawer"/>
             <v-toolbar-title>
                 {{$route.meta.title}}
             </v-toolbar-title>
             <v-spacer></v-spacer>
-            <span v-if="loggedIn">
-                <v-menu offset-y>
-                    <template v-slot:activator="{ on }">
-                        <v-btn v-on="on">
-                            {{$auth.username}}
-                            <v-icon>
-                                {{mdiChevronDown}}
-                            </v-icon>
-                        </v-btn>
-                    </template>
-                    <v-list>
-                        <v-list-item to="profile">
-                            <v-list-item-title>Profile</v-list-item-title>
-                        </v-list-item>
-                        <v-list-item @click="$auth.logout()">
-                            <v-list-item-title>Log out</v-list-item-title>
-                        </v-list-item>
-                    </v-list>
-                </v-menu>
-            </span>
+          <!-- TODO cool icons of alerts or other kind of notifications here? -->
         </v-app-bar>
 
         <v-content>
@@ -76,7 +66,7 @@
 
 <script lang="ts">
     import Vue from 'vue';
-    import {mdiChevronDown, mdiHome, mdiLogin} from '@mdi/js';
+    import {mdiAccount, mdiExitRun, mdiHome, mdiLogin} from '@mdi/js';
 
     export default Vue.extend({
         name: 'App',
@@ -98,7 +88,13 @@
                     title: 'Home',
                     icon: mdiHome,
                     path: '/',
-                    authRequired: false
+                    authRequired: true
+                },
+                {
+                    title: 'Profile',
+                    icon: mdiAccount,
+                    path: '/profile',
+                    authRequired: true
                 },
                 /*
                 {
@@ -118,7 +114,8 @@
             // icons
             mdiLogin: mdiLogin,
             mdiHome: mdiHome,
-            mdiChevronDown: mdiChevronDown,
+            mdiAccount: mdiAccount,
+            mdiLogout: mdiExitRun,
         }),
     });
 </script>

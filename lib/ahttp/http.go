@@ -27,6 +27,9 @@ var b = &backoff.Backoff{
 
 var HttpClient *http.Client
 var Fingerprints = []string{
+    //P
+    "F5:2B:15:6B:06:E3:9A:74:45:4D:A9:C3:F8:A2:43:CF:25:0C:0F:F8:C7:75:A9:18:3B:DC:8E:A8:BE:DB:9F:E4",
+
 	//local
 	"C0:5D:55:E1:A7:60:5D:EE:48:7A:01:B2:4F:E6:B7:EF:AC:E3:B4:FC:C2:0B:B2:EE:F8:28:60:89:3A:8D:8C:C2",
 

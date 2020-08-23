@@ -44,6 +44,12 @@ Remember to open `master-frontend/tslint.json` with IntelliJ and apply rules to 
 
 ### Backend
 
+#### Dependencies
+
+```bash
+apt-get install tmux libsystemd-dev inotify-tools
+```
+
 #### ENV variables
 
 You need to build and run master binary with something like this to make it work locally:
@@ -55,6 +61,12 @@ HTTP_DOCS_DIR=/home/user/Projects/aimpanel2/master/
 HTTP_TLS_KEY_PATH=/home/user/Projects/aimpanel2/key.pem
 HTTP_TLS_CERT_PATH=/home/user/Projects/aimpanel2/crt.pem
 HTTP_TEMPLATE_DIR=/home/user/Projects/aimpanel2/master/templates/
+```
+
+Example cmd:
+```
+cd master
+DEV_MODE=true HTTP_TEMPLATE_DIR=./templates/ HTTP_TLS_KEY_PATH=../key.pem HTTP_TLS_CERT_PATH=../crt.pem go run . server 3000
 ```
 
 #### Cert
@@ -98,9 +110,9 @@ sudo adduser `id -un` libvirt-qemu
 
 # Vagrant
 #https://www.vagrantup.com/downloads.html
-wget https://releases.hashicorp.com/vagrant/2.2.6/vagrant_2.2.6_x86_64.deb
-sudo dpkg -i vagrant_2.2.6_x86_64.deb
-rm vagrant_2.2.6_x86_64.deb
+wget https://releases.hashicorp.com/vagrant/2.2.9/vagrant_2.2.9_x86_64.deb
+sudo dpkg -i vagrant_2.2.9_x86_64.deb
+rm vagrant_2.2.9_x86_64.deb
 
 # Vagrant KVM plugin
 #https://github.com/vagrant-libvirt/vagrant-libvirt
