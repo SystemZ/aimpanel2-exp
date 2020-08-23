@@ -38,6 +38,14 @@
                         <v-list-item-title>Login</v-list-item-title>
                     </v-list-item-content>
                 </v-list-item>
+                <v-list-item v-else @click="$auth.logout()">
+                    <v-list-item-action>
+                        <v-icon>{{mdiLogout}}</v-icon>
+                    </v-list-item-action>
+                    <v-list-item-content>
+                        <v-list-item-title>Logout</v-list-item-title>
+                    </v-list-item-content>
+                </v-list-item>
             </v-list>
         </v-navigation-drawer>
 
@@ -76,7 +84,7 @@
 
 <script lang="ts">
     import Vue from 'vue';
-    import {mdiChevronDown, mdiHome, mdiLogin} from '@mdi/js';
+    import {mdiAccount, mdiExitRun, mdiHome, mdiLogin} from '@mdi/js';
 
     export default Vue.extend({
         name: 'App',
@@ -118,7 +126,8 @@
             // icons
             mdiLogin: mdiLogin,
             mdiHome: mdiHome,
-            mdiChevronDown: mdiChevronDown,
+            mdiAccount: mdiAccount,
+            mdiLogout: mdiExitRun,
         }),
     });
 </script>
