@@ -11,9 +11,9 @@ stages:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Jobs/Code-Quality.gitlab-ci.yml
 # https://docs.gitlab.com/ee/user/project/merge_requests/code_quality.html#example-configuration
 # https://gitlab.com/gitlab-org/security-products/codequality
-include:
-  - template: Code-Quality.gitlab-ci.yml
-# this doesn't support Go right now (2019-10-17)
+# https://gitlab.com/gitlab-org/ci-cd/codequality/-/issues/10
+#include:
+#  - template: Code-Quality.gitlab-ci.yml
 
 update-todo:
   stage: compile
