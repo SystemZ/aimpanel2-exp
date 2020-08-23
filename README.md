@@ -63,6 +63,12 @@ HTTP_TLS_CERT_PATH=/home/user/Projects/aimpanel2/crt.pem
 HTTP_TEMPLATE_DIR=/home/user/Projects/aimpanel2/master/templates/
 ```
 
+Example cmd:
+```
+cd master
+DEV_MODE=true HTTP_TEMPLATE_DIR=./templates/ HTTP_TLS_KEY_PATH=../key.pem HTTP_TLS_CERT_PATH=../crt.pem go run . server 3000
+```
+
 #### Cert
 
 Generate TLS cert for local dev env.  
