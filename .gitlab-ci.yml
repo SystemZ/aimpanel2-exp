@@ -1,11 +1,11 @@
 stages:
-  #- test
+  - test
   - compile
   - build
   - deploy
 
 include:
-  - template: "SAST.gitlab-ci"
+  - template: "SAST.gitlab-ci.yml"
 
 #include:
 #  - template: Code-Quality.gitlab-ci.yml
