@@ -44,6 +44,12 @@ Remember to open `master-frontend/tslint.json` with IntelliJ and apply rules to 
 
 ### Backend
 
+#### Dependencies
+
+```bash
+apt-get install tmux libsystemd-dev inotify-tools
+```
+
 #### ENV variables
 
 You need to build and run master binary with something like this to make it work locally:
