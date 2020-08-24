@@ -45,7 +45,7 @@
       <v-col>
         <host-performance-chart
           v-if="allMetrics.length > 0"
-          :title="selectedMetric"
+          :title="selectedMetricTitle"
           :unit="metricUnit"
           :metrics="allMetrics"
         />
@@ -111,6 +111,7 @@ export default Vue.extend({
       {'unit': 'MB', 'label': 'Disk total', 'v': 'disk_total'}
     ],
     selectedMetric: 'ram_available',
+    selectedMetricTitle: '',
     metricUnit: '',
     allMetrics: {} as Array<Metric>,
     noMetricsYet: false,
@@ -180,6 +181,7 @@ export default Vue.extend({
         for (let i = 0; i < this.availableMetrics.length; i++) {
           if (this.availableMetrics[i].v === this.selectedMetric) {
             this.metricUnit = this.availableMetrics[i].unit;
+            this.selectedMetricTitle = this.availableMetrics[i].label;
           }
         }
 
