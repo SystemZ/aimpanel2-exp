@@ -6,11 +6,11 @@
       <v-container>
         <v-row>
           <v-col
-              cols="12"
+            cols="12"
           >
             <v-text-field
-                v-model="gsInfo.custom_cmd_start"
-                label="custom_cmd_start"
+              v-model="gsInfo.custom_cmd_start"
+              label="custom_cmd_start"
             ></v-text-field>
           </v-col>
         </v-row>

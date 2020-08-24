@@ -2,11 +2,11 @@
   <v-container>
     <v-card>
       <v-tabs
-          v-model="tab"
-          background-color="transparent"
-          color="basil"
-          grow
-          :vertical="$vuetify.breakpoint.xsOnly"
+        v-model="tab"
+        background-color="transparent"
+        color="basil"
+        grow
+        :vertical="$vuetify.breakpoint.xsOnly"
       >
         <v-tab left>
           State & control
@@ -56,7 +56,10 @@
 
                     <v-list-item two-line>
                       <v-list-item-content>
-                        <v-list-item-title>{{ game_server.metric_frequency }}s</v-list-item-title>
+                        <v-list-item-title>{{
+                            game_server.metric_frequency
+                          }}s
+                        </v-list-item-title>
                         <v-list-item-subtitle>Metric frequency</v-list-item-subtitle>
                       </v-list-item-content>
                     </v-list-item>
@@ -100,25 +103,25 @@
     </v-card>
 
     <v-snackbar
-        v-model="installSnackbar"
+      v-model="installSnackbar"
     >
       Installing game server...
       <v-btn
-          @click="installSnackbar = false"
-          color="red"
-          text
+        @click="installSnackbar = false"
+        color="red"
+        text
       >
         Close
       </v-btn>
     </v-snackbar>
     <v-snackbar
-        v-model="removeSnackbar"
+      v-model="removeSnackbar"
     >
       Removing game server...
       <v-btn
-          @click="removeSnackbar = false"
-          color="red"
-          text
+        @click="removeSnackbar = false"
+        color="red"
+        text
       >
         Close
       </v-btn>
