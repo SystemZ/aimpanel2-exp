@@ -52,6 +52,7 @@ export default class HostPerformanceChart extends Vue {
           }
           label += Math.round(tooltipItem.yLabel * 100) / 100;
           if (this.unit.length > 0) {
+            // use prettySize from file manager to auto select units
             label += ' ' + this.unit;
           }
           return label;

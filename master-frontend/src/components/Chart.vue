@@ -1,0 +1,166 @@
+<template>
+  <v-card flat>
+    <!--
+      :loading="isLoading"
+      :search-input.sync="search"
+            prepend-icon="mdi-database-search"
+            return-object
+
+    -->
+    <v-row>
+      <v-col cols="12" xl="1" md="3" xs="12">
+        <v-text-field
+          v-model="metricIntervalS"
+          label="Metric interval in sec"
+        ></v-text-field>
+      </v-col>
+      <v-col cols="12" xl="3" md="3" xs="12">
+        <v-autocomplete
+          v-model="selectedMetric"
+          :items='availableMetrics'
+          color="white"
+          hide-no-data
+          hide-selected
+          label="Metrics"
+          placeholder="Data to track"
+          item-text="label"
+          item-value="v"
+          @change="getChart"
+        ></v-autocomplete>
+      </v-col>
+      <v-col>
+        <v-btn @click.native="getChart" color="green">Update</v-btn>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col>
+        <host-performance-chart
+          v-if="allMetrics.length > 0"
+          :title="selectedMetric"
+          :unit="metricUnit"
+          :metrics="allMetrics"
+        />
+      </v-col>
+    </v-row>
+
+  </v-card>
+</template>
+
+<script lang="ts">
+import Vue from 'vue';
+import HostPerformanceChart from '@/components/HostPerformanceChart.vue';
+import {Metric} from '@/types/api';
+
+export default Vue.extend({
+  name: 'chart',
+  components: {
+    HostPerformanceChart,
+  },
+  props: {
+    hostId: {
+      type: String,
+      required: true,
+    },
+  },
+  data: () => ({
+    serverUrl: '',
+    metricIntervalS: 3600,
+    availableMetrics: [
+      {'unit': '%', 'label': 'CPU usage', 'v': 'cpu_usage'},
+      {'unit': '%', 'label': 'CPU user', 'v': 'cpu_user'},
+      {'unit': '%', 'label': 'CPU system', 'v': 'cpu_system'},
+      {'unit': '%', 'label': 'CPU idle', 'v': 'cpu_idle'},
+      {'unit': '%', 'label': 'CPU nice', 'v': 'cpu_nice'},
+      {'unit': '%', 'label': 'CPU guest', 'v': 'cpu_guest'},
+      {'unit': '%', 'label': 'CPU guest nice', 'v': 'cpu_guest_nice'},
+      {'unit': '%', 'label': 'CPU steal', 'v': 'cpu_steal'},
+      {'unit': '%', 'label': 'CPU iowait', 'v': 'cpu_iowait'},
+      {'unit': '%', 'label': 'CPU irq', 'v': 'cpu_irq'},
+      {'unit': '%', 'label': 'CPU soft irq', 'v': 'cpu_irq_soft'},
+      {'unit': 'MB', 'label': 'RAM usage', 'v': 'ram_usage'},
+      {'unit': 'MB', 'label': 'RAM available', 'v': 'ram_available'},
+      {'unit': 'MB', 'label': 'RAM free', 'v': 'ram_free'},
+      {'unit': 'MB', 'label': 'RAM total', 'v': 'ram_total'},
+      {'unit': 'MB', 'label': 'RAM buffers', 'v': 'ram_buffers'},
+      {'unit': 'MB', 'label': 'RAM cache', 'v': 'ram_cache'},
+      {'unit': 'MB', 'label': 'Disk free', 'v': 'disk_free'},
+      {'unit': 'MB', 'label': 'Disk used', 'v': 'disk_used'},
+      {'unit': 'MB', 'label': 'Disk total', 'v': 'disk_total'}
+    ],
+    selectedMetric: 'ram_available',
+    metricUnit: '',
+    allMetrics: {} as Array<Metric>,
+    noMetricsYet: false,
+    noChartsYet: false,
+  }),
+  mounted() {
+    // this.serverUrl = '/v1/host/' + this.hostId + '/server/' + this.serverId;
+    this.serverUrl = '/v1/host/' + this.hostId;
+    this.getChart();
+  },
+  methods: {
+    getChart(): void {
+      this.allMetrics = [];
+      this.$http.get('/v1/host/' + this.$route.params.id + '/metric?name=' + this.selectedMetric + '&interval=' + this.metricIntervalS).then((res) => {
+        if (res.data.metrics.length < 1) {
+          // no data, skip assigning
+          this.noMetricsYet = true;
+          this.noChartsYet = true;
+          return;
+        }
+
+        // modify records for chart.js purposes (spanGaps)
+        let intervalS = this.metricIntervalS;
+        let newMetrics = [];
+        // first record is always OK and it's our guideline
+        newMetrics[0] = res.data.metrics[0];
+        for (let i = 1; i < res.data.metrics.length; i++) {
+          let dateAInt = (res.data.metrics[i - 1].t * 1000) + (intervalS * 1000);
+          // let dateAStr = new Date(dateAInt);
+          let dateBInt = res.data.metrics[i].t * 1000;
+          // let dateBStr = new Date(dateBInt);
+          let diff = dateBInt - dateAInt;
+          // console.log(dateAInt + ' vs ' + dateBInt);
+          // console.log(dateAStr + ' vs ' + dateBStr);
+          if (dateAInt != dateBInt) {
+            // console.log('wrong! diff:');
+            // console.log(diff);
+            let nullsToAdd = diff / (intervalS * 1000);
+            // console.log(nullsToAdd);
+            // take 1 from nulls to add to account adding real data as last point
+            for (let n = 0; n < nullsToAdd - 1; n++) {
+              // console.log(n);
+              let emptyDateInt = dateAInt + (intervalS * 1000 * (n + 1));
+              // console.log(emptyDateInt);
+              // console.log(new Date(emptyDateInt));
+              newMetrics.push({
+                't': emptyDateInt / 1000,
+                'min': NaN,
+                'avg': NaN,
+                'max': NaN,
+              });
+            }
+          }
+          // else {
+          //   console.log('ok');
+          // }
+          // needs NaN or not, we need to add this value
+          newMetrics.push(res.data.metrics[i]);
+
+        }
+        // select proper tooltip unit for this data
+        for (let i = 0; i < this.availableMetrics.length; i++) {
+          if (this.availableMetrics[i].v === this.selectedMetric) {
+            this.metricUnit = this.availableMetrics[i].unit;
+          }
+        }
+
+        // use our data from backend enriched with NaNs for chart.js
+        this.allMetrics = newMetrics;
+      }).catch(e => {
+        this.$auth.checkResponse(e.response.status);
+      });
+    },
+  },
+});
+</script>

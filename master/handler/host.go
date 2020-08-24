@@ -127,10 +127,63 @@ func HostMetric(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// get metric name
+	metricName := query.Get("name")
+	// FIXME move this to service to make http fat free
+	// FIXME use map to make it shorter
+	metricId := 0
+	switch metricName {
+	case "cpu_usage":
+		metricId = int(metric.CpuUsage)
+	case "cpu_user":
+		metricId = int(metric.User)
+	case "cpu_system":
+		metricId = int(metric.System)
+	case "cpu_idle":
+		metricId = int(metric.Idle)
+	case "cpu_nice":
+		metricId = int(metric.Nice)
+	case "cpu_guest":
+		metricId = int(metric.Guest)
+	case "cpu_guest_nice":
+		metricId = int(metric.GuestNice)
+	case "cpu_steal":
+		metricId = int(metric.Steal)
+	case "cpu_iowait":
+		metricId = int(metric.Iowait)
+	case "cpu_irq":
+		metricId = int(metric.Irq)
+	case "cpu_irq_soft":
+		metricId = int(metric.Softirq)
+	case "ram_usage":
+		metricId = int(metric.RamUsage)
+	case "ram_free":
+		metricId = int(metric.RamFree)
+	case "ram_total":
+		metricId = int(metric.RamTotal)
+	case "ram_available":
+		metricId = int(metric.RamAvailable)
+	case "ram_buffers":
+		metricId = int(metric.RamBuffers)
+	case "ram_cache":
+		metricId = int(metric.RamCache)
+	case "disk_free":
+		metricId = int(metric.DiskFree)
+	case "disk_used":
+		metricId = int(metric.DiskUsed)
+	case "disk_total":
+		metricId = int(metric.DiskTotal)
+	}
+	if metricId == 0 {
+		// TODO make separate ecode for incorrect metric name
+		lib.ReturnError(w, http.StatusBadRequest, ecode.Unknown, nil)
+		return
+	}
+
 	now := time.Now()
 	from := time.Date(now.Year()-1, now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 	to := time.Date(now.Year()+1, now.Month(), now.Day(), 23, 59, 0, 0, now.Location())
-	metrics, err := model.GetTimeSeries(oid, intervalSInt, from, to, metric.RamAvailable)
+	metrics, err := model.GetTimeSeries(oid, intervalSInt, from, to, metric.Id(metricId))
 	if err != nil {
 		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, err)
 		return
