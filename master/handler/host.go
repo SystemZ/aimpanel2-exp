@@ -118,7 +118,7 @@ func HostMetric(w http.ResponseWriter, r *http.Request) {
 	now := time.Now()
 	from := time.Date(now.Year()-1, now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 	to := time.Date(now.Year()+1, now.Month(), now.Day(), 23, 59, 0, 0, now.Location())
-	metrics, err := model.GetTimeSeries(oid, 60, from, to, metric.RamAvailable)
+	metrics, err := model.GetTimeSeries(oid, 3600, from, to, metric.RamAvailable)
 	if err != nil {
 		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, err)
 		return

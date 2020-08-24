@@ -165,9 +165,6 @@ export default Vue.extend({
     //this.getGameServers();
 
     this.$http.get('/v1/host/' + this.$route.params.id + '/metric').then((res) => {
-      this.allMetrics = res.data.metrics;
-      // FIXME metrics are empty!
-
       if (res.data.metrics.length < 1) {
         // no data, skip assigning
         this.noMetricsYet = true;
@@ -175,6 +172,49 @@ export default Vue.extend({
         return;
       }
 
+      // modify records for chart.js purposes (spanGaps)
+      let intervalS = 3600;
+      let newMetrics = [];
+      // first record is always OK and it's our guideline
+      newMetrics[0] = res.data.metrics[0];
+      for (let i = 1; i < res.data.metrics.length; i++) {
+        let dateAInt = (res.data.metrics[i - 1].t * 1000) + (intervalS * 1000);
+        // let dateAStr = new Date(dateAInt);
+        let dateBInt = res.data.metrics[i].t * 1000;
+        // let dateBStr = new Date(dateBInt);
+        let diff = dateBInt - dateAInt;
+        // console.log(dateAInt + ' vs ' + dateBInt);
+        // console.log(dateAStr + ' vs ' + dateBStr);
+        if (dateAInt != dateBInt) {
+          // console.log('wrong! diff:');
+          // console.log(diff);
+          let nullsToAdd = diff / (intervalS * 1000);
+          // console.log(nullsToAdd);
+          // take 1 from nulls to add to account adding real data as last point
+          for (let n = 0; n < nullsToAdd - 1; n++) {
+            // console.log(n);
+            let emptyDateInt = dateAInt + (intervalS * 1000 * (n + 1));
+            // console.log(emptyDateInt);
+            // console.log(new Date(emptyDateInt));
+            newMetrics.push({
+              't': emptyDateInt / 1000,
+              'min': NaN,
+              'avg': NaN,
+              'max': NaN,
+            });
+          }
+        }
+        // else {
+        //   console.log('ok');
+        // }
+        // needs NaN or not, we need to add this value
+        newMetrics.push(res.data.metrics[i]);
+
+      }
+      // use our data from backend enriched with NaNs for chart.js
+      this.allMetrics = newMetrics;
+
+      // FIXME pie charts are empty
       this.metric = res.data.metrics[0];
 
       this.metric.disk_free = +(this.metric.disk_free as number / 1024).toFixed(0);

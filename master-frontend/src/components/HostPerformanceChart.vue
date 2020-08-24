@@ -55,7 +55,8 @@ export default class HostPerformanceChart extends Vue {
         },
       }]
     },
-    showLines: false,
+    showLines: true,
+    spanGaps: false,
     tooltips: {
       mode: 'index',
       intersect: false,
@@ -70,23 +71,12 @@ export default class HostPerformanceChart extends Vue {
     labels: this.metrics.map(m => moment.unix(m.t).toDate()),
     datasets: [
       {
-        label: 'RAM Available',
+        label: 'RAM Available avg',
         backgroundColor: '#43a047',
         borderColor: '#43a047',
         data: this.metrics.map(m => m.avg),
         type: 'line',
-        pointRadius: 1,
-        fill: false,
-        lineTension: 0,
-        borderWidth: 2,
-      },
-      {
-        label: 'RAM Available',
-        backgroundColor: '#43a047',
-        borderColor: '#43a047',
-        data: this.metrics.map(m => m.avg),
-        type: 'line',
-        pointRadius: 1,
+        pointRadius: 2,
         fill: false,
         lineTension: 0,
         borderWidth: 2,
