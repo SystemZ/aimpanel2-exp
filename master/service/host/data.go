@@ -1,7 +1,6 @@
 package host
 
 import (
-	"errors"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/ecode"
@@ -10,16 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func Data(hostToken string, taskMsg *task.Message) error {
-	host, err := model.GetHostByToken(hostToken)
-	if err != nil {
-		return err
-	}
-
-	if host == nil {
-		return errors.New("error when getting host from db")
-	}
-
+func Data(host model.Host, taskMsg *task.Message) error {
 	switch taskMsg.TaskId {
 	case task.AGENT_STARTED:
 		logrus.Infof("Got %v", taskMsg.TaskId)
@@ -32,20 +22,20 @@ func Data(hostToken string, taskMsg *task.Message) error {
 	case task.AGENT_METRICS_FREQUENCY:
 		logrus.Infof("Got %v", taskMsg.TaskId)
 
-		err := AgentMetricsFrequency(host)
+		err := AgentMetricsFrequency(&host)
 		if err != nil {
 			return err
 		}
 	case task.AGENT_METRICS:
 		logrus.Infof("Got %v", taskMsg.TaskId)
 
-		err := Metrics(hostToken, *taskMsg)
+		err := Metrics(host.Token, *taskMsg)
 		if err != nil {
 			return err
 		}
 	case task.AGENT_OS:
 		logrus.Infof("Got %v", taskMsg.TaskId)
-		err := AgentOS(host, taskMsg)
+		err := AgentOS(&host, taskMsg)
 		if err != nil {
 			return err
 		}
@@ -56,7 +46,7 @@ func Data(hostToken string, taskMsg *task.Message) error {
 	case task.AGENT_GET_JOBS:
 		logrus.Infof("Got %v", taskMsg.TaskId)
 
-		err := AgentGetJobs(host)
+		err := AgentGetJobs(&host)
 		if err != nil {
 			return err
 		}
@@ -68,7 +58,7 @@ func Data(hostToken string, taskMsg *task.Message) error {
 }
 
 func AgentStarted(hostId primitive.ObjectID) error {
-	err := Update(hostId)
+	err := Update(hostId, model.User{})
 	if err != nil {
 		return err
 	}
@@ -82,7 +72,7 @@ func AgentMetricsFrequency(host *model.Host) error {
 		MetricFrequency: host.MetricFrequency,
 	}
 
-	err := model.SendEvent(host.ID, taskMsg)
+	err := model.SendTaskToSlave(host.ID, model.User{}, taskMsg)
 	if err != nil {
 		return &lib.Error{ErrorCode: ecode.DbSave}
 	}
@@ -127,7 +117,7 @@ func AgentGetJobs(host *model.Host) error {
 		Jobs:   &jobs,
 	}
 
-	err = model.SendEvent(host.ID, taskMsg)
+	err = model.SendTaskToSlave(host.ID, model.User{}, taskMsg)
 	if err != nil {
 		return &lib.Error{ErrorCode: ecode.DbSave}
 	}

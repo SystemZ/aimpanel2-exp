@@ -39,10 +39,27 @@ const (
 
 	// special case, eg. just to keep up SSE session
 	PING
+
+	GS_CMD_START_CHANGE
+	//HOST_NAME_CHANGE
+	//GS_NAME_CHANGE
 )
 
 func (i Id) StringValue() string {
 	return strconv.Itoa(int(i))
+}
+
+func (i Id) IsForAudit() bool {
+	switch i {
+	case
+		AGENT_FILE_LIST_GS,
+		AGENT_GET_JOBS,
+		GAME_METRICS_FREQUENCY,
+		AGENT_METRICS_FREQUENCY:
+		return false
+	default:
+		return true
+	}
 }
 
 type Messages []Message

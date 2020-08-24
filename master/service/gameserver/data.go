@@ -14,20 +14,30 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func Data(hostToken string, taskMsg *task.Message) error {
+func Data(host model.Host, taskMsg *task.Message) error {
 	str, _ := taskMsg.Serialize()
 	logrus.Infof("Got %s L:%v from GS %s", taskMsg.TaskId.String(), len(str), taskMsg.GameServerID)
 	logrus.Tracef("%s", str)
+
 	switch taskMsg.TaskId {
-	case task.GAME_STARTED:
-	case task.GAME_SERVER_LOG:
-		err := Log(hostToken, taskMsg)
+	case task.GAME_STARTED, task.GAME_SHUTDOWN:
+		err := model.SaveAction(
+			*taskMsg,
+			model.User{},
+			host.ID,
+			"",
+			"",
+		)
 		if err != nil {
 			return err
 		}
-	case task.GAME_SHUTDOWN:
+	case task.GAME_SERVER_LOG:
+		err := Log(host.Token, taskMsg)
+		if err != nil {
+			return err
+		}
 	case task.GAME_METRICS_FREQUENCY:
-		err := GameMetricsFrequency(hostToken, taskMsg)
+		err := GameMetricsFrequency(host.Token, taskMsg)
 		if err != nil {
 			return err
 		}
@@ -69,11 +79,14 @@ func Log(hostToken string, taskMsg *task.Message) error {
 		return err
 	}
 
-	//TODO: Handle this with mongo events collection
-	events.SSE.SendMessage(fmt.Sprintf("/v1/host/%s/server/%s/console",
-		host.ID.Hex(),
-		gsLog.GameServerId.Hex()),
-		sse.SimpleMessage(base64.StdEncoding.EncodeToString([]byte(gsLog.Log))))
+	events.SSE.SendMessage(
+		fmt.Sprintf(
+			"/v1/host/%s/server/%s/console",
+			host.ID.Hex(),
+			gsLog.GameServerId.Hex(),
+		),
+		sse.SimpleMessage(base64.StdEncoding.EncodeToString([]byte(gsLog.Log))),
+	)
 
 	err = model.Put(&gsLog)
 	if err != nil {
@@ -111,7 +124,7 @@ func GameMetricsFrequency(hostToken string, taskMsg *task.Message) error {
 		MetricFrequency: gs.MetricFrequency,
 	}
 
-	err = model.SendEvent(host.ID, taskMessage)
+	err = model.SendTaskToSlave(host.ID, model.User{}, taskMessage)
 	if err != nil {
 		return &lib.Error{ErrorCode: ecode.DbSave}
 	}

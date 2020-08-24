@@ -57,7 +57,6 @@ func AuthMiddleware(handler http.Handler) http.Handler {
 		}
 
 		context.Set(r, "user", *user)
-
 		handler.ServeHTTP(w, r)
 	})
 }
@@ -143,6 +142,7 @@ func SlavePermissionMiddleware(handler http.Handler) http.Handler {
 			}
 		}
 
+		context.Set(r, "host", *host)
 		handler.ServeHTTP(w, r)
 	})
 }

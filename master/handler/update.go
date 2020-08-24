@@ -49,7 +49,7 @@ func NewVersion(w http.ResponseWriter, r *http.Request) {
 
 	go func() {
 		for _, host := range hosts {
-			err := h.Update(host.ID)
+			err := h.Update(host.ID, model.User{})
 			if err != nil {
 				logrus.Error(err)
 			}

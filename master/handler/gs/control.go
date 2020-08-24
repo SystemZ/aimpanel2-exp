@@ -2,10 +2,12 @@ package gs
 
 import (
 	"encoding/json"
+	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/ecode"
 	"gitlab.com/systemz/aimpanel2/lib/request"
+	"gitlab.com/systemz/aimpanel2/master/model"
 	"gitlab.com/systemz/aimpanel2/master/service/gameserver"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
@@ -26,8 +28,9 @@ func Start(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	gsId := params["gsId"]
 	oid, _ := primitive.ObjectIDFromHex(gsId)
+	user := context.Get(r, "user").(model.User)
 
-	err := gameserver.Start(oid)
+	err := gameserver.Start(oid, user)
 	if err != nil {
 		lib.ReturnError(w, http.StatusInternalServerError, ecode.GsStart, err)
 		return
@@ -51,12 +54,13 @@ func Install(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	gsId := params["gsId"]
 	oid, err := primitive.ObjectIDFromHex(gsId)
+	user := context.Get(r, "user").(model.User)
 	if err != nil {
 		lib.ReturnError(w, http.StatusBadRequest, ecode.OidError, err)
 		return
 	}
 
-	err = gameserver.Install(oid)
+	err = gameserver.Install(oid, user)
 	if err != nil {
 		lib.ReturnError(w, http.StatusInternalServerError, ecode.GsInstall, err)
 		return
@@ -80,6 +84,7 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	gsId := params["gsId"]
 	oid, _ := primitive.ObjectIDFromHex(gsId)
+	user := context.Get(r, "user").(model.User)
 
 	data := &request.GameServerStop{}
 	err := json.NewDecoder(r.Body).Decode(data)
@@ -88,7 +93,7 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = gameserver.Restart(oid, data.Type)
+	err = gameserver.Restart(oid, data.Type, user)
 	if err != nil {
 		lib.ReturnError(w, http.StatusInternalServerError, ecode.GsRestart, err)
 		return
@@ -112,6 +117,7 @@ func Stop(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	gsId := params["gsId"]
 	oid, _ := primitive.ObjectIDFromHex(gsId)
+	user := context.Get(r, "user").(model.User)
 
 	data := &request.GameServerStop{}
 	err := json.NewDecoder(r.Body).Decode(data)
@@ -120,7 +126,7 @@ func Stop(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = gameserver.Stop(oid, data.Type)
+	err = gameserver.Stop(oid, data.Type, user)
 	if err != nil {
 		lib.ReturnError(w, http.StatusInternalServerError, ecode.GsStop, err)
 		return
@@ -145,6 +151,7 @@ func SendCommand(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	gsId := params["gsId"]
 	oid, _ := primitive.ObjectIDFromHex(gsId)
+	user := context.Get(r, "user").(model.User)
 
 	data := &request.GameServerSendCommand{}
 	err := json.NewDecoder(r.Body).Decode(data)
@@ -153,7 +160,7 @@ func SendCommand(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = gameserver.SendCommand(oid, data.Command)
+	err = gameserver.SendCommand(oid, data.Command, user)
 	if err != nil {
 		lib.ReturnError(w, http.StatusInternalServerError, ecode.GsCmd, err)
 		return
@@ -167,8 +174,9 @@ func FileList(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	gsId := params["gsId"]
 	oid, _ := primitive.ObjectIDFromHex(gsId)
+	user := context.Get(r, "user").(model.User)
 
-	files, err := gameserver.FileList(oid)
+	files, err := gameserver.FileList(oid, user)
 	if err != nil {
 		lib.ReturnError(w, http.StatusInternalServerError, ecode.GsFileList, err)
 		return
@@ -193,12 +201,13 @@ func Shutdown(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	gsId := params["gsId"]
 	oid, err := primitive.ObjectIDFromHex(gsId)
+	user := context.Get(r, "user").(model.User)
 	if err != nil {
 		lib.ReturnError(w, http.StatusBadRequest, ecode.OidError, err)
 		return
 	}
 
-	err = gameserver.Shutdown(oid)
+	err = gameserver.Shutdown(oid, user)
 	if err != nil {
 		lib.ReturnError(w, http.StatusInternalServerError, ecode.GsInstall, err)
 		return

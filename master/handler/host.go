@@ -145,7 +145,8 @@ func HostRemove(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
 	oid, _ := primitive.ObjectIDFromHex(params["hostId"])
-	errCode := host.Remove(oid)
+	user := context.Get(r, "user").(model.User)
+	errCode := host.Remove(oid, user)
 	if errCode != ecode.NoError {
 		lib.ReturnError(w, http.StatusBadRequest, errCode, nil)
 		return
@@ -170,7 +171,8 @@ func HostAuth(w http.ResponseWriter, r *http.Request) {
 func HostUpdate(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	oid, _ := primitive.ObjectIDFromHex(params["hostId"])
-	err := host.Update(oid)
+	user := context.Get(r, "user").(model.User)
+	err := host.Update(oid, user)
 	if err != nil {
 		lib.ReturnError(w, http.StatusInternalServerError, ecode.GsUpdate, err)
 		return
