@@ -8,12 +8,24 @@
 
     -->
     <v-row>
-      <v-col cols="12" xl="1" md="3" xs="12">
+      <v-col cols="12" xl="1" md="3" xs="6">
+        <v-select
+          v-model="metricIntervalS"
+          :items="metricIntervalPresets"
+          item-text="label"
+          item-value="v"
+          label="Interval"
+          @change="getChart"
+        ></v-select>
+      </v-col>
+      <!--
+      <v-col cols="12" xl="1" md="3" xs="6">
         <v-text-field
           v-model="metricIntervalS"
           label="Metric interval in sec"
         ></v-text-field>
       </v-col>
+      -->
       <v-col cols="12" xl="3" md="3" xs="12">
         <v-autocomplete
           v-model="selectedMetric"
@@ -21,15 +33,12 @@
           color="white"
           hide-no-data
           hide-selected
-          label="Metrics"
+          label="Metric"
           placeholder="Data to track"
           item-text="label"
           item-value="v"
           @change="getChart"
         ></v-autocomplete>
-      </v-col>
-      <v-col>
-        <v-btn @click.native="getChart" color="green">Update</v-btn>
       </v-col>
     </v-row>
     <v-row>
@@ -65,6 +74,20 @@ export default Vue.extend({
   data: () => ({
     serverUrl: '',
     metricIntervalS: 3600,
+    metricIntervalPresets: [
+      {'label': '24h', 'v': 86400},
+      {'label': '12h', 'v': 43200},
+      {'label': '6h', 'v': 21600},
+      {'label': '3h', 'v': 10800},
+      {'label': '1h', 'v': 3600},
+      {'label': '30m', 'v': 1800},
+      {'label': '15m', 'v': 900},
+      {'label': '10m', 'v': 600},
+      {'label': '5m', 'v': 300},
+      {'label': '1m', 'v': 60},
+      {'label': '30s', 'v': 30},
+      {'label': '15s', 'v': 15},
+    ],
     availableMetrics: [
       {'unit': '%', 'label': 'CPU usage', 'v': 'cpu_usage'},
       {'unit': '%', 'label': 'CPU user', 'v': 'cpu_user'},
@@ -97,6 +120,11 @@ export default Vue.extend({
     // this.serverUrl = '/v1/host/' + this.hostId + '/server/' + this.serverId;
     this.serverUrl = '/v1/host/' + this.hostId;
     this.getChart();
+  },
+  watch: {
+    metricIntervalS() {
+      console.log('changed!');
+    }
   },
   methods: {
     getChart(): void {
