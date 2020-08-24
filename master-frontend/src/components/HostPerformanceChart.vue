@@ -21,6 +21,7 @@ export default class HostPerformanceChart extends Vue {
     responsive: true,
     maintainAspectRatio: false,
     legend: {
+      position: 'bottom',
       labels: {
         fontColor: 'white'
       }
