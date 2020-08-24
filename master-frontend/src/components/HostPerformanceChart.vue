@@ -1,5 +1,5 @@
 <script lang="ts">
-import {Component, Prop, Vue} from 'vue-property-decorator';
+import {Component, Prop, Vue, Watch} from 'vue-property-decorator';
 import {Metric} from '@/types/api';
 import {Line} from 'vue-chartjs';
 import moment from 'moment';
@@ -86,6 +86,12 @@ export default class HostPerformanceChart extends Vue {
 
   mounted() {
     this.renderChart(this.chartData, this.options);
+  }
+
+  @Watch('metrics')
+  onPropertyChanged(value: string, oldValue: string) {
+    this.renderChart(this.chartData, this.options);
+    //this.$data._chart.update();
   }
 
 }

@@ -13,6 +13,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/master/service/host"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -97,6 +98,7 @@ func HostCreate(w http.ResponseWriter, r *http.Request) {
 	lib.MustEncode(json.NewEncoder(w), response.Token{Token: h.Token})
 }
 
+// FIXME add interval param
 // @Router /host/{id}/metric [get]
 // @Summary Metric
 // @Tags Host
@@ -115,10 +117,20 @@ func HostMetric(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// get time between data points
+	query := r.URL.Query()
+	intervalSStr := query.Get("interval")
+	intervalSInt, err := strconv.Atoi(intervalSStr)
+	if err != nil {
+		// TODO make separate ecode
+		lib.ReturnError(w, http.StatusBadRequest, ecode.Unknown, nil)
+		return
+	}
+
 	now := time.Now()
 	from := time.Date(now.Year()-1, now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 	to := time.Date(now.Year()+1, now.Month(), now.Day(), 23, 59, 0, 0, now.Location())
-	metrics, err := model.GetTimeSeries(oid, 3600, from, to, metric.RamAvailable)
+	metrics, err := model.GetTimeSeries(oid, intervalSInt, from, to, metric.RamAvailable)
 	if err != nil {
 		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, err)
 		return
