@@ -10,6 +10,16 @@
     <v-row>
       <v-col cols="12" xl="1" md="3" xs="6">
         <v-select
+          v-model="metricLastS"
+          :items="metricLastSPresets"
+          item-text="label"
+          item-value="v"
+          label="Time"
+          @change="getChart"
+        ></v-select>
+      </v-col>
+      <v-col cols="12" xl="1" md="3" xs="6">
+        <v-select
           v-model="metricIntervalS"
           :items="metricIntervalPresets"
           item-text="label"
@@ -73,7 +83,26 @@ export default Vue.extend({
   },
   data: () => ({
     serverUrl: '',
-    metricIntervalS: 3600,
+    metricLastS: 86400,
+    metricLastSPresets: [
+      {'label': '30d', 'v': 2592000},
+      {'label': '14d', 'v': 1209600},
+      {'label': '7d', 'v': 604800},
+      {'label': '3d', 'v': 259200},
+      {'label': '1d', 'v': 86400},
+      /*
+      {'label': '???', 'v': 69778},
+      {'label': '12h', 'v': 43200},
+      {'label': '6h', 'v': 21600},
+      {'label': '3h', 'v': 10800},
+      {'label': '1h', 'v': 3600},
+      {'label': '30m', 'v': 1800},
+      {'label': '15m', 'v': 900},
+      {'label': '10m', 'v': 600},
+      {'label': '5m', 'v': 300},
+      */
+    ],
+    metricIntervalS: 900,
     metricIntervalPresets: [
       {'label': '24h', 'v': 86400},
       {'label': '12h', 'v': 43200},
@@ -130,7 +159,8 @@ export default Vue.extend({
   methods: {
     getChart(): void {
       this.allMetrics = [];
-      this.$http.get('/v1/host/' + this.$route.params.id + '/metric?name=' + this.selectedMetric + '&interval=' + this.metricIntervalS).then((res) => {
+      let metricUrl = '/v1/host/' + this.$route.params.id + '/metric?name=' + this.selectedMetric + '&last=' + this.metricLastS + '&interval=' + this.metricIntervalS;
+      this.$http.get(metricUrl).then((res) => {
         if (res.data.metrics.length < 1) {
           // no data, skip assigning
           this.noMetricsYet = true;

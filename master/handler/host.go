@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/ecode"
 	"gitlab.com/systemz/aimpanel2/lib/metric"
@@ -98,7 +99,7 @@ func HostCreate(w http.ResponseWriter, r *http.Request) {
 	lib.MustEncode(json.NewEncoder(w), response.Token{Token: h.Token})
 }
 
-// FIXME add interval param
+// FIXME add URL params
 // @Router /host/{id}/metric [get]
 // @Summary Metric
 // @Tags Host
@@ -117,6 +118,7 @@ func HostMetric(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// FIXME more validation for metric params
 	// get time between data points
 	query := r.URL.Query()
 	intervalSStr := query.Get("interval")
@@ -180,9 +182,24 @@ func HostMetric(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	lastStr := query.Get("last")
+	lastInt, err := strconv.Atoi(lastStr)
+	if err != nil {
+		// TODO make separate ecode
+		lib.ReturnError(w, http.StatusBadRequest, ecode.Unknown, nil)
+		return
+	}
+
 	now := time.Now()
 	from := time.Date(now.Year()-1, now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 	to := time.Date(now.Year()+1, now.Month(), now.Day(), 23, 59, 0, 0, now.Location())
+	if lastInt > 0 {
+		nowProcessed := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), 0, 0, now.Location())
+		from = nowProcessed.Add(time.Duration(-lastInt) * time.Second)
+		to = nowProcessed
+		logrus.Debugf("from %v to %v", from, to)
+	}
+
 	metrics, err := model.GetTimeSeries(oid, intervalSInt, from, to, metric.Id(metricId))
 	if err != nil {
 		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, err)
