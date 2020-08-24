@@ -127,7 +127,12 @@
                 <v-btn @click.native="getChart" color="green">Update</v-btn>
               </v-col>
             </v-row>
-            <host-performance-chart v-if="allMetrics.length > 0" :metrics="allMetrics"/>
+            <host-performance-chart
+              v-if="allMetrics.length > 0"
+              title="RAM Available"
+              unit="MB RAM"
+              :metrics="allMetrics"
+            />
           </v-card-text>
         </v-card>
       </v-col>
