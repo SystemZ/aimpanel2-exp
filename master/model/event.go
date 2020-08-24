@@ -1,25 +1,23 @@
 package model
 
 import (
-	"context"
 	"fmt"
 	"github.com/alexandrevicenzi/go-sse"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/master/events"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"log"
 )
 
 type Event struct {
-	ID primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty" example:"1238206236281802752"`
-
-	HostId primitive.ObjectID `bson:"host_id"`
-
-	TaskMessage task.Message `bson:"task_message" json:"task_message"`
+	ID           primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty" example:"1238206236281802752"`
+	UserId       primitive.ObjectID `bson:"user_id"`
+	HostId       primitive.ObjectID `bson:"host_id"`
+	GameServerId primitive.ObjectID `bson:"gs_id"`
+	TaskId       int                `bson:"task_id"`
+	Value        string             `bson:"val"`
+	ValuePrev    string             `bson:"val_prev"`
 }
 
 func (e *Event) GetCollectionName() string {
@@ -34,30 +32,46 @@ func (e *Event) SetID(id primitive.ObjectID) {
 	e.ID = id
 }
 
-func SendEvent(hostId primitive.ObjectID, taskMsg task.Message) (err error) {
+func SaveAction(taskMsg task.Message, user User, hostId primitive.ObjectID, val string, valPrev string) error {
+	gsId, _ := primitive.ObjectIDFromHex(taskMsg.GameServerID)
 	event := &Event{
-		HostId:      hostId,
-		TaskMessage: taskMsg,
+		UserId:       user.ID,
+		TaskId:       int(taskMsg.TaskId),
+		HostId:       hostId,
+		GameServerId: gsId,
+		Value:        val,
+		ValuePrev:    valPrev,
 	}
-
+	// note additional details
+	switch taskMsg.TaskId {
+	case task.GAME_COMMAND:
+		event.Value = taskMsg.Body
+	}
 	// put copy of event in DB for later audit
-	err = Put(event)
-	if err != nil {
-		return err
+	if taskMsg.TaskId.IsForAudit() {
+		err := Put(event)
+		logrus.Debugf("event DB ID: %s", event.ID.Hex())
+		if err != nil {
+			return err
+		}
 	}
+	return nil
+}
 
-	// decide if we need to trigger actions
-
+func SendTaskToSlave(hostId primitive.ObjectID, user User, taskMsg task.Message) (err error) {
+	/*
+		first, decide if we need to trigger actions
+	*/
 	// skip action for empty hostId
 	if hostId == primitive.NilObjectID {
-		logrus.Warn("SendEvent() HostId is empty, ignoring")
+		logrus.Warn("SendTaskToSlave() HostId is empty, ignoring")
 		return
 	}
 
 	// skip action for nonexistent hosts
 	host, err := GetHostById(hostId)
 	if err != nil {
-		logrus.Info("SendEvent() host not found, ignoring")
+		logrus.Info("SendTaskToSlave() host not found, ignoring")
 		return
 	}
 
@@ -66,7 +80,7 @@ func SendEvent(hostId primitive.ObjectID, taskMsg task.Message) (err error) {
 	availableHosts := events.SSE.Channels()
 	channelName := fmt.Sprintf("/v1/events/%s", host.Token)
 	if !lib.StringInSlice(channelName, availableHosts) {
-		logrus.Warn("SendEvent() host dc, ignoring")
+		logrus.Warn("SendTaskToSlave() host dc, ignoring")
 		return
 	}
 
@@ -74,14 +88,24 @@ func SendEvent(hostId primitive.ObjectID, taskMsg task.Message) (err error) {
 	channel, _ := events.SSE.GetChannel(channelName)
 	taskMsgStr, err := taskMsg.Serialize()
 	if err != nil {
-		logrus.Error("SendEvent() serialization of task message failed, ignoring")
+		logrus.Error("SendTaskToSlave() serialization of task message failed")
+		return
+	}
+
+	// log this if necessary
+	err = SaveAction(taskMsg, user, hostId, "", "")
+	if err != nil {
+		logrus.Error("SendTaskToSlave() action save to DB failed")
+		return
 	}
 
 	// send task to slave
 	channel.SendMessage(sse.NewMessage("", taskMsgStr, taskMsg.TaskId.StringValue()))
-	logrus.Infof("SendEvent() Task %v sent to host %v", taskMsg.TaskId.String(), host.ID.Hex())
+	logrus.Infof("SendTaskToSlave() Task %v sent to host %v", taskMsg.TaskId.String(), host.ID.Hex())
 	return
 }
+
+/*
 
 func SendMongoEvent(hostId primitive.ObjectID, taskMsg task.Message) (err error) {
 	event := &Event{
@@ -158,3 +182,4 @@ func ListenEventChangesFromMongo() {
 		log.Fatal(err)
 	}
 }
+*/

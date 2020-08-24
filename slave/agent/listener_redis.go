@@ -26,6 +26,9 @@ func QueueSendTaskData(msgRaw task.Message) {
 
 // gather all messages in specified time and send them in batches
 // prevent massive number of HTTP requests which wrongfully can look like DoS
+// TODO put some kind of debouncer
+// TODO use less sleep and check for high priority messages
+// TODO decide sleep time with last sent nanosecond timestamp
 func SendMessagesToMaster() {
 	for {
 		// wait between sending batches

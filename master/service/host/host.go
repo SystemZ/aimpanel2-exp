@@ -38,7 +38,7 @@ func Create(data *request.HostCreate, userId primitive.ObjectID) (*model.Host, i
 }
 
 //Removes host and linked game servers
-func Remove(hostId primitive.ObjectID) int {
+func Remove(hostId primitive.ObjectID, user model.User) int {
 	host, err := model.GetHostById(hostId)
 	if err != nil {
 		return ecode.DbError
@@ -50,7 +50,7 @@ func Remove(hostId primitive.ObjectID) int {
 	}
 
 	for _, gameServer := range *gameServers {
-		err := gameserver.Remove(gameServer.ID)
+		err := gameserver.Remove(gameServer.ID, user)
 		if err != nil {
 			return ecode.GsRemove
 		}
@@ -184,7 +184,7 @@ func sendJobsToAgent(hostId primitive.ObjectID) int {
 		Jobs:   &jobs,
 	}
 
-	err = model.SendEvent(host.ID, taskMsg)
+	err = model.SendTaskToSlave(host.ID, model.User{}, taskMsg)
 	if err != nil {
 		return ecode.DbSave
 	}
@@ -192,7 +192,7 @@ func sendJobsToAgent(hostId primitive.ObjectID) int {
 	return ecode.NoError
 }
 
-func Update(hostId primitive.ObjectID) error {
+func Update(hostId primitive.ObjectID, user model.User) error {
 	host, err := model.GetHostById(hostId)
 	if err != nil {
 		return &lib.Error{ErrorCode: ecode.HostNotFound}
@@ -206,7 +206,7 @@ func Update(hostId primitive.ObjectID) error {
 		Url:    binaryUrl,
 	}
 
-	err = model.SendEvent(host.ID, taskMsg)
+	err = model.SendTaskToSlave(host.ID, user, taskMsg)
 	if err != nil {
 		return &lib.Error{ErrorCode: ecode.DbSave}
 	}

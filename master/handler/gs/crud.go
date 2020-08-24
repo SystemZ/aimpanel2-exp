@@ -8,6 +8,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib/ecode"
 	"gitlab.com/systemz/aimpanel2/lib/game"
 	"gitlab.com/systemz/aimpanel2/lib/request"
+	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"gitlab.com/systemz/aimpanel2/master/response"
 	"gitlab.com/systemz/aimpanel2/master/service/gameserver"
@@ -236,6 +237,22 @@ func Edit(w http.ResponseWriter, r *http.Request) {
 	// save custom CMD only
 	// FIXME validate custom CMD
 	// FIXME move to service
+	user := context.Get(r, "user").(model.User)
+	err = model.SaveAction(
+		task.Message{
+			TaskId:       task.GS_CMD_START_CHANGE,
+			GameServerID: gameServer.ID.Hex(),
+		},
+		user,
+		hostId,
+		data.CustomCmdStart,
+		gameServer.CustomCmdStart,
+	)
+	if err != nil {
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbSave, err)
+		return
+	}
+
 	gameServer.CustomCmdStart = data.CustomCmdStart
 	model.Update(gameServer)
 
@@ -282,7 +299,8 @@ func PutLogs(w http.ResponseWriter, r *http.Request) {
 func Remove(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	gameServerId, _ := primitive.ObjectIDFromHex(params["gsId"])
-	err := gameserver.Remove(gameServerId)
+	user := context.Get(r, "user").(model.User)
+	err := gameserver.Remove(gameServerId, user)
 	if err != nil {
 		lib.ReturnError(w, http.StatusInternalServerError, ecode.GsRemove, err)
 		return
