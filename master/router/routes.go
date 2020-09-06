@@ -39,7 +39,7 @@ func NewRouter() *mux.Router {
 	v1 := router.PathPrefix("/v1").Subrouter()
 	for _, route := range v1Routes {
 		var h http.Handler
-		h = CommonMiddleware(ExitMiddleware(route.HandlerFunc))
+		h = CommonMiddleware(DBCheckMiddleware(ExitMiddleware(route.HandlerFunc)))
 
 		if route.AuthRequired {
 			if route.SlaveOnly {

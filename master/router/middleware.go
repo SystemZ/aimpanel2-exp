@@ -1,6 +1,7 @@
 package router
 
 import (
+	c "context"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
@@ -18,6 +19,18 @@ import (
 func CommonMiddleware(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "application/json")
+		handler.ServeHTTP(w, r)
+	})
+}
+
+func DBCheckMiddleware(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		err := model.DB.Client().Ping(c.TODO(), nil)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
 		handler.ServeHTTP(w, r)
 	})
 }
