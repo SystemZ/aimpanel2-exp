@@ -22,6 +22,18 @@ func CommonMiddleware(handler http.Handler) http.Handler {
 	})
 }
 
+func DBCheckMiddleware(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !model.DBOnline {
+			logrus.Warn("DB seems to be offline")
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		handler.ServeHTTP(w, r)
+	})
+}
+
 func AuthMiddleware(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		tokenString := r.Header.Get("Authorization")
