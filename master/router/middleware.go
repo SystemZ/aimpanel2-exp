@@ -1,7 +1,6 @@
 package router
 
 import (
-	c "context"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
@@ -25,8 +24,8 @@ func CommonMiddleware(handler http.Handler) http.Handler {
 
 func DBCheckMiddleware(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		err := model.DB.Client().Ping(c.TODO(), nil)
-		if err != nil {
+		if !model.DBOnline {
+			logrus.Warn("DB seems to be offline")
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
