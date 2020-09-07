@@ -31,7 +31,7 @@ func AgentTaskHandler(taskMsg task.Message) {
 		model.SetGsGame(taskMsg.GameServerID, taskMsg.Game)
 		model.SetGsStart(taskMsg.GameServerID, 1)
 		// start game server by running wrapper
-		StartWrapperInDocker(taskMsg.GameServerID)
+		StartWrapperInDocker(taskMsg)
 		if false {
 			StartWrapperExecRaw(taskMsg)
 		}

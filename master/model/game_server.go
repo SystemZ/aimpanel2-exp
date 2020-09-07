@@ -2,8 +2,10 @@ package model
 
 import (
 	"context"
+	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"strings"
 	"time"
 )
 
@@ -43,6 +45,28 @@ type GameServer struct {
 
 	// Custom launch cmd
 	CustomCmdStart string `bson:"custom_cmd_start" json:"custom_cmd_start" example:"java -jar mc.jar"`
+
+	// Ports to forward from container to host
+	Ports *[]GamePort `bson:"ports" json:"ports"`
+}
+
+type GamePort struct {
+	Protocol      string `json:"protocol,omitempty" bson:"protocol"`
+	Host          string `json:"host,omitempty" bson:"host"`
+	PortHost      int    `json:"port_host,omitempty" bson:"port_host"`
+	PortContainer int    `json:"port_container,omitempty" bson:"port_container"`
+}
+
+func (g GameServer) SerializePorts() (res string) {
+	var resPorts []string
+	if g.Ports == nil {
+		return
+	}
+	for _, port := range *g.Ports {
+		resPorts = append(resPorts, fmt.Sprintf("%v:%v->%v/%v", port.Host, port.PortHost, port.PortContainer, port.Protocol))
+	}
+	res = strings.Join(resPorts, " ")
+	return
 }
 
 func (g *GameServer) GetCollectionName() string {

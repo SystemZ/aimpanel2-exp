@@ -1,6 +1,10 @@
 package request
 
-import "gitlab.com/systemz/aimpanel2/lib/task"
+import (
+	"fmt"
+	"gitlab.com/systemz/aimpanel2/lib/task"
+	"strings"
+)
 
 type HostCreate struct {
 	// User assigned name
@@ -31,6 +35,25 @@ type GameServerCreate struct {
 
 	//Custom cmd for starting game server
 	CustomCmdStart string `json:"custom_cmd_start" example:"java -jar mc.jar"`
+
+	//Ports used by game server
+	Ports []GameServerPort `json:"ports"`
+}
+
+type GameServerPort struct {
+	Protocol      string `json:"protocol,omitempty"`
+	Host          string `json:"host,omitempty"`
+	PortHost      int    `json:"port_host,omitempty"`
+	PortContainer int    `json:"port_container,omitempty"`
+}
+
+func (gs GameServerCreate) SerializePorts() (res string) {
+	var resPorts []string
+	for _, port := range gs.Ports {
+		resPorts = append(resPorts, fmt.Sprintf("%v:%v->%v/%v", port.Host, port.PortHost, port.PortContainer, port.Protocol))
+	}
+	res = strings.Join(resPorts, " ")
+	return
 }
 
 type GameServerStop struct {

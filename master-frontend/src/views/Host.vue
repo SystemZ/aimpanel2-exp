@@ -184,6 +184,18 @@ export default Vue.extend({
       });
     },
     /*
+    // FIXME pie charts are empty
+        this.metric = res.data.metrics[0];
+
+        this.metric.disk_free = +(this.metric.disk_free as number / 1024).toFixed(0);
+        this.metric.disk_total = +(this.metric.disk_total / 1024).toFixed(0);
+        this.metric.disk_used = this.metric.disk_total - this.metric.disk_free;
+
+        this.metric.ram_total = +(this.metric.ram_total / 1024).toFixed(1);
+        this.metric.ram_free = +(this.metric.ram_free / 1024).toFixed(1);
+        this.metric.ram_used = +(this.metric.ram_total - this.metric.ram_free).toFixed(1);
+    */
+    /*
     getGameServers(): void {
         this.$http.get('/v1/host/' + this.$route.params.id + '/server').then(res => {
             this.gameServers = res.data.game_servers;
