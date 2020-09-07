@@ -117,15 +117,18 @@ func redisTaskHandler(taskCh string, taskBody string) {
 		}
 
 		//Start wrapper if gs is restarting
-		val, _ := model.GetGsRestart(taskMsg.GameServerID)
-		if val == 1 {
-			model.SetGsRestart(taskMsg.GameServerID, 2)
-			tasks.StartWrapperInDocker(taskMsg.GameServerID)
-			if false {
-				tasks.StartWrapperExecRaw(taskMsg)
+		// FIXME redesign restart cmd
+		/*
+			val, _ := model.GetGsRestart(taskMsg.GameServerID)
+			if val == 1 {
+				model.SetGsRestart(taskMsg.GameServerID, 2)
+				tasks.StartWrapperInDocker(taskMsg.GameServerID)
+				if false {
+					tasks.StartWrapperExecRaw(taskMsg)
+				}
+				model.DelGsRestart(taskMsg.GameServerID)
 			}
-			model.DelGsRestart(taskMsg.GameServerID)
-		}
+		*/
 
 	case task.GAME_SERVER_LOG:
 		logrus.Info("Agent got " + taskMsg.TaskId.String())

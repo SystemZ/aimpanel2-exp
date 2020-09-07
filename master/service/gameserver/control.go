@@ -38,10 +38,24 @@ func Start(gsId primitive.ObjectID, user model.User) error {
 	// FIXME validate if current plan allows custom cmd, throw HTTP error if plan is too low
 	gameDef.CustomCommandStart = gameServer.CustomCmdStart
 
+	// send info which ports need to be forwarded
+	var ports []task.Port
+	if gameServer.Ports != nil {
+		for _, v := range *gameServer.Ports {
+			ports = append(ports, task.Port{
+				Host:          v.Host,
+				Protocol:      v.Protocol,
+				PortHost:      v.PortHost,
+				PortContainer: v.PortContainer,
+			})
+		}
+	}
+
 	taskMsg := task.Message{
 		TaskId:       task.AGENT_START_GS,
 		GameServerID: gsId.Hex(),
 		Game:         &gameDef,
+		Ports:        &ports,
 	}
 
 	err = model.SendTaskToSlave(host.ID, user, taskMsg)

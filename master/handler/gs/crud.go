@@ -193,6 +193,12 @@ func Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// prevent null port list
+	if gameServer.Ports == nil {
+		emptyPorts := make([]model.GamePort, 0)
+		gameServer.Ports = &emptyPorts
+	}
+
 	lib.MustEncode(json.NewEncoder(w), response.GameServer{GameServer: *gameServer})
 }
 
@@ -234,27 +240,46 @@ func Edit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// save custom CMD only
-	// FIXME validate custom CMD
-	// FIXME move to service
-	user := context.Get(r, "user").(model.User)
-	err = model.SaveAction(
-		task.Message{
-			TaskId:       task.GS_CMD_START_CHANGE,
-			GameServerID: gameServer.ID.Hex(),
-		},
-		user,
-		hostId,
-		data.CustomCmdStart,
-		gameServer.CustomCmdStart,
-	)
-	if err != nil {
-		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbSave, err)
-		return
+	// modify ports
+	if data.SerializePorts() != gameServer.SerializePorts() {
+		// FIXME validate
+		// FIXME log this action
+		// FIXME maybe this can be done in less code
+		var newPortList []model.GamePort
+		for _, port := range data.Ports {
+			newPortList = append(newPortList, model.GamePort{
+				Protocol:      port.Protocol,
+				Host:          port.Host,
+				PortHost:      port.PortHost,
+				PortContainer: port.PortContainer,
+			})
+		}
+		gameServer.Ports = &newPortList
+		model.Update(gameServer)
 	}
 
-	gameServer.CustomCmdStart = data.CustomCmdStart
-	model.Update(gameServer)
+	// modify custom cmd to start server
+	if gameServer.CustomCmdStart != data.CustomCmdStart {
+		// FIXME validate custom CMD
+		// FIXME move to service
+		user := context.Get(r, "user").(model.User)
+		err = model.SaveAction(
+			task.Message{
+				TaskId:       task.GS_CMD_START_CHANGE,
+				GameServerID: gameServer.ID.Hex(),
+			},
+			user,
+			hostId,
+			data.CustomCmdStart,
+			gameServer.CustomCmdStart,
+		)
+		if err != nil {
+			lib.ReturnError(w, http.StatusInternalServerError, ecode.DbSave, err)
+			return
+		}
+		gameServer.CustomCmdStart = data.CustomCmdStart
+		model.Update(gameServer)
+	}
 
 	lib.MustEncode(json.NewEncoder(w), response.GameServer{GameServer: *gameServer})
 }
