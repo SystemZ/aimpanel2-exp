@@ -43,7 +43,7 @@ func SendMessagesToMaster() {
 
 		// send all messages in queue
 		// FIXME handle task send retry
-		_, err := ahttp.SendTaskBatchData("/v1/events/"+config.HOST_TOKEN+"/batch", config.API_TOKEN, QueuedMsgs)
+		_, err := ahttp.SendTaskBatchData("/v1/events/"+config.HOST_TOKEN+"/batch", config.HW_ID, QueuedMsgs)
 		if err != nil {
 			logrus.Error(err)
 		}
@@ -57,7 +57,7 @@ func SendMessagesToMaster() {
 
 func listenerRedis(done chan bool) {
 	// start connection to redis
-	model.InitRedis()
+	//model.InitRedis()
 
 	// start batch processing
 	go SendMessagesToMaster()
@@ -102,7 +102,7 @@ func redisTaskHandler(taskCh string, taskBody string) {
 			tasks.GsStartGame(taskMsg)
 			model.DelGsStart(taskMsg.GameServerID)
 
-			_, err = ahttp.SendTaskData("/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
+			_, err = ahttp.SendTaskData("/v1/events/"+config.HOST_TOKEN, config.HW_ID, taskMsg)
 			if err != nil {
 				logrus.Error(err)
 			}
@@ -111,7 +111,7 @@ func redisTaskHandler(taskCh string, taskBody string) {
 	case task.GAME_SHUTDOWN:
 		logrus.Info("Agent got " + taskMsg.TaskId.String())
 
-		_, err = ahttp.SendTaskData("/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
+		_, err = ahttp.SendTaskData("/v1/events/"+config.HOST_TOKEN, config.HW_ID, taskMsg)
 		if err != nil {
 			logrus.Error(err)
 		}
@@ -136,14 +136,14 @@ func redisTaskHandler(taskCh string, taskBody string) {
 	case task.GAME_METRICS:
 		logrus.Info("Agent got " + taskMsg.TaskId.String())
 
-		_, err = ahttp.SendTaskData("/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
+		_, err = ahttp.SendTaskData("/v1/events/"+config.HOST_TOKEN, config.HW_ID, taskMsg)
 		if err != nil {
 			logrus.Error(err)
 		}
 	case task.GAME_METRICS_FREQUENCY:
 		logrus.Info("Agent got " + taskMsg.TaskId.String())
 
-		_, err = ahttp.SendTaskData("/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
+		_, err = ahttp.SendTaskData("/v1/events/"+config.HOST_TOKEN, config.HW_ID, taskMsg)
 		if err != nil {
 			logrus.Error(err)
 		}
