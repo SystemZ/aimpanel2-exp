@@ -8,12 +8,15 @@
           <v-col
             cols="12"
           >
-            <v-text-field
+            <v-textarea
               v-model="gsInfo.custom_cmd_start"
               color="green"
               filled
               label="Custom CMD"
-            ></v-text-field>
+              auto-grow
+              counter
+              rows="1"
+            ></v-textarea>
           </v-col>
         </v-row>
       </v-container>
