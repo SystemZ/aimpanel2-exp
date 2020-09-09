@@ -30,9 +30,9 @@
                   <v-card-title>Actions</v-card-title>
                   <v-card-text>
                     <v-btn @click="start()" class="ma-2" color="green" dark>Start</v-btn>
-                    <v-btn @click="shutdown()" class="ma-2" color="yellow" dark>Shutdown</v-btn>
+                    <v-btn @click="shutdown()" class="ma-2" color="yellow darken-2" dark>Shutdown</v-btn>
                     <v-btn @click="stop()" class="ma-2" color="red" dark>Stop</v-btn>
-                    <v-btn @click="restart()" class="ma-2" color="orange" dark>Restart</v-btn>
+                    <v-btn @click="restart()" class="ma-2" color="orange darken-2" dark>Restart</v-btn>
                     <v-btn @click="install()" class="ma-2" color="blue" dark>Install</v-btn>
                   </v-card-text>
                 </v-card>
