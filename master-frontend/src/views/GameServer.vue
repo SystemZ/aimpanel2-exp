@@ -1,5 +1,38 @@
 <template>
   <v-container>
+    <v-dialog v-model="newGSNameDialog" persistent max-width="600px">
+      <v-card>
+        <v-card-title>
+          <span class="headline">Edit Game Server name</span>
+        </v-card-title>
+        <v-card-text>
+          <v-container>
+            <v-row>
+              <v-col cols="12">
+                <v-text-field
+                  v-model="game_server.name"
+                  label="Current name"
+                  disabled
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12">
+                <v-text-field
+                  v-model="newGSName"
+                  label="New name*"
+                  required></v-text-field>
+              </v-col>
+            </v-row>
+          </v-container>
+          <small>*required field</small>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="red darken-1" text @click="newGSNameDialog = false">Close</v-btn>
+          <v-btn color="green darken-1" @click="saveGSName">Save</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <v-card>
       <v-tabs
         v-model="tab"
@@ -44,6 +77,16 @@
                         <v-list-item-title>{{ game_server.name }}</v-list-item-title>
                         <v-list-item-subtitle>Name</v-list-item-subtitle>
                       </v-list-item-content>
+                      <v-list-item-action>
+                        <v-btn
+                          @click="newGSNameDialog = true"
+                          small
+                          color="blue"
+                          class="my-2"
+                        >
+                          <v-icon size="20">{{ mdiPencil }}</v-icon>
+                        </v-btn>
+                      </v-list-item-action>
                     </v-list-item>
 
                     <v-list-item two-line>
@@ -137,6 +180,7 @@ import GsFileManager from '@/components/GsFileManager.vue';
 import GsScheduler from '@/components/GsScheduler.vue';
 import GsSettings from '@/components/GsSettings.vue';
 import {mdiTrashCan} from '@mdi/js';
+import {mdiPencil} from '@mdi/js';
 
 export default Vue.extend({
   name: 'game_server',
@@ -153,8 +197,11 @@ export default Vue.extend({
     timer: '',
     installSnackbar: false,
     removeSnackbar: false,
+    newGSNameDialog: false,
+    newGSName: '',
     //icons
     mdiTrashCan: mdiTrashCan,
+    mdiPencil: mdiPencil,
   }),
   computed: {
     serverId() {
@@ -222,6 +269,21 @@ export default Vue.extend({
       }).catch(e => {
         this.$auth.checkResponse(e.response.status);
       });
+    },
+    saveGSName() {
+      // FIXME need api endpoint for this to work properly
+      // let data = {'name': this.newGSName}
+      // this.$http.post(this.serverUrl + '', data)
+      // .then((res) => {
+      //   //empty form
+      //   this.newGSName = ''
+      //   // hide form
+      //   this.newGSNameDialog = false
+      // });
+      // needed for mockup reasons
+      console.log(this.newGSName);
+      this.newGSName = ''
+      this.newGSNameDialog = false
     },
   },
 });
