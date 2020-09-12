@@ -119,6 +119,7 @@ func SlavePermissionMiddleware(handler http.Handler) http.Handler {
 			return
 		}
 
+		//if hw_id in DB is empty, save those that came to DB
 		if len(host.HwId) == 0 {
 			host.HwId = tokenString
 			err := model.Update(host)
