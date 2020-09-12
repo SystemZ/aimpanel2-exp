@@ -237,18 +237,6 @@ func HostRemove(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func HostAuth(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-
-	token, errCode := host.Auth(params["token"])
-	if errCode != ecode.NoError {
-		lib.ReturnError(w, http.StatusBadRequest, errCode, nil)
-		return
-	}
-
-	lib.MustEncode(json.NewEncoder(w), response.Token{Token: token})
-}
-
 //TODO: Available for users?
 func HostUpdate(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)

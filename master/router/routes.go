@@ -200,14 +200,6 @@ var v1Routes = Routes{
 		false,
 	},
 	Route{
-		"Host Authentication",
-		"GET",
-		"/host/auth/{token}",
-		handler.HostAuth,
-		false,
-		false,
-	},
-	Route{
 		"Host Details",
 		"GET",
 		"/host/{hostId}",
