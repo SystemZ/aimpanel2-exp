@@ -6,7 +6,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"strings"
-	"time"
 )
 
 type GameServer struct {
@@ -23,10 +22,6 @@ type GameServer struct {
 	// State
 	// 0 off, 1 running
 	State uint `bson:"state" json:"state" example:"0"`
-
-	// State Last Changed
-	//FIXME default current timestamp
-	StateLastChanged time.Time `bson:"state_last_changed" json:"state_last_changed" example:"2019-09-29T03:16:27+02:00"`
 
 	// Game ID
 	GameId uint `bson:"game_id" json:"game_id" example:"1"`

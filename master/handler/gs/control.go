@@ -169,7 +169,17 @@ func SendCommand(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// FIXME document FileList endpoint
+// @Router /host/{hostId}/server/{gsId}/file/list [get]
+// @Summary File List
+// @Tags Game Server
+// @Description Get game server file list
+// @Accept json
+// @Produce json
+// @Param hostId path string true "Host ID"
+// @Param gsId path string true "Game Server ID"
+// @Success 200 {object} filemanager.Node
+// @Failure 400 {object} response.JsonError
+// @Security ApiKey
 func FileList(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	gsId := params["gsId"]

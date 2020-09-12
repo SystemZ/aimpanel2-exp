@@ -85,14 +85,14 @@ function stop {
 function swagger-gen-dev {
     cd master
     #swagger generate spec -m -o ../swagger.json
-    swag init
+    swag init --parseDependency
     mv docs/swagger.json .
     rm -rf docs
     cd ../
 }
 
 function swagger-serve {
-    swagger serve --flavor=swagger --port=9090 swagger.json
+    swagger serve --flavor=swagger --port=9090 master/swagger.json
 }
 
 function update-todo-issue {
@@ -168,7 +168,7 @@ function ci-redis-upload {
 function ci-swagger-gen {
     cd master
     #swagger generate spec -m -o ../swagger.json
-    swag init
+    swag init --parseDependency
     mv docs/swagger.json ../
     rm -rf docs
     cd ../
