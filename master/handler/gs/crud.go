@@ -281,6 +281,11 @@ func Edit(w http.ResponseWriter, r *http.Request) {
 		model.Update(gameServer)
 	}
 
+	if gameServer.Name != data.Name {
+		gameServer.Name = data.Name
+		model.Update(gameServer)
+	}
+
 	lib.MustEncode(json.NewEncoder(w), response.GameServer{GameServer: *gameServer})
 }
 
