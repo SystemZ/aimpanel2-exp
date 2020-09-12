@@ -24,6 +24,19 @@ func Create(data *request.HostCreate, userId primitive.ObjectID) (*model.Host, i
 		return nil, ecode.DbSave
 	}
 
+	hostJob := &model.HostJob{
+		Name:           "Check for update",
+		HostId:         host.ID,
+		CronExpression: "*/10 * * * *",
+		TaskMessage: task.Message{
+			TaskId: task.AGENT_GET_UPDATE,
+		},
+	}
+	err = model.Put(hostJob)
+	if err != nil {
+		return nil, ecode.DbSave
+	}
+
 	/*
 		err = model.CreatePermissionsForNewHost(userId, host.ID)
 		if err != nil {
