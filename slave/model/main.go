@@ -92,3 +92,15 @@ func SetGsRunning(gsId string, running int) {
 func GetGsRunning(gsId string) (int64, error) {
 	return Redis.Get(context.TODO(), "gs_running_id_"+gsId).Int64()
 }
+
+func SetHwId(hwId string) {
+	Redis.Set(context.TODO(), "hw_id", hwId, 0)
+}
+
+func GetHwId() string {
+	val, err := Redis.Get(context.TODO(), "hw_id").Result()
+	if err != nil {
+		return ""
+	}
+	return val
+}

@@ -1,7 +1,6 @@
 package host
 
 import (
-	"github.com/dgrijalva/jwt-go"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/ecode"
 	"gitlab.com/systemz/aimpanel2/lib/request"
@@ -10,8 +9,6 @@ import (
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"gitlab.com/systemz/aimpanel2/master/service/gameserver"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"os"
-	"time"
 )
 
 func Create(data *request.HostCreate, userId primitive.ObjectID) (*model.Host, int) {
@@ -76,28 +73,6 @@ func Remove(hostId primitive.ObjectID, user model.User) int {
 	}
 
 	return ecode.NoError
-}
-
-func Auth(t string) (string, int) {
-	host, err := model.GetHostByToken(t)
-	if err != nil {
-		return "", ecode.DbError
-	}
-
-	if host == nil {
-		return "", ecode.HostNotFound
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"exp": time.Now().Add(time.Hour * 48).Unix(),
-		"uid": host.ID,
-	})
-	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
-	if err != nil {
-		return "", ecode.Unknown
-	}
-
-	return tokenString, ecode.NoError
 }
 
 func CreateJob(data *request.HostCreateJob, userId primitive.ObjectID, hostId primitive.ObjectID) (*model.HostJob, int) {

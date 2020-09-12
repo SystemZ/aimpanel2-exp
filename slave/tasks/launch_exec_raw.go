@@ -37,7 +37,7 @@ func StartWrapperExecRaw(taskMsg task.Message) {
 
 	// TODO test this for very long running GS
 	attr.Env = append(attr.Env, "HOST_TOKEN="+config.HOST_TOKEN)
-	attr.Env = append(attr.Env, "API_TOKEN="+config.API_TOKEN)
+	attr.Env = append(attr.Env, "HW_ID="+config.HW_ID)
 
 	//TODO: move gsID to env variable
 	//FIXME use variables, don't hardcode paths

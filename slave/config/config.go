@@ -10,7 +10,6 @@ var (
 	TRASH_DIR                string
 	BACKUP_DIR               string
 	HOST_TOKEN               string
-	API_TOKEN                string
 	GIT_COMMIT               string
 	REDIS_HOST               string
 	REDIS_USERNAME           string
@@ -18,6 +17,7 @@ var (
 	REDIS_PUB_SUB_AGENT_CH   string
 	REDIS_PUB_SUB_WRAPPER_CH string
 	MASTER_URLS              []string
+	HW_ID                    string
 )
 
 func init() {
@@ -38,9 +38,6 @@ func init() {
 	viper.SetDefault("HOST_TOKEN", "")
 	HOST_TOKEN = viper.GetString("HOST_TOKEN")
 
-	viper.SetDefault("API_TOKEN", "")
-	API_TOKEN = viper.GetString("API_TOKEN")
-
 	viper.SetDefault("REDIS_HOST", "/opt/aimpanel/redis/redis.sock")
 	REDIS_HOST = viper.GetString("REDIS_HOST")
 
@@ -59,4 +56,7 @@ func init() {
 	// use multiple URLs by separating them with space
 	viper.SetDefault("MASTER_URLS", "https://aimpanel.local:3000")
 	MASTER_URLS = viper.GetStringSlice("MASTER_URLS")
+
+	viper.SetDefault("HW_ID", "")
+	HW_ID = viper.GetString("HW_ID")
 }

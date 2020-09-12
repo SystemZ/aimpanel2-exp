@@ -52,6 +52,8 @@ type Host struct {
 
 	// Last successful heartbeat received
 	LastHeartbeat time.Time `bson:"last_heartbeat" json:"last_heartbeat" example:"2019-09-29T03:16:27+02:00"`
+
+	HwId string `bson:"hw_id" json:"hw_id" example:"0ea13526-5349-4671-9b6e-626d5678cc5f"`
 }
 
 func (h *Host) GetCollectionName() string {

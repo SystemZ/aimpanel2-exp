@@ -120,11 +120,13 @@ func StartWrapperInDocker(taskMsg task.Message) {
 	// https://stackoverflow.com/questions/41789083/set-portbindings-config-for-containercreate-function-in-golang-sdk-for-docker-ap
 	exposedPorts := map[nat.Port]struct{}{}
 	portBindings := map[nat.Port][]nat.PortBinding{}
-	for _, port := range *taskMsg.Ports {
-		containerPortSpec := nat.Port(strconv.Itoa(port.PortContainer) + "/" + port.Protocol)
-		logrus.Infof("mapping %v:%v->%v", port.Host, port.PortHost, containerPortSpec)
-		exposedPorts[containerPortSpec] = struct{}{}
-		portBindings[containerPortSpec] = []nat.PortBinding{{HostIP: port.Host, HostPort: strconv.Itoa(port.PortHost)}}
+	if taskMsg.Ports != nil {
+		for _, port := range *taskMsg.Ports {
+			containerPortSpec := nat.Port(strconv.Itoa(port.PortContainer) + "/" + port.Protocol)
+			logrus.Infof("mapping %v:%v->%v", port.Host, port.PortHost, containerPortSpec)
+			exposedPorts[containerPortSpec] = struct{}{}
+			portBindings[containerPortSpec] = []nat.PortBinding{{HostIP: port.Host, HostPort: strconv.Itoa(port.PortHost)}}
+		}
 	}
 
 	containerCreateRes, err := cli.ContainerCreate(
