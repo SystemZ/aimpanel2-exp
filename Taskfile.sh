@@ -86,7 +86,7 @@ function swagger-gen-dev {
     cd master
     #swagger generate spec -m -o ../swagger.json
     swag init --parseDependency
-    mv docs/swagger.json master/swagger.json
+    mv docs/swagger.json .
     rm -rf docs
     cd ../
 }
