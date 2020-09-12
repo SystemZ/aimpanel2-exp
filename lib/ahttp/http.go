@@ -27,11 +27,14 @@ var b = &backoff.Backoff{
 
 var HttpClient *http.Client
 var Fingerprints = []string{
-    //P
-    "F5:2B:15:6B:06:E3:9A:74:45:4D:A9:C3:F8:A2:43:CF:25:0C:0F:F8:C7:75:A9:18:3B:DC:8E:A8:BE:DB:9F:E4",
+	//P
+	"F5:2B:15:6B:06:E3:9A:74:45:4D:A9:C3:F8:A2:43:CF:25:0C:0F:F8:C7:75:A9:18:3B:DC:8E:A8:BE:DB:9F:E4",
 
 	//local
 	"C0:5D:55:E1:A7:60:5D:EE:48:7A:01:B2:4F:E6:B7:EF:AC:E3:B4:FC:C2:0B:B2:EE:F8:28:60:89:3A:8D:8C:C2",
+
+	//local-kacper
+	"48:B5:7C:F0:1B:0E:CB:5E:18:42:06:BF:A7:A8:FE:E0:BF:30:6E:8B:F0:6A:45:0A:3A:D5:7F:E8:54:01:64:C1",
 
 	//*.lvlup.pro CF
 	"70:D7:10:D5:15:B5:C7:07:D4:22:0D:58:8E:F9:E8:EE:EF:67:13:77:6B:26:4B:D3:B7:94:CB:F4:98:9B:0A:1D",
@@ -125,7 +128,7 @@ func Post(path, token, jsonStr string) (*http.Response, error) {
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("Authorization", token)
 
 	for {
 		resp, err := HttpClient.Do(req)

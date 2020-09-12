@@ -98,5 +98,9 @@ func SetHwId(hwId string) {
 }
 
 func GetHwId() string {
-	return Redis.Get(context.TODO(), "hw_id").String()
+	val, err := Redis.Get(context.TODO(), "hw_id").Result()
+	if err != nil {
+		return ""
+	}
+	return val
 }
