@@ -39,10 +39,27 @@ const (
 
 	// special case, eg. just to keep up SSE session
 	PING
+
+	GS_CMD_START_CHANGE
+	//HOST_NAME_CHANGE
+	//GS_NAME_CHANGE
 )
 
 func (i Id) StringValue() string {
 	return strconv.Itoa(int(i))
+}
+
+func (i Id) IsForAudit() bool {
+	switch i {
+	case
+		AGENT_FILE_LIST_GS,
+		AGENT_GET_JOBS,
+		GAME_METRICS_FREQUENCY,
+		AGENT_METRICS_FREQUENCY:
+		return false
+	default:
+		return true
+	}
 }
 
 type Messages []Message
@@ -95,6 +112,7 @@ type Message struct {
 
 	Files *filemanager.Node `json:"files,omitempty"`
 	Jobs  *[]Job            `json:"jobs,omitempty"`
+	Ports *[]Port           `json:"ports,omitempty"`
 
 	Timestamp int64 `json:"timestamp,omitempty"`
 }
@@ -103,6 +121,13 @@ type Job struct {
 	Name           string  `json:"name,omitempty"`
 	CronExpression string  `json:"cron_expression,omitempty"`
 	TaskMessage    Message `json:"task_message,omitempty"`
+}
+
+type Port struct {
+	Protocol      string `json:"protocol,omitempty"`
+	Host          string `json:"host,omitempty"`
+	PortHost      int    `json:"port_host,omitempty"`
+	PortContainer int    `json:"port_container,omitempty"`
 }
 
 func (m *Message) Serialize() (string, error) {

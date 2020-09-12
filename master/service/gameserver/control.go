@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-func Start(gsId primitive.ObjectID) error {
+func Start(gsId primitive.ObjectID, user model.User) error {
 	gameServer, err := model.GetGameServerById(gsId)
 	if err != nil {
 		return err
@@ -38,13 +38,27 @@ func Start(gsId primitive.ObjectID) error {
 	// FIXME validate if current plan allows custom cmd, throw HTTP error if plan is too low
 	gameDef.CustomCommandStart = gameServer.CustomCmdStart
 
+	// send info which ports need to be forwarded
+	var ports []task.Port
+	if gameServer.Ports != nil {
+		for _, v := range *gameServer.Ports {
+			ports = append(ports, task.Port{
+				Host:          v.Host,
+				Protocol:      v.Protocol,
+				PortHost:      v.PortHost,
+				PortContainer: v.PortContainer,
+			})
+		}
+	}
+
 	taskMsg := task.Message{
 		TaskId:       task.AGENT_START_GS,
 		GameServerID: gsId.Hex(),
 		Game:         &gameDef,
+		Ports:        &ports,
 	}
 
-	err = model.SendEvent(host.ID, taskMsg)
+	err = model.SendTaskToSlave(host.ID, user, taskMsg)
 	if err != nil {
 		return &lib.Error{ErrorCode: ecode.DbSave}
 	}
@@ -52,7 +66,7 @@ func Start(gsId primitive.ObjectID) error {
 	return nil
 }
 
-func Stop(gsId primitive.ObjectID, stopType uint) error {
+func Stop(gsId primitive.ObjectID, stopType uint, user model.User) error {
 	gameServer, err := model.GetGameServerById(gsId)
 	if err != nil {
 		return err
@@ -76,7 +90,7 @@ func Stop(gsId primitive.ObjectID, stopType uint) error {
 		taskMsg.TaskId = task.GAME_STOP_SIGTERM
 	}
 
-	err = model.SendEvent(host.ID, taskMsg)
+	err = model.SendTaskToSlave(host.ID, user, taskMsg)
 	if err != nil {
 		return &lib.Error{ErrorCode: ecode.DbSave}
 	}
@@ -84,7 +98,7 @@ func Stop(gsId primitive.ObjectID, stopType uint) error {
 	return nil
 }
 
-func Install(gsId primitive.ObjectID) error {
+func Install(gsId primitive.ObjectID, user model.User) error {
 	gameServer, err := model.GetGameServerById(gsId)
 	if err != nil {
 		return err
@@ -121,7 +135,7 @@ func Install(gsId primitive.ObjectID) error {
 		GameServerID: gsId.Hex(),
 	}
 
-	err = model.SendEvent(host.ID, taskMsg)
+	err = model.SendTaskToSlave(host.ID, user, taskMsg)
 	if err != nil {
 		return &lib.Error{ErrorCode: ecode.DbSave}
 	}
@@ -129,7 +143,7 @@ func Install(gsId primitive.ObjectID) error {
 	return nil
 }
 
-func SendCommand(gsId primitive.ObjectID, command string) error {
+func SendCommand(gsId primitive.ObjectID, command string, user model.User) error {
 	gameServer, err := model.GetGameServerById(gsId)
 	if err != nil {
 		return err
@@ -150,7 +164,7 @@ func SendCommand(gsId primitive.ObjectID, command string) error {
 		Body:         command,
 	}
 
-	err = model.SendEvent(host.ID, taskMsg)
+	err = model.SendTaskToSlave(host.ID, user, taskMsg)
 	if err != nil {
 		return &lib.Error{ErrorCode: ecode.DbSave}
 	}
@@ -158,7 +172,7 @@ func SendCommand(gsId primitive.ObjectID, command string) error {
 	return nil
 }
 
-func Restart(gsId primitive.ObjectID, stopType uint) error {
+func Restart(gsId primitive.ObjectID, stopType uint, user model.User) error {
 	gameServer, err := model.GetGameServerById(gsId)
 	if err != nil {
 		return err
@@ -186,7 +200,7 @@ func Restart(gsId primitive.ObjectID, stopType uint) error {
 		Game:         &gameDef,
 	}
 
-	err = model.SendEvent(host.ID, taskMsg)
+	err = model.SendTaskToSlave(host.ID, user, taskMsg)
 	if err != nil {
 		return &lib.Error{ErrorCode: ecode.DbSave}
 	}
@@ -194,7 +208,7 @@ func Restart(gsId primitive.ObjectID, stopType uint) error {
 	return nil
 }
 
-func Remove(gsId primitive.ObjectID) error {
+func Remove(gsId primitive.ObjectID, user model.User) error {
 	gameServer, err := model.GetGameServerById(gsId)
 	if err != nil {
 		return err
@@ -214,7 +228,7 @@ func Remove(gsId primitive.ObjectID) error {
 			TaskId:       task.GAME_STOP_SIGKILL,
 		}
 
-		err = model.SendEvent(host.ID, taskMsg)
+		err = model.SendTaskToSlave(host.ID, user, taskMsg)
 		if err != nil {
 			return &lib.Error{ErrorCode: ecode.DbSave}
 		}
@@ -225,22 +239,22 @@ func Remove(gsId primitive.ObjectID) error {
 		TaskId:       task.AGENT_REMOVE_GS,
 	}
 
-	err = model.SendEvent(host.ID, taskMsg)
+	err = model.SendTaskToSlave(host.ID, user, taskMsg)
 	if err != nil {
 		return &lib.Error{ErrorCode: ecode.DbSave}
 	}
 
-	permissions, err := model.GetPermisionsByEndpointRegex("/v1/host/" + gameServer.HostId.Hex() + "/server/" + gsId.Hex() + "%")
-	if err != nil {
-		return err
-	}
-
-	for _, perm := range permissions {
-		err := model.Delete(&perm)
-		if err != nil {
-			return err
-		}
-	}
+	//permissions, err := model.GetPermisionsByEndpointRegex("/v1/host/" + gameServer.HostId.Hex() + "/server/" + gsId.Hex() + "%")
+	//if err != nil {
+	//	return err
+	//}
+	//
+	//for _, perm := range permissions {
+	//	err := model.Delete(&perm)
+	//	if err != nil {
+	//		return err
+	//	}
+	//}
 
 	err = model.Delete(gameServer)
 	if err != nil {
@@ -250,7 +264,7 @@ func Remove(gsId primitive.ObjectID) error {
 	return nil
 }
 
-func FileList(gsId primitive.ObjectID) (res *filemanager.Node, err error) {
+func FileList(gsId primitive.ObjectID, user model.User) (res *filemanager.Node, err error) {
 	gameServer, err := model.GetGameServerById(gsId)
 	if err != nil {
 		return
@@ -301,7 +315,7 @@ func FileList(gsId primitive.ObjectID) (res *filemanager.Node, err error) {
 	}()
 
 	// send task to slave
-	err = model.SendEvent(host.ID, taskMsg)
+	err = model.SendTaskToSlave(host.ID, user, taskMsg)
 	if err != nil {
 		err = &lib.Error{ErrorCode: ecode.DbSave}
 		wg.Done()
@@ -312,7 +326,7 @@ func FileList(gsId primitive.ObjectID) (res *filemanager.Node, err error) {
 	return
 }
 
-func Shutdown(gsId primitive.ObjectID) error {
+func Shutdown(gsId primitive.ObjectID, user model.User) error {
 	gameServer, err := model.GetGameServerById(gsId)
 	if err != nil {
 		return err
@@ -339,7 +353,7 @@ func Shutdown(gsId primitive.ObjectID) error {
 		GameServerID: gsId.Hex(),
 	}
 
-	err = model.SendEvent(host.ID, taskMsg)
+	err = model.SendTaskToSlave(host.ID, user, taskMsg)
 	if err != nil {
 		return &lib.Error{ErrorCode: ecode.DbSave}
 	}

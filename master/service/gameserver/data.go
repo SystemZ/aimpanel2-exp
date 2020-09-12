@@ -14,38 +14,46 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func Data(hostToken string, taskMsg *task.Message) error {
+func Data(host model.Host, taskMsg *task.Message) error {
+	str, _ := taskMsg.Serialize()
+	logrus.Infof("Got %s L:%v from GS %s", taskMsg.TaskId.String(), len(str), taskMsg.GameServerID)
+	logrus.Tracef("%s", str)
+
 	switch taskMsg.TaskId {
-	case task.GAME_STARTED:
-		logrus.Infof("Got %v", taskMsg.TaskId)
-	case task.GAME_SERVER_LOG:
-		logrus.Infof("Got %v", taskMsg.TaskId)
-		err := Log(hostToken, taskMsg)
+	case task.GAME_STARTED, task.GAME_SHUTDOWN:
+		err := model.SaveAction(
+			*taskMsg,
+			model.User{},
+			host.ID,
+			"",
+			"",
+		)
 		if err != nil {
 			return err
 		}
-	case task.GAME_SHUTDOWN:
-		logrus.Infof("Got %v", taskMsg.TaskId)
+	case task.GAME_SERVER_LOG:
+		err := Log(host.Token, taskMsg)
+		if err != nil {
+			return err
+		}
 	case task.GAME_METRICS_FREQUENCY:
-		logrus.Infof("Got %v", taskMsg.TaskId)
-		err := GameMetricsFrequency(hostToken, taskMsg)
+		err := GameMetricsFrequency(host.Token, taskMsg)
 		if err != nil {
 			return err
 		}
 	case task.GAME_METRICS:
-		logrus.Infof("Got %v", taskMsg.TaskId)
 		err := Metrics(*taskMsg)
 		if err != nil {
 			return err
 		}
 	case task.AGENT_FILE_LIST_GS:
-		logrus.Infof("Got %v", taskMsg.TaskId)
 		err := model.GsFilesPublish(taskMsg.GameServerID, taskMsg.Files)
 		if err != nil {
 			logrus.Error(err)
 		}
 	default:
-		logrus.Infof("Unhandled task %v", taskMsg.TaskId)
+		logrus.Warnf("Unhandled task %s", taskMsg.TaskId.String())
+		logrus.Debugf("%s", str)
 	}
 
 	return nil
@@ -71,11 +79,14 @@ func Log(hostToken string, taskMsg *task.Message) error {
 		return err
 	}
 
-	//TODO: Handle this with mongo events collection
-	events.SSE.SendMessage(fmt.Sprintf("/v1/host/%s/server/%s/console",
-		host.ID.Hex(),
-		gsLog.GameServerId.Hex()),
-		sse.SimpleMessage(base64.StdEncoding.EncodeToString([]byte(gsLog.Log))))
+	events.SSE.SendMessage(
+		fmt.Sprintf(
+			"/v1/host/%s/server/%s/console",
+			host.ID.Hex(),
+			gsLog.GameServerId.Hex(),
+		),
+		sse.SimpleMessage(base64.StdEncoding.EncodeToString([]byte(gsLog.Log))),
+	)
 
 	err = model.Put(&gsLog)
 	if err != nil {
@@ -113,7 +124,7 @@ func GameMetricsFrequency(hostToken string, taskMsg *task.Message) error {
 		MetricFrequency: gs.MetricFrequency,
 	}
 
-	err = model.SendEvent(host.ID, taskMessage)
+	err = model.SendTaskToSlave(host.ID, model.User{}, taskMessage)
 	if err != nil {
 		return &lib.Error{ErrorCode: ecode.DbSave}
 	}

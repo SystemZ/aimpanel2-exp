@@ -1,0 +1,19 @@
+image: alpine
+  setup: |
+    #!/bin/bash
+    echo "test"
+variables:
+  - env: "MAX_PLAYERS"
+    required: true
+    visible: true
+    editable: true
+    editable_at_setup: true
+    default_value: "15"
+    validation_rules:
+      zzzz: "1"
+    short_i18n:
+      en_us: "Max players"
+      pl_pl: "Maksymalna ilość graczy"
+      de_de: "Max spieler"
+    description_i18n:
+      en_us: "Maximum concurrent users"

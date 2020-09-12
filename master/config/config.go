@@ -7,6 +7,8 @@ import (
 )
 
 var (
+	LOG_LEVEL int
+
 	DB_HOST     string
 	DB_PORT     string
 	DB_USERNAME string
@@ -33,6 +35,17 @@ var (
 
 func init() {
 	viper.AutomaticEnv()
+
+	// Error levels
+	// 0 PANIC
+	// 1 FATAL
+	// 2 ERROR
+	// 3 WARN
+	// 4 INFO
+	// 5 DEBUG
+	// 6 TRACE
+	viper.SetDefault("LOG_LEVEL", 4)
+	LOG_LEVEL = viper.GetInt("LOG_LEVEL")
 
 	viper.SetDefault("DB_HOST", "localhost")
 	DB_HOST = viper.GetString("DB_HOST")

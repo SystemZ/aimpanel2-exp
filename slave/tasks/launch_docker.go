@@ -9,12 +9,15 @@ import (
 	"github.com/docker/docker/api/types/strslice"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/archive"
+	"github.com/docker/go-connections/nat"
 	"github.com/sirupsen/logrus"
+	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/slave/config"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strconv"
 )
 
 func RemoveContainer(client client.APIClient, containerName string) (err error) {
@@ -52,8 +55,9 @@ func ImageBuild(client client.APIClient, imageName string) {
 	io.Copy(os.Stdout, res.Body)
 }
 
-func StartWrapperInDocker(gsId string) {
-
+func StartWrapperInDocker(taskMsg task.Message) {
+	logrus.Info("starting wrapper in container")
+	gsId := taskMsg.GameServerID
 	containerName := gsId
 	imageName := gsId
 
@@ -112,6 +116,19 @@ func StartWrapperInDocker(gsId string) {
 		VolumeOptions: nil,
 		TmpfsOptions:  nil,
 	})
+
+	// https://stackoverflow.com/questions/41789083/set-portbindings-config-for-containercreate-function-in-golang-sdk-for-docker-ap
+	exposedPorts := map[nat.Port]struct{}{}
+	portBindings := map[nat.Port][]nat.PortBinding{}
+	if taskMsg.Ports != nil {
+		for _, port := range *taskMsg.Ports {
+			containerPortSpec := nat.Port(strconv.Itoa(port.PortContainer) + "/" + port.Protocol)
+			logrus.Infof("mapping %v:%v->%v", port.Host, port.PortHost, containerPortSpec)
+			exposedPorts[containerPortSpec] = struct{}{}
+			portBindings[containerPortSpec] = []nat.PortBinding{{HostIP: port.Host, HostPort: strconv.Itoa(port.PortHost)}}
+		}
+	}
+
 	containerCreateRes, err := cli.ContainerCreate(
 		context.Background(),
 		&container.Config{
@@ -121,10 +138,11 @@ func StartWrapperInDocker(gsId string) {
 			AttachStdin:  false,
 			AttachStdout: false,
 			AttachStderr: false,
-			ExposedPorts: nil,
-			Tty:          false,
-			OpenStdin:    false,
-			StdinOnce:    false,
+			ExposedPorts: exposedPorts,
+			//ExposedPorts: nat.PortSet{nat.Port("25577/tcp"): {}},
+			Tty:       false,
+			OpenStdin: false,
+			StdinOnce: false,
 			Env: []string{
 				"REDIS_HOST=/opt/lvlup/exp/redis.sock", //FIXME needs variable
 				"GS_DIR=/opt/lvlup/exp/gs",             //FIXME needs variable
@@ -150,8 +168,11 @@ func StartWrapperInDocker(gsId string) {
 			Binds:           nil,
 			ContainerIDFile: "",
 			LogConfig:       container.LogConfig{},
-			NetworkMode:     "",
-			PortBindings:    nil,
+			NetworkMode:     "default",
+			PortBindings:    portBindings,
+			//PortBindings: nat.PortMap{
+			//	nat.Port("25577/tcp"): []nat.PortBinding{{HostIP: "0.0.0.0", HostPort: "25577"}},
+			//},
 			RestartPolicy:   container.RestartPolicy{},
 			AutoRemove:      false,
 			VolumeDriver:    "",
@@ -188,13 +209,14 @@ func StartWrapperInDocker(gsId string) {
 			ReadonlyPaths:   nil,
 			Init:            nil,
 		},
+
 		&network.NetworkingConfig{},
 		containerName,
 	)
 	if err != nil {
 		logrus.Errorf("%v", err)
 	}
-	logrus.Infof("%v", containerCreateRes)
+	logrus.Infof("container ID: %v", containerCreateRes.ID)
 
 	err = cli.ContainerStart(context.Background(), containerName, types.ContainerStartOptions{})
 	if err != nil {

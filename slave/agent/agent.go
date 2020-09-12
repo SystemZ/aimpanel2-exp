@@ -1,13 +1,14 @@
 package agent
 
 import (
+	"github.com/gofrs/uuid"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/ahttp"
-	"gitlab.com/systemz/aimpanel2/lib/response"
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/slave/config"
 	"gitlab.com/systemz/aimpanel2/slave/cron"
+	"gitlab.com/systemz/aimpanel2/slave/model"
 	"gitlab.com/systemz/aimpanel2/slave/tasks"
 	"time"
 )
@@ -18,12 +19,24 @@ func Start(hostToken string) {
 	cron.InitCron()
 	ahttp.HttpClient = ahttp.InitHttpClient()
 
-	var token response.Token
-	_, err := ahttp.Get("/v1/host/auth/"+hostToken, &token)
-	if err != nil {
-		lib.FailOnError(err, "Failed to get host token")
+	//Init redis
+	model.InitRedis()
+
+	//Get HW ID from Redis, If empty create new one
+	hwId := model.GetHwId()
+	if hwId == "" {
+		u, err := uuid.NewV4()
+		if err != nil {
+			lib.FailOnError(err, "Failed to generate HW ID")
+		}
+
+		model.SetHwId(u.String())
+		config.HW_ID = u.String()
 	}
-	config.API_TOKEN = token.Token
+	config.HW_ID = hwId
+
+	// task which needs API token but SSE and redis isn't necessary
+	//
 
 	sseStarted := make(chan bool, 1)
 	redisStarted := make(chan bool, 1)
@@ -42,16 +55,13 @@ func Start(hostToken string) {
 	// tasks which needs just SSE connected
 	//
 
-	// task which needs API token but SSE and redis isn't necessary
-	//
-
 	// tasks which needs both SSE and redis already connected
 	logrus.Info("Send AGENT_STARTED")
 	taskMsg := task.Message{
 		TaskId: task.AGENT_STARTED,
 	}
 	//TODO: do something with status code
-	_, err = ahttp.SendTaskData("/v1/events/"+hostToken, config.API_TOKEN, taskMsg)
+	_, err := ahttp.SendTaskData("/v1/events/"+hostToken, config.HW_ID, taskMsg)
 	if err != nil {
 		logrus.Error(err)
 	}
@@ -61,7 +71,7 @@ func Start(hostToken string) {
 		TaskId: task.AGENT_METRICS_FREQUENCY,
 	}
 	//TODO: do something with status code
-	_, err = ahttp.SendTaskData("/v1/events/"+hostToken, config.API_TOKEN, taskMsg)
+	_, err = ahttp.SendTaskData("/v1/events/"+hostToken, config.HW_ID, taskMsg)
 	if err != nil {
 		logrus.Error(err)
 	}
@@ -83,7 +93,7 @@ func Start(hostToken string) {
 		}
 
 		//TODO: do something with status code
-		_, err = ahttp.SendTaskData("/v1/events/"+hostToken, config.API_TOKEN, taskMsg)
+		_, err = ahttp.SendTaskData("/v1/events/"+hostToken, config.HW_ID, taskMsg)
 		if err != nil {
 			logrus.Error(err)
 		}

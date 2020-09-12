@@ -22,6 +22,18 @@ func CommonMiddleware(handler http.Handler) http.Handler {
 	})
 }
 
+func DBCheckMiddleware(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !model.DBOnline {
+			logrus.Warn("DB seems to be offline")
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		handler.ServeHTTP(w, r)
+	})
+}
+
 func AuthMiddleware(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		tokenString := r.Header.Get("Authorization")
@@ -57,7 +69,6 @@ func AuthMiddleware(handler http.Handler) http.Handler {
 		}
 
 		context.Set(r, "user", *user)
-
 		handler.ServeHTTP(w, r)
 	})
 }
@@ -95,19 +106,9 @@ func SlavePermissionMiddleware(handler http.Handler) http.Handler {
 			return
 		}
 
-		tokenString = strings.Replace(tokenString, "Bearer ", "", 1)
+		params := mux.Vars(r)
 
-		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			//TODO: move to config package instead of jwt_secret
-			return []byte(os.Getenv("JWT_SECRET")), nil
-		})
-		if err != nil {
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
-
-		hostId, _ := primitive.ObjectIDFromHex(token.Claims.(jwt.MapClaims)["uid"].(string))
-		host, err := model.GetHostById(hostId)
+		host, err := model.GetHostByToken(params["hostToken"])
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
@@ -118,8 +119,18 @@ func SlavePermissionMiddleware(handler http.Handler) http.Handler {
 			return
 		}
 
-		params := mux.Vars(r)
-		if params["hostToken"] != host.Token {
+		//if hw_id in DB is empty, save those that came to DB
+		if len(host.HwId) == 0 {
+			host.HwId = tokenString
+			err := model.Update(host)
+			if err != nil {
+				logrus.Error(err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+		}
+
+		if host.HwId != tokenString {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
@@ -143,6 +154,7 @@ func SlavePermissionMiddleware(handler http.Handler) http.Handler {
 			}
 		}
 
+		context.Set(r, "host", *host)
 		handler.ServeHTTP(w, r)
 	})
 }

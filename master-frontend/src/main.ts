@@ -25,19 +25,19 @@ Vue.prototype.$eventSource = EventSourcePolyfill;
 Vue.prototype.$apiUrl = process.env.VUE_APP_API_URL;
 
 declare module 'vue/types/vue' {
-    interface Vue {
-        $http: AxiosStatic;
-        $auth: AuthInterface;
-        $eventSource: any;
-        $apiUrl: string;
-    }
+  interface Vue {
+    $http: AxiosStatic;
+    $auth: AuthInterface;
+    $eventSource: any;
+    $apiUrl: string;
+  }
 }
 
 auth.checkAuthentication();
 
 new Vue({
-    router,
-    store,
-    vuetify,
-    render: (h) => h(App)
+  router,
+  store,
+  vuetify,
+  render: (h) => h(App)
 }).$mount('#app');

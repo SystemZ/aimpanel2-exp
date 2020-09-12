@@ -26,6 +26,9 @@ func QueueSendTaskData(msgRaw task.Message) {
 
 // gather all messages in specified time and send them in batches
 // prevent massive number of HTTP requests which wrongfully can look like DoS
+// TODO put some kind of debouncer
+// TODO use less sleep and check for high priority messages
+// TODO decide sleep time with last sent nanosecond timestamp
 func SendMessagesToMaster() {
 	for {
 		// wait between sending batches
@@ -40,7 +43,7 @@ func SendMessagesToMaster() {
 
 		// send all messages in queue
 		// FIXME handle task send retry
-		_, err := ahttp.SendTaskBatchData("/v1/events/"+config.HOST_TOKEN+"/batch", config.API_TOKEN, QueuedMsgs)
+		_, err := ahttp.SendTaskBatchData("/v1/events/"+config.HOST_TOKEN+"/batch", config.HW_ID, QueuedMsgs)
 		if err != nil {
 			logrus.Error(err)
 		}
@@ -54,7 +57,7 @@ func SendMessagesToMaster() {
 
 func listenerRedis(done chan bool) {
 	// start connection to redis
-	model.InitRedis()
+	//model.InitRedis()
 
 	// start batch processing
 	go SendMessagesToMaster()
@@ -99,7 +102,7 @@ func redisTaskHandler(taskCh string, taskBody string) {
 			tasks.GsStartGame(taskMsg)
 			model.DelGsStart(taskMsg.GameServerID)
 
-			_, err = ahttp.SendTaskData("/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
+			_, err = ahttp.SendTaskData("/v1/events/"+config.HOST_TOKEN, config.HW_ID, taskMsg)
 			if err != nil {
 				logrus.Error(err)
 			}
@@ -108,21 +111,24 @@ func redisTaskHandler(taskCh string, taskBody string) {
 	case task.GAME_SHUTDOWN:
 		logrus.Info("Agent got " + taskMsg.TaskId.String())
 
-		_, err = ahttp.SendTaskData("/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
+		_, err = ahttp.SendTaskData("/v1/events/"+config.HOST_TOKEN, config.HW_ID, taskMsg)
 		if err != nil {
 			logrus.Error(err)
 		}
 
 		//Start wrapper if gs is restarting
-		val, _ := model.GetGsRestart(taskMsg.GameServerID)
-		if val == 1 {
-			model.SetGsRestart(taskMsg.GameServerID, 2)
-			tasks.StartWrapperInDocker(taskMsg.GameServerID)
-			if false {
-				tasks.StartWrapperExecRaw(taskMsg)
+		// FIXME redesign restart cmd
+		/*
+			val, _ := model.GetGsRestart(taskMsg.GameServerID)
+			if val == 1 {
+				model.SetGsRestart(taskMsg.GameServerID, 2)
+				tasks.StartWrapperInDocker(taskMsg.GameServerID)
+				if false {
+					tasks.StartWrapperExecRaw(taskMsg)
+				}
+				model.DelGsRestart(taskMsg.GameServerID)
 			}
-			model.DelGsRestart(taskMsg.GameServerID)
-		}
+		*/
 
 	case task.GAME_SERVER_LOG:
 		logrus.Info("Agent got " + taskMsg.TaskId.String())
@@ -130,14 +136,14 @@ func redisTaskHandler(taskCh string, taskBody string) {
 	case task.GAME_METRICS:
 		logrus.Info("Agent got " + taskMsg.TaskId.String())
 
-		_, err = ahttp.SendTaskData("/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
+		_, err = ahttp.SendTaskData("/v1/events/"+config.HOST_TOKEN, config.HW_ID, taskMsg)
 		if err != nil {
 			logrus.Error(err)
 		}
 	case task.GAME_METRICS_FREQUENCY:
 		logrus.Info("Agent got " + taskMsg.TaskId.String())
 
-		_, err = ahttp.SendTaskData("/v1/events/"+config.HOST_TOKEN, config.API_TOKEN, taskMsg)
+		_, err = ahttp.SendTaskData("/v1/events/"+config.HOST_TOKEN, config.HW_ID, taskMsg)
 		if err != nil {
 			logrus.Error(err)
 		}

@@ -4,14 +4,17 @@ stages:
   - build
   - deploy
 
-include:
-  - template: "SAST.gitlab-ci.yml"
-
+# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Security/SAST.gitlab-ci.yml
 #include:
-#  - template: Code-Quality.gitlab-ci.yml
-# this doesn't support Go right now (2019-10-17)
+#  - template: "SAST.gitlab-ci.yml"
+
+# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Jobs/Code-Quality.gitlab-ci.yml
 # https://docs.gitlab.com/ee/user/project/merge_requests/code_quality.html#example-configuration
 # https://gitlab.com/gitlab-org/security-products/codequality
+# https://gitlab.com/gitlab-org/ci-cd/codequality/-/issues/10
+# https://gitlab.com/jheimbuck_gl/jh_java_example_project/-/blob/master/.gitlab-ci.yml
+#include:
+#  - template: Code-Quality.gitlab-ci.yml
 
 update-todo:
   stage: compile
@@ -83,7 +86,6 @@ backend:
     paths:
       - aimpanel-master
       - aimpanel-slave
-      - install.sh
       - swagger.json
       - report.xml
     when: always

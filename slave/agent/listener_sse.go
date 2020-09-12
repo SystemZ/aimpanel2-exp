@@ -16,7 +16,7 @@ func listenerSse(done chan bool) {
 	ahttpHost := ahttp.Hosts[ahttp.CurrentHost]
 	client := sse.NewClient(ahttpHost + "/v1/events/" + config.HOST_TOKEN)
 	client.Headers = map[string]string{
-		"Authorization": "Bearer " + config.API_TOKEN,
+		"Authorization": config.HW_ID,
 	}
 	client.Connection.Transport = &http.Transport{
 		DialTLSContext: ahttp.VerifyPinTLSContext,
