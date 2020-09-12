@@ -99,6 +99,47 @@ func HostCreate(w http.ResponseWriter, r *http.Request) {
 	lib.MustEncode(json.NewEncoder(w), response.Token{Token: h.Token})
 }
 
+// @Router /host/{hostId} [put]
+// @Summary Edit
+// @Tags Host
+// @Description Edit host by selected id
+// @Accept json
+// @Produce json
+// @Param hostId path string true "Host ID"
+// @Param host body request.HostCreate true " "
+// @Success 200 {object} response.Host
+// @Failure 400 {object} response.JsonError
+// @Security ApiKey
+func HostEdit(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+
+	hostId, err := primitive.ObjectIDFromHex(params["hostId"])
+	if err != nil {
+		lib.ReturnError(w, http.StatusBadRequest, ecode.OidError, err)
+		return
+	}
+
+	h, err := model.GetHostById(hostId)
+	if err != nil {
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, err)
+		return
+	}
+
+	data := &request.HostCreate{}
+	err = json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		lib.ReturnError(w, http.StatusBadRequest, ecode.JsonDecode, err)
+		return
+	}
+
+	if h.Name != data.Name {
+		h.Name = data.Name
+		model.Update(h)
+	}
+
+	lib.MustEncode(json.NewEncoder(w), response.Host{Host: *h})
+}
+
 // FIXME add URL params
 // @Router /host/{id}/metric [get]
 // @Summary Metric

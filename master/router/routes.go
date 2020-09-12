@@ -208,6 +208,14 @@ var v1Routes = Routes{
 		false,
 	},
 	Route{
+		"Host Edit",
+		"PUT",
+		"/host/{hostId}",
+		handler.HostEdit,
+		true,
+		false,
+	},
+	Route{
 		"Host Remove",
 		"DELETE",
 		"/host/{hostId}",
