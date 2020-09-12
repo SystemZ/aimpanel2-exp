@@ -202,8 +202,7 @@ func Get(w http.ResponseWriter, r *http.Request) {
 	lib.MustEncode(json.NewEncoder(w), response.GameServer{GameServer: *gameServer})
 }
 
-// FIXME API docs are incomplete
-// @Router /host/{hostId}/server/{gsId} [get]
+// @Router /host/{hostId}/server/{gsId} [PUT]
 // @Summary Edit
 // @Tags Game Server
 // @Description Edit Game server with selected ID
