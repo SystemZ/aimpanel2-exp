@@ -14,11 +14,10 @@ func Data(host model.Host, taskMsg *task.Message) error {
 	case task.AGENT_STARTED:
 		logrus.Infof("Got %v", taskMsg.TaskId)
 
-		// FIXME check for updates
-		//err := AgentStarted(host.ID)
-		//if err != nil {
-		//	return err
-		//}
+		err := AgentGetUpdate(host.ID)
+		if err != nil {
+			return err
+		}
 	case task.AGENT_METRICS_FREQUENCY:
 		logrus.Infof("Got %v", taskMsg.TaskId)
 
@@ -50,6 +49,13 @@ func Data(host model.Host, taskMsg *task.Message) error {
 		if err != nil {
 			return err
 		}
+	case task.AGENT_GET_UPDATE:
+		logrus.Infof("Got %v", taskMsg.TaskId)
+
+		err := AgentGetUpdate(host.ID)
+		if err != nil {
+			return err
+		}
 	default:
 		logrus.Infof("Unhandled task %v", taskMsg.TaskId)
 	}
@@ -57,7 +63,7 @@ func Data(host model.Host, taskMsg *task.Message) error {
 	return nil
 }
 
-func AgentStarted(hostId primitive.ObjectID) error {
+func AgentGetUpdate(hostId primitive.ObjectID) error {
 	err := Update(hostId, model.User{})
 	if err != nil {
 		return err

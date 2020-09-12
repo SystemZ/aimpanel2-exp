@@ -45,8 +45,10 @@ func AgentTaskHandler(taskMsg task.Message) {
 		GsFileList(taskMsg.GameServerID)
 	case task.AGENT_METRICS_FREQUENCY:
 		go AgentMetrics(taskMsg.MetricFrequency)
-		// TODO enable backup task handler
-		// case task.AGENT_BACKUP_GS:
+	// TODO enable backup task handler
+	// case task.AGENT_BACKUP_GS:
+	case task.AGENT_GET_UPDATE:
+		go AgentGetUpdate(taskMsg)
 	}
 }
 
@@ -75,6 +77,11 @@ func GsInstall(taskMsg task.Message) {
 }
 
 func SelfUpdate(taskMsg task.Message) {
+	if config.GIT_COMMIT == "" {
+		logrus.Warning("version of slave is empty, ignoring update")
+		return
+	}
+
 	if config.GIT_COMMIT == taskMsg.Commit {
 		logrus.Warning("version of new slave is same as current, ignoring update")
 		return
@@ -265,6 +272,13 @@ func AgentSendOSInfo() {
 		KernelArch:      h.KernelArch,
 	}
 	//TODO: do something with status code
+	_, err := ahttp.SendTaskData("/v1/events/"+config.HOST_TOKEN, config.HW_ID, taskMsg)
+	if err != nil {
+		logrus.Error(err)
+	}
+}
+
+func AgentGetUpdate(taskMsg task.Message) {
 	_, err := ahttp.SendTaskData("/v1/events/"+config.HOST_TOKEN, config.HW_ID, taskMsg)
 	if err != nil {
 		logrus.Error(err)

@@ -45,6 +45,16 @@ func MigrateUp() (err error) {
 		config.MigrateVersion = 3
 		model.Update(&config)
 	}
+	// 3 -> 4
+	if config.MigrateVersion < 4 {
+		logrus.Info("Applying migration ID 4")
+		err = Migration4Up()
+		if err != nil {
+			return
+		}
+		config.MigrateVersion = 4
+		model.Update(&config)
+	}
 
 	// end
 	return
