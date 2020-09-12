@@ -86,7 +86,7 @@ function swagger-gen-dev {
     cd master
     #swagger generate spec -m -o ../swagger.json
     swag init --parseDependency
-    mv docs/swagger.json .
+    mv docs/swagger.json master/swagger.json
     rm -rf docs
     cd ../
 }
@@ -168,7 +168,7 @@ function ci-redis-upload {
 function ci-swagger-gen {
     cd master
     #swagger generate spec -m -o ../swagger.json
-    swag init
+    swag init --parseDependency
     mv docs/swagger.json ../
     rm -rf docs
     cd ../
