@@ -282,6 +282,22 @@ func Edit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if gameServer.Name != data.Name {
+		user := context.Get(r, "user").(model.User)
+		err = model.SaveAction(
+			task.Message{
+				TaskId:       task.GS_NAME_CHANGE,
+				GameServerID: gameServer.ID.Hex(),
+			},
+			user,
+			hostId,
+			data.Name,
+			gameServer.Name,
+		)
+		if err != nil {
+			lib.ReturnError(w, http.StatusInternalServerError, ecode.DbSave, err)
+			return
+		}
+
 		gameServer.Name = data.Name
 		model.Update(gameServer)
 	}

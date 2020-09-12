@@ -9,6 +9,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib/ecode"
 	"gitlab.com/systemz/aimpanel2/lib/metric"
 	"gitlab.com/systemz/aimpanel2/lib/request"
+	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"gitlab.com/systemz/aimpanel2/master/response"
 	"gitlab.com/systemz/aimpanel2/master/service/host"
@@ -133,6 +134,22 @@ func HostEdit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if h.Name != data.Name {
+		user := context.Get(r, "user").(model.User)
+		err = model.SaveAction(
+			task.Message{
+				TaskId: task.HOST_NAME_CHANGE,
+				HostID: h.ID.Hex(),
+			},
+			user,
+			hostId,
+			data.Name,
+			h.Name,
+		)
+		if err != nil {
+			lib.ReturnError(w, http.StatusInternalServerError, ecode.DbSave, err)
+			return
+		}
+
 		h.Name = data.Name
 		model.Update(h)
 	}

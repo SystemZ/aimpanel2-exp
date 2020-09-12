@@ -41,8 +41,8 @@ const (
 	PING
 
 	GS_CMD_START_CHANGE
-	//HOST_NAME_CHANGE
-	//GS_NAME_CHANGE
+	HOST_NAME_CHANGE
+	GS_NAME_CHANGE
 )
 
 func (i Id) StringValue() string {
@@ -69,6 +69,7 @@ type Message struct {
 	TaskId             Id         `json:"task_id,omitempty"`
 	Game               *game.Game `json:"game,omitempty"`
 	GameServerID       string     `json:"game_server_id,omitempty"`
+	HostID             string     `json:"host_id,omitempty"`
 	GameCustomCmdStart string     `json:"game_custom_cmd_start"`
 	Body               string     `json:"body,omitempty"`
 	StopTimeout        int        `json:"stop_timeout,omitempty"`
