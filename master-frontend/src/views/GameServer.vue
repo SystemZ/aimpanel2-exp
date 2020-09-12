@@ -215,13 +215,16 @@ export default Vue.extend({
     }
   },
   mounted() {
-    this.$http.get(this.serverUrl).then(res => {
-      this.game_server = res.data.game_server;
-    }).catch(e => {
-      this.$auth.checkResponse(e.response.status);
-    });
+    this.gsInfo()
   },
   methods: {
+    gsInfo() {
+      this.$http.get(this.serverUrl).then(res => {
+        this.game_server = res.data.game_server;
+      }).catch(e => {
+        this.$auth.checkResponse(e.response.status);
+      });
+    },
     start() {
       this.$http.put(this.serverUrl + '/start').then(res => {
         //console.log(res);
@@ -271,19 +274,16 @@ export default Vue.extend({
       });
     },
     saveGSName() {
-      // FIXME need api endpoint for this to work properly
-      // let data = {'name': this.newGSName}
-      // this.$http.post(this.serverUrl + '', data)
-      // .then((res) => {
-      //   //empty form
-      //   this.newGSName = ''
-      //   // hide form
-      //   this.newGSNameDialog = false
-      // });
-      // needed for mockup reasons
-      console.log(this.newGSName);
-      this.newGSName = ''
-      this.newGSNameDialog = false
+      this.$http.put(this.serverUrl, {
+        name: this.newGSName
+      }).then(res => {
+        this.gsInfo()
+        this.newGSName = ''
+        this.newGSNameDialog = false
+      }).catch(e => {
+        this.$auth.checkResponse(e.response.status);
+      })
+
     },
   },
 });
