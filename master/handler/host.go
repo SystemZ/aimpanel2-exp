@@ -9,6 +9,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib/ecode"
 	"gitlab.com/systemz/aimpanel2/lib/metric"
 	"gitlab.com/systemz/aimpanel2/lib/request"
+	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"gitlab.com/systemz/aimpanel2/master/response"
 	"gitlab.com/systemz/aimpanel2/master/service/host"
@@ -97,6 +98,63 @@ func HostCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	lib.MustEncode(json.NewEncoder(w), response.Token{Token: h.Token})
+}
+
+// @Router /host/{hostId} [put]
+// @Summary Edit
+// @Tags Host
+// @Description Edit host by selected id
+// @Accept json
+// @Produce json
+// @Param hostId path string true "Host ID"
+// @Param host body request.HostCreate true " "
+// @Success 200 {object} response.Host
+// @Failure 400 {object} response.JsonError
+// @Security ApiKey
+func HostEdit(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+
+	hostId, err := primitive.ObjectIDFromHex(params["hostId"])
+	if err != nil {
+		lib.ReturnError(w, http.StatusBadRequest, ecode.OidError, err)
+		return
+	}
+
+	h, err := model.GetHostById(hostId)
+	if err != nil {
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.DbError, err)
+		return
+	}
+
+	data := &request.HostCreate{}
+	err = json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		lib.ReturnError(w, http.StatusBadRequest, ecode.JsonDecode, err)
+		return
+	}
+
+	if h.Name != data.Name {
+		user := context.Get(r, "user").(model.User)
+		err = model.SaveAction(
+			task.Message{
+				TaskId: task.HOST_NAME_CHANGE,
+				HostID: h.ID.Hex(),
+			},
+			user,
+			hostId,
+			data.Name,
+			h.Name,
+		)
+		if err != nil {
+			lib.ReturnError(w, http.StatusInternalServerError, ecode.DbSave, err)
+			return
+		}
+
+		h.Name = data.Name
+		model.Update(h)
+	}
+
+	lib.MustEncode(json.NewEncoder(w), response.Host{Host: *h})
 }
 
 // FIXME add URL params
