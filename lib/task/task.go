@@ -44,6 +44,7 @@ const (
 	GS_CMD_START_CHANGE
 	HOST_NAME_CHANGE
 	GS_NAME_CHANGE
+	GS_GAME_CHANGE
 )
 
 func (i Id) StringValue() string {

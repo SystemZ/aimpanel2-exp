@@ -77,6 +77,15 @@ var Games = []GameDefinition{
 	},
 }
 
+func GetGameNameById(id uint) string {
+	for _, gameDef := range Games {
+		if gameDef.Id == id {
+			return gameDef.Name
+		}
+	}
+	return ""
+}
+
 type Game struct {
 	Id uint `json:"id,omitempty"`
 
