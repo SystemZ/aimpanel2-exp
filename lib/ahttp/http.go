@@ -43,6 +43,8 @@ var Fingerprints = []string{
 var CurrentHost = 0
 var Hosts = config.MASTER_URLS
 
+var SlaveVersion = ""
+
 func InitHttpClient() *http.Client {
 	client := &http.Client{}
 	client.Transport = &http.Transport{
@@ -129,6 +131,10 @@ func Post(path, token, jsonStr string) (*http.Response, error) {
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", token)
+
+	if SlaveVersion != "" {
+		req.Header.Set("X-Slave-Version", SlaveVersion)
+	}
 
 	for {
 		resp, err := HttpClient.Do(req)
