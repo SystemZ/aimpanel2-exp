@@ -302,6 +302,37 @@ func Edit(w http.ResponseWriter, r *http.Request) {
 		model.Update(gameServer)
 	}
 
+	if gameServer.GameId != data.GameId || gameServer.GameVersion != data.GameVersion{
+		user := context.Get(r, "user").(model.User)
+		err = model.SaveAction(
+			task.Message{
+				TaskId:       task.GS_GAME_CHANGE,
+				GameServerID: gameServer.ID.Hex(),
+			},
+			user,
+			hostId,
+			game.GetGameNameById(gameServer.GameId)+" "+data.GameVersion,
+			game.GetGameNameById(data.GameId)+" "+data.GameVersion,
+		)
+		if err != nil {
+			lib.ReturnError(w, http.StatusInternalServerError, ecode.DbSave, err)
+			return
+		}
+
+		gameDef := game.Game{
+			Id:      data.GameId,
+			Version: data.GameVersion,
+		}
+		gameDef.SetDefaults()
+		gameDefJson, _ := json.Marshal(gameDef)
+
+		gameServer.GameId = data.GameId
+		gameServer.GameVersion = data.GameVersion
+		gameServer.GameJson = string(gameDefJson)
+
+		model.Update(gameServer)
+	}
+
 	lib.MustEncode(json.NewEncoder(w), response.GameServer{GameServer: *gameServer})
 }
 
