@@ -80,9 +80,8 @@
 
             <v-list-item two-line>
               <v-list-item-content>
-                <v-list-item-title>{{ host.platform }} {{
-                    host.platform_version
-                  }}
+                <v-list-item-title>
+                  {{ host.platform }} {{host.platform_version }}
                 </v-list-item-title>
                 <v-list-item-subtitle>Platform</v-list-item-subtitle>
               </v-list-item-content>
@@ -256,27 +255,27 @@ export default Vue.extend({
         this.$auth.checkResponse(e.response.status);
       })
     }
-      /*
-      // FIXME pie charts are empty
-          this.metric = res.data.metrics[0];
+    /*
+    // FIXME pie charts are empty
+        this.metric = res.data.metrics[0];
 
-          this.metric.disk_free = +(this.metric.disk_free as number / 1024).toFixed(0);
-          this.metric.disk_total = +(this.metric.disk_total / 1024).toFixed(0);
-          this.metric.disk_used = this.metric.disk_total - this.metric.disk_free;
+        this.metric.disk_free = +(this.metric.disk_free as number / 1024).toFixed(0);
+        this.metric.disk_total = +(this.metric.disk_total / 1024).toFixed(0);
+        this.metric.disk_used = this.metric.disk_total - this.metric.disk_free;
 
-          this.metric.ram_total = +(this.metric.ram_total / 1024).toFixed(1);
-          this.metric.ram_free = +(this.metric.ram_free / 1024).toFixed(1);
-          this.metric.ram_used = +(this.metric.ram_total - this.metric.ram_free).toFixed(1);
-      */
-      /*
-      getGameServers(): void {
-          this.$http.get('/v1/host/' + this.$route.params.id + '/server').then(res => {
-              this.gameServers = res.data.game_servers;
-          }).catch(e => {
-              this.$auth.checkResponse(e.response.status);
-          });
-      },
-      */
+        this.metric.ram_total = +(this.metric.ram_total / 1024).toFixed(1);
+        this.metric.ram_free = +(this.metric.ram_free / 1024).toFixed(1);
+        this.metric.ram_used = +(this.metric.ram_total - this.metric.ram_free).toFixed(1);
+    */
+    /*
+    getGameServers(): void {
+        this.$http.get('/v1/host/' + this.$route.params.id + '/server').then(res => {
+            this.gameServers = res.data.game_servers;
+        }).catch(e => {
+            this.$auth.checkResponse(e.response.status);
+        });
     },
-  });
+    */
+  },
+});
 </script>
