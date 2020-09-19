@@ -17,6 +17,7 @@ func Start(hostToken string) {
 	//model.InitRedis()
 	logrus.Info("starting agent version " + config.GIT_COMMIT)
 	cron.InitCron()
+	ahttp.SlaveVersion = config.GIT_COMMIT
 	ahttp.HttpClient = ahttp.InitHttpClient()
 
 	//Init redis
