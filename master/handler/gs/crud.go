@@ -302,7 +302,7 @@ func Edit(w http.ResponseWriter, r *http.Request) {
 		model.Update(gameServer)
 	}
 
-	if gameServer.GameId != data.GameId {
+	if gameServer.GameId != data.GameId || gameServer.GameVersion != data.GameVersion{
 		user := context.Get(r, "user").(model.User)
 		err = model.SaveAction(
 			task.Message{
