@@ -190,7 +190,7 @@ func Update(hostId primitive.ObjectID, user model.User) error {
 	taskMsg := task.Message{
 		TaskId: task.AGENT_UPDATE,
 		// TODO in DEV mode just use some random string
-		Commit: "new", // FIXME set git commit ID in master when building in CI
+		Commit: config.GIT_COMMIT,
 		Url:    binaryUrl,
 	}
 
