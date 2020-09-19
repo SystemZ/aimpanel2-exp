@@ -27,7 +27,9 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="red darken-1" text @click="newGSNameDialog = false">Close</v-btn>
+          <v-btn color="red darken-1" text @click="newGSNameDialog = false">
+            Close
+          </v-btn>
           <v-btn color="green darken-1" @click="saveGSName">Save</v-btn>
         </v-card-actions>
       </v-card>
@@ -62,11 +64,20 @@
                 <v-card>
                   <v-card-title>Actions</v-card-title>
                   <v-card-text>
-                    <v-btn @click="start()" class="ma-2" color="green" dark>Start</v-btn>
-                    <v-btn @click="shutdown()" class="ma-2" color="yellow darken-2" dark>Shutdown</v-btn>
-                    <v-btn @click="stop()" class="ma-2" color="red" dark>Stop</v-btn>
-                    <v-btn @click="restart()" class="ma-2" color="orange darken-2" dark>Restart</v-btn>
-                    <v-btn @click="install()" class="ma-2" color="blue" dark>Install</v-btn>
+                    <v-btn @click="start()" class="ma-2" color="green" dark>
+                      Start
+                    </v-btn>
+                    <v-btn @click="shutdown()" class="ma-2"
+                           color="yellow darken-2" dark>Shutdown
+                    </v-btn>
+                    <v-btn @click="stop()" class="ma-2" color="red" dark>Stop
+                    </v-btn>
+                    <v-btn @click="restart()" class="ma-2"
+                           color="orange darken-2" dark>Restart
+                    </v-btn>
+                    <v-btn @click="install()" class="ma-2" color="blue" dark>
+                      Install
+                    </v-btn>
                   </v-card-text>
                 </v-card>
                 <v-card class="mt-5">
@@ -74,7 +85,10 @@
                   <v-card-text>
                     <v-list-item two-line>
                       <v-list-item-content>
-                        <v-list-item-title>{{ game_server.name }}</v-list-item-title>
+                        <v-list-item-title>{{
+                            game_server.name
+                          }}
+                        </v-list-item-title>
                         <v-list-item-subtitle>Name</v-list-item-subtitle>
                       </v-list-item-content>
                       <v-list-item-action>
@@ -91,7 +105,8 @@
 
                     <v-list-item two-line>
                       <v-list-item-content>
-                        <v-list-item-title>{{ game_server.state == 1 ? 'Active' : 'Locked' }}
+                        <v-list-item-title>
+                          {{ game_server.state == 1 ? 'Active' : 'Locked' }}
                         </v-list-item-title>
                         <v-list-item-subtitle>Status</v-list-item-subtitle>
                       </v-list-item-content>
@@ -103,14 +118,19 @@
                             game_server.metric_frequency
                           }}s
                         </v-list-item-title>
-                        <v-list-item-subtitle>Metric frequency</v-list-item-subtitle>
+                        <v-list-item-subtitle>Metric frequency
+                        </v-list-item-subtitle>
                       </v-list-item-content>
                     </v-list-item>
 
                     <v-list-item two-line>
                       <v-list-item-content>
-                        <v-list-item-title>{{ game_server.stop_timeout }}s</v-list-item-title>
-                        <v-list-item-subtitle>Stop timeout</v-list-item-subtitle>
+                        <v-list-item-title>{{
+                            game_server.stop_timeout
+                          }}s
+                        </v-list-item-title>
+                        <v-list-item-subtitle>Stop timeout
+                        </v-list-item-subtitle>
                       </v-list-item-content>
                     </v-list-item>
                   </v-card-text>
@@ -174,117 +194,120 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Component, Vue } from 'vue-property-decorator';
 import GsConsole from '@/components/GsConsole.vue';
 import GsFileManager from '@/components/GsFileManager.vue';
 import GsScheduler from '@/components/GsScheduler.vue';
 import GsSettings from '@/components/GsSettings.vue';
-import {mdiTrashCan} from '@mdi/js';
-import {mdiPencil} from '@mdi/js';
+import { mdiTrashCan } from '@mdi/js';
+import { mdiPencil } from '@mdi/js';
+import { GameServer as GS } from '@/types/api';
 
-export default Vue.extend({
-  name: 'game_server',
+@Component({
   components: {
     GsConsole,
     GsFileManager,
     GsScheduler,
-    GsSettings,
-  },
-  data: () => ({
-    tab: 0,
-    game_server: {},
-    message: '',
-    timer: '',
-    installSnackbar: false,
-    removeSnackbar: false,
-    newGSNameDialog: false,
-    newGSName: '',
-    //icons
-    mdiTrashCan: mdiTrashCan,
-    mdiPencil: mdiPencil,
-  }),
-  computed: {
-    serverId() {
-      return this.$route.params.server_id;
-    },
-    hostId() {
-      return this.$route.params.id;
-    },
-    serverUrl() {
-      return '/v1/host/' + this.$route.params.id + '/server/' + this.$route.params.server_id;
-    }
-  },
-  mounted() {
-    this.gsInfo()
-  },
-  methods: {
-    gsInfo() {
-      this.$http.get(this.serverUrl).then(res => {
-        this.game_server = res.data.game_server;
-      }).catch(e => {
-        this.$auth.checkResponse(e.response.status);
-      });
-    },
-    start() {
-      this.$http.put(this.serverUrl + '/start').then(res => {
-        //console.log(res);
-      }).catch(e => {
-        this.$auth.checkResponse(e.response.status);
-      });
-    },
-    stop() {
-      this.$http.put(this.serverUrl + '/stop', {
-        type: 1
-      }).then(res => {
-        //console.log(res);
-      }).catch(e => {
-        this.$auth.checkResponse(e.response.status);
-      });
-    },
-    restart() {
-      this.$http.put(this.serverUrl + '/restart', {
-        type: 1
-      }).then(res => {
-        //console.log(res);
-      }).catch(e => {
-        this.$auth.checkResponse(e.response.status);
-      });
-    },
-    install() {
-      this.$http.put(this.serverUrl + '/install').then(res => {
-        this.installSnackbar = true;
-      }).catch(e => {
-        this.$auth.checkResponse(e.response.status);
-      });
-    },
-    remove() {
-      this.$http.delete(this.serverUrl).then(res => {
-        this.removeSnackbar = true;
-        console.log(res);
-        this.$router.push('/');
-      }).catch(e => {
-        this.$auth.checkResponse(e.response.status);
-      });
-    },
-    shutdown() {
-      this.$http.put(this.serverUrl + '/shutdown').then(res => {
-        //console.log(res);
-      }).catch(e => {
-        this.$auth.checkResponse(e.response.status);
-      });
-    },
-    saveGSName() {
-      this.$http.put(this.serverUrl, {
-        name: this.newGSName
-      }).then(res => {
-        this.gsInfo()
-        this.newGSName = ''
-        this.newGSNameDialog = false
-      }).catch(e => {
-        this.$auth.checkResponse(e.response.status);
-      })
+    GsSettings
+  }
+})
+export default class GameServer extends Vue {
+  tab = 0
+  game_server = {} as GS
+  message = '';
+  timer = '';
+  installSnackbar = false;
+  removeSnackbar = false;
+  newGSNameDialog = false;
+  newGSName = '';
+  //icons
+  mdiTrashCan = mdiTrashCan;
+  mdiPencil = mdiPencil;
 
-    },
-  },
-});
+  get serverId() {
+    return this.$route.params.server_id;
+  }
+
+  get hostId() {
+    return this.$route.params.id
+  }
+
+  get serverUrl() {
+    return '/v1/host/' + this.$route.params.id + '/server/' + this.$route.params.server_id;
+  }
+
+  gsInfo() {
+    this.$http.get(this.serverUrl).then(res => {
+      this.game_server = res.data.game_server;
+    }).catch(e => {
+      this.$auth.checkResponse(e.response.status);
+    });
+  }
+
+  start() {
+    this.$http.put(this.serverUrl + '/start').then(res => {
+      //console.log(res);
+    }).catch(e => {
+      this.$auth.checkResponse(e.response.status);
+    });
+  }
+
+  stop() {
+    this.$http.put(this.serverUrl + '/stop', {
+      type: 1
+    }).then(res => {
+      //console.log(res);
+    }).catch(e => {
+      this.$auth.checkResponse(e.response.status);
+    });
+  }
+
+  restart() {
+    this.$http.put(this.serverUrl + '/restart', {
+      type: 1
+    }).then(res => {
+      //console.log(res);
+    }).catch(e => {
+      this.$auth.checkResponse(e.response.status);
+    });
+  }
+
+  install() {
+    this.$http.put(this.serverUrl + '/install').then(res => {
+      this.installSnackbar = true;
+    }).catch(e => {
+      this.$auth.checkResponse(e.response.status);
+    });
+  }
+
+  remove() {
+    this.$http.delete(this.serverUrl).then(res => {
+      this.removeSnackbar = true;
+      console.log(res);
+      this.$router.push('/');
+    }).catch(e => {
+      this.$auth.checkResponse(e.response.status);
+    });
+  }
+
+  shutdown() {
+    this.$http.put(this.serverUrl + '/shutdown').then(res => {
+      //console.log(res);
+    }).catch(e => {
+      this.$auth.checkResponse(e.response.status);
+    });
+  }
+
+  saveGSName() {
+    this.$http.put(this.serverUrl, {
+      name: this.newGSName
+    }).then(res => {
+      this.gsInfo()
+      this.newGSName = ''
+      this.newGSNameDialog = false
+    }).catch(e => {
+      this.$auth.checkResponse(e.response.status);
+    })
+  }
+}
 </script>
