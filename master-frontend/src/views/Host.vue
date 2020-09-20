@@ -81,7 +81,7 @@
             <v-list-item two-line>
               <v-list-item-content>
                 <v-list-item-title>
-                  {{ host.platform }} {{host.platform_version }}
+                  {{ host.platform }} {{ host.platform_version }}
                 </v-list-item-title>
                 <v-list-item-subtitle>Platform</v-list-item-subtitle>
               </v-list-item-content>
@@ -199,83 +199,87 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Component, Vue } from 'vue-property-decorator';
 import { Host, Metric } from '@/types/api';
 import Chart from '@/components/Chart.vue';
 import { mdiPencil } from '@mdi/js';
 
-export default Vue.extend({
-  name: 'host',
+@Component({
   components: {
-    Chart,
-  },
-  data: () => ({
-    host: {} as Host,
-    metric: {} as Metric,
-    removeSnackbar: false,
-    newHostNameDialog: false,
-    newHostName: '',
-    mdiPencil: mdiPencil,
-  }),
-  mounted(): void {
+    Chart
+  }
+})
+export default class HostPage extends Vue {
+  host = {} as Host;
+  metric = {} as Metric;
+  removeSnackbar = false;
+  newHostNameDialog = false;
+  newHostName = '';
+  mdiPencil = mdiPencil;
+
+  mounted() {
     this.hostInfo()
-  },
-  methods: {
-    hostInfo() {
-      this.$http.get('/v1/host/' + this.$route.params.id).then((res) => {
-        this.host = res.data.host;
-      }).catch(e => {
-        this.$auth.checkResponse(e.response.status);
-      });
-    },
-    remove(): void {
-      this.$http.delete('/v1/host/' + this.$route.params.id).then(res => {
-        this.removeSnackbar = true;
-        console.log(res);
-        this.$router.push('/');
-      }).catch(e => {
-        this.$auth.checkResponse(e.response.status);
-      });
-    },
-    update(): void {
-      this.$http.get('/v1/host/' + this.$route.params.id + '/update').then(res => {
-        console.log(res);
-      }).catch(e => {
-        this.$auth.checkResponse(e.response.status);
-      });
-    },
-    saveHostName() {
-      this.$http.put('/v1/host/' + this.$route.params.id, {
-        name: this.newHostName
-      }).then(res => {
-        this.hostInfo()
-        this.newHostName = ''
-        this.newHostNameDialog = false
-      }).catch(e => {
-        this.$auth.checkResponse(e.response.status);
-      })
-    }
-    /*
-    // FIXME pie charts are empty
-        this.metric = res.data.metrics[0];
+  }
 
-        this.metric.disk_free = +(this.metric.disk_free as number / 1024).toFixed(0);
-        this.metric.disk_total = +(this.metric.disk_total / 1024).toFixed(0);
-        this.metric.disk_used = this.metric.disk_total - this.metric.disk_free;
+  hostInfo() {
+    this.$http.get('/v1/host/' + this.$route.params.id).then((res) => {
+      this.host = res.data.host;
+    }).catch(e => {
+      this.$auth.checkResponse(e.response.status);
+    });
+  }
 
-        this.metric.ram_total = +(this.metric.ram_total / 1024).toFixed(1);
-        this.metric.ram_free = +(this.metric.ram_free / 1024).toFixed(1);
-        this.metric.ram_used = +(this.metric.ram_total - this.metric.ram_free).toFixed(1);
-    */
-    /*
-    getGameServers(): void {
-        this.$http.get('/v1/host/' + this.$route.params.id + '/server').then(res => {
-            this.gameServers = res.data.game_servers;
-        }).catch(e => {
-            this.$auth.checkResponse(e.response.status);
-        });
-    },
-    */
-  },
-});
+  remove(): void {
+    this.$http.delete('/v1/host/' + this.$route.params.id).then(res => {
+      this.removeSnackbar = true;
+      console.log(res);
+      this.$router.push('/');
+    }).catch(e => {
+      this.$auth.checkResponse(e.response.status);
+    });
+  }
+
+  update(): void {
+    this.$http.get('/v1/host/' + this.$route.params.id + '/update').then(res => {
+      console.log(res);
+    }).catch(e => {
+      this.$auth.checkResponse(e.response.status);
+    });
+  }
+
+  saveHostName() {
+    this.$http.put('/v1/host/' + this.$route.params.id, {
+      name: this.newHostName
+    }).then(res => {
+      this.hostInfo()
+      this.newHostName = ''
+      this.newHostNameDialog = false
+    }).catch(e => {
+      this.$auth.checkResponse(e.response.status);
+    })
+  }
+
+  //     /*
+//     // FIXME pie charts are empty
+//         this.metric = res.data.metrics[0];
+//
+//         this.metric.disk_free = +(this.metric.disk_free as number / 1024).toFixed(0);
+//         this.metric.disk_total = +(this.metric.disk_total / 1024).toFixed(0);
+//         this.metric.disk_used = this.metric.disk_total - this.metric.disk_free;
+//
+//         this.metric.ram_total = +(this.metric.ram_total / 1024).toFixed(1);
+//         this.metric.ram_free = +(this.metric.ram_free / 1024).toFixed(1);
+//         this.metric.ram_used = +(this.metric.ram_total - this.metric.ram_free).toFixed(1);
+//     */
+//     /*
+//     getGameServers(): void {
+//         this.$http.get('/v1/host/' + this.$route.params.id + '/server').then(res => {
+//             this.gameServers = res.data.game_servers;
+//         }).catch(e => {
+//             this.$auth.checkResponse(e.response.status);
+//         });
+//     },
+//     */
+
+}
 </script>

@@ -104,7 +104,7 @@ export default class GsList extends Vue {
     return '';
   }
 
-  goToGameServer(row: GameServer): void {
+  goToGameServer(row: GameServer) {
     this.$router.push('/host/' + row.host_id + '/server/' + row.id);
   }
 

@@ -1,11 +1,10 @@
 <template>
 </template>
 <script lang="ts">
-import Vue from 'vue';
+import { Component, Vue } from 'vue-property-decorator';
 
-export default Vue.extend({
-  name: 'help',
-  data: () => ({})
-});
+@Component
+export default class HelpPage extends Vue {
 
+}
 </script>

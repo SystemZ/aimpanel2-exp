@@ -21,21 +21,22 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Component, Vue } from 'vue-property-decorator';
 import HostList from '@/components/HostList.vue';
 import GsList from '@/components/GsList.vue';
 import HostCreate from '@/components/HostCreate.vue';
 import GsCreate from '@/components/GsCreate.vue';
 
-export default Vue.extend({
-  name: 'Hosts',
+
+@Component({
   components: {
     HostList,
     HostCreate,
     GsList,
-    GsCreate,
-  },
-  data: () => ({}),
-  methods: {},
-});
+    GsCreate
+  }
+})
+export default class HomePage extends Vue {
+
+}
 </script>

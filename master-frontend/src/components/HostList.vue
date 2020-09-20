@@ -21,64 +21,66 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
-import {Host} from '@/types/api';
-import {mdiCheckboxBlankCircle} from '@mdi/js';
+import { Component, Vue } from 'vue-property-decorator';
+import { Host } from '@/types/api';
+import { mdiCheckboxBlankCircle } from '@mdi/js';
 
-export default Vue.extend({
-  name: 'host-create',
-  data: () => ({
-    hostListLoading: true,
-    refreshInterval: 0,
-    headers: [
-      {
-        text: 'Name',
-        align: 'left',
-        sortable: true,
-        value: 'name'
-      },
-      {
-        text: 'IP',
-        align: 'right',
-        value: 'ip'
-      },
-      {
-        text: 'Game servers',
-        align: 'right',
-        value: 'gs'
-      },
-      {
-        text: 'State',
-        align: 'right',
-        value: 'state'
-      }
-    ],
-    hosts: [] as Host[],
-    //icons
-    mdiCheckboxBlankCircle: mdiCheckboxBlankCircle,
-  }),
+@Component
+export default class HostList extends Vue {
+  hostListLoading = true
+  refreshInterval = 0
+
+  headers = [
+    {
+      text: 'Name',
+      align: 'left',
+      sortable: true,
+      value: 'name'
+    },
+    {
+      text: 'IP',
+      align: 'right',
+      value: 'ip'
+    },
+    {
+      text: 'Game servers',
+      align: 'right',
+      value: 'gs'
+    },
+    {
+      text: 'State',
+      align: 'right',
+      value: 'state'
+    }
+  ];
+  hosts = [] as Host[]
+
+  //icons
+  mdiCheckboxBlankCircle = mdiCheckboxBlankCircle
+
   mounted() {
-    this.getHosts();
+    this.getHosts()
     this.refreshInterval = setInterval(() => {
-      this.getHosts();
+      this.getHosts()
     }, 10 * 1000);
-  },
-  beforeDestroy(): void {
-    clearInterval(this.refreshInterval);
-  },
-  methods: {
-    goToHost(row: Host): void {
-      this.$router.push('/host/' + row.id);
-    },
-    getHosts(): void {
-      this.hostListLoading = true;
-      this.$http.get('/v1/host').then(res => {
-        this.hosts = res.data.hosts;
-        this.hostListLoading = false;
-      }).catch(e => {
-        this.$auth.checkResponse(e.response.status);
-      });
-    },
   }
-});
+
+  beforeDestroy() {
+    clearInterval(this.refreshInterval);
+  }
+
+  goToHost(row: Host): void {
+    this.$router.push('/host/' + row.id);
+  }
+
+  getHosts(): void {
+    this.hostListLoading = true;
+    this.$http.get('/v1/host').then(res => {
+      this.hosts = res.data.hosts;
+      this.hostListLoading = false;
+    }).catch(e => {
+      this.$auth.checkResponse(e.response.status);
+    });
+  }
+}
 </script>

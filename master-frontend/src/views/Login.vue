@@ -24,7 +24,8 @@
                 >
                   {{ loginError }}
                 </v-alert>
-                <v-form @keyup.native.enter="loginValid && login()" v-model="loginValid">
+                <v-form @keyup.native.enter="loginValid && login()"
+                        v-model="loginValid">
                   <v-text-field
                     :rules="rules.username"
                     label="Login"
@@ -65,30 +66,36 @@
                 >
                   {{ registerError }}
                 </v-alert>
-                <v-form @keyup.native.enter="registerValid && register()" v-model="registerValid">
+                <v-form @keyup.native.enter="registerValid && register()"
+                        v-model="registerValid">
                   <v-text-field :rules="rules.username" label="Username"
                                 :prepend-icon="mdiAccount"
                                 required
-                                type="text" v-model="registerForm.username"></v-text-field>
+                                type="text"
+                                v-model="registerForm.username"></v-text-field>
 
                   <v-text-field :rules="rules.password" label="Password"
                                 :prepend-icon="mdiLock"
                                 required
-                                type="password" v-model="registerForm.password"></v-text-field>
-
-                  <v-text-field :error-messages="confirmation.passwordConfirmation"
-                                :rules="rules.password"
-                                label="Repeat password"
-                                :prepend-icon="mdiLockOpenCheck"
-                                required
                                 type="password"
-                                v-model="registerForm.password_repeat"></v-text-field>
+                                v-model="registerForm.password"></v-text-field>
+
+                  <v-text-field
+                    :error-messages="confirmation.passwordConfirmation"
+                    :rules="rules.password"
+                    label="Repeat password"
+                    :prepend-icon="mdiLockOpenCheck"
+                    required
+                    type="password"
+                    v-model="registerForm.password_repeat"></v-text-field>
 
                   <v-text-field :rules="rules.email" label="Email"
                                 :prepend-icon="mdiEmail" required
-                                type="email" v-model="registerForm.email"></v-text-field>
+                                type="email"
+                                v-model="registerForm.email"></v-text-field>
 
-                  <v-text-field :error-messages="confirmation.emailConfirmation" :rules="rules.email"
+                  <v-text-field :error-messages="confirmation.emailConfirmation"
+                                :rules="rules.email"
                                 label="Repeat email"
                                 :prepend-icon="mdiEmailCheck"
                                 required
@@ -98,7 +105,8 @@
               </v-card-text>
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn :disabled="!registerValid" @click="register()" color="success">
+                <v-btn :disabled="!registerValid" @click="register()"
+                       color="success">
                   <v-icon class="mr-2">{{ mdiRocket }}</v-icon>
                   Register
                 </v-btn>
@@ -112,7 +120,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
+import { Component, Vue, Watch} from 'vue-property-decorator';
 import {
   mdiAccount,
   mdiAccountPlus,
@@ -124,83 +132,83 @@ import {
   mdiRocket
 } from '@mdi/js';
 
-export default Vue.extend({
-  name: 'Login',
-  data: () => ({
-    loginForm: {
-      username: '',
-      password: ''
-    },
+@Component
+export default class LoginPage extends Vue {
+  loginForm = {
+    username: '',
+    password: ''
+  };
 
-    registerForm: {
-      username: '',
-      password: '',
-      password_repeat: '',
-      email: '',
-      email_repeat: '',
-    },
-    rules: {
-      username: [
-        (v: string) => !!v || 'Username is required',
-        (v: string) => v.length >= 3 || 'Username must be of minimum 3 characters'
-      ],
-      password: [
-        (v: string) => !!v || 'Password is required',
-        (v: string) => v.length >= 5 || 'Password must be of minimum 5 characters'
-      ],
-      email: [
-        (v: string) => !!v || 'Email is required',
-        (v: string) => /.+@.+/.test(v) || 'Email must be valid'
-      ],
-    },
+  registerForm = {
+    username: '',
+    password: '',
+    password_repeat: '',
+    email: '',
+    email_repeat: '',
+  };
+  rules = {
+    username: [
+      (v: string) => !!v || 'Username is required',
+      (v: string) => v.length >= 3 || 'Username must be of minimum 3 characters'
+    ],
+    password: [
+      (v: string) => !!v || 'Password is required',
+      (v: string) => v.length >= 5 || 'Password must be of minimum 5 characters'
+    ],
+    email: [
+      (v: string) => !!v || 'Email is required',
+      (v: string) => /.+@.+/.test(v) || 'Email must be valid'
+    ],
+  };
 
-    confirmation: {
-      passwordConfirmation: '',
-      emailConfirmation: '',
-    },
+  confirmation = {
+    passwordConfirmation: '',
+    emailConfirmation: '',
+  };
 
-    registerError: null,
-    loginError: null,
+  registerError = null;
+  loginError = null;
 
-    registerValid: false,
-    loginValid: false,
+  registerValid = false;
+  loginValid = false;
 
-    active: null,
-    // icons
-    mdiAccount: mdiAccount,
-    mdiLock: mdiLock,
-    mdiAccountPlus: mdiAccountPlus,
-    mdiLogin: mdiLogin,
-    mdiLockOpenCheck: mdiLockOpenCheck,
-    mdiEmail: mdiEmail,
-    mdiEmailCheck: mdiEmailCheck,
-    mdiRocket: mdiRocket,
-  }),
-  methods: {
-    login() {
-      this.loginError = null;
-      this.$auth.login(this, this.loginForm, '/');
-    },
-    register() {
-      this.registerError = null;
-      this.$auth.register(this, this.registerForm, '/');
-    }
-  },
-  watch: {
-    'registerForm.password_repeat': function() {
-      if (this.registerForm.password !== this.registerForm.password_repeat) {
-        this.confirmation.passwordConfirmation = 'Passwords do not match';
-      } else {
-        this.confirmation.passwordConfirmation = '';
-      }
-    },
-    'registerForm.email_repeat': function() {
-      if (this.registerForm.email !== this.registerForm.email_repeat) {
-        this.confirmation.emailConfirmation = 'Emails do not match';
-      } else {
-        this.confirmation.emailConfirmation = '';
-      }
+  active = null;
+  // icons
+  mdiAccount = mdiAccount;
+  mdiLock = mdiLock;
+  mdiAccountPlus = mdiAccountPlus;
+  mdiLogin = mdiLogin;
+  mdiLockOpenCheck = mdiLockOpenCheck;
+  mdiEmail = mdiEmail;
+  mdiEmailCheck = mdiEmailCheck;
+  mdiRocket = mdiRocket;
+
+  login() {
+    this.loginError = null;
+    this.$auth.login(this, this.loginForm, '/');
+  }
+
+  register() {
+    this.registerError = null;
+    this.$auth.register(this, this.registerForm, '/');
+  }
+
+  @Watch('registerForm.password_repeat')
+  onPasswordRepeatChanged(value: number) {
+    if (this.registerForm.password !== this.registerForm.password_repeat) {
+      this.confirmation.passwordConfirmation = 'Passwords do not match';
+    } else {
+      this.confirmation.passwordConfirmation = '';
     }
   }
-});
+
+  @Watch('registerForm.email_repeat')
+  onEmailRepeatChanged(value: number) {
+    if (this.registerForm.email !== this.registerForm.email_repeat) {
+      this.confirmation.emailConfirmation = 'Emails do not match';
+    } else {
+      this.confirmation.emailConfirmation = '';
+    }
+  }
+}
 </script>
