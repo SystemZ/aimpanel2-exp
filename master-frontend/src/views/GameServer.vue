@@ -85,9 +85,8 @@
                   <v-card-text>
                     <v-list-item two-line>
                       <v-list-item-content>
-                        <v-list-item-title>{{
-                            game_server.name
-                          }}
+                        <v-list-item-title>
+                          {{game_server.name}}
                         </v-list-item-title>
                         <v-list-item-subtitle>Name</v-list-item-subtitle>
                       </v-list-item-content>
@@ -114,9 +113,8 @@
 
                     <v-list-item two-line>
                       <v-list-item-content>
-                        <v-list-item-title>{{
-                            game_server.metric_frequency
-                          }}s
+                        <v-list-item-title>
+                          {{game_server.metric_frequency}}s
                         </v-list-item-title>
                         <v-list-item-subtitle>Metric frequency
                         </v-list-item-subtitle>
@@ -125,9 +123,8 @@
 
                     <v-list-item two-line>
                       <v-list-item-content>
-                        <v-list-item-title>{{
-                            game_server.stop_timeout
-                          }}s
+                        <v-list-item-title>
+                          {{game_server.stop_timeout}}s
                         </v-list-item-title>
                         <v-list-item-subtitle>Stop timeout
                         </v-list-item-subtitle>
@@ -234,6 +231,10 @@ export default class GameServerPage extends Vue {
 
   get serverUrl() {
     return '/v1/host/' + this.$route.params.id + '/server/' + this.$route.params.server_id;
+  }
+
+  mounted() {
+    this.gsInfo()
   }
 
   gsInfo() {
