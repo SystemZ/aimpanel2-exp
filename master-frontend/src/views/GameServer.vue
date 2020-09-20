@@ -211,7 +211,7 @@ import { GameServer as GS } from '@/types/api';
     GsSettings
   }
 })
-export default class GameServer extends Vue {
+export default class GameServerPage extends Vue {
   tab = 0
   game_server = {} as GS
   message = '';
