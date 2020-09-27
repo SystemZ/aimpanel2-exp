@@ -13,8 +13,8 @@ import (
 
 func Create(data *request.HostCreate, userId primitive.ObjectID) (*model.Host, int) {
 	host := &model.Host{
-		Name:            data.Name,
-		Ip:              data.Ip,
+		Name:            *data.Name,
+		Ip:              *data.Ip,
 		UserId:          userId,
 		MetricFrequency: 30,
 		Token:           lib.RandomString(32),

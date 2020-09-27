@@ -37,15 +37,15 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 	//Decode json
 	data := &request.GameServerCreate{}
-	err = json.NewDecoder(r.Body).Decode(&data)
+	err = json.NewDecoder(r.Body).Decode(data)
 	if err != nil {
 		lib.ReturnError(w, http.StatusBadRequest, ecode.JsonDecode, nil)
 		return
 	}
 
 	gameDef := game.Game{
-		Id:      data.GameId,
-		Version: data.GameVersion,
+		Id:      *data.GameId,
+		Version: *data.GameVersion,
 	}
 	gameDef.SetDefaults()
 	gameDefJson, _ := json.Marshal(gameDef)
@@ -64,9 +64,9 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	gameServer := &model.GameServer{
-		Name:            data.Name,
-		GameId:          data.GameId,
-		GameVersion:     data.GameVersion,
+		Name:            *data.Name,
+		GameId:          *data.GameId,
+		GameVersion:     *data.GameVersion,
 		HostId:          host.ID,
 		MetricFrequency: 30,
 		StopTimeout:     30,
@@ -234,32 +234,34 @@ func Edit(w http.ResponseWriter, r *http.Request) {
 
 	//Decode json
 	data := &request.GameServerCreate{}
-	err = json.NewDecoder(r.Body).Decode(&data)
+	err = json.NewDecoder(r.Body).Decode(data)
 	if err != nil {
 		lib.ReturnError(w, http.StatusBadRequest, ecode.JsonDecode, nil)
 		return
 	}
 
 	// modify ports
-	if data.SerializePorts() != gameServer.SerializePorts() {
-		// FIXME validate
-		// FIXME log this action
-		// FIXME maybe this can be done in less code
-		var newPortList []model.GamePort
-		for _, port := range data.Ports {
-			newPortList = append(newPortList, model.GamePort{
-				Protocol:      port.Protocol,
-				Host:          port.Host,
-				PortHost:      port.PortHost,
-				PortContainer: port.PortContainer,
-			})
+	if data.Ports != nil {
+		if data.SerializePorts() != gameServer.SerializePorts() {
+			// FIXME validate
+			// FIXME log this action
+			// FIXME maybe this can be done in less code
+			var newPortList []model.GamePort
+			for _, port := range *data.Ports {
+				newPortList = append(newPortList, model.GamePort{
+					Protocol:      port.Protocol,
+					Host:          port.Host,
+					PortHost:      port.PortHost,
+					PortContainer: port.PortContainer,
+				})
+			}
+			gameServer.Ports = &newPortList
+			model.Update(gameServer)
 		}
-		gameServer.Ports = &newPortList
-		model.Update(gameServer)
 	}
 
 	// modify custom cmd to start server
-	if gameServer.CustomCmdStart != data.CustomCmdStart {
+	if data.CustomCmdStart != nil {
 		// FIXME validate custom CMD
 		// FIXME move to service
 		user := context.Get(r, "user").(model.User)
@@ -270,18 +272,18 @@ func Edit(w http.ResponseWriter, r *http.Request) {
 			},
 			user,
 			hostId,
-			data.CustomCmdStart,
+			*data.CustomCmdStart,
 			gameServer.CustomCmdStart,
 		)
 		if err != nil {
 			lib.ReturnError(w, http.StatusInternalServerError, ecode.DbSave, err)
 			return
 		}
-		gameServer.CustomCmdStart = data.CustomCmdStart
+		gameServer.CustomCmdStart = *data.CustomCmdStart
 		model.Update(gameServer)
 	}
 
-	if gameServer.Name != data.Name && data.Name != "" {
+	if data.Name != nil {
 		user := context.Get(r, "user").(model.User)
 		err = model.SaveAction(
 			task.Message{
@@ -290,7 +292,7 @@ func Edit(w http.ResponseWriter, r *http.Request) {
 			},
 			user,
 			hostId,
-			data.Name,
+			*data.Name,
 			gameServer.Name,
 		)
 		if err != nil {
@@ -298,11 +300,12 @@ func Edit(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		gameServer.Name = data.Name
+		gameServer.Name = *data.Name
 		model.Update(gameServer)
 	}
 
-	if gameServer.GameId != data.GameId || gameServer.GameVersion != data.GameVersion {
+	if data.GameId != nil && data.GameVersion != nil {
+		//&& gameServer.GameId != *data.GameId || gameServer.GameVersion != *data.GameVersion
 		user := context.Get(r, "user").(model.User)
 		err = model.SaveAction(
 			task.Message{
@@ -311,8 +314,8 @@ func Edit(w http.ResponseWriter, r *http.Request) {
 			},
 			user,
 			hostId,
-			game.GetGameNameById(gameServer.GameId)+" "+data.GameVersion,
-			game.GetGameNameById(data.GameId)+" "+data.GameVersion,
+			game.GetGameNameById(gameServer.GameId)+" "+*data.GameVersion,
+			game.GetGameNameById(*data.GameId)+" "+*data.GameVersion,
 		)
 		if err != nil {
 			lib.ReturnError(w, http.StatusInternalServerError, ecode.DbSave, err)
@@ -320,14 +323,14 @@ func Edit(w http.ResponseWriter, r *http.Request) {
 		}
 
 		gameDef := game.Game{
-			Id:      data.GameId,
-			Version: data.GameVersion,
+			Id:      *data.GameId,
+			Version: *data.GameVersion,
 		}
 		gameDef.SetDefaults()
 		gameDefJson, _ := json.Marshal(gameDef)
 
-		gameServer.GameId = data.GameId
-		gameServer.GameVersion = data.GameVersion
+		gameServer.GameId = *data.GameId
+		gameServer.GameVersion = *data.GameVersion
 		gameServer.GameJson = string(gameDefJson)
 
 		model.Update(gameServer)

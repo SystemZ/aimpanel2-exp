@@ -8,10 +8,12 @@ import (
 
 type HostCreate struct {
 	// User assigned name
-	Name string `json:"name" example:"My Great Linux server"`
+	Name *string `json:"name" example:"My Great Linux server"`
 
 	// User assigned ip
-	Ip string `json:"ip" example:"192.51.100.128"`
+	Ip *string `json:"ip" example:"192.51.100.128"`
+
+	HwId *string `json:"hw_id"`
 }
 
 type HostCreateJob struct {
@@ -25,19 +27,19 @@ type HostCreateJob struct {
 
 type GameServerCreate struct {
 	//User assigned name
-	Name string `json:"name" example:"Ultra MC Server"`
+	Name *string `json:"name" example:"Ultra MC Server"`
 
 	//Selected game id
-	GameId uint `json:"game_id" example:"1"`
+	GameId *uint `json:"game_id" example:"1"`
 
 	//Selected game version
-	GameVersion string `json:"game_version" example:"1.14.2"`
+	GameVersion *string `json:"game_version" example:"1.14.2"`
 
 	//Custom cmd for starting game server
-	CustomCmdStart string `json:"custom_cmd_start" example:"java -jar mc.jar"`
+	CustomCmdStart *string `json:"custom_cmd_start" example:"java -jar mc.jar"`
 
 	//Ports used by game server
-	Ports []GameServerPort `json:"ports"`
+	Ports *[]GameServerPort `json:"ports"`
 }
 
 type GameServerPort struct {
@@ -49,7 +51,7 @@ type GameServerPort struct {
 
 func (gs GameServerCreate) SerializePorts() (res string) {
 	var resPorts []string
-	for _, port := range gs.Ports {
+	for _, port := range *gs.Ports {
 		resPorts = append(resPorts, fmt.Sprintf("%v:%v->%v/%v", port.Host, port.PortHost, port.PortContainer, port.Protocol))
 	}
 	res = strings.Join(resPorts, " ")

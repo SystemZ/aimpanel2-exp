@@ -85,7 +85,7 @@ func HostCreate(w http.ResponseWriter, r *http.Request) {
 	user := context.Get(r, "user").(model.User)
 
 	data := &request.HostCreate{}
-	err := json.NewDecoder(r.Body).Decode(&data)
+	err := json.NewDecoder(r.Body).Decode(data)
 	if err != nil {
 		lib.ReturnError(w, http.StatusBadRequest, ecode.JsonDecode, err)
 		return
@@ -127,13 +127,13 @@ func HostEdit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := &request.HostCreate{}
-	err = json.NewDecoder(r.Body).Decode(&data)
+	err = json.NewDecoder(r.Body).Decode(data)
 	if err != nil {
 		lib.ReturnError(w, http.StatusBadRequest, ecode.JsonDecode, err)
 		return
 	}
 
-	if h.Name != data.Name {
+	if data.Name != nil {
 		user := context.Get(r, "user").(model.User)
 		err = model.SaveAction(
 			task.Message{
@@ -142,7 +142,7 @@ func HostEdit(w http.ResponseWriter, r *http.Request) {
 			},
 			user,
 			hostId,
-			data.Name,
+			*data.Name,
 			h.Name,
 		)
 		if err != nil {
@@ -150,7 +150,28 @@ func HostEdit(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		h.Name = data.Name
+		h.Name = *data.Name
+		model.Update(h)
+	}
+
+	if data.HwId != nil {
+		user := context.Get(r, "user").(model.User)
+		err = model.SaveAction(
+			task.Message{
+				TaskId: task.HOST_HWID_CHANGE,
+				HostID: h.ID.Hex(),
+			},
+			user,
+			hostId,
+			*data.HwId,
+			h.HwId,
+		)
+		if err != nil {
+			lib.ReturnError(w, http.StatusInternalServerError, ecode.DbSave, err)
+			return
+		}
+
+		h.HwId = *data.HwId
 		model.Update(h)
 	}
 
