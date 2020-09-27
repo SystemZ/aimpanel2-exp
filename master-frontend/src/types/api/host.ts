@@ -4,6 +4,7 @@ export interface Host {
   user_id: string,
   ip: string,
   token: string,
+  hw_id: string,
   metric_frequency: string,
   os: string,
   platform: string,
