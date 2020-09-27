@@ -104,6 +104,23 @@
               </v-list-item-content>
             </v-list-item>
 
+            <v-list-item two-line>
+              <v-list-item-content>
+                <v-list-item-title>{{ host.hw_id || 'not set'}}</v-list-item-title>
+                <v-list-item-subtitle>HW ID</v-list-item-subtitle>
+              </v-list-item-content>
+              <v-list-item-action>
+                <v-btn
+                  @click="clearHwId()"
+                  small
+                  color="red"
+                  class="my-2"
+                >
+                  <v-icon size="20">{{ mdiDelete }}</v-icon>
+                </v-btn>
+              </v-list-item-action>
+            </v-list-item>
+
           </v-card-text>
           <v-card-actions>
             <v-btn @click="remove()" color="red darken-2 accent-4" text>Remove
@@ -202,7 +219,7 @@
 import { Component, Vue } from 'vue-property-decorator';
 import { Host, Metric } from '@/types/api';
 import Chart from '@/components/Chart.vue';
-import { mdiPencil } from '@mdi/js';
+import { mdiPencil, mdiDelete } from '@mdi/js';
 
 @Component({
   components: {
@@ -216,6 +233,7 @@ export default class HostPage extends Vue {
   newHostNameDialog = false;
   newHostName = '';
   mdiPencil = mdiPencil;
+  mdiDelete = mdiDelete;
 
   mounted() {
     this.hostInfo()
@@ -254,6 +272,16 @@ export default class HostPage extends Vue {
       this.hostInfo()
       this.newHostName = ''
       this.newHostNameDialog = false
+    }).catch(e => {
+      this.$auth.checkResponse(e.response.status);
+    })
+  }
+
+  clearHwId() {
+    this.$http.put('/v1/host/' + this.$route.params.id, {
+      hw_id: ""
+    }).then(res => {
+      this.hostInfo()
     }).catch(e => {
       this.$auth.checkResponse(e.response.status);
     })

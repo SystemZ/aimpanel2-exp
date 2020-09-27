@@ -45,6 +45,7 @@ const (
 	HOST_NAME_CHANGE
 	GS_NAME_CHANGE
 	GS_GAME_CHANGE
+	HOST_HWID_CHANGE
 )
 
 func (i Id) StringValue() string {
