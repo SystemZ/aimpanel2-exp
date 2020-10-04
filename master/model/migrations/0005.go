@@ -11,7 +11,7 @@ func Migration5Up() (err error) {
 	}
 
 	for _, host := range hosts {
-		host.MetricMaxS = 12 * 3600
+		host.MetricMaxS = 30 * 24 * 3600
 		err = model.Update(&host)
 		if err != nil {
 			return
