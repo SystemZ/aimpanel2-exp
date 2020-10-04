@@ -28,6 +28,8 @@ type Host struct {
 	// Metric frequency
 	MetricFrequency int `bson:"metric_frequency" json:"metric_frequency" example:"30"`
 
+	MetricMaxS int `bson:"metric_max_s" json:"metric_max_s" example:"30"`
+
 	// Host OS
 	OS string `bson:"os" json:"os" example:"linux"`
 

@@ -45,9 +45,11 @@ var serverCmd = &cobra.Command{
 
 		router.InitRateLimit()
 
+		//Cron
 		go cron.SseHeartbeat()
 		//go cron.CheckHostsHeartbeat()
 		//go cron.CheckGSHeartbeat()
+		go cron.RemoveOldMetrics()
 
 		logrus.Info("Starting API on port :" + args[0])
 		r := router.NewRouter()

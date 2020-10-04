@@ -35,6 +35,8 @@ type GameServer struct {
 	// Metric Frequency
 	MetricFrequency int `bson:"metric_frequency" json:"metric_frequency" example:"30"`
 
+	MetricMaxS int `bson:"metric_max_s" json:"metric_max_s" example:"30"`
+
 	// Stop Timeout
 	StopTimeout int `bson:"stop_timeout" json:"stop_timeout" example:"30"`
 
