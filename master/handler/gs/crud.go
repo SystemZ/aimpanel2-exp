@@ -69,6 +69,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		GameVersion:     *data.GameVersion,
 		HostId:          host.ID,
 		MetricFrequency: 30,
+		MetricMaxS:      30 * 24 * 3600,
 		StopTimeout:     30,
 		GameJson:        string(gameDefJson),
 	}
