@@ -17,6 +17,7 @@ func Create(data *request.HostCreate, userId primitive.ObjectID) (*model.Host, i
 		Ip:              *data.Ip,
 		UserId:          userId,
 		MetricFrequency: 30,
+		MetricMaxS:      30 * 24 * 3600,
 		Token:           lib.RandomString(32),
 	}
 	err := model.Put(host)

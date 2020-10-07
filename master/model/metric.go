@@ -329,3 +329,25 @@ type AggregateOutput struct {
 	ID        primitive.ObjectID `bson:"_id"`
 	SampleAvg float64            `bson:"sampleAvg"`
 }
+
+func RemoveMetricsOlderThan(rid primitive.ObjectID, metricType uint8, seconds int) (int64, error) {
+	t := time.Now()
+	t.Add(-time.Second * time.Duration(seconds))
+	id := primitive.NewObjectIDFromTimestamp(t)
+
+	res, err := DB.Collection(MetricCollection).DeleteMany(context.TODO(), bson.D{
+		{Key: "type", Value: metricType},
+		{Key: "r_id", Value: rid},
+		{Key: "_id", Value: bson.D{
+			{
+				Key:   "$lt",
+				Value: id,
+			},
+		}},
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	return res.DeletedCount, nil
+}
