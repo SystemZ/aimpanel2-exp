@@ -23,6 +23,12 @@ func Start(hostToken string) {
 	//Init redis
 	model.InitRedis()
 
+	//Migrate host token from env to redis
+	if len(hostToken) > 0 && len(model.GetHostToken()) == 0 {
+		model.SetHostToken(hostToken)
+	}
+	hostToken = model.GetHostToken()
+
 	//Get HW ID from Redis, If empty create new one
 	hwId := model.GetHwId()
 	if hwId == "" {
