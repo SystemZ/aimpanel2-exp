@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-func Start(hostToken string) {
+func Start() {
 	//model.InitRedis()
 	logrus.Info("starting agent version " + config.GIT_COMMIT)
 	cron.InitCron()
@@ -24,10 +24,10 @@ func Start(hostToken string) {
 	model.InitRedis()
 
 	//Migrate host token from env to redis
-	if len(hostToken) > 0 && len(model.GetHostToken()) == 0 {
-		model.SetHostToken(hostToken)
+	if len(config.HOST_TOKEN) > 0 && len(model.GetHostToken()) == 0 {
+		model.SetHostToken(config.HOST_TOKEN)
 	}
-	hostToken = model.GetHostToken()
+	hostToken := model.GetHostToken()
 
 	//Get HW ID from Redis, If empty create new one
 	hwId := model.GetHwId()

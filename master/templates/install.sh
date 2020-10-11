@@ -135,7 +135,6 @@ ExecStop=$AIMPANEL_BINARY_DIR/$AIMPANEL_BINARY_NAME shutdown
 Environment="GS_DIR=$AIMPANEL_DIR/gs/"
 Environment="STORAGE_DIR=$AIMPANEL_DIR/storage/"
 Environment="TRASH_DIR=$AIMPANEL_DIR/trash/"
-Environment="HOST_TOKEN=$TOKEN"
 Environment="MASTER_URLS=$API_URL"
 " > /etc/systemd/system/aimpanel.service
 
@@ -178,6 +177,9 @@ systemctl restart aimpanel
 systemctl enable aimpanel-redis
 systemctl enable aimpanel-supervisor
 systemctl enable aimpanel
+
+# install token in redis
+slave install $TOKEN
 
 # show status to user
 #systemctl status --no-pager aimpanel-redis.service
