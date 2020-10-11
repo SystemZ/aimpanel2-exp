@@ -18,6 +18,6 @@ var installCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		model.InitRedis()
 		model.SetHostToken(args[0])
-		fmt.Fprintf(cmd.OutOrStdout(), "Installed token successfully.")
+		fmt.Fprintf(cmd.OutOrStdout(), "Installed token successfully.\n")
 	},
 }
