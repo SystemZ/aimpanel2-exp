@@ -13,6 +13,8 @@ import (
 )
 
 func listenerSse(done chan bool) {
+	connected := false
+
 	ahttpHost := ahttp.Hosts[ahttp.CurrentHost]
 	client := sse.NewClient(ahttpHost + "/v1/events/" + config.HOST_TOKEN)
 	client.Headers = map[string]string{
@@ -23,6 +25,7 @@ func listenerSse(done chan bool) {
 	}
 	client.ReconnectStrategy = NewUnlimitedRetry(true, "sse")
 	client.OnDisconnect(func(c *sse.Client) {
+		connected = false
 		logrus.Warn("SSE disconnected")
 	})
 
@@ -33,9 +36,14 @@ func listenerSse(done chan bool) {
 	}
 
 	logrus.Info("Subscribed to SSE")
+	connected = true
 	done <- true
 
 	for msg := range events {
+		if !connected {
+			logrus.Info("Reconnected to SSE successfully")
+			connected = true
+		}
 		taskMsg := task.Message{}
 		err := taskMsg.Deserialize(string(msg.Data))
 		if err != nil {
