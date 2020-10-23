@@ -104,3 +104,15 @@ func GetHwId() string {
 	}
 	return val
 }
+
+func SetHostToken(hostToken string) {
+	Redis.Set(context.TODO(), "host_token", hostToken, 0)
+}
+
+func GetHostToken() string {
+	val, err := Redis.Get(context.TODO(), "host_token").Result()
+	if err != nil {
+		return ""
+	}
+	return val
+}
