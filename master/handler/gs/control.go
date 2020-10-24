@@ -225,3 +225,33 @@ func Shutdown(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusNoContent)
 }
+
+// @Router /host/{host_id}/server/{server_id}/backup [put]
+// @Summary Backup
+// @Tags Game Server
+// @Description Backup selected game server
+// @Accept json
+// @Produce json
+// @Param host_id path string true "Host ID"
+// @Param server_id path string true "Game Server ID"
+// @Success 204 ""
+// @Failure 400 {object} response.JsonError
+// @Security ApiKey
+func Backup(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	gsId := params["gsId"]
+	oid, err := primitive.ObjectIDFromHex(gsId)
+	user := context.Get(r, "user").(model.User)
+	if err != nil {
+		lib.ReturnError(w, http.StatusBadRequest, ecode.OidError, err)
+		return
+	}
+
+	err = gameserver.Backup(oid, user)
+	if err != nil {
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.GsBackup, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
