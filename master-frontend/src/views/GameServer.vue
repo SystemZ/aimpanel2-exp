@@ -78,6 +78,9 @@
                     <v-btn @click="install()" class="ma-2" color="blue" dark>
                       Install
                     </v-btn>
+                    <v-btn @click="backup()" class="ma-2" color="orange" dark>
+                      Backup
+                    </v-btn>
                   </v-card-text>
                 </v-card>
                 <v-card class="mt-5">
@@ -293,6 +296,14 @@ export default class GameServerPage extends Vue {
 
   shutdown() {
     this.$http.put(this.serverUrl + '/shutdown').then(res => {
+      //console.log(res);
+    }).catch(e => {
+      this.$auth.checkResponse(e.response.status);
+    });
+  }
+
+  backup() {
+    this.$http.put(this.serverUrl + '/backup').then(res => {
       //console.log(res);
     }).catch(e => {
       this.$auth.checkResponse(e.response.status);

@@ -46,7 +46,8 @@ func AgentTaskHandler(taskMsg task.Message) {
 	case task.AGENT_METRICS_FREQUENCY:
 		go AgentMetrics(taskMsg.MetricFrequency)
 	// TODO enable backup task handler
-	// case task.AGENT_BACKUP_GS:
+	case task.AGENT_BACKUP_GS:
+		GsBackup(taskMsg.GameServerID)
 	case task.AGENT_GET_UPDATE:
 		go AgentGetUpdate(taskMsg)
 	}

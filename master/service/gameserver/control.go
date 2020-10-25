@@ -360,3 +360,31 @@ func Shutdown(gsId primitive.ObjectID, user model.User) error {
 
 	return nil
 }
+
+func Backup(gsId primitive.ObjectID, user model.User) error {
+	gameServer, err := model.GetGameServerById(gsId)
+	if err != nil {
+		return err
+	}
+
+	if gameServer == nil {
+		return errors.New("error when getting game server from db")
+	}
+
+	host, err := model.GetHostById(gameServer.HostId)
+	if err != nil {
+		return &lib.Error{ErrorCode: ecode.HostNotFound}
+	}
+
+	taskMsg := task.Message{
+		TaskId:       task.AGENT_BACKUP_GS,
+		GameServerID: gsId.Hex(),
+	}
+
+	err = model.SendTaskToSlave(host.ID, user, taskMsg)
+	if err != nil {
+		return &lib.Error{ErrorCode: ecode.DbSave}
+	}
+
+	return nil
+}
