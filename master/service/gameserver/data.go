@@ -51,6 +51,11 @@ func Data(host model.Host, taskMsg *task.Message) error {
 		if err != nil {
 			logrus.Error(err)
 		}
+	case task.AGENT_BACKUP_LIST_GS:
+		err := model.GsBackupsPublish(taskMsg.GameServerID, taskMsg.Backups)
+		if err != nil {
+			logrus.Error(err)
+		}
 	default:
 		logrus.Warnf("Unhandled task %s", taskMsg.TaskId.String())
 		logrus.Debugf("%s", str)

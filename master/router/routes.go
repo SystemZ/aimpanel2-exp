@@ -393,6 +393,22 @@ var v1Routes = Routes{
 		true,
 		false,
 	},
+	Route{
+		"GameServer Backup list",
+		"GET",
+		"/host/{hostId}/server/{gsId}/backup/list",
+		gs.BackupList,
+		true,
+		false,
+	},
+	Route{
+		"GameServer Backup restore",
+		"PUT",
+		"/host/{hostId}/server/{gsId}/backup/restore",
+		gs.BackupRestore,
+		true,
+		false,
+	},
 
 	//GameServer Files
 	Route{

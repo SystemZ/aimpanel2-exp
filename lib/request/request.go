@@ -92,3 +92,7 @@ type AuthLogin struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
+
+type BackupRestore struct {
+	BackupFilename string `json:"backup_filename"`
+}

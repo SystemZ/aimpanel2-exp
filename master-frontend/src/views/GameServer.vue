@@ -53,6 +53,9 @@
           Scheduler
         </v-tab>
         <v-tab>
+          Backups
+        </v-tab>
+        <v-tab>
           Settings
         </v-tab>
       </v-tabs>
@@ -77,9 +80,6 @@
                     </v-btn>
                     <v-btn @click="install()" class="ma-2" color="blue" dark>
                       Install
-                    </v-btn>
-                    <v-btn @click="backup()" class="ma-2" color="orange" dark>
-                      Backup
                     </v-btn>
                   </v-card-text>
                 </v-card>
@@ -160,6 +160,9 @@
           <gs-scheduler :host-id="hostId" :server-id="serverId"/>
         </v-tab-item>
         <v-tab-item>
+          <gs-backup :host-id="hostId" :server-id="serverId"/>
+        </v-tab-item>
+        <v-tab-item>
           <gs-settings :host-id="hostId" :server-id="serverId"/>
         </v-tab-item>
       </v-tabs-items>
@@ -202,13 +205,15 @@ import GsSettings from '@/components/GsSettings.vue';
 import { mdiTrashCan } from '@mdi/js';
 import { mdiPencil } from '@mdi/js';
 import { GameServer as GS } from '@/types/api';
+import GsBackup from '@/components/GsBackup.vue';
 
 @Component({
   components: {
     GsConsole,
     GsFileManager,
     GsScheduler,
-    GsSettings
+    GsSettings,
+    GsBackup
   }
 })
 export default class GameServerPage extends Vue {
@@ -238,6 +243,7 @@ export default class GameServerPage extends Vue {
 
   mounted() {
     this.gsInfo()
+    this.backupList()
   }
 
   gsInfo() {
@@ -302,9 +308,9 @@ export default class GameServerPage extends Vue {
     });
   }
 
-  backup() {
-    this.$http.put(this.serverUrl + '/backup').then(res => {
-      //console.log(res);
+  backupList() {
+    this.$http.get(this.serverUrl + '/backup/list').then(res => {
+      console.log(res);
     }).catch(e => {
       this.$auth.checkResponse(e.response.status);
     });

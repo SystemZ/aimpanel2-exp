@@ -35,6 +35,7 @@ const (
 	AGENT_REMOVE_GS
 	AGENT_BACKUP_GS
 	AGENT_BACKUP_RESTORE_GS
+	AGENT_BACKUP_LIST_GS
 	AGENT_START_GS
 	AGENT_INSTALL_GS
 	AGENT_FILE_LIST_GS
@@ -119,7 +120,8 @@ type Message struct {
 	Jobs  *[]Job            `json:"jobs,omitempty"`
 	Ports *[]Port           `json:"ports,omitempty"`
 
-	BackupFilename string `json:"backup_filename,omitempty"`
+	BackupFilename string   `json:"backup_filename,omitempty"`
+	Backups        []string `json:"backups,omitempty"`
 
 	Timestamp int64 `json:"timestamp,omitempty"`
 }

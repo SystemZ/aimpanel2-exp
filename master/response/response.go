@@ -76,3 +76,7 @@ type GameServer struct {
 type ID struct {
 	ID string `json:"id"`
 }
+
+type BackupList struct {
+	Backups []string `json:"backups"`
+}

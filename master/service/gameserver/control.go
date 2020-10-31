@@ -11,6 +11,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/master/model"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"strings"
 	"sync"
 	"time"
 )
@@ -379,6 +380,91 @@ func Backup(gsId primitive.ObjectID, user model.User) error {
 	taskMsg := task.Message{
 		TaskId:       task.AGENT_BACKUP_GS,
 		GameServerID: gsId.Hex(),
+	}
+
+	err = model.SendTaskToSlave(host.ID, user, taskMsg)
+	if err != nil {
+		return &lib.Error{ErrorCode: ecode.DbSave}
+	}
+
+	return nil
+}
+
+func BackupList(gsId primitive.ObjectID, user model.User) (res []string, err error) {
+	gameServer, err := model.GetGameServerById(gsId)
+	if err != nil {
+		return
+	}
+
+	if gameServer == nil {
+		return nil, errors.New("error when getting game server from db")
+	}
+
+	host, err := model.GetHostById(gameServer.HostId)
+	if err != nil {
+		return nil, &lib.Error{ErrorCode: ecode.HostNotFound}
+	}
+
+	taskMsg := task.Message{
+		TaskId:       task.AGENT_BACKUP_LIST_GS,
+		GameServerID: gsId.Hex(),
+	}
+
+	// FIXME make safe for concurrent requests
+	backupListId := "gs-" + gsId.Hex() + "-backuplist"
+	logrus.Infof("waiting for %v", backupListId)
+	model.GlobalEmitter[backupListId] = make(chan string)
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+	// cancel after 10 seconds of waiting
+	go func() {
+		time.Sleep(time.Second * 10)
+		return
+	}()
+
+	// wait for slave to provide result
+	go func() {
+		for {
+			select {
+			case msg := <-model.GlobalEmitter[backupListId]:
+				res = strings.Split(msg, ",")
+				wg.Done()
+			}
+		}
+	}()
+
+	// send task to slave
+	err = model.SendTaskToSlave(host.ID, user, taskMsg)
+	if err != nil {
+		err = &lib.Error{ErrorCode: ecode.DbSave}
+		wg.Done()
+	}
+
+	// wait for result or 10 seconds, whatever comes first
+	wg.Wait()
+	return
+}
+
+func BackupRestore(gsId primitive.ObjectID, backupFilename string, user model.User) error {
+	gameServer, err := model.GetGameServerById(gsId)
+	if err != nil {
+		return err
+	}
+
+	if gameServer == nil {
+		return errors.New("error when getting game server from db")
+	}
+
+	host, err := model.GetHostById(gameServer.HostId)
+	if err != nil {
+		return &lib.Error{ErrorCode: ecode.HostNotFound}
+	}
+
+	taskMsg := task.Message{
+		TaskId:         task.AGENT_BACKUP_RESTORE_GS,
+		GameServerID:   gsId.Hex(),
+		BackupFilename: backupFilename,
 	}
 
 	err = model.SendTaskToSlave(host.ID, user, taskMsg)
