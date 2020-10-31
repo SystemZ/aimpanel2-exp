@@ -6,6 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -51,6 +52,22 @@ func IterDirectory(dirPath string, tw *tar.Writer, filter bool, filterPath strin
 		curPath := dirPath + "/" + fi.Name()
 		if fi.IsDir() {
 			//TarGzWrite( curPath, tw, fi )
+
+			//Add header with directory to archive
+			h := &tar.Header{
+				ModTime:  fi.ModTime(),
+				Typeflag: tar.TypeDir,
+			}
+
+			if filter {
+				h.Name = "files" + strings.TrimPrefix(curPath, filterPath)
+			} else {
+				h.Name = curPath
+			}
+
+			err = tw.WriteHeader(h)
+			handleBackupError(err)
+
 			IterDirectory(curPath, tw, filter, filterPath)
 		} else {
 			logrus.Debugf("Adding to tar: %s", curPath)
@@ -73,8 +90,66 @@ func TarGz(outFilePath string, inPath string, filterAbsolutePath bool) {
 	tw := tar.NewWriter(gw)
 	defer tw.Close()
 
+	if filterAbsolutePath {
+		h := &tar.Header{
+			Name:     "files",
+			Typeflag: tar.TypeDir,
+		}
+
+		err = tw.WriteHeader(h)
+		handleBackupError(err)
+	}
+
 	IterDirectory(inPath, tw, filterAbsolutePath, inPath)
 	logrus.Info("Completed .tar.gz creation")
+}
+
+func UnTar(src string, dst string) {
+	tarFile, err := os.Open(src)
+	if err != nil {
+		logrus.Warnf("Could not find backup to restore: %s", src)
+	}
+
+	gzipReader, err := gzip.NewReader(tarFile)
+
+	tr := tar.NewReader(gzipReader)
+	for {
+		header, err := tr.Next()
+
+		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			logrus.Warnf("Restore backup failed1: %s", err.Error())
+		}
+
+		//Remove `files` directory from path to extract file directly to gs dir
+		parts := strings.Split(header.Name, string(os.PathSeparator))
+		newHeaderName := strings.Join(parts[1:], string(os.PathSeparator))
+
+		target := filepath.Join(dst, newHeaderName)
+
+		switch header.Typeflag {
+		case tar.TypeDir:
+			if _, err := os.Stat(target); err != nil {
+				if err := os.MkdirAll(target, 0755); err != nil {
+					logrus.Warnf("Restore backup failed (dir): %s", err.Error())
+				}
+			}
+		case tar.TypeReg:
+			fileToWrite, err := os.OpenFile(target, os.O_CREATE|os.O_RDWR, os.FileMode(header.Mode))
+			if err != nil {
+				logrus.Warnf("Restore backup failed (file): %s", err.Error())
+			}
+
+			if _, err := io.Copy(fileToWrite, tr); err != nil {
+				logrus.Warnf("Restore backup failed (copy): %s", err.Error())
+			}
+
+			fileToWrite.Close()
+		}
+	}
 }
 
 func handleBackupError(err error) {

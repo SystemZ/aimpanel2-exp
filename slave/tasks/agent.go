@@ -45,9 +45,10 @@ func AgentTaskHandler(taskMsg task.Message) {
 		GsFileList(taskMsg.GameServerID)
 	case task.AGENT_METRICS_FREQUENCY:
 		go AgentMetrics(taskMsg.MetricFrequency)
-	// TODO enable backup task handler
 	case task.AGENT_BACKUP_GS:
 		GsBackup(taskMsg.GameServerID)
+	case task.AGENT_BACKUP_RESTORE_GS:
+		GsBackupRestore(taskMsg.GameServerID, taskMsg.BackupFilename)
 	case task.AGENT_GET_UPDATE:
 		go AgentGetUpdate(taskMsg)
 	}
@@ -150,6 +151,47 @@ func GsBackup(gsId string) {
 
 	// all done!
 	logrus.Infof("Backup for GS ID %v finished", gsId)
+}
+
+func GsBackupRestoreTrigger(gsId string, backupFilename string) {
+	taskMsg := task.Message{
+		// FIXME other task IDs for user CLI actions
+		TaskId:         task.AGENT_BACKUP_RESTORE_GS,
+		GameServerID:   gsId,
+		BackupFilename: backupFilename,
+	}
+	taskMsgStr, err := taskMsg.Serialize()
+	if err != nil {
+		logrus.Errorf("preparing msg failed: %v", err)
+		return
+	}
+	res, err := model.Redis.Publish(context.TODO(), config.REDIS_PUB_SUB_AGENT_CH, taskMsgStr).Result()
+	if err != nil {
+		logrus.Errorf("sending msg failed: %v", err)
+	}
+	logrus.Infof("Task sent to %v processes", res)
+}
+
+func GsBackupRestore(gsId string, backupFilename string) {
+	logrus.Infof("Backup restore for GS ID %v started", gsId)
+
+	//remove all files in gs dir
+	files, err := filepath.Glob(filepath.Join(config.GS_DIR, gsId, "*"))
+	if err != nil {
+		logrus.Error(err)
+	}
+
+	for _, file := range files {
+		err = os.RemoveAll(file)
+		if err != nil {
+			logrus.Error(err)
+		}
+	}
+
+	//extract backup to gs dir
+	UnTar(filepath.Join(config.BACKUP_DIR, backupFilename), filepath.Join(config.GS_DIR, gsId))
+
+	logrus.Infof("Backup restore for GS ID %v finished", gsId)
 }
 
 func GsFileList(gsId string) {
