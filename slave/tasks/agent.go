@@ -120,6 +120,33 @@ func SelfUpdate(taskMsg task.Message) {
 	os.Exit(0)
 }
 
+func SelfHeal() {
+	//Check if directory exist - if not create it
+	if _, err := os.Stat(config.STORAGE_DIR); err != nil {
+		if err := os.MkdirAll(config.STORAGE_DIR, 0755); err != nil {
+			logrus.Warnf("Could not create %s directory", config.STORAGE_DIR)
+		}
+	}
+
+	if _, err := os.Stat(config.GS_DIR); err != nil {
+		if err := os.MkdirAll(config.GS_DIR, 0755); err != nil {
+			logrus.Warnf("Could not create %s directory", config.GS_DIR)
+		}
+	}
+
+	if _, err := os.Stat(config.BACKUP_DIR); err != nil {
+		if err := os.MkdirAll(config.BACKUP_DIR, 0755); err != nil {
+			logrus.Warnf("Could not create %s directory", config.BACKUP_DIR)
+		}
+	}
+
+	if _, err := os.Stat(config.TRASH_DIR); err != nil {
+		if err := os.MkdirAll(config.TRASH_DIR, 0755); err != nil {
+			logrus.Warnf("Could not create %s directory", config.TRASH_DIR)
+		}
+	}
+}
+
 func GsFileList(gsId string) {
 	logrus.Infof("File list for GS ID %v started", gsId)
 
