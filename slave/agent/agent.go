@@ -20,6 +20,9 @@ func Start() {
 	ahttp.SlaveVersion = config.GIT_COMMIT
 	ahttp.HttpClient = ahttp.InitHttpClient()
 
+	//recreate directories if not exist
+	tasks.SelfHeal()
+
 	//Init redis
 	model.InitRedis()
 

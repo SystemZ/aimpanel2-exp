@@ -151,6 +151,9 @@ func redisTaskHandler(taskCh string, taskBody string) {
 	case task.AGENT_BACKUP_GS:
 		logrus.Info("agent got GAME_MAKE_BACKUP msg")
 		go tasks.GsBackup(taskMsg.GameServerID)
+	case task.AGENT_BACKUP_RESTORE_GS:
+		logrus.Info("agent got GAME_BACKUP_RESTORE msg")
+		go tasks.GsBackupRestore(taskMsg.GameServerID, taskMsg.BackupFilename)
 	case task.AGENT_SHUTDOWN:
 		logrus.Info("agent got AGENT_SHUTDOWN msg")
 		cron.Stop()

@@ -8,6 +8,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib/ecode"
 	"gitlab.com/systemz/aimpanel2/lib/request"
 	"gitlab.com/systemz/aimpanel2/master/model"
+	"gitlab.com/systemz/aimpanel2/master/response"
 	"gitlab.com/systemz/aimpanel2/master/service/gameserver"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
@@ -250,6 +251,67 @@ func Backup(w http.ResponseWriter, r *http.Request) {
 	err = gameserver.Backup(oid, user)
 	if err != nil {
 		lib.ReturnError(w, http.StatusInternalServerError, ecode.GsBackup, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+// @Router /host/{hostId}/server/{gsId}/backup/list [get]
+// @Summary Backup List
+// @Tags Game Server
+// @Description Get game server backup list
+// @Accept json
+// @Produce json
+// @Param hostId path string true "Host ID"
+// @Param gsId path string true "Game Server ID"
+// @Success 200 {object} response.BackupList
+// @Failure 400 {object} response.JsonError
+// @Security ApiKey
+func BackupList(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	gsId := params["gsId"]
+	oid, _ := primitive.ObjectIDFromHex(gsId)
+	user := context.Get(r, "user").(model.User)
+
+	files, err := gameserver.BackupList(oid, user)
+	if err != nil {
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.GsBackupList, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	lib.MustEncode(json.NewEncoder(w), response.BackupList{Backups: files})
+}
+
+// @Router /host/{host_id}/server/{server_id}/backup/restore [put]
+// @Summary Backup restore
+// @Tags Game Server
+// @Description Restore specific backup for gs
+// @Accept json
+// @Produce json
+// @Param host_id path string true "Host ID"
+// @Param server_id path string true "Game Server ID"
+// @Param host body request.BackupRestore true " "
+// @Success 204 ""
+// @Failure 400 {object} response.JsonError
+// @Security ApiKey
+func BackupRestore(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	gsId := params["gsId"]
+	oid, _ := primitive.ObjectIDFromHex(gsId)
+	user := context.Get(r, "user").(model.User)
+
+	data := &request.BackupRestore{}
+	err := json.NewDecoder(r.Body).Decode(data)
+	if err != nil {
+		lib.ReturnError(w, http.StatusBadRequest, ecode.JsonDecode, err)
+		return
+	}
+
+	err = gameserver.BackupRestore(oid, data.BackupFilename, user)
+	if err != nil {
+		lib.ReturnError(w, http.StatusInternalServerError, ecode.GsBackupRestore, err)
 		return
 	}
 

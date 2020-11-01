@@ -45,11 +45,14 @@ func AgentTaskHandler(taskMsg task.Message) {
 		GsFileList(taskMsg.GameServerID)
 	case task.AGENT_METRICS_FREQUENCY:
 		go AgentMetrics(taskMsg.MetricFrequency)
-	// TODO enable backup task handler
 	case task.AGENT_BACKUP_GS:
 		GsBackup(taskMsg.GameServerID)
+	case task.AGENT_BACKUP_RESTORE_GS:
+		GsBackupRestore(taskMsg.GameServerID, taskMsg.BackupFilename)
 	case task.AGENT_GET_UPDATE:
 		go AgentGetUpdate(taskMsg)
+	case task.AGENT_BACKUP_LIST_GS:
+		go AgentSendGsBackupList(taskMsg.GameServerID)
 	}
 }
 
@@ -117,39 +120,31 @@ func SelfUpdate(taskMsg task.Message) {
 	os.Exit(0)
 }
 
-func GsBackupTrigger(gsId string) {
-	taskMsg := task.Message{
-		// FIXME other task IDs for user CLI actions
-		TaskId:       task.AGENT_BACKUP_GS,
-		GameServerID: gsId,
+func SelfHeal() {
+	//Check if directory exist - if not create it
+	if _, err := os.Stat(config.STORAGE_DIR); err != nil {
+		if err := os.MkdirAll(config.STORAGE_DIR, 0755); err != nil {
+			logrus.Warnf("Could not create %s directory", config.STORAGE_DIR)
+		}
 	}
-	taskMsgStr, err := taskMsg.Serialize()
-	if err != nil {
-		logrus.Errorf("preparing msg failed: %v", err)
-		return
+
+	if _, err := os.Stat(config.GS_DIR); err != nil {
+		if err := os.MkdirAll(config.GS_DIR, 0755); err != nil {
+			logrus.Warnf("Could not create %s directory", config.GS_DIR)
+		}
 	}
-	res, err := model.Redis.Publish(context.TODO(), config.REDIS_PUB_SUB_AGENT_CH, taskMsgStr).Result()
-	if err != nil {
-		logrus.Errorf("sending msg failed: %v", err)
+
+	if _, err := os.Stat(config.BACKUP_DIR); err != nil {
+		if err := os.MkdirAll(config.BACKUP_DIR, 0755); err != nil {
+			logrus.Warnf("Could not create %s directory", config.BACKUP_DIR)
+		}
 	}
-	logrus.Infof("Task sent to %v processes", res)
-}
 
-func GsBackup(gsId string) {
-	logrus.Infof("Backup for GS ID %v started", gsId)
-
-	// prepare destination name and path for backup
-	unixTimestamp := strconv.Itoa(int(time.Now().Unix()))
-	// FIXME add human readable UTC date at the end
-	backupFilename := unixTimestamp + "_" + gsId + ".tar.gz"
-	backupPath := config.BACKUP_DIR + backupFilename
-	inputDirPath := strings.TrimRight(config.GS_DIR+gsId, "/")
-
-	// create backup
-	TarGz(backupPath, inputDirPath, true)
-
-	// all done!
-	logrus.Infof("Backup for GS ID %v finished", gsId)
+	if _, err := os.Stat(config.TRASH_DIR); err != nil {
+		if err := os.MkdirAll(config.TRASH_DIR, 0755); err != nil {
+			logrus.Warnf("Could not create %s directory", config.TRASH_DIR)
+		}
+	}
 }
 
 func GsFileList(gsId string) {
@@ -280,6 +275,108 @@ func AgentSendOSInfo() {
 }
 
 func AgentGetUpdate(taskMsg task.Message) {
+	_, err := ahttp.SendTaskData("/v1/events/"+config.HOST_TOKEN, config.HW_ID, taskMsg)
+	if err != nil {
+		logrus.Error(err)
+	}
+}
+
+//Backups
+func GsBackupTrigger(gsId string) {
+	taskMsg := task.Message{
+		// FIXME other task IDs for user CLI actions
+		TaskId:       task.AGENT_BACKUP_GS,
+		GameServerID: gsId,
+	}
+	taskMsgStr, err := taskMsg.Serialize()
+	if err != nil {
+		logrus.Errorf("preparing msg failed: %v", err)
+		return
+	}
+	res, err := model.Redis.Publish(context.TODO(), config.REDIS_PUB_SUB_AGENT_CH, taskMsgStr).Result()
+	if err != nil {
+		logrus.Errorf("sending msg failed: %v", err)
+	}
+	logrus.Infof("Task sent to %v processes", res)
+}
+
+func GsBackup(gsId string) {
+	logrus.Infof("Backup for GS ID %v started", gsId)
+
+	// prepare destination name and path for backup
+	unixTimestamp := strconv.Itoa(int(time.Now().Unix()))
+	// FIXME add human readable UTC date at the end
+	backupFilename := unixTimestamp + "_" + gsId + ".tar.gz"
+	backupPath := config.BACKUP_DIR + backupFilename
+	inputDirPath := strings.TrimRight(config.GS_DIR+gsId, "/")
+
+	// create backup
+	TarGz(backupPath, inputDirPath, true)
+
+	// all done!
+	logrus.Infof("Backup for GS ID %v finished", gsId)
+}
+
+func GsBackupRestoreTrigger(gsId string, backupFilename string) {
+	taskMsg := task.Message{
+		// FIXME other task IDs for user CLI actions
+		TaskId:         task.AGENT_BACKUP_RESTORE_GS,
+		GameServerID:   gsId,
+		BackupFilename: backupFilename,
+	}
+	taskMsgStr, err := taskMsg.Serialize()
+	if err != nil {
+		logrus.Errorf("preparing msg failed: %v", err)
+		return
+	}
+	res, err := model.Redis.Publish(context.TODO(), config.REDIS_PUB_SUB_AGENT_CH, taskMsgStr).Result()
+	if err != nil {
+		logrus.Errorf("sending msg failed: %v", err)
+	}
+	logrus.Infof("Task sent to %v processes", res)
+}
+
+func GsBackupRestore(gsId string, backupFilename string) {
+	logrus.Infof("Backup restore for GS ID %v started", gsId)
+
+	//remove all files in gs dir
+	files, err := filepath.Glob(filepath.Join(config.GS_DIR, gsId, "*"))
+	if err != nil {
+		logrus.Error(err)
+	}
+
+	for _, file := range files {
+		err = os.RemoveAll(file)
+		if err != nil {
+			logrus.Error(err)
+		}
+	}
+
+	//extract backup to gs dir
+	UnTar(filepath.Join(config.BACKUP_DIR, backupFilename), filepath.Join(config.GS_DIR, gsId))
+
+	logrus.Infof("Backup restore for GS ID %v finished", gsId)
+}
+
+func AgentSendGsBackupList(gsId string) {
+	//Get file list which ends with "_{gsId}.tar.gz"
+	var files []string
+	filepath.Walk(config.BACKUP_DIR, func(path string, fi os.FileInfo, err error) error {
+		logrus.Info(fi.Name())
+		if !fi.IsDir() {
+			if strings.HasSuffix(fi.Name(), "_"+gsId+".tar.gz") {
+				files = append(files, fi.Name())
+			}
+		}
+		return nil
+	})
+
+	taskMsg := task.Message{
+		TaskId:       task.AGENT_BACKUP_LIST_GS,
+		GameServerID: gsId,
+		Backups:      files,
+	}
+	//TODO: do something with status code
 	_, err := ahttp.SendTaskData("/v1/events/"+config.HOST_TOKEN, config.HW_ID, taskMsg)
 	if err != nil {
 		logrus.Error(err)
