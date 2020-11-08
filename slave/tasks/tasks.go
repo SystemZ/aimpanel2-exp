@@ -20,7 +20,8 @@ func ProcessTask(taskMsg task.Message) {
 		task.AGENT_BACKUP_GS, task.AGENT_UPDATE,
 		task.AGENT_REMOVE_GS, task.AGENT_FILE_LIST_GS,
 		task.AGENT_METRICS_FREQUENCY, task.AGENT_GET_UPDATE,
-		task.AGENT_BACKUP_RESTORE_GS, task.AGENT_BACKUP_LIST_GS:
+		task.AGENT_BACKUP_RESTORE_GS, task.AGENT_BACKUP_LIST_GS,
+		task.AGENT_CLEAN_REINSTALL_GS:
 		logrus.Infof("agent got task %v", taskMsg.TaskId.String())
 		// executed by agent
 		AgentTaskHandler(taskMsg)

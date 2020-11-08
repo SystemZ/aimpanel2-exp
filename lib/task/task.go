@@ -41,6 +41,9 @@ const (
 	AGENT_FILE_LIST_GS
 	AGENT_CLEAN_REINSTALL_GS
 
+	//supervisor
+	SUPERVISOR_CLEAN_FILES_GS
+
 	// special case, eg. just to keep up SSE session
 	PING
 

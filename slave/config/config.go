@@ -5,19 +5,20 @@ import (
 )
 
 var (
-	GS_DIR                   string
-	STORAGE_DIR              string
-	TRASH_DIR                string
-	BACKUP_DIR               string
-	HOST_TOKEN               string
-	GIT_COMMIT               string
-	REDIS_HOST               string
-	REDIS_USERNAME           string
-	REDIS_PASSWORD           string
-	REDIS_PUB_SUB_AGENT_CH   string
-	REDIS_PUB_SUB_WRAPPER_CH string
-	MASTER_URLS              []string
-	HW_ID                    string
+	GS_DIR                      string
+	STORAGE_DIR                 string
+	TRASH_DIR                   string
+	BACKUP_DIR                  string
+	HOST_TOKEN                  string
+	GIT_COMMIT                  string
+	REDIS_HOST                  string
+	REDIS_USERNAME              string
+	REDIS_PASSWORD              string
+	REDIS_PUB_SUB_AGENT_CH      string
+	REDIS_PUB_SUB_WRAPPER_CH    string
+	REDIS_PUB_SUB_SUPERVISOR_CH string
+	MASTER_URLS                 []string
+	HW_ID                       string
 )
 
 func init() {
@@ -52,6 +53,9 @@ func init() {
 
 	viper.SetDefault("REDIS_PUB_SUB_WRAPPER_CH", "aimpanel_wrapper")
 	REDIS_PUB_SUB_WRAPPER_CH = viper.GetString("REDIS_PUB_SUB_WRAPPER_CH")
+
+	viper.SetDefault("REDIS_PUB_SUB_SUPERVISOR_CH", "aimpanel_supervisor")
+	REDIS_PUB_SUB_SUPERVISOR_CH = viper.GetString("REDIS_PUB_SUB_SUPERVISOR_CH")
 
 	// use multiple URLs by separating them with space
 	viper.SetDefault("MASTER_URLS", "https://aimpanel.local:3000")

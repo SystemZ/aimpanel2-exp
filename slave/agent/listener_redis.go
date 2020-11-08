@@ -161,6 +161,8 @@ func redisTaskHandler(taskCh string, taskBody string) {
 		logrus.Info("agent got AGENT_SHUTDOWN msg")
 		cron.Stop()
 		tasks.AgentShutdown()
+	case task.SUPERVISOR_CLEAN_FILES_GS:
+		model.GsCleanFilesFinished(taskMsg.GameServerID, true)
 	default:
 		logrus.Warningf("Unhandled task %v!", taskMsg.TaskId)
 	}
