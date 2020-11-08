@@ -390,14 +390,11 @@ func GsCleanFilesTrigger(gsId string) {
 		return
 	}()
 
-	var ok bool
-
 	// wait for supervisor to provide result
 	go func() {
 		for {
 			select {
-			case msg := <-model.GlobalEmitter[cleanFilesId]:
-				ok = msg
+			case <-model.GlobalEmitter[cleanFilesId]:
 				wg.Done()
 			}
 		}
