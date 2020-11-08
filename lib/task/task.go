@@ -39,6 +39,7 @@ const (
 	AGENT_START_GS
 	AGENT_INSTALL_GS
 	AGENT_FILE_LIST_GS
+	AGENT_CLEAN_REINSTALL_GS
 
 	// special case, eg. just to keep up SSE session
 	PING

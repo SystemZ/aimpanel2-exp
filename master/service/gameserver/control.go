@@ -474,3 +474,48 @@ func BackupRestore(gsId primitive.ObjectID, backupFilename string, user model.Us
 
 	return nil
 }
+
+func CleanReinstall(gsId primitive.ObjectID, user model.User) error {
+	gameServer, err := model.GetGameServerById(gsId)
+	if err != nil {
+		return err
+	}
+
+	if gameServer == nil {
+		return errors.New("error when getting game server from db")
+	}
+
+	host, err := model.GetHostById(gameServer.HostId)
+	if err != nil {
+		return &lib.Error{ErrorCode: ecode.HostNotFound}
+	}
+
+	gameFile, err := model.GetGameFileByGameIdAndVersion(gameServer.GameId, gameServer.GameVersion)
+	if err != nil {
+		return err
+	}
+
+	if gameFile == nil {
+		return errors.New("error when getting game file from db")
+	}
+
+	var g game.Game
+	err = json.Unmarshal([]byte(gameServer.GameJson), &g)
+	if err != nil {
+		logrus.Error(err)
+	}
+	g.DownloadUrl = gameFile.DownloadUrl
+
+	taskMsg := task.Message{
+		TaskId:       task.AGENT_CLEAN_REINSTALL_GS,
+		Game:         &g,
+		GameServerID: gsId.Hex(),
+	}
+
+	err = model.SendTaskToSlave(host.ID, user, taskMsg)
+	if err != nil {
+		return &lib.Error{ErrorCode: ecode.DbSave}
+	}
+
+	return nil
+}

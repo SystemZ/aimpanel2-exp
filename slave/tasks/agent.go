@@ -53,6 +53,8 @@ func AgentTaskHandler(taskMsg task.Message) {
 		go AgentGetUpdate(taskMsg)
 	case task.AGENT_BACKUP_LIST_GS:
 		go AgentSendGsBackupList(taskMsg.GameServerID)
+	case task.AGENT_CLEAN_REINSTALL_GS:
+		go GsCleanReinstall(taskMsg)
 	}
 }
 
@@ -317,6 +319,7 @@ func GsBackup(gsId string) {
 	logrus.Infof("Backup for GS ID %v finished", gsId)
 }
 
+
 func GsBackupRestoreTrigger(gsId string, backupFilename string) {
 	taskMsg := task.Message{
 		// FIXME other task IDs for user CLI actions
@@ -339,6 +342,17 @@ func GsBackupRestoreTrigger(gsId string, backupFilename string) {
 func GsBackupRestore(gsId string, backupFilename string) {
 	logrus.Infof("Backup restore for GS ID %v started", gsId)
 
+	GsCleanFiles(gsId)
+
+	//extract backup to gs dir
+	UnTar(filepath.Join(config.BACKUP_DIR, backupFilename), filepath.Join(config.GS_DIR, gsId))
+
+	logrus.Infof("Backup restore for GS ID %v finished", gsId)
+}
+
+func GsCleanFiles(gsId string) {
+	logrus.Infof("Cleaning files for GS ID %v started", gsId)
+
 	//remove all files in gs dir
 	files, err := filepath.Glob(filepath.Join(config.GS_DIR, gsId, "*"))
 	if err != nil {
@@ -352,10 +366,7 @@ func GsBackupRestore(gsId string, backupFilename string) {
 		}
 	}
 
-	//extract backup to gs dir
-	UnTar(filepath.Join(config.BACKUP_DIR, backupFilename), filepath.Join(config.GS_DIR, gsId))
-
-	logrus.Infof("Backup restore for GS ID %v finished", gsId)
+	logrus.Infof("Cleaning files for GS ID %v finished", gsId)
 }
 
 func AgentSendGsBackupList(gsId string) {
@@ -381,4 +392,9 @@ func AgentSendGsBackupList(gsId string) {
 	if err != nil {
 		logrus.Error(err)
 	}
+}
+
+func GsCleanReinstall(taskMsg task.Message) {
+	GsCleanFiles(taskMsg.GameServerID)
+	GsInstall(taskMsg)
 }
