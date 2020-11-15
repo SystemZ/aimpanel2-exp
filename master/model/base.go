@@ -19,6 +19,10 @@ const (
 	MetricCollection           = "metrics"
 	EventCollection            = "event"
 	ConfigCollection           = "config"
+
+	//LE
+	CertDomainCollection = "cert_domains"
+	CertCollection       = "certs"
 )
 
 type Document interface {
