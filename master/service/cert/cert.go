@@ -5,11 +5,11 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
-	"fmt"
+	"errors"
 	"github.com/go-acme/lego/v4/certcrypto"
 	"github.com/go-acme/lego/v4/certificate"
-	"github.com/go-acme/lego/v4/challenge/http01"
 	"github.com/go-acme/lego/v4/lego"
+	"github.com/go-acme/lego/v4/providers/dns/cloudflare"
 	"github.com/go-acme/lego/v4/registration"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/master/config"
@@ -36,14 +36,20 @@ func (u *LeUser) GetPrivateKey() crypto.PrivateKey {
 	return u.key
 }
 
-func InitLego() {
+func InitLego() error {
+	//Create cloudflare provider
+	cfProvider, err := createCloudflareProvider()
+	if err != nil {
+		return err
+	}
+
 	privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
-		logrus.Fatal(err)
+		return err
 	}
 
 	User = LeUser{
-		Email: "aimpanel@aimpanel.pro",
+		Email: config.LE_EMAIL,
 		key:   privateKey,
 	}
 
@@ -59,22 +65,37 @@ func InitLego() {
 	//Create lego client
 	Client, err = lego.NewClient(cfg)
 	if err != nil {
-		logrus.Fatal(err)
+		return err
 	}
 
-	//Create http solver
-	err = Client.Challenge.SetHTTP01Provider(http01.NewProviderServer("", "5002"))
-	if err != nil {
-		logrus.Fatal(err)
-	}
+	err = Client.Challenge.SetDNS01Provider(cfProvider)
 
 	//Register client
 	reg, err := Client.Registration.Register(registration.RegisterOptions{TermsOfServiceAgreed: true})
 	if err != nil {
-		logrus.Fatal(err)
+		return err
 	}
 
 	User.Registration = reg
+
+	return nil
+}
+
+func createCloudflareProvider() (*cloudflare.DNSProvider, error) {
+	if config.CLOUDFLARE_AUTH_TOKEN == "" || config.CLOUDFLARE_ZONE_TOKEN == "" {
+		return nil, errors.New("CLOUDFLARE_AUTH_TOKEN or CLOUDFLARE_ZONE_TOKEN not set")
+	}
+
+	cloudflareCfg := cloudflare.NewDefaultConfig()
+	cloudflareCfg.AuthToken = config.CLOUDFLARE_AUTH_TOKEN
+	cloudflareCfg.ZoneToken = config.CLOUDFLARE_ZONE_TOKEN
+
+	provider, err := cloudflare.NewDNSProviderConfig(cloudflareCfg)
+	if err != nil {
+		return nil, err
+	}
+
+	return provider, nil
 }
 
 func CreateCertForDomain(domain string) {
@@ -83,12 +104,11 @@ func CreateCertForDomain(domain string) {
 		Bundle:  true,
 	}
 
-	certificates, err := Client.Certificate.Obtain(request)
+	cert, err := Client.Certificate.Obtain(request)
 	if err != nil {
 		logrus.Fatal(err)
 	}
 
-	// Each certificate comes back with the cert bytes, the bytes of the client's
-	// private key, and a certificate URL. SAVE THESE TO DISK.
-	fmt.Printf("%#v\n", certificates)
+	logrus.Info(string(cert.Certificate))
+	logrus.Info(string(cert.PrivateKey))
 }

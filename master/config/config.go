@@ -31,6 +31,15 @@ var (
 	HTTP_API_URL string
 	// URL for slave update repo
 	HTTP_REPO_URL string
+
+	//CERTS
+	//Email for letsencrypt
+	LE_EMAIL string
+
+	//Cloudflare Auth Token (Zone/DNS/Edit permission)
+	CLOUDFLARE_AUTH_TOKEN string
+	//Cloudflare Zone Token (Zone/Zone/Read permission)
+	CLOUDFLARE_ZONE_TOKEN string
 )
 
 func init() {
@@ -85,5 +94,12 @@ func init() {
 	HTTP_API_URL = viper.GetString("HTTP_API_URL")
 	viper.SetDefault("HTTP_REPO_URL", "https://storage.gra.cloud.ovh.net/v1/AUTH_23b9e96be2fc431d93deedba1b8c87d2/aimpanel-updates")
 	HTTP_REPO_URL = viper.GetString("HTTP_REPO_URL")
+
+	viper.SetDefault("LE_EMAIL", "aimpanel@aimpanel.pro")
+	LE_EMAIL = viper.GetString("LE_EMAIL")
+	viper.SetDefault("CLOUDFLARE_AUTH_TOKEN", "")
+	CLOUDFLARE_AUTH_TOKEN = viper.GetString("CLOUDFLARE_AUTH_TOKEN")
+	viper.SetDefault("CLOUDFLARE_ZONE_TOKEN", "")
+	CLOUDFLARE_ZONE_TOKEN = viper.GetString("CLOUDFLARE_ZONE_TOKEN")
 
 }
