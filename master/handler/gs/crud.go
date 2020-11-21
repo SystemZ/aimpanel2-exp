@@ -335,6 +335,20 @@ func Edit(w http.ResponseWriter, r *http.Request) {
 		gameServer.GameJson = string(gameDefJson)
 
 		model.Update(gameServer)
+
+		if *data.CleanReinstall {
+			err := gameserver.CleanReinstall(gameServer.ID, user)
+			if err != nil {
+				lib.ReturnError(w, http.StatusInternalServerError, ecode.GsCleanReinstall, err)
+				return
+			}
+		} else {
+			err := gameserver.Install(gameServer.ID, user)
+			if err != nil {
+				lib.ReturnError(w, http.StatusInternalServerError, ecode.GsCleanReinstall, err)
+				return
+			}
+		}
 	}
 
 	lib.MustEncode(json.NewEncoder(w), response.GameServer{GameServer: *gameServer})

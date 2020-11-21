@@ -48,6 +48,7 @@ const (
 	GsBackup
 	GsBackupList
 	GsBackupRestore
+	GsCleanReinstall
 	// games
 	GameNotFound
 	///agent
