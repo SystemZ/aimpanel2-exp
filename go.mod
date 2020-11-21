@@ -17,6 +17,7 @@ require (
 	github.com/docker/distribution v2.7.1+incompatible // indirect
 	github.com/docker/docker v17.12.0-ce-rc1.0.20200731103033-88820a4793ea+incompatible
 	github.com/docker/go-connections v0.4.0
+	github.com/go-acme/lego/v4 v4.1.0
 	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/go-redis/redis/v8 v8.0.0-beta.7
 	github.com/gofrs/uuid v3.2.0+incompatible
@@ -33,7 +34,6 @@ require (
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.0.1 // indirect
 	github.com/opencontainers/runc v0.1.1 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/r3labs/sse v0.0.0-20191214223212-f0cc80f53f80
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/rs/cors v1.7.0
@@ -47,9 +47,6 @@ require (
 	github.com/vjeantet/grok v1.0.0
 	go.mongodb.org/mongo-driver v1.3.3
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
-	golang.org/x/net v0.0.0-20200822124328-c89045814202 // indirect
 	golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208 // indirect
 	golang.org/x/text v0.3.3 // indirect
-	golang.org/x/time v0.0.0-20200416051211-89c76fbcd5d1 // indirect
-	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
