@@ -14,7 +14,7 @@ func init() {
 var generateCertsCmd = &cobra.Command{
 	Use:   "generate-certs",
 	Short: "Generate certs for all domains in database",
-	Args:  cobra.MinimumNArgs(1),
+	Args:  cobra.MinimumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		model.DB = model.InitDB()
 

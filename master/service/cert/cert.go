@@ -2,10 +2,13 @@ package cert
 
 import (
 	"crypto"
+	"crypto/aes"
+	"crypto/cipher"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
 	"errors"
+	"fmt"
 	"github.com/go-acme/lego/v4/certcrypto"
 	"github.com/go-acme/lego/v4/certificate"
 	"github.com/go-acme/lego/v4/lego"
@@ -13,6 +16,7 @@ import (
 	"github.com/go-acme/lego/v4/registration"
 	"gitlab.com/systemz/aimpanel2/master/config"
 	"gitlab.com/systemz/aimpanel2/master/model"
+	"io"
 )
 
 var (
@@ -109,9 +113,26 @@ func CreateCertForDomain(domain model.CertDomain) error {
 		return err
 	}
 
+	c, err := aes.NewCipher([]byte(config.LE_SECRET))
+	if err != nil {
+		return err
+	}
+
+	aesGCM, err := cipher.NewGCM(c)
+	if err != nil {
+		return err
+	}
+
+	nonce := make([]byte, aesGCM.NonceSize())
+	if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
+		return err
+	}
+
+	encryptedPrivateKey := aesGCM.Seal(nonce, nonce, cert.PrivateKey, nil)
+
 	dbCert := &model.Cert{
 		Cert:       string(cert.Certificate),
-		PrivateKey: string(cert.PrivateKey),
+		PrivateKey: fmt.Sprintf("%x", encryptedPrivateKey),
 		DomainId:   domain.ID,
 	}
 
