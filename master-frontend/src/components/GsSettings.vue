@@ -15,16 +15,27 @@
                   :items="games"
                   item-text="name"
                   item-value="id"
-                  label="Select game"
+                  label="Select game*"
                   v-model="game.game_id">
                 </v-select>
               </v-flex>
               <v-flex xs12>
                 <v-select
                   :items="gameVersions"
-                  label="Select game version"
+                  label="Select game version*"
                   v-model="game.game_version">
                 </v-select>
+              </v-flex>
+              <v-flex xs12>
+                <v-checkbox
+                  label="Clean reinstall (removes all game server files)*"
+                  v-model="game.clean_reinstall">
+                </v-checkbox>
+              </v-flex>
+              <v-flex xs12 v-if="game.clean_reinstall">
+                <v-btn @click="backup()" color="green">
+                  Make backup
+                </v-btn>
               </v-flex>
             </v-layout>
           </v-container>
@@ -208,6 +219,7 @@ export default class GsSettings extends Vue {
   game = {
     game_id: 0,
     game_version: 0,
+    clean_reinstall: false
   }
   gamesLoading = true;
   games = [] as Game[];
@@ -292,17 +304,26 @@ export default class GsSettings extends Vue {
   saveGameEngine(): void {
     this.$http.put(this.serverUrl, {
       game_id: this.game.game_id,
-      game_version: this.game.game_version
+      game_version: this.game.game_version,
+      clean_reinstall: this.game.clean_reinstall,
     }).then(res => {
       this.getSettings();
       this.game = {
         game_id: 0,
         game_version: 0,
+        clean_reinstall: false,
       }
       this.changeGameEngineDialog = false
     }).catch(e => {
       this.$auth.checkResponse(e.response.status);
     })
+  }
+
+  backup() {
+    this.$http.put('/v1/host/' + this.hostId + '/server/' + this.serverId + '/backup').then(res => {
+    }).catch(e => {
+      this.$auth.checkResponse(e.response.status);
+    });
   }
 }
 </script>

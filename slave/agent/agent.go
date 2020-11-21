@@ -26,10 +26,14 @@ func Start() {
 	//Init redis
 	model.InitRedis()
 
+	// helper for sending tasks to supervisor
+	model.EmitterInit()
+
 	//Migrate host token from env to redis
 	if len(config.HOST_TOKEN) > 0 && len(model.GetHostToken()) == 0 {
 		model.SetHostToken(config.HOST_TOKEN)
 	}
+
 	hostToken := model.GetHostToken()
 
 	//Get HW ID from Redis, If empty create new one

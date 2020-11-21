@@ -18,6 +18,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -53,6 +54,8 @@ func AgentTaskHandler(taskMsg task.Message) {
 		go AgentGetUpdate(taskMsg)
 	case task.AGENT_BACKUP_LIST_GS:
 		go AgentSendGsBackupList(taskMsg.GameServerID)
+	case task.AGENT_CLEAN_REINSTALL_GS:
+		go GsCleanReinstall(taskMsg)
 	}
 }
 
@@ -68,6 +71,7 @@ func GsRemove(taskMsg task.Message) {
 }
 
 func GsInstall(taskMsg task.Message) {
+	logrus.Infof("Installation of GS ID %v started", taskMsg.GameServerID)
 	gsPath := filepath.Clean(config.GS_DIR) + "/" + taskMsg.GameServerID
 	if _, err := os.Stat(gsPath); os.IsNotExist(err) {
 		//TODO: Set correct perms
@@ -78,6 +82,7 @@ func GsInstall(taskMsg task.Message) {
 	if err != nil {
 		logrus.Error(err)
 	}
+	logrus.Infof("Installation of GS ID %v finished", taskMsg.GameServerID)
 }
 
 func SelfUpdate(taskMsg task.Message) {
@@ -339,18 +344,7 @@ func GsBackupRestoreTrigger(gsId string, backupFilename string) {
 func GsBackupRestore(gsId string, backupFilename string) {
 	logrus.Infof("Backup restore for GS ID %v started", gsId)
 
-	//remove all files in gs dir
-	files, err := filepath.Glob(filepath.Join(config.GS_DIR, gsId, "*"))
-	if err != nil {
-		logrus.Error(err)
-	}
-
-	for _, file := range files {
-		err = os.RemoveAll(file)
-		if err != nil {
-			logrus.Error(err)
-		}
-	}
+	GsCleanFilesTrigger(gsId)
 
 	//extract backup to gs dir
 	UnTar(filepath.Join(config.BACKUP_DIR, backupFilename), filepath.Join(config.GS_DIR, gsId))
@@ -381,4 +375,42 @@ func AgentSendGsBackupList(gsId string) {
 	if err != nil {
 		logrus.Error(err)
 	}
+}
+
+func GsCleanFilesTrigger(gsId string) {
+	cleanFilesId := "gs-" + gsId + "-cleanfiles"
+	logrus.Infof("waiting for %v", cleanFilesId)
+	model.GlobalEmitter[cleanFilesId] = make(chan bool)
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+	// cancel after 10 seconds of waiting
+	go func() {
+		time.Sleep(time.Second * 10)
+		return
+	}()
+
+	// wait for supervisor to provide result
+	go func() {
+		for {
+			select {
+			case <-model.GlobalEmitter[cleanFilesId]:
+				wg.Done()
+			}
+		}
+	}()
+
+	supervisorTask := task.Message{
+		TaskId:       task.SUPERVISOR_CLEAN_FILES_GS,
+		GameServerID: gsId,
+	}
+	model.SendTask(config.REDIS_PUB_SUB_SUPERVISOR_CH, supervisorTask)
+
+	wg.Wait()
+}
+
+func GsCleanReinstall(taskMsg task.Message) {
+	GsCleanFilesTrigger(taskMsg.GameServerID)
+
+	GsInstall(taskMsg)
 }

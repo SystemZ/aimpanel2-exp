@@ -40,6 +40,9 @@ type GameServerCreate struct {
 
 	//Ports used by game server
 	Ports *[]GameServerPort `json:"ports"`
+
+	//CleanReinstall true or false
+	CleanReinstall *bool `json:"clean_reinstall" example:"true"`
 }
 
 type GameServerPort struct {

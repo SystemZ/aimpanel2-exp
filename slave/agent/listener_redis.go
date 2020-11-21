@@ -154,10 +154,15 @@ func redisTaskHandler(taskCh string, taskBody string) {
 	case task.AGENT_BACKUP_RESTORE_GS:
 		logrus.Info("agent got GAME_BACKUP_RESTORE msg")
 		go tasks.GsBackupRestore(taskMsg.GameServerID, taskMsg.BackupFilename)
+	case task.AGENT_CLEAN_REINSTALL_GS:
+		logrus.Info("agent got GAME_CLEAN_REINSTALL msg")
+		go tasks.GsCleanReinstall(taskMsg)
 	case task.AGENT_SHUTDOWN:
 		logrus.Info("agent got AGENT_SHUTDOWN msg")
 		cron.Stop()
 		tasks.AgentShutdown()
+	case task.SUPERVISOR_CLEAN_FILES_GS:
+		model.GsCleanFilesFinished(taskMsg.GameServerID, true)
 	default:
 		logrus.Warningf("Unhandled task %v!", taskMsg.TaskId)
 	}
