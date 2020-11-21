@@ -11,8 +11,8 @@ import (
 	"github.com/go-acme/lego/v4/lego"
 	"github.com/go-acme/lego/v4/providers/dns/cloudflare"
 	"github.com/go-acme/lego/v4/registration"
-	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/master/config"
+	"gitlab.com/systemz/aimpanel2/master/model"
 )
 
 var (
@@ -98,17 +98,42 @@ func createCloudflareProvider() (*cloudflare.DNSProvider, error) {
 	return provider, nil
 }
 
-func CreateCertForDomain(domain string) {
+func CreateCertForDomain(domain model.CertDomain) error {
 	request := certificate.ObtainRequest{
-		Domains: []string{domain},
-		Bundle:  true,
+		Domains: []string{domain.Name},
+		Bundle:  false,
 	}
 
 	cert, err := Client.Certificate.Obtain(request)
 	if err != nil {
-		logrus.Fatal(err)
+		return err
 	}
 
-	logrus.Info(string(cert.Certificate))
-	logrus.Info(string(cert.PrivateKey))
+	dbCert := &model.Cert{
+		Cert:       string(cert.Certificate),
+		PrivateKey: string(cert.PrivateKey),
+		DomainId:   domain.ID,
+	}
+
+	err = model.Put(dbCert)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func CreateCerts() error {
+	domains, err := model.GetCertDomains()
+	if err != nil {
+		return err
+	}
+
+	for _, domain := range domains {
+		if err := CreateCertForDomain(domain); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
