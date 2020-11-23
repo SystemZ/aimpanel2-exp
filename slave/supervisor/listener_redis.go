@@ -53,6 +53,9 @@ func redisTaskHandler(taskCh string, taskBody string) {
 			GameServerID: taskMsg.GameServerID,
 		}
 		model.SendTask(config.REDIS_PUB_SUB_AGENT_CH, taskMsg)
+	case task.SUPERVISOR_REMOVE_FILE_GS:
+		logrus.Info("supervisor got SUPERVISOR_REMOVE_FILE_GS")
+		tasks.GsFileRemove(taskMsg.GameServerID, taskMsg.Body)
 	default:
 		logrus.Warningf("Unhandled task %v!", taskMsg.TaskId)
 	}

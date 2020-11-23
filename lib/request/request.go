@@ -99,3 +99,7 @@ type AuthLogin struct {
 type BackupRestore struct {
 	BackupFilename string `json:"backup_filename"`
 }
+
+type GameServerFile struct {
+	Path string `json:"path" example:"/minecraft.jar"`
+}

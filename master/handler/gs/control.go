@@ -170,33 +170,6 @@ func SendCommand(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// @Router /host/{hostId}/server/{gsId}/file/list [get]
-// @Summary File List
-// @Tags Game Server
-// @Description Get game server file list
-// @Accept json
-// @Produce json
-// @Param hostId path string true "Host ID"
-// @Param gsId path string true "Game Server ID"
-// @Success 200 {object} filemanager.Node
-// @Failure 400 {object} response.JsonError
-// @Security ApiKey
-func FileList(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	gsId := params["gsId"]
-	oid, _ := primitive.ObjectIDFromHex(gsId)
-	user := context.Get(r, "user").(model.User)
-
-	files, err := gameserver.FileList(oid, user)
-	if err != nil {
-		lib.ReturnError(w, http.StatusInternalServerError, ecode.GsFileList, err)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	lib.MustEncode(json.NewEncoder(w), files)
-}
-
 // @Router /host/{host_id}/server/{server_id}/shutdown [put]
 // @Summary Shutdown
 // @Tags Game Server

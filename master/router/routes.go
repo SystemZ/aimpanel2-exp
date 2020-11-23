@@ -419,6 +419,14 @@ var v1Routes = Routes{
 		true,
 		false,
 	},
+	Route{
+		"GameServer File remove",
+		"DELETE",
+		"/host/{hostId}/server/{gsId}/file",
+		gs.FileRemove,
+		true,
+		false,
+	},
 
 	//User
 	Route{

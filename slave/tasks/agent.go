@@ -9,7 +9,6 @@ import (
 	"github.com/shirou/gopsutil/mem"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/systemz/aimpanel2/lib/ahttp"
-	"gitlab.com/systemz/aimpanel2/lib/filemanager"
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/slave/config"
 	"gitlab.com/systemz/aimpanel2/slave/model"
@@ -44,6 +43,8 @@ func AgentTaskHandler(taskMsg task.Message) {
 		GsRemove(taskMsg)
 	case task.AGENT_FILE_LIST_GS:
 		GsFileList(taskMsg.GameServerID)
+	case task.AGENT_FILE_REMOVE_GS:
+		GsFileRemoveTrigger(taskMsg)
 	case task.AGENT_METRICS_FREQUENCY:
 		go AgentMetrics(taskMsg.MetricFrequency)
 	case task.AGENT_BACKUP_GS:
@@ -150,28 +151,6 @@ func SelfHeal() {
 			logrus.Warnf("Could not create %s directory", config.TRASH_DIR)
 		}
 	}
-}
-
-func GsFileList(gsId string) {
-	logrus.Infof("File list for GS ID %v started", gsId)
-
-	node, err := filemanager.NewTree(config.GS_DIR+"/"+gsId, 100, 64)
-	if err != nil {
-		logrus.Error(err)
-	}
-
-	taskMsg := task.Message{
-		TaskId:       task.AGENT_FILE_LIST_GS,
-		GameServerID: gsId,
-		Files:        node,
-	}
-
-	_, err = ahttp.SendTaskData("/v1/events/"+config.HOST_TOKEN, config.HW_ID, taskMsg)
-	if err != nil {
-		logrus.Error(err)
-	}
-
-	logrus.Infof("File list for GS ID %v finished", gsId)
 }
 
 func AgentShutdown() {
