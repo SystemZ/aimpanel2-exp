@@ -13,7 +13,6 @@ import (
 // @Accept json
 // @Produce json
 // @Success 200 {array} response.Game
-// @Failure 400 {object} response.JsonError
 // @Router /game [get]
 // @Security ApiKey
 func ListGames(w http.ResponseWriter, r *http.Request) {
