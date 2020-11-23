@@ -69,6 +69,11 @@
             <v-icon>{{ mdiInformation }}</v-icon>
           </v-btn>
         </v-list-item-action>
+        <v-list-item-action>
+          <v-btn icon @click="removeFile(item)" color="red">
+            <v-icon>{{ mdiDelete }}</v-icon>
+          </v-btn>
+        </v-list-item-action>
       </v-list-item>
     </v-list>
   </v-card>
@@ -77,7 +82,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { Node } from '@/types/files';
-import { mdiArrowLeft, mdiFile, mdiFolder, mdiInformation } from '@mdi/js';
+import { mdiArrowLeft, mdiFile, mdiFolder, mdiInformation, mdiDelete } from '@mdi/js';
 
 interface FileRow {
   icon: string,
@@ -114,6 +119,7 @@ export default class GsFileManager extends Vue {
   mdiFile = mdiFile;
   mdiFolder = mdiFolder;
   mdiArrowLeft = mdiArrowLeft;
+  mdiDelete = mdiDelete;
 
   mounted() {
     this.serverUrl = '/v1/host/' + this.hostId + '/server/' + this.serverId;
@@ -170,6 +176,22 @@ export default class GsFileManager extends Vue {
       }
     });
     return node;
+  }
+
+  removeFile(item: Node) {
+    console.log(item)
+    console.log(this.files)
+    this.$http.delete(this.serverUrl + '/file', {
+      data: {
+        path: item.path
+      }
+    }).then(res => {
+      setTimeout(() => {
+        this.getFiles()
+      }, 2000)
+    }).catch(e => {
+      this.$auth.checkResponse(e.response.status);
+    });
   }
 }
 </script>

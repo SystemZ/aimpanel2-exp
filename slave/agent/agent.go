@@ -35,6 +35,7 @@ func Start() {
 	}
 
 	hostToken := model.GetHostToken()
+	config.HOST_TOKEN = model.GetHostToken()
 
 	//Get HW ID from Redis, If empty create new one
 	hwId := model.GetHwId()

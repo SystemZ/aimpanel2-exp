@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -67,7 +68,7 @@ func NewTree(root string, limit int, maxContentSize int64) (result *Node, err er
 		}
 
 		parents[path] = &Node{
-			FullPath: path,
+			FullPath: strings.TrimPrefix(path, absRoot),
 			Info:     fileInfoFromInterface(info, string(content)),
 			Children: make([]*Node, 0),
 		}
