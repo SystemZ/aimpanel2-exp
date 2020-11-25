@@ -9,6 +9,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib/response"
 	"io/ioutil"
 	"math/rand"
+	"net"
 	goHttp "net/http"
 	"time"
 )
@@ -88,4 +89,16 @@ func StringInSlice(a string, list []string) bool {
 		}
 	}
 	return false
+}
+
+func GetFreePort() (int, error) {
+	listener, err := net.Listen("tcp", ":0")
+	if err != nil {
+		return 0, err
+	}
+	err = listener.Close()
+	if err != nil {
+		return 0, err
+	}
+	return listener.Addr().(*net.TCPAddr).Port, nil
 }

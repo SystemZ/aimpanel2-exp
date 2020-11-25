@@ -58,7 +58,7 @@ type Host struct {
 	HwId string `bson:"hw_id" json:"hw_id" example:"0ea13526-5349-4671-9b6e-626d5678cc5f"`
 
 	//Domain for internal use (certs, slave https server)
-	Domain string `bson:"domain" json:"-"`
+	Domain string `bson:"domain" json:"domain"`
 }
 
 func (h *Host) GetCollectionName() string {

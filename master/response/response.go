@@ -80,3 +80,7 @@ type ID struct {
 type BackupList struct {
 	Backups []string `json:"backups"`
 }
+
+type Port struct {
+	Port int `json:"port"`
+}

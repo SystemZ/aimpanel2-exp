@@ -13,6 +13,7 @@ export interface Host {
   kernel_version: string,
   kernel_arch: string,
   state: number,
+  domain: string,
   created_at: Date,
 }
 

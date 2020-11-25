@@ -126,6 +126,7 @@
                 <v-icon>{{ mdiDelete }}</v-icon>
               </v-btn>
             </v-list-item-action>
+          </template>
         </v-list-item>
       </v-list-item-group>
     </v-list>

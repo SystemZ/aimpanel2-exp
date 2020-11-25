@@ -49,3 +49,7 @@ func GsFileRemoveTrigger(taskMsg task.Message) {
 
 	model.SendTask(config.REDIS_PUB_SUB_SUPERVISOR_CH, supervisorTask)
 }
+
+func GsFileServer(taskMsg task.Message) {
+	logrus.Infof("starting file server for gs %v", taskMsg.GameServerID)
+}

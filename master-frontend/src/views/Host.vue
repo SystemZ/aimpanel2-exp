@@ -34,6 +34,40 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="newDomainDialog" persistent max-width="600px">
+      <v-card>
+        <v-card-title>
+          <span class="headline">Edit Host domain</span>
+        </v-card-title>
+        <v-card-text>
+          <v-container>
+            <v-row>
+              <v-col cols="12">
+                <v-text-field
+                  v-model="host.domain"
+                  label="Current domain"
+                  disabled
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12">
+                <v-text-field
+                  v-model="newDomain"
+                  label="New domain*"
+                  required></v-text-field>
+              </v-col>
+            </v-row>
+          </v-container>
+          <small>*required field</small>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="red darken-1" text @click="newDomainDialog = false">
+            Close
+          </v-btn>
+          <v-btn color="green darken-1" @click="saveDomain">Save</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <v-row class="mb-6">
       <v-col>
         <v-card>
@@ -117,6 +151,26 @@
                   class="my-2"
                 >
                   <v-icon size="20">{{ mdiDelete }}</v-icon>
+                </v-btn>
+              </v-list-item-action>
+            </v-list-item>
+
+            <v-list-item two-line>
+              <v-list-item-content>
+                <v-list-item-title>
+                  {{host.domain || 'not set'}}
+                </v-list-item-title>
+                <v-list-item-subtitle>Domain
+                </v-list-item-subtitle>
+              </v-list-item-content>
+              <v-list-item-action>
+                <v-btn
+                  @click="newDomainDialog = true"
+                  small
+                  color="blue"
+                  class="my-2"
+                >
+                  <v-icon size="20">{{ mdiPencil }}</v-icon>
                 </v-btn>
               </v-list-item-action>
             </v-list-item>
@@ -232,6 +286,10 @@ export default class HostPage extends Vue {
   removeSnackbar = false;
   newHostNameDialog = false;
   newHostName = '';
+
+  newDomainDialog = false;
+  newDomain = '';
+
   mdiPencil = mdiPencil;
   mdiDelete = mdiDelete;
 
@@ -272,6 +330,18 @@ export default class HostPage extends Vue {
       this.hostInfo()
       this.newHostName = ''
       this.newHostNameDialog = false
+    }).catch(e => {
+      this.$auth.checkResponse(e.response.status);
+    })
+  }
+
+  saveDomain() {
+    this.$http.put('/v1/host/' + this.$route.params.id,{
+      domain: this.newDomain
+    }).then(res => {
+      this.hostInfo();
+      this.newDomain = ''
+      this.newDomainDialog = false
     }).catch(e => {
       this.$auth.checkResponse(e.response.status);
     })

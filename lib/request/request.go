@@ -14,6 +14,8 @@ type HostCreate struct {
 	Ip *string `json:"ip" example:"192.51.100.128"`
 
 	HwId *string `json:"hw_id"`
+
+	Domain *string `json:"domain"`
 }
 
 type HostCreateJob struct {

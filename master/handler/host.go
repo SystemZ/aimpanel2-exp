@@ -175,6 +175,27 @@ func HostEdit(w http.ResponseWriter, r *http.Request) {
 		model.Update(h)
 	}
 
+	if data.Domain != nil {
+		user := context.Get(r, "user").(model.User)
+		err = model.SaveAction(
+			task.Message{
+				TaskId: task.HOST_DOMAIN_CHANGE,
+				HostID: h.ID.Hex(),
+			},
+			user,
+			hostId,
+			*data.Domain,
+			h.Domain,
+		)
+		if err != nil {
+			lib.ReturnError(w, http.StatusInternalServerError, ecode.DbSave, err)
+			return
+		}
+
+		h.Domain = *data.Domain
+		model.Update(h)
+	}
+
 	lib.MustEncode(json.NewEncoder(w), response.Host{Host: *h})
 }
 

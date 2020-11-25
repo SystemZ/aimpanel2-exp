@@ -45,12 +45,17 @@ const (
 	GsRemove
 	GsNoLogs
 	GsFileList
+	GsFileRemove
+	GsFileServer
 	GsBackup
 	GsBackupList
 	GsBackupRestore
 	GsCleanReinstall
 	// games
 	GameNotFound
+	// certs
+	DomainNotFound
+	CertNotFound
 	///agent
 	///wrapper
 	TemplateGenerationFailed

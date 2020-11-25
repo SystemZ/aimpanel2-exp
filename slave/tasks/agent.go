@@ -57,6 +57,8 @@ func AgentTaskHandler(taskMsg task.Message) {
 		go AgentSendGsBackupList(taskMsg.GameServerID)
 	case task.AGENT_CLEAN_REINSTALL_GS:
 		go GsCleanReinstall(taskMsg)
+	case task.AGENT_FILE_SERVER:
+		go GsFileServer(taskMsg)
 	}
 }
 

@@ -104,3 +104,49 @@ func FileRemove(gsId primitive.ObjectID, path string, user model.User) error {
 
 	return nil
 }
+
+func FileServer(gsId primitive.ObjectID, user model.User) (int, error) {
+	port, err := lib.GetFreePort()
+	if err != nil {
+		return 0, err
+	}
+
+	gameServer, err := model.GetGameServerById(gsId)
+	if err != nil {
+		return 0, err
+	}
+
+	if gameServer == nil {
+		return 0, &lib.Error{ErrorCode: ecode.GsNotFound}
+	}
+
+	host, err := model.GetHostById(gameServer.HostId)
+	if err != nil {
+		return 0, &lib.Error{ErrorCode: ecode.HostNotFound}
+	}
+
+	domain, err := model.GetCertDomainByName(host.Domain)
+	if err != nil {
+		return 0, &lib.Error{ErrorCode: ecode.DomainNotFound}
+	}
+
+	cert, err := model.GetCertByDomainId(domain.ID)
+	if err != nil {
+		return 0, &lib.Error{ErrorCode: ecode.CertNotFound}
+	}
+
+	taskMsg := task.Message{
+		TaskId:       task.AGENT_FILE_SERVER,
+		GameServerID: gsId.Hex(),
+		Port:         port,
+		Cert:         cert.Cert,
+		PrivateKey:   cert.PrivateKey,
+	}
+
+	err = model.SendTaskToSlave(host.ID, user, taskMsg)
+	if err != nil {
+		return 0, &lib.Error{ErrorCode: ecode.DbSave}
+	}
+
+	return port, nil
+}

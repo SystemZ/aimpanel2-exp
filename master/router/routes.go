@@ -427,6 +427,14 @@ var v1Routes = Routes{
 		true,
 		false,
 	},
+	Route{
+		"GameServer File server",
+		"PUT",
+		"/host/{hostId}/server/{gsId}/file/server",
+		gs.FileServer,
+		true,
+		false,
+	},
 
 	//User
 	Route{
