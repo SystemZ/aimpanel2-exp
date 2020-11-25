@@ -2,6 +2,11 @@
   <v-card>
     <v-card-title>Files</v-card-title>
 
+    <v-container v-if="selectedFiles.length > 0">
+      <v-btn color="primary" @click="selectedFiles = []">Unselect all</v-btn>
+    </v-container>
+
+
     <v-list subheader two-line>
       <v-subheader inset>Folders</v-subheader>
 
@@ -21,17 +26,16 @@
 
       <v-list-item
         :key="item.info.name"
-        @click="files.selected = item"
         v-for="item in files.selected.children"
         v-if="item.info.is_dir"
       >
-        <v-list-item-avatar>
+        <v-list-item-avatar @click="files.selected = item">
           <v-icon>
             {{ mdiFolder }}
           </v-icon>
         </v-list-item-avatar>
 
-        <v-list-item-content>
+        <v-list-item-content @click="files.selected = item">
           <v-list-item-title v-text="item.info.name"></v-list-item-title>
           <v-list-item-subtitle
             v-text="prettySize(item.info.size)"></v-list-item-subtitle>
@@ -40,6 +44,11 @@
         <v-list-item-action>
           <v-btn icon>
             <v-icon>{{ mdiInformation }}</v-icon>
+          </v-btn>
+        </v-list-item-action>
+        <v-list-item-action>
+          <v-btn icon @click="remove(item)" color="red">
+            <v-icon>{{ mdiDelete }}</v-icon>
           </v-btn>
         </v-list-item-action>
       </v-list-item>
@@ -48,33 +57,44 @@
 
       <v-subheader inset>Files</v-subheader>
 
-      <v-list-item
-        :key="item.info.name"
-        @click=""
-        v-for="item in files.selected.children"
-        v-if="!item.info.is_dir"
+      <v-list-item-group
+        v-model="selectedFiles"
+        multiple
       >
-        <v-list-item-avatar>
-          <v-icon>{{ mdiFile }}</v-icon>
-        </v-list-item-avatar>
+        <v-list-item
+          :key="item.info.name"
+          :value="item"
+          v-for="item in files.selected.children"
+          v-if="!item.info.is_dir"
+        >
+          <template v-slot:default="{ active }">
+            <v-checkbox
+              :input-value="active"
+            ></v-checkbox>
 
-        <v-list-item-content>
-          <v-list-item-title v-text="item.info.name"></v-list-item-title>
-          <v-list-item-subtitle
-            v-text="prettySize(item.info.size)"></v-list-item-subtitle>
-        </v-list-item-content>
+            <v-list-item-avatar>
+              <v-icon>{{ mdiFile }}</v-icon>
+            </v-list-item-avatar>
 
-        <v-list-item-action>
-          <v-btn icon>
-            <v-icon>{{ mdiInformation }}</v-icon>
-          </v-btn>
-        </v-list-item-action>
-        <v-list-item-action>
-          <v-btn icon @click="removeFile(item)" color="red">
-            <v-icon>{{ mdiDelete }}</v-icon>
-          </v-btn>
-        </v-list-item-action>
-      </v-list-item>
+            <v-list-item-content>
+              <v-list-item-title v-text="item.info.name"></v-list-item-title>
+              <v-list-item-subtitle
+                v-text="prettySize(item.info.size)"></v-list-item-subtitle>
+            </v-list-item-content>
+
+            <v-list-item-action>
+              <v-btn icon>
+                <v-icon>{{ mdiInformation }}</v-icon>
+              </v-btn>
+            </v-list-item-action>
+            <v-list-item-action>
+              <v-btn icon @click="remove(item)" color="red">
+                <v-icon>{{ mdiDelete }}</v-icon>
+              </v-btn>
+            </v-list-item-action>
+          </template>
+        </v-list-item>
+      </v-list-item-group>
     </v-list>
   </v-card>
 </template>
@@ -82,7 +102,13 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { Node } from '@/types/files';
-import { mdiArrowLeft, mdiFile, mdiFolder, mdiInformation, mdiDelete } from '@mdi/js';
+import {
+  mdiArrowLeft,
+  mdiFile,
+  mdiFolder,
+  mdiInformation,
+  mdiDelete
+} from '@mdi/js';
 
 interface FileRow {
   icon: string,
@@ -113,6 +139,8 @@ export default class GsFileManager extends Vue {
     root: {} as Node,
     selected: {} as Node
   };
+
+  selectedFiles = [];
 
   //icons
   mdiInformation = mdiInformation;
@@ -178,9 +206,7 @@ export default class GsFileManager extends Vue {
     return node;
   }
 
-  removeFile(item: Node) {
-    console.log(item)
-    console.log(this.files)
+  remove(item: Node) {
     this.$http.delete(this.serverUrl + '/file', {
       data: {
         path: item.path
