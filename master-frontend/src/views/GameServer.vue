@@ -81,6 +81,10 @@
                     <v-btn @click="install()" class="ma-2" color="blue" dark>
                       Install
                     </v-btn>
+
+                    <v-btn @click="fileServer()" class="ma-2" color="cyan" dark>
+                      Start file server
+                    </v-btn>
                   </v-card-text>
                 </v-card>
                 <v-card class="mt-5">
@@ -310,6 +314,14 @@ export default class GameServerPage extends Vue {
 
   backupList() {
     this.$http.get(this.serverUrl + '/backup/list').then(res => {
+      console.log(res);
+    }).catch(e => {
+      this.$auth.checkResponse(e.response.status);
+    });
+  }
+
+  fileServer() {
+    this.$http.put(this.serverUrl + '/file/server').then(res => {
       console.log(res);
     }).catch(e => {
       this.$auth.checkResponse(e.response.status);
