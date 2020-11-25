@@ -34,6 +34,17 @@
 
     <v-card-title>Files</v-card-title>
 
+    <v-container v-if="downloading">
+      <v-progress-linear
+
+        v-model="downloadProgress"
+        color="amber"
+        height="25"
+      >
+        <strong>{{ Math.ceil(downloadProgress) }}%</strong>
+      </v-progress-linear>
+    </v-container>
+
     <v-container v-if="selectedFiles.length > 0">
       <v-btn color="primary" @click="selectedFiles = []">Unselect all</v-btn>
     </v-container>
@@ -120,6 +131,14 @@
                 <v-icon>{{ mdiInformation }}</v-icon>
               </v-btn>
             </v-list-item-action>
+
+            <v-list-item-action>
+              <v-btn icon @click="download(item)"
+                     color="blue">
+                <v-icon>{{ mdiDownload }}</v-icon>
+              </v-btn>
+            </v-list-item-action>
+
             <v-list-item-action>
               <v-btn icon @click="fileToRemove = item; removeFileDialog = true"
                      color="red">
@@ -141,7 +160,7 @@ import {
   mdiFile,
   mdiFolder,
   mdiInformation,
-  mdiDelete
+  mdiDelete, mdiDownload
 } from '@mdi/js';
 
 interface FileRow {
@@ -167,6 +186,13 @@ export default class GsFileManager extends Vue {
   })
   hostId !: String;
 
+  @Prop({
+    type: String, required: true, default: () => {
+      return '';
+    }
+  })
+  fileServerAddress !: String;
+
   serverUrl = '';
   stream = '' as any;
   files = {
@@ -175,9 +201,12 @@ export default class GsFileManager extends Vue {
   };
 
   removeFileDialog = false;
-  fileToRemove ={} as Node
+  fileToRemove = {} as Node
 
   selectedFiles = [];
+
+  downloading = false;
+  downloadProgress = 0;
 
   //icons
   mdiInformation = mdiInformation;
@@ -185,6 +214,7 @@ export default class GsFileManager extends Vue {
   mdiFolder = mdiFolder;
   mdiArrowLeft = mdiArrowLeft;
   mdiDelete = mdiDelete;
+  mdiDownload = mdiDownload;
 
   mounted() {
     this.serverUrl = '/v1/host/' + this.hostId + '/server/' + this.serverId;
@@ -257,6 +287,30 @@ export default class GsFileManager extends Vue {
     }).finally(() => {
       this.fileToRemove = {} as Node
       this.removeFileDialog = false;
+    })
+  }
+
+  download(item: Node) {
+    this.downloading = true;
+    this.$http.post(this.fileServerAddress + '/download', {
+      path: item.path
+    }, {
+      responseType: 'blob',
+      onDownloadProgress: (ev) => {
+        this.downloadProgress = Math.round((ev.loaded * 100) / ev.total)
+        console.log(this.downloadProgress)
+      }
+    }).then(res => {
+      console.log(res)
+      const [, filename] = res.headers['content-disposition'].split('filename=');
+
+      let blob = new Blob([res.data], {type: res.headers['content-type']});
+      let link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = filename;
+      link.click()
+    }).finally(() => {
+      this.downloading = false;
     })
   }
 }

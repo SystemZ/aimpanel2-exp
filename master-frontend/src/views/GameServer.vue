@@ -156,7 +156,7 @@
           <!-- v-if="files.selected" -->
           <v-row class="mb-6">
             <v-col cols="12" md="12" sm="12" xs="12">
-              <gs-file-manager :host-id="hostId" :server-id="serverId"/>
+              <gs-file-manager :host-id="hostId" :server-id="serverId" :file-server-address="fileServerAddress"/>
             </v-col>
           </v-row>
         </v-tab-item>
@@ -208,7 +208,7 @@ import GsScheduler from '@/components/GsScheduler.vue';
 import GsSettings from '@/components/GsSettings.vue';
 import { mdiTrashCan } from '@mdi/js';
 import { mdiPencil } from '@mdi/js';
-import { GameServer as GS } from '@/types/api';
+import { GameServer as GS, Host } from '@/types/api';
 import GsBackup from '@/components/GsBackup.vue';
 
 @Component({
@@ -223,12 +223,14 @@ import GsBackup from '@/components/GsBackup.vue';
 export default class GameServerPage extends Vue {
   tab = 0
   game_server = {} as GS
+  host = {} as Host
   message = '';
   timer = '';
   installSnackbar = false;
   removeSnackbar = false;
   newGSNameDialog = false;
   newGSName = '';
+  fileServerAddress = '';
   //icons
   mdiTrashCan = mdiTrashCan;
   mdiPencil = mdiPencil;
@@ -248,6 +250,15 @@ export default class GameServerPage extends Vue {
   mounted() {
     this.gsInfo()
     this.backupList()
+    this.hostInfo()
+  }
+
+  hostInfo() {
+    this.$http.get('/v1/host/' + this.hostId).then((res) => {
+      this.host = res.data.host;
+    }).catch(e => {
+      this.$auth.checkResponse(e.response.status);
+    });
   }
 
   gsInfo() {
@@ -323,6 +334,7 @@ export default class GameServerPage extends Vue {
   fileServer() {
     this.$http.put(this.serverUrl + '/file/server').then(res => {
       console.log(res);
+      this.fileServerAddress = 'https://' + this.host.domain + ':' + res.data.port
     }).catch(e => {
       this.$auth.checkResponse(e.response.status);
     });
