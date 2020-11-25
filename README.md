@@ -71,8 +71,8 @@ DEV_MODE=true HTTP_TEMPLATE_DIR=./templates/ HTTP_TLS_KEY_PATH=../key.pem HTTP_T
 
 #### Cert
 
-Generate TLS cert for local dev env.  
-Remember to visit `https://127.0.0.1:3000` and accept self signed cert in a browser at least once.  
+Generate TLS cert for local dev env.
+Remember to visit `https://127.0.0.1:3000` and accept self signed cert in a browser at least once.
 If you don't do this, visiting frontend via webpack server will not work.
 
 ```bash
@@ -95,7 +95,7 @@ If you change some iota ints or whatever, just run this to regenerate all syntax
 ```bash
 ./Taskfile.sh generate
 ```
-You will need this if you encounter error like:  
+You will need this if you encounter error like:
 > "invalid array index" compiler error signifies that the constant values have changed
 
 ### Slave VM via Vagrant
@@ -161,7 +161,7 @@ git remote prune origin
 
 * https://github.com/swaggo/swag/cmd/swag
 
-Swagger allow us to automatically build API docs and client SDK in the future, 
+Swagger allow us to automatically build API docs and client SDK in the future,
 all this without much work from devs
 
 ```bash
@@ -173,6 +173,15 @@ This will generate .json file with swagger spec
 
 ```bash
 ./Taskfile.sh swagger-gen-dev
+```
+
+### Self-signed cert for file server
+
+This will generate self signed cert for slave.
+Remember to set IP on host page in frontend.
+
+```bash
+./Taskfile.sh dev-slave-crt
 ```
 
 ### Serve

@@ -43,6 +43,7 @@ const (
 	//FILE MANAGER
 	AGENT_FILE_LIST_GS
 	AGENT_FILE_REMOVE_GS
+	AGENT_FILE_START_SERVER
 
 	//supervisor
 	SUPERVISOR_CLEAN_FILES_GS
@@ -130,6 +131,11 @@ type Message struct {
 
 	BackupFilename string   `json:"backup_filename,omitempty"`
 	Backups        []string `json:"backups,omitempty"`
+
+	//FileManager
+	Port       int    `json:"port,omitempty"`
+	Cert       string `json:"cert,omitempty"`
+	PrivateKey string `json:"private_key,omitempty"`
 
 	Timestamp int64 `json:"timestamp,omitempty"`
 }
