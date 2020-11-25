@@ -1,5 +1,37 @@
 <template>
   <v-card>
+    <v-dialog
+      v-model="removeFileDialog"
+      persistent
+      max-width="250px"
+    >
+      <v-card>
+        <v-card-title class="headline">
+          Delete file
+        </v-card-title>
+        <v-card-text>
+          <p>Are you sure you want to delete this file?</p>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="primary darken-1"
+            text
+            @click="removeFileDialog = false; fileToRemove = {}"
+          >
+            Cancel
+          </v-btn>
+          <v-btn
+            color="red darken-1"
+            text
+            @click="remove(fileToRemove)"
+          >
+            Delete
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <v-card-title>Files</v-card-title>
 
     <v-container v-if="selectedFiles.length > 0">
@@ -47,7 +79,8 @@
           </v-btn>
         </v-list-item-action>
         <v-list-item-action>
-          <v-btn icon @click="remove(item)" color="red">
+          <v-btn icon @click="fileToRemove = item; removeFileDialog = true"
+                 color="red">
             <v-icon>{{ mdiDelete }}</v-icon>
           </v-btn>
         </v-list-item-action>
@@ -88,11 +121,11 @@
               </v-btn>
             </v-list-item-action>
             <v-list-item-action>
-              <v-btn icon @click="remove(item)" color="red">
+              <v-btn icon @click="fileToRemove = item; removeFileDialog = true"
+                     color="red">
                 <v-icon>{{ mdiDelete }}</v-icon>
               </v-btn>
             </v-list-item-action>
-          </template>
         </v-list-item>
       </v-list-item-group>
     </v-list>
@@ -139,6 +172,9 @@ export default class GsFileManager extends Vue {
     root: {} as Node,
     selected: {} as Node
   };
+
+  removeFileDialog = false;
+  fileToRemove ={} as Node
 
   selectedFiles = [];
 
@@ -217,7 +253,10 @@ export default class GsFileManager extends Vue {
       }, 2000)
     }).catch(e => {
       this.$auth.checkResponse(e.response.status);
-    });
+    }).finally(() => {
+      this.fileToRemove = {} as Node
+      this.removeFileDialog = false;
+    })
   }
 }
 </script>
