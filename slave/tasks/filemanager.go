@@ -34,7 +34,7 @@ func GsFileList(gsId string) {
 }
 
 func GsFileRemove(gsId string, filePath string) {
-	err := os.Remove(path.Join(config.GS_DIR, gsId, filePath))
+	err := os.RemoveAll(path.Join(config.GS_DIR, gsId, filePath))
 	if err != nil {
 		logrus.Warn(err)
 	}

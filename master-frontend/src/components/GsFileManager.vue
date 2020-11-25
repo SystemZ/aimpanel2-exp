@@ -21,17 +21,16 @@
 
       <v-list-item
         :key="item.info.name"
-        @click="files.selected = item"
         v-for="item in files.selected.children"
         v-if="item.info.is_dir"
       >
-        <v-list-item-avatar>
+        <v-list-item-avatar @click="files.selected = item">
           <v-icon>
             {{ mdiFolder }}
           </v-icon>
         </v-list-item-avatar>
 
-        <v-list-item-content>
+        <v-list-item-content @click="files.selected = item">
           <v-list-item-title v-text="item.info.name"></v-list-item-title>
           <v-list-item-subtitle
             v-text="prettySize(item.info.size)"></v-list-item-subtitle>
@@ -40,6 +39,11 @@
         <v-list-item-action>
           <v-btn icon>
             <v-icon>{{ mdiInformation }}</v-icon>
+          </v-btn>
+        </v-list-item-action>
+        <v-list-item-action>
+          <v-btn icon @click="remove(item)" color="red">
+            <v-icon>{{ mdiDelete }}</v-icon>
           </v-btn>
         </v-list-item-action>
       </v-list-item>
@@ -70,7 +74,7 @@
           </v-btn>
         </v-list-item-action>
         <v-list-item-action>
-          <v-btn icon @click="removeFile(item)" color="red">
+          <v-btn icon @click="remove(item)" color="red">
             <v-icon>{{ mdiDelete }}</v-icon>
           </v-btn>
         </v-list-item-action>
@@ -178,9 +182,7 @@ export default class GsFileManager extends Vue {
     return node;
   }
 
-  removeFile(item: Node) {
-    console.log(item)
-    console.log(this.files)
+  remove(item: Node) {
     this.$http.delete(this.serverUrl + '/file', {
       data: {
         path: item.path
