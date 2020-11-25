@@ -1,14 +1,20 @@
 package tasks
 
 import (
+	"context"
+	"crypto/tls"
+	"fmt"
 	"github.com/sirupsen/logrus"
+	"gitlab.com/systemz/aimpanel2/lib"
 	"gitlab.com/systemz/aimpanel2/lib/ahttp"
 	"gitlab.com/systemz/aimpanel2/lib/filemanager"
 	"gitlab.com/systemz/aimpanel2/lib/task"
 	"gitlab.com/systemz/aimpanel2/slave/config"
 	"gitlab.com/systemz/aimpanel2/slave/model"
+	"net/http"
 	"os"
 	"path"
+	"time"
 )
 
 func GsFileList(gsId string) {
@@ -52,4 +58,37 @@ func GsFileRemoveTrigger(taskMsg task.Message) {
 
 func GsFileServer(taskMsg task.Message) {
 	logrus.Infof("starting file server for gs %v", taskMsg.GameServerID)
+
+	cert, err := lib.ParseCertificate(taskMsg.Cert, taskMsg.PrivateKey)
+	if err != nil {
+		logrus.Warn("failed to parse cert for gs %v", taskMsg.GameServerID)
+		return
+	}
+
+	server := &http.Server{
+		Addr:    fmt.Sprintf(":%d", taskMsg.Port),
+		Handler: http.DefaultServeMux,
+		TLSConfig: &tls.Config{
+			Certificates: []tls.Certificate{*cert},
+		},
+	}
+
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "hello world")
+	})
+
+	go func() {
+		if err := server.ListenAndServeTLS("", ""); err != nil {
+			logrus.Warnf("file server for %s - %v", taskMsg.GameServerID, err)
+		}
+	}()
+
+	time.Sleep(60 * time.Second)
+
+	err = server.Shutdown(context.Background())
+	if err != nil {
+		logrus.Fatal(err)
+	}
+
+	logrus.Infof("file server for %s stopped", taskMsg.GameServerID)
 }

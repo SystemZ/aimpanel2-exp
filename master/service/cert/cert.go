@@ -24,7 +24,6 @@ import (
 	"io"
 	"math/big"
 	"net"
-	"os"
 	"time"
 )
 
@@ -170,7 +169,7 @@ func CreateCerts() error {
 
 //https://gist.github.com/samuel/8b500ddd3f6118d052b5e6bc16bc4c09
 func CreateSelfSignedCert(domain model.CertDomain) error {
-	privateKey, err := ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
+	privateKey, err := rsa.GenerateKey(rand.Reader, 4096)
 	if err != nil {
 		return err
 	}
@@ -236,13 +235,6 @@ func pemBlockForKey(priv interface{}) *pem.Block {
 	switch k := priv.(type) {
 	case *rsa.PrivateKey:
 		return &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(k)}
-	case *ecdsa.PrivateKey:
-		b, err := x509.MarshalECPrivateKey(k)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Unable to marshal ECDSA private key: %v", err)
-			os.Exit(2)
-		}
-		return &pem.Block{Type: "EC PRIVATE KEY", Bytes: b}
 	default:
 		return nil
 	}
