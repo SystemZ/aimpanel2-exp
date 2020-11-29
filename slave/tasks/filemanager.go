@@ -71,7 +71,7 @@ func GsFileServer(taskMsg task.Message) {
 
 	cert, err := lib.ParseCertificate(taskMsg.Cert, taskMsg.PrivateKey)
 	if err != nil {
-		logrus.Warn("failed to parse cert for gs %v", gsId)
+		logrus.Warnf("failed to parse cert for gs %v", gsId)
 		return
 	}
 
