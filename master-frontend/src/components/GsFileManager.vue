@@ -34,19 +34,41 @@
 
     <v-card-title>Files</v-card-title>
 
-    <v-container v-if="downloading">
-      <v-progress-linear
 
-        v-model="downloadProgress"
-        color="amber"
-        height="25"
-      >
-        <strong>{{ Math.ceil(downloadProgress) }}%</strong>
-      </v-progress-linear>
+
+    <v-container>
+
     </v-container>
 
-    <v-container v-if="selectedFiles.length > 0">
-      <v-btn color="primary" @click="selectedFiles = []">Unselect all</v-btn>
+    <v-container>
+      <v-row v-if="progress">
+        <v-progress-linear
+
+          v-model="progressPercent"
+          color="amber"
+          height="25"
+        >
+          <strong>{{ Math.ceil(progressPercent) }}%</strong>
+        </v-progress-linear>
+      </v-row>
+
+      <v-row>
+        <v-col cols="10">
+          <v-file-input
+            accept="*/*"
+            label="File input"
+            v-model="fileToUpload"
+          ></v-file-input>
+        </v-col>
+        <v-col cols="2">
+          <v-btn color="green" @click="upload()" :disabled="fileToUpload == null || progress">Upload</v-btn>
+        </v-col>
+      </v-row>
+
+      <v-row v-if="selectedFiles.length > 0">
+        <v-btn color="primary" @click="selectedFiles = []">Unselect all</v-btn>
+      </v-row>
+
     </v-container>
 
 
@@ -205,8 +227,10 @@ export default class GsFileManager extends Vue {
 
   selectedFiles = [];
 
-  downloading = false;
-  downloadProgress = 0;
+  progress = false;
+  progressPercent = 0;
+
+  fileToUpload = null as any;
 
   //icons
   mdiInformation = mdiInformation;
@@ -291,14 +315,13 @@ export default class GsFileManager extends Vue {
   }
 
   download(item: Node) {
-    this.downloading = true;
+    this.progress = true;
     this.$http.post(this.fileServerAddress + '/download', {
       path: item.path
     }, {
       responseType: 'blob',
       onDownloadProgress: (ev) => {
-        this.downloadProgress = Math.round((ev.loaded * 100) / ev.total)
-        console.log(this.downloadProgress)
+        this.progressPercent = Math.round((ev.loaded * 100) / ev.total)
       }
     }).then(res => {
       console.log(res)
@@ -310,7 +333,32 @@ export default class GsFileManager extends Vue {
       link.download = filename;
       link.click()
     }).finally(() => {
-      this.downloading = false;
+      this.progress = false;
+    })
+  }
+
+  upload() {
+    this.progress = true;
+
+    const formData = new FormData();
+    formData.append('path', this.files.selected.path)
+    formData.append('file', this.fileToUpload)
+
+    this.$http.post(this.fileServerAddress + '/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      onUploadProgress: (ev) => {
+        this.progressPercent = Math.round((ev.loaded * 100) / ev.total)
+      }
+    }).then(res => {
+      this.fileToUpload = null;
+
+      setTimeout(() => {
+        this.getFiles()
+      }, 2000)
+    }).finally(() => {
+      this.progress = false;
     })
   }
 }
