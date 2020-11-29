@@ -83,9 +83,8 @@ func GsFileServer(taskMsg task.Message) {
 		},
 	}
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "hello world")
-	})
+	idle := NewIdleTracker(5 * time.Minute)
+	server.ConnState = idle.ConnState
 
 	http.HandleFunc("/download", func(w http.ResponseWriter, r *http.Request) {
 		setupHeaders(w, r)
@@ -180,9 +179,9 @@ func GsFileServer(taskMsg task.Message) {
 		}
 
 		supervisorTask := task.Message{
-			TaskId:       task.SUPERVISOR_MOVE_FILE_GS,
-			Body:         tempFile.Name(),
-			Path: path.Join(destPath, filename),
+			TaskId: task.SUPERVISOR_MOVE_FILE_GS,
+			Body:   tempFile.Name(),
+			Path:   path.Join(destPath, filename),
 		}
 
 		model.SendTask(config.REDIS_PUB_SUB_SUPERVISOR_CH, supervisorTask)
@@ -192,18 +191,17 @@ func GsFileServer(taskMsg task.Message) {
 
 	go func() {
 		if err := server.ListenAndServeTLS("", ""); err != nil {
-			logrus.Warnf("file server for %s - %v", gsId, err)
+			logrus.Warnf("file server error %s: %v", gsId, err)
 		}
 	}()
 
-	time.Sleep(15 * time.Minute)
+	<-idle.Done()
 
-	err = server.Shutdown(context.Background())
-	if err != nil {
-		logrus.Fatal(err)
+	if err := server.Shutdown(context.Background()); err != nil {
+		logrus.Warnf("file server shutting down error %s: %v\n", gsId, err)
 	}
 
-	logrus.Infof("file server for %s stopped", gsId)
+	logrus.Infof("file server %s stopped", gsId)
 }
 
 func GsFileMove(taskMsg task.Message) {

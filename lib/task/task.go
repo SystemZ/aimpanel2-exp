@@ -48,6 +48,7 @@ const (
 	//supervisor
 	SUPERVISOR_CLEAN_FILES_GS
 	SUPERVISOR_REMOVE_FILE_GS
+	SUPERVISOR_MOVE_FILE_GS
 
 	// special case, eg. just to keep up SSE session
 	PING
@@ -137,6 +138,8 @@ type Message struct {
 	Port       int    `json:"port,omitempty"`
 	Cert       string `json:"cert,omitempty"`
 	PrivateKey string `json:"private_key,omitempty"`
+
+	Path string `json:"path,omitempty"`
 
 	Timestamp int64 `json:"timestamp,omitempty"`
 }
