@@ -52,6 +52,12 @@ function dev-tls-crt {
   openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout key.pem -out crt.pem -config tls.cnf -sha256
 }
 
+function dev-slave-crt {
+  ip=$(vagrant ssh -c "ip address show eth0 | grep 'inet ' | sed -e 's/^.*inet //' -e 's/\/.*$//' | tr -d '\n'" -- -q)
+  go run master/main.go dev-slave-cert $ip
+  echo "Set $ip as domain on host page"
+}
+
 function update-hosts-slave {
   ssh -F vagrant.slave.ssh.config default "sudo sed -i '/aimpanel.local/d' /etc/hosts"
   ssh -F vagrant.slave.ssh.config default "echo "$(hostname -I | cut -d' ' -f1) aimpanel.local" | sudo tee -a /etc/hosts > /dev/null"

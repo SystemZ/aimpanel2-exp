@@ -112,6 +112,7 @@ func SetHostToken(hostToken string) {
 func GetHostToken() string {
 	val, err := Redis.Get(context.TODO(), "host_token").Result()
 	if err != nil {
+		logrus.Warn(err)
 		return ""
 	}
 	return val

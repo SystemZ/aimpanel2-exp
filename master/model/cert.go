@@ -1,6 +1,10 @@
 package model
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"context"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type Cert struct {
 	ID primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
@@ -22,4 +26,15 @@ func (c *Cert) GetID() primitive.ObjectID {
 
 func (c *Cert) SetID(id primitive.ObjectID) {
 	c.ID = id
+}
+
+func GetCertByDomainId(domainId primitive.ObjectID) (*Cert, error) {
+	var cert Cert
+
+	err := DB.Collection(CertCollection).FindOne(context.TODO(), bson.D{{Key: "domain_id", Value: domainId}}).Decode(&cert)
+	if err != nil {
+		return nil, err
+	}
+
+	return &cert, nil
 }

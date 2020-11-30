@@ -1,7 +1,13 @@
 package lib
 
 import (
+	"crypto"
+	"crypto/ecdsa"
+	"crypto/rsa"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
+	"encoding/pem"
 	"fmt"
 	"github.com/cavaliercoder/grab"
 	log "github.com/sirupsen/logrus"
@@ -9,6 +15,7 @@ import (
 	"gitlab.com/systemz/aimpanel2/lib/response"
 	"io/ioutil"
 	"math/rand"
+	"net"
 	goHttp "net/http"
 	"time"
 )
@@ -88,4 +95,51 @@ func StringInSlice(a string, list []string) bool {
 		}
 	}
 	return false
+}
+
+func GetFreePort() (int, error) {
+	listener, err := net.Listen("tcp", ":0")
+	if err != nil {
+		return 0, err
+	}
+	err = listener.Close()
+	if err != nil {
+		return 0, err
+	}
+	return listener.Addr().(*net.TCPAddr).Port, nil
+}
+
+//https://gist.github.com/ukautz/cd118e298bbd8f0a88fc
+func ParseCertificate(certificate string, privateKey string) (*tls.Certificate, error) {
+	var cert tls.Certificate
+
+	block, _ := pem.Decode([]byte(certificate))
+	cert.Certificate = append(cert.Certificate, block.Bytes)
+
+	block, _ = pem.Decode([]byte(privateKey))
+	pk, err := ParsePrivateKey(block.Bytes)
+	if err != nil {
+		return nil, err
+	}
+	cert.PrivateKey = pk
+
+	return &cert, nil
+}
+
+func ParsePrivateKey(der []byte) (crypto.PrivateKey, error) {
+	if key, err := x509.ParsePKCS1PrivateKey(der); err == nil {
+		return key, nil
+	}
+	if key, err := x509.ParsePKCS8PrivateKey(der); err == nil {
+		switch key := key.(type) {
+		case *rsa.PrivateKey, *ecdsa.PrivateKey:
+			return key, nil
+		default:
+			return nil, fmt.Errorf("found unknown private key type in PKCS#8 wrapping")
+		}
+	}
+	if key, err := x509.ParseECPrivateKey(der); err == nil {
+		return key, nil
+	}
+	return nil, fmt.Errorf("failed to parse private key")
 }

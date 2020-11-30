@@ -34,8 +34,41 @@
 
     <v-card-title>Files</v-card-title>
 
-    <v-container v-if="selectedFiles.length > 0">
-      <v-btn color="primary" @click="selectedFiles = []">Unselect all</v-btn>
+
+
+    <v-container>
+
+    </v-container>
+
+    <v-container>
+      <v-row v-if="progress">
+        <v-progress-linear
+
+          v-model="progressPercent"
+          color="amber"
+          height="25"
+        >
+          <strong>{{ Math.ceil(progressPercent) }}%</strong>
+        </v-progress-linear>
+      </v-row>
+
+      <v-row>
+        <v-col cols="10">
+          <v-file-input
+            accept="*/*"
+            label="File input"
+            v-model="fileToUpload"
+          ></v-file-input>
+        </v-col>
+        <v-col cols="2">
+          <v-btn color="green" @click="upload()" :disabled="fileToUpload == null || progress">Upload</v-btn>
+        </v-col>
+      </v-row>
+
+      <v-row v-if="selectedFiles.length > 0">
+        <v-btn color="primary" @click="selectedFiles = []">Unselect all</v-btn>
+      </v-row>
+
     </v-container>
 
 
@@ -120,12 +153,21 @@
                 <v-icon>{{ mdiInformation }}</v-icon>
               </v-btn>
             </v-list-item-action>
+
+            <v-list-item-action>
+              <v-btn icon @click="download(item)"
+                     color="blue">
+                <v-icon>{{ mdiDownload }}</v-icon>
+              </v-btn>
+            </v-list-item-action>
+
             <v-list-item-action>
               <v-btn icon @click="fileToRemove = item; removeFileDialog = true"
                      color="red">
                 <v-icon>{{ mdiDelete }}</v-icon>
               </v-btn>
             </v-list-item-action>
+          </template>
         </v-list-item>
       </v-list-item-group>
     </v-list>
@@ -140,7 +182,7 @@ import {
   mdiFile,
   mdiFolder,
   mdiInformation,
-  mdiDelete
+  mdiDelete, mdiDownload
 } from '@mdi/js';
 
 interface FileRow {
@@ -166,6 +208,13 @@ export default class GsFileManager extends Vue {
   })
   hostId !: String;
 
+  @Prop({
+    type: String, required: true, default: () => {
+      return '';
+    }
+  })
+  fileServerAddress !: String;
+
   serverUrl = '';
   stream = '' as any;
   files = {
@@ -174,9 +223,14 @@ export default class GsFileManager extends Vue {
   };
 
   removeFileDialog = false;
-  fileToRemove ={} as Node
+  fileToRemove = {} as Node
 
   selectedFiles = [];
+
+  progress = false;
+  progressPercent = 0;
+
+  fileToUpload = null as any;
 
   //icons
   mdiInformation = mdiInformation;
@@ -184,6 +238,7 @@ export default class GsFileManager extends Vue {
   mdiFolder = mdiFolder;
   mdiArrowLeft = mdiArrowLeft;
   mdiDelete = mdiDelete;
+  mdiDownload = mdiDownload;
 
   mounted() {
     this.serverUrl = '/v1/host/' + this.hostId + '/server/' + this.serverId;
@@ -256,6 +311,54 @@ export default class GsFileManager extends Vue {
     }).finally(() => {
       this.fileToRemove = {} as Node
       this.removeFileDialog = false;
+    })
+  }
+
+  download(item: Node) {
+    this.progress = true;
+    this.$http.post(this.fileServerAddress + '/download', {
+      path: item.path
+    }, {
+      responseType: 'blob',
+      onDownloadProgress: (ev) => {
+        this.progressPercent = Math.round((ev.loaded * 100) / ev.total)
+      }
+    }).then(res => {
+      console.log(res)
+      const [, filename] = res.headers['content-disposition'].split('filename=');
+
+      let blob = new Blob([res.data], {type: res.headers['content-type']});
+      let link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = filename;
+      link.click()
+    }).finally(() => {
+      this.progress = false;
+    })
+  }
+
+  upload() {
+    this.progress = true;
+
+    const formData = new FormData();
+    formData.append('path', this.files.selected.path)
+    formData.append('file', this.fileToUpload)
+
+    this.$http.post(this.fileServerAddress + '/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      onUploadProgress: (ev) => {
+        this.progressPercent = Math.round((ev.loaded * 100) / ev.total)
+      }
+    }).then(res => {
+      this.fileToUpload = null;
+
+      setTimeout(() => {
+        this.getFiles()
+      }, 2000)
+    }).finally(() => {
+      this.progress = false;
     })
   }
 }

@@ -43,10 +43,12 @@ const (
 	//FILE MANAGER
 	AGENT_FILE_LIST_GS
 	AGENT_FILE_REMOVE_GS
+	AGENT_FILE_SERVER
 
 	//supervisor
 	SUPERVISOR_CLEAN_FILES_GS
 	SUPERVISOR_REMOVE_FILE_GS
+	SUPERVISOR_MOVE_FILE_GS
 
 	// special case, eg. just to keep up SSE session
 	PING
@@ -56,6 +58,7 @@ const (
 	GS_NAME_CHANGE
 	GS_GAME_CHANGE
 	HOST_HWID_CHANGE
+	HOST_DOMAIN_CHANGE
 )
 
 func (i Id) StringValue() string {
@@ -130,6 +133,13 @@ type Message struct {
 
 	BackupFilename string   `json:"backup_filename,omitempty"`
 	Backups        []string `json:"backups,omitempty"`
+
+	//FileManager
+	Port       int    `json:"port,omitempty"`
+	Cert       string `json:"cert,omitempty"`
+	PrivateKey string `json:"private_key,omitempty"`
+
+	Path string `json:"path,omitempty"`
 
 	Timestamp int64 `json:"timestamp,omitempty"`
 }
