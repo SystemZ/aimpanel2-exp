@@ -1,6 +1,6 @@
 <template xmlns:v-slot="http://www.w3.org/1999/XSL/Transform">
   <v-app :style="{background: $vuetify.theme.themes['dark'].background}">
-    <v-navigation-drawer app v-model="drawer">
+    <v-navigation-drawer v-model="drawer" app>
       <v-list-item>
         <v-list-item-content>
           <v-list-item-title class="title">
@@ -15,12 +15,12 @@
 
       <v-list dense nav>
         <v-list-item
+          v-for="item in menu"
+          v-if="(item.authRequired && loggedIn) || (!item.authRequired && !loggedIn) || !item.authRequired"
           :key="item.title"
           :to="item.path"
           active-class="red--text red--darken-1"
-          link
-          v-for="item in menu"
-          v-if="(item.authRequired && loggedIn) || (!item.authRequired && !loggedIn) || !item.authRequired">
+          link>
           <v-list-item-icon>
             <v-icon>{{ item.icon }}</v-icon>
           </v-list-item-icon>
@@ -30,7 +30,7 @@
           </v-list-item-content>
         </v-list-item>
 
-        <v-list-item active-class="red--text red--darken-1" to="login" v-if="!loggedIn">
+        <v-list-item v-if="!loggedIn" active-class="red--text red--darken-1" to="login">
           <v-list-item-action>
             <v-icon>{{ mdiLogin }}</v-icon>
           </v-list-item-action>
@@ -66,7 +66,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import {mdiAccount, mdiExitRun, mdiHome, mdiLogin} from '@mdi/js';
+import {mdiAccount, mdiExitRun, mdiHome, mdiLogin, mdiNoteText} from '@mdi/js';
 
 export default Vue.extend({
   name: 'App',
@@ -96,26 +96,27 @@ export default Vue.extend({
         path: '/profile',
         authRequired: true
       },
-      /*
       {
-          title: 'License',
-          icon: '',
-          path: '/license',
-          authRequired: false
+        title: 'License',
+        icon: mdiNoteText,
+        path: '/license',
+        authRequired: true
       },
-      {
-          title: 'Help',
-          icon: '',
-          path: '/help',
-          authRequired: false
-      }
-      */
+      /*
+{
+    title: 'Help',
+    icon: '',
+    path: '/help',
+    authRequired: false
+}
+*/
     ],
     // icons
     mdiLogin: mdiLogin,
     mdiHome: mdiHome,
     mdiAccount: mdiAccount,
     mdiLogout: mdiExitRun,
+    mdiNoteText: mdiNoteText,
   }),
 });
 </script>
