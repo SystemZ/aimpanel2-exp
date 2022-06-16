@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  name: MyString
+  slug: MyString
+  disabled_until: 2022-06-17 00:56:30
+  abuse: false
+  body: 
+
+two:
+  user: two
+  name: MyString
+  slug: MyString
+  disabled_until: 2022-06-17 00:56:30
+  abuse: false
+  body: 

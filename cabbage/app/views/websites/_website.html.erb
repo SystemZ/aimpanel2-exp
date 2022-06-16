@@ -1,0 +1,37 @@
+<div id="<%= dom_id website %>">
+  <p class="my-5">
+    <strong class="block font-medium mb-1">User:</strong>
+    <%= website.user_id %>
+  </p>
+
+  <p class="my-5">
+    <strong class="block font-medium mb-1">Name:</strong>
+    <%= website.name %>
+  </p>
+
+  <p class="my-5">
+    <strong class="block font-medium mb-1">Slug:</strong>
+    <%= website.slug %>
+  </p>
+
+  <p class="my-5">
+    <strong class="block font-medium mb-1">Disabled until:</strong>
+    <%= website.disabled_until %>
+  </p>
+
+  <p class="my-5">
+    <strong class="block font-medium mb-1">Abuse:</strong>
+    <%= website.abuse %>
+  </p>
+
+  <p class="my-5">
+    <strong class="block font-medium mb-1">Body:</strong>
+    <%= website.body %>
+  </p>
+
+  <% if action_name != "show" %>
+    <%= link_to "Show this website", website, class: "rounded-lg py-3 px-5 bg-gray-100 inline-block font-medium" %>
+    <%= link_to 'Edit this website', edit_website_path(website), class: "rounded-lg py-3 ml-2 px-5 bg-gray-100 inline-block font-medium" %>
+    <hr class="mt-6">
+  <% end %>
+</div>

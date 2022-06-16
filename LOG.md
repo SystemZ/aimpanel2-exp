@@ -28,4 +28,10 @@ rails generate scaffold domain name:string user:belongs_to
 # add type: :uuid to domains migrations
 # https://stackoverflow.com/questions/40977506/rails-model-how-to-do-the-relation
 rake db:migrate
+
+# websites
+rails generate scaffold website user:belongs_to name:string slug:string disabled_until:datetime abuse:boolean body:json
+rake db:migrate
+
+
 ```
