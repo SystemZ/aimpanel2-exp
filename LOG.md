@@ -16,6 +16,7 @@ bundle add devise
 bundle install
 rails g devise:install
 rails g devise user
+# you can edit id from int to UUID before migration
 rake db:migrate
 # You can copy Devise views (for customization) to your app by running: rails g devise:views
 # show new routes for auth

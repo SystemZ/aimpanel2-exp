@@ -2,7 +2,9 @@
 
 class DeviseCreateUsers < ActiveRecord::Migration[7.0]
   def change
-    create_table :users do |t|
+    # https://stackoverflow.com/questions/15993028/modify-devise-to-support-uuid-primary-key
+    enable_extension 'pgcrypto' # needed for UUID if not already enabled
+    create_table :users, id: :uuid do |t|
       ## Database authenticatable
       t.string :email,              null: false, default: ""
       t.string :encrypted_password, null: false, default: ""
