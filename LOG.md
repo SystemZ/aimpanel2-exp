@@ -9,4 +9,13 @@ rm -rf cabbage/.git
 cd cabbage
 docker-compose up
 bin/rails db:create
+
+# auth setup
+# https://betterprogramming.pub/devise-auth-setup-in-rails-7-44240aaed4be
+bundle add devise
+bundle install
+rails g devise:install
+rails g devise user
+rake db:migrate
+# You can copy Devise views (for customization) to your app by running: rails g devise:views
 ```
