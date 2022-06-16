@@ -18,4 +18,6 @@ rails g devise:install
 rails g devise user
 rake db:migrate
 # You can copy Devise views (for customization) to your app by running: rails g devise:views
+# show new routes for auth
+rails routes
 ```
