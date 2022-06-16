@@ -21,4 +21,11 @@ rake db:migrate
 # You can copy Devise views (for customization) to your app by running: rails g devise:views
 # show new routes for auth
 rails routes
+
+# domains
+rails generate scaffold domain name:string user:belongs_to
+# add `has_many :domains` to user model
+# add type: :uuid to domains migrations
+# https://stackoverflow.com/questions/40977506/rails-model-how-to-do-the-relation
+rake db:migrate
 ```
