@@ -7,4 +7,5 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   # Ensure you have defined root_url to *something*
   # root "articles#index"
+  get "s/:slug", to: "websites#site"
 end

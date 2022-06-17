@@ -18,5 +18,10 @@ module Cabbage
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
+
+    # TODO check DNS rebinding attack
+    # https://blog.saeloun.com/2019/10/31/rails-6-adds-guard-against-dns-rebinding-attacks.html
+    # https://unit42.paloaltonetworks.com/dns-rebinding/
+    config.hosts = nil
   end
 end

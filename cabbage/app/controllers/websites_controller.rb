@@ -1,6 +1,15 @@
 class WebsitesController < ApplicationController
   before_action :set_website, only: %i[ show edit update destroy ]
 
+  # GET /s/<slug>
+  def site
+    puts request.domain
+    puts request.subdomain
+    puts request.host
+    @website = Website.find_by_slug(request.subdomain)
+    @website = Website.find_by_slug("example") unless @website
+  end
+
   # GET /websites or /websites.json
   def index
     @websites = Website.all
