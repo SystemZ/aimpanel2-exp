@@ -38,4 +38,8 @@ rails generate scaffold domain name:string user:belongs_to website:belongs_to
 # add `has_many :domains` to website model
 # add type: :uuid to domains migrations
 rake db:migrate
+
+# model graphs
+apt-get install -y graphviz
+rake erd
 ```
