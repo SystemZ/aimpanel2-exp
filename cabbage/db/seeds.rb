@@ -7,7 +7,14 @@
 #   Character.create(name: "Luke", movie: movies.first)
 
 user1 = User.create!(:email => 'user1@example.com', :password => 'password')
+
+website1 = Website.create!(user: user1, name: "shop.craftexample.com", slug: "shop-craftexample-com", body: "Welcome to shop.craftexample.com")
+Domain.create!(name: "shop.craftexample.com", user: user1, website: website1)
+
+website2 = Website.create!(user: user1, name: "craftmax.com", slug: "craftmax-com", body: "Welcome to craftmax.com")
+Domain.create!(name: "craftmax.com", user: user1, website: website2)
+
 user2 = User.create!(:email => 'user2@example.com', :password => 'password')
-Domain.create!(name: "shop.craftexample.com", user: user1)
-Domain.create!(name: "craftmax.com", user: user1)
-Domain.create!(name: "www.craftcraft.pro", user: user2)
+
+website3 = Website.create!(user: user2, name: "www.craftcraft.pro", slug: "www-craftcraft-pro", body: "Welcome to www.craftcraft.pro")
+Domain.create!(name: "www.craftcraft.pro", user: user2, website: website3)
