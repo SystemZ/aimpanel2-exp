@@ -33,5 +33,9 @@ rake db:migrate
 rails generate scaffold website user:belongs_to name:string slug:string disabled_until:datetime abuse:boolean body:json
 rake db:migrate
 
-
+# domains change
+rails generate scaffold domain name:string user:belongs_to website:belongs_to
+# add `has_many :domains` to website model
+# add type: :uuid to domains migrations
+rake db:migrate
 ```

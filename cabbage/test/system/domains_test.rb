@@ -16,6 +16,7 @@ class DomainsTest < ApplicationSystemTestCase
 
     fill_in "Name", with: @domain.name
     fill_in "User", with: @domain.user_id
+    fill_in "Website", with: @domain.website_id
     click_on "Create Domain"
 
     assert_text "Domain was successfully created"
@@ -28,6 +29,7 @@ class DomainsTest < ApplicationSystemTestCase
 
     fill_in "Name", with: @domain.name
     fill_in "User", with: @domain.user_id
+    fill_in "Website", with: @domain.website_id
     click_on "Update Domain"
 
     assert_text "Domain was successfully updated"
