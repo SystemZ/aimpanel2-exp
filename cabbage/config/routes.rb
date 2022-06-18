@@ -2,6 +2,7 @@
 Rails.application.routes.draw do
 
   # alternative matching host: "exp.lvlup.pro"
+  # https://guides.rubyonrails.org/routing.html#restricting-the-routes-created
   # https://blog.appsignal.com/2020/03/04/building-a-rails-app-with-multiple-subdomains.html
   # https://stackoverflow.com/questions/6054668/rails-3-routing-and-multiple-domains/6058737#6058737
   constraints domain: "lvlup.pro" do
