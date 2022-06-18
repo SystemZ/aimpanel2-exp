@@ -10,6 +10,10 @@ class WebsitesController < ApplicationController
     @website = Website.find_by_slug("example") unless @website
   end
 
+  def saas
+    @website = Website.joins(:domains).where(domains: {name: request.host}).first
+  end
+
   # GET /websites or /websites.json
   def index
     @websites = Website.all

@@ -43,4 +43,9 @@ rake db:migrate
 # model graphs
 apt-get install -y graphviz
 rake erd
+
+# system tests
+rails generate system_test domains_routing
+rails test:system
+rails test test/system/domains_routings_test.rb
 ```
