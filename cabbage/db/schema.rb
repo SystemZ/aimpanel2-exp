@@ -18,7 +18,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_06_18_123638) do
   create_table "domains", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "name"
     t.uuid "user_id", null: false
-    t.uuid "website_id", null: false
+    t.uuid "website_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_domains_on_user_id"

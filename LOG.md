@@ -36,7 +36,8 @@ rake db:migrate
 # domains change
 rails generate scaffold domain name:string user:belongs_to website:belongs_to
 # add `has_many :domains` to website model
-# add type: :uuid to domains migrations
+# add `type: :uuid` to domains migrations
+# add `null: true` to domains website migration
 rake db:migrate
 
 # model graphs
