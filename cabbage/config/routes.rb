@@ -12,10 +12,6 @@ Rails.application.routes.draw do
     resources :pages
   end
 
-  # Defines the root path route ("/")
-  # Ensure you have defined root_url to *something*
-  # root "articles#index"
-  root :to => "websites#saas"
-  match '*path' => 'websites#slugs', via: :get
-  #get "s/:slug", to: "websites#site"
+  root :to => "pages#page_by_slug_and_domain"
+  match '*path' => 'pages#page_by_slug_and_domain', via: :get
 end

@@ -28,7 +28,7 @@ class DomainsRoutingsTest < ApplicationSystemTestCase
     }
   end
 
-  test "saas domains body" do
+  test "saas domains homepage" do
     saas_domains.each{|domain|
       puts domain
       visit "http://" + domain
@@ -36,7 +36,7 @@ class DomainsRoutingsTest < ApplicationSystemTestCase
     }
   end
 
-  test "saas slug pages" do
+  test "saas custom slug pages" do
     visit "http://shop.craftexample.com/rulez"
     assert_text "some rules here"
 

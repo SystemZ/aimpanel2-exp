@@ -1,6 +1,12 @@
 class PagesController < ApplicationController
   before_action :set_page, only: %i[ show edit update destroy ]
 
+  def page_by_slug_and_domain
+    @page = Page.joins({:website => :domains}).where(website: {domains: {name: request.host}}, pages: {slug: params[:path]}).first!
+    #@website = Website.joins(:domains).where(domains: {name: request.host}).first!
+    render("page_from_db")
+  end
+
   # GET /pages or /pages.json
   def index
     @pages = Page.all
