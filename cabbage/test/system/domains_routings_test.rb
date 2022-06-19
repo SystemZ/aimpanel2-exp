@@ -16,16 +16,16 @@ class DomainsRoutingsTest < ApplicationSystemTestCase
     #visit domains_url
     visit "http://exp.lvlup.pro/domains"
     assert_selector "h1", text: "Domains"
-    assert_text "shop.craftexample.com"
-    assert_text "craftmax.com"
-    assert_text "www.craftcraft.pro"
+    saas_domains.each{|domain|
+      assert_text domain
+    }
   end
 
   test "list of websites on panel domain" do
     visit "http://exp.lvlup.pro/websites"
-    assert_text "shop.craftexample.com"
-    assert_text "craftmax.com"
-    assert_text "www.craftcraft.pro"
+    saas_domains.each{|domain|
+      assert_text domain
+    }
   end
 
   test "saas domains body" do
