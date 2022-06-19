@@ -15,5 +15,6 @@ Rails.application.routes.draw do
   # Ensure you have defined root_url to *something*
   # root "articles#index"
   root :to => "websites#saas"
+  match '*path' => 'websites#saas', via: :get
   #get "s/:slug", to: "websites#site"
 end
