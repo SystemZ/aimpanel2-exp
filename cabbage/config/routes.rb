@@ -18,6 +18,7 @@ Rails.application.routes.draw do
     end
   }
 
+  # TODO ignore panel domains to skip DB query
   root :to => "pages#page_by_slug_and_domain"
   match '*path' => 'pages#page_by_slug_and_domain', via: :get
 end
