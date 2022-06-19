@@ -5,22 +5,18 @@
 #
 #   movies = Movie.create([{ name: "Star Wars" }, { name: "Lord of the Rings" }])
 #   Character.create(name: "Luke", movie: movies.first)
+include PagesHelper
 
-user1 = User.create!(:email => 'user1@example.com', :password => 'password')
+websites = example_saas_pages
+user = []
+example_users.each { |u|
+  user << User.create!(:email => u["email"], :password => u["password"])
+}
 
-website1 = Website.create!(user: user1, name: "shop.craftexample.com", slug: "shop-craftexample-com")
-Page.create!(website: website1, user: user1, language: "en", slug: nil, title: "Homepage", body: "Welcome to shop.craftexample.com")
-Page.create!(website: website1, user: user1, language: "en", slug: "rulez", title: "Rules of server", body: "some rules here")
-Page.create!(website: website1, user: user1, language: "en", slug: "aboutz", title: "About team", body: "some team info will be here in the future")
-Domain.create!(name: "shop.craftexample.com", user: user1, website: website1)
-
-website2 = Website.create!(user: user1, name: "craftmax.com", slug: "craftmax-com")
-Page.create!(website: website2, user: user1, language: "en", slug: nil, title: "Homepage", body: "Welcome to craftmax.com")
-Page.create!(website: website2, user: user1, language: "en", slug: "tos", title: "ToS", body: "Long ToS")
-Domain.create!(name: "craftmax.com", user: user1, website: website2)
-
-user2 = User.create!(:email => 'user2@example.com', :password => 'password')
-
-website3 = Website.create!(user: user2, name: "www.craftcraft.pro", slug: "www-craftcraft-pro")
-Page.create!(website: website3, user: user2, language: "en", slug: nil, title: "Homepage", body: "Welcome to www.craftcraft.pro")
-Domain.create!(name: "www.craftcraft.pro", user: user2, website: website3)
+websites.each { |website|
+  new_website = Website.create!(user: user[website["user"]], name: website["domain"], slug: website["slug"])
+  website["pages"].each { |page|
+    Page.create!(website: new_website, user: user[website["user"]], language: page[:language], slug: page[:slug], title: page[:title], body: page[:body])
+  }
+  Domain.create!(name: website["domain"], user: user[website["user"]], website: new_website)
+}
