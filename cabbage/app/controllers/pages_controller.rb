@@ -3,8 +3,14 @@ class PagesController < ApplicationController
 
   def page_by_slug_and_domain
     @page = Page.joins({:website => :domains}).where(website: {domains: {name: request.host}}, pages: {slug: params[:path]}).first!
-    #@website = Website.joins(:domains).where(domains: {name: request.host}).first!
-    render("page_from_db")
+    # https://stackoverflow.com/questions/9560093/bypass-application-html-erb-in-rails-app
+    render "page_from_db", :layout => false
+  end
+
+  def page_by_slug
+    @page = Page.joins(:website).where(website: {slug: params[:website]}, pages: {slug: params[:path]}).first!
+    # render :layout => false
+    render "page_from_db", :layout => false
   end
 
   # GET /pages or /pages.json
