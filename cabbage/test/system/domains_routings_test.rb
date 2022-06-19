@@ -36,6 +36,17 @@ class DomainsRoutingsTest < ApplicationSystemTestCase
     }
   end
 
+  test "saas slug pages" do
+    visit "http://shop.craftexample.com/rulez"
+    assert_text "some rules here"
+
+    visit "http://shop.craftexample.com/aboutz"
+    assert_text "some team info will be here in the future"
+
+    visit "http://craftmax.com/tos"
+    assert_text "Long ToS"
+  end
+
   test "saas domains lack of main panel" do
     saas_domains.each{|domain|
       puts domain

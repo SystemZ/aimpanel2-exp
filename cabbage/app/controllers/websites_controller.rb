@@ -14,6 +14,10 @@ class WebsitesController < ApplicationController
     @website = Website.joins(:domains).where(domains: {name: request.host}).first
   end
 
+  def slugs
+    @page = Page.joins({:website => :domains}).where(website: {domains: {name: request.host}}, pages: {slug: params[:path]}).first
+  end
+
   # GET /websites or /websites.json
   def index
     @websites = Website.all

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_06_18_123638) do
+ActiveRecord::Schema[7.0].define(version: 2022_06_19_013748) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -23,6 +23,21 @@ ActiveRecord::Schema[7.0].define(version: 2022_06_18_123638) do
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_domains_on_user_id"
     t.index ["website_id"], name: "index_domains_on_website_id"
+  end
+
+  create_table "pages", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "website_id", null: false
+    t.uuid "user_id", null: false
+    t.integer "breed", default: 1
+    t.string "language", limit: 2
+    t.datetime "active_from"
+    t.string "slug"
+    t.string "title"
+    t.json "body"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_pages_on_user_id"
+    t.index ["website_id"], name: "index_pages_on_website_id"
   end
 
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -51,5 +66,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_06_18_123638) do
 
   add_foreign_key "domains", "users"
   add_foreign_key "domains", "websites"
+  add_foreign_key "pages", "users"
+  add_foreign_key "pages", "websites"
   add_foreign_key "websites", "users"
 end

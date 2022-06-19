@@ -48,4 +48,7 @@ rake erd
 rails generate system_test domains_routing
 rails test:system
 rails test test/system/domains_routings_test.rb
+
+# pages
+rails generate scaffold page website:belongs_to user:belongs_to breed:integer language:string{2} active_from:datetime slug:string title:string body:json
 ```

@@ -1,0 +1,47 @@
+<div id="<%= dom_id page %>">
+  <p class="my-5">
+    <strong class="block font-medium mb-1">Website:</strong>
+    <%= page.website_id %>
+  </p>
+
+  <p class="my-5">
+    <strong class="block font-medium mb-1">User:</strong>
+    <%= page.user_id %>
+  </p>
+
+  <p class="my-5">
+    <strong class="block font-medium mb-1">Breed:</strong>
+    <%= page.breed %>
+  </p>
+
+  <p class="my-5">
+    <strong class="block font-medium mb-1">Language:</strong>
+    <%= page.language %>
+  </p>
+
+  <p class="my-5">
+    <strong class="block font-medium mb-1">Active from:</strong>
+    <%= page.active_from %>
+  </p>
+
+  <p class="my-5">
+    <strong class="block font-medium mb-1">Slug:</strong>
+    <%= page.slug %>
+  </p>
+
+  <p class="my-5">
+    <strong class="block font-medium mb-1">Title:</strong>
+    <%= page.title %>
+  </p>
+
+  <p class="my-5">
+    <strong class="block font-medium mb-1">Body:</strong>
+    <%= page.body %>
+  </p>
+
+  <% if action_name != "show" %>
+    <%= link_to "Show this page", page, class: "rounded-lg py-3 px-5 bg-gray-100 inline-block font-medium" %>
+    <%= link_to 'Edit this page', edit_page_path(page), class: "rounded-lg py-3 ml-2 px-5 bg-gray-100 inline-block font-medium" %>
+    <hr class="mt-6">
+  <% end %>
+</div>

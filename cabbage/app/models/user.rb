@@ -6,4 +6,5 @@ class User < ApplicationRecord
 
   has_many :domains
   has_many :websites
+  has_many :pages
 end
