@@ -1,0 +1,85 @@
+{
+  "$id": "https://lvlup.pro/exp.gameserver.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "description": "A representation of a game server",
+  "required": [
+    "apiVersion",
+    "kind",
+    "metadata",
+    "spec"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "apiVersion": {
+      "default": "exp.lvlup.pro/v1alpha0",
+      "type": "string",
+      "enum": ["exp.lvlup.pro/v1alpha0"]
+    },
+    "kind": {
+      "default": "GameServer",
+      "type": "string"
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "labels": {
+          "type": "object"
+        }
+      }
+    },
+    "spec": {
+      "type": "object",
+      "required": ["resources"],
+      "additionalProperties": false,
+      "properties": {
+        "vars": {
+          "type" : "object"
+        },
+        "resources": {
+          "type": "object",
+          "required": ["memory","cpu"],
+          "additionalProperties": false,
+          "properties": {
+            "memory" : {
+              "type": "object",
+              "required": ["min","max"],
+              "additionalProperties": false,
+              "properties": {
+                "min": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "max": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "cpu" : {
+              "type": "object",
+              "required": ["min","max"],
+              "additionalProperties": false,
+              "properties": {
+                "min": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "max": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            }
+          }
+        },
+        "actions" : {
+          "additionalProperties": false
+        }
+      }
+    }
+  }
+}

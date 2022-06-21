@@ -1,0 +1,64 @@
+---
+apiVersion: exp.lvlup.pro/v1alpha0
+kind: GameServer
+metadata:
+  name: Example Craft
+  labels:
+    game: minecraft
+    edition: java
+    runtime: jvm
+spec:
+  vars:
+    INSTA_URL: "https://instagram.com/nope"
+  resources:
+    memory:
+      min: 1
+      max: 2048
+    cpu:
+      min: 1
+      max: 100
+  features:
+    autorestart: yes
+  actions:
+    beforeStart:
+      - name: test 1
+    beforeRestart:
+      - consoleCmd: "say restart in 5 seconds ..."
+      - sleep:
+          seconds: 5
+      - webhook:
+          discord: "URL_HERE"
+    beforeStopOrRestart:
+      beforeStop:
+        # sync filesystem of game server to other host
+        sync:
+          timeLimit:
+            seconds: 30
+    afterStart:
+    afterCrash:
+    afterAutoRestart:
+      - pushover:
+          msg:
+          title:
+          sound:
+    afterResurrection:
+  schedule:
+    - name: "social media URLs every 5th minutes"
+      cron: "0 */5 * * * *"
+      consoleCmd: "say {{ vars.INSTA_URL }}"
+  container:
+    image: openjdk:8-jre-slim-bullseye
+    command: ["java"]
+    args: ["-Xms{{ resources.ram.minM }}M", "-Xmx{{ resources.ram.maxM }}<", "-jar", "paper-1.18.1-164.jar"]
+  healthCheck:
+    interval: 5
+    method: minecraft
+    port: 25565/tcp
+  network:
+    ports:
+      - protocol: tcp
+        internal: 25565
+        external: 3655
+#---
+#kind: signature
+#hmac: F10E2821BBBEA527EA02200352313BC059445190
