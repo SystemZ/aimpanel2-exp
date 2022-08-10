@@ -49,4 +49,5 @@ require (
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208 // indirect
 	golang.org/x/text v0.3.3 // indirect
+	gopkg.in/yaml.v2 v2.3.0
 )
