@@ -49,7 +49,7 @@ spec:
   container:
     image: openjdk:8-jre-slim-bullseye
     command: ["java"]
-    args: ["-Xms{{ resources.ram.minM }}M", "-Xmx{{ resources.ram.maxM }}<", "-jar", "paper-1.18.1-164.jar"]
+    args: ["-Xms{{ resources.memory.min }}M", "-Xmx{{ resources.memory.max }}M", "-jar", "paper-1.18.1-164.jar"]
   healthCheck:
     interval: 5
     method: minecraft
