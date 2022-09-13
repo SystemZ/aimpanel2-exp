@@ -1,79 +1,228 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Server list</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"/>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tw-elements/dist/css/index.min.css"/>
-  <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <title>Server list</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tw-elements/dist/css/index.min.css"/>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
-<!-- This example requires Tailwind CSS v2.0+ -->
-<nav class="bg-red-900 shadow-lg">
-  <div class="max-w-7xl px-2 sm:px-6 lg:px-8">
-    <div class="relative flex items-center justify-between h-16">
-      <div class="absolute inset-y-0 left-0 flex items-center sm:hidden" id="burger">
-        <!-- Mobile menu button-->
-        <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
-          <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
-      </div>
-      <div class="flex-1 flex items-center justify-center sm:items-stretch sm:justify-start">
-        <div class="flex-shrink-0 flex items-center">
-          <a class="text-xl text-gray-300">Exp</a>
+<!--&lt;!&ndash; This example requires Tailwind CSS v2.0+ &ndash;&gt;-->
+<!--<nav class="bg-red-900 shadow-lg">-->
+<!--  <div class="max-w-7xl px-2 sm:px-6 lg:px-8">-->
+<!--    <div class="relative flex items-center justify-between h-16">-->
+<!--      <div class="absolute inset-y-0 left-0 flex items-center sm:hidden" id="burger">-->
+<!--        &lt;!&ndash; Mobile menu button&ndash;&gt;-->
+<!--        <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">-->
+<!--          <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">-->
+<!--            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />-->
+<!--          </svg>-->
+<!--        </button>-->
+<!--      </div>-->
+<!--      <div class="flex-1 flex items-center justify-center sm:items-stretch sm:justify-start">-->
+<!--        <div class="flex-shrink-0 flex items-center">-->
+<!--          <a class="text-xl text-gray-300">Exp</a>-->
+<!--        </div>-->
+<!--        <div class="hidden sm:block sm:ml-6">-->
+<!--          <div class="flex space-x-4">-->
+<!--            &lt;!&ndash; Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" &ndash;&gt;-->
+<!--            <a href="#" class="bg-gray-800 text-white px-3 py-2 rounded-md text-sm font-medium" aria-current="page">Home</a>-->
+
+<!--            <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Dashboard</a>-->
+
+<!--            <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Pricing</a>-->
+
+<!--            <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Calendar</a>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </div>-->
+
+<!--  &lt;!&ndash; Mobile menu, show/hide based on menu state. &ndash;&gt;-->
+<!--  <div class="sm:hidden" id="menu">-->
+<!--    <div class="px-2 pt-2 pb-3 space-y-1">-->
+<!--      &lt;!&ndash; Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" &ndash;&gt;-->
+<!--      <a href="#" class="bg-gray-900 text-white block px-3 py-2 rounded-md text-base font-medium" aria-current="page">Home</a>-->
+
+<!--      <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Dashboard</a>-->
+
+<!--      <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Pricing</a>-->
+
+<!--      <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Calendar</a>-->
+<!--    </div>-->
+<!--  </div>-->
+<!--</nav>-->
+<div class="container static">
+    <!--  Sidenav -->
+    <div class="w-60 h-full shadow-md bg-white absolute hidden sm:block" id="sidenavSecExample">
+        <div class="pt-4 pb-2 px-6">
+            <a href="#!">
+                <div class="flex items-center">
+                    <div class="shrink-0">
+                        <!-- Example of logo position -->
+                        <img src="beams.jpg" class="rounded-full w-10" alt="Avatar">
+                    </div>
+                    <div class="grow ml-3">
+                        <p class="text-sm font-semibold text-red-600">Exp panel</p>
+                    </div>
+                </div>
+            </a>
         </div>
-        <div class="hidden sm:block sm:ml-6">
-          <div class="flex space-x-4">
-            <!-- Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" -->
-            <a href="#" class="bg-gray-800 text-white px-3 py-2 rounded-md text-sm font-medium" aria-current="page">Home</a>
-
-            <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Dashboard</a>
-
-            <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Pricing</a>
-
-            <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Calendar</a>
-          </div>
-        </div>
-      </div>
+        <!--  TODO List elements use fontavesome svg icons, change later to pure svg files, do not use paths -->
+        <ul class="relative px-1">
+            <li class="relative">
+                <a class="flex items-center text-sm py-4 px-6 h-12 overflow-hidden text-gray-700 text-ellipsis whitespace-nowrap rounded hover:text-red-600 hover:bg-red-50 transition duration-300 ease-in-out"
+                   href="#!" data-mdb-ripple="true" data-mdb-ripple-color="primary">
+                    <svg aria-hidden="true" focusable="false" data-prefix="fas" class="w-3 h-3 mr-3" role="img"
+                         xmlns="http://www.w3.org/2000/svg" viewBox="0 0 572 512">
+                        <path fill="currentColor"
+                              d="M24 0C10.7 0 0 10.7 0 24S10.7 48 24 48H76.1l60.3 316.5c2.2 11.3 12.1 19.5 23.6 19.5H488c13.3 0 24-10.7 24-24s-10.7-24-24-24H179.9l-9.1-48h317c14.3 0 26.9-9.5 30.8-23.3l54-192C578.3 52.3 563 32 541.8 32H122l-2.4-12.5C117.4 8.2 107.5 0 96 0H24zM176 512c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm336-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48z"></path>
+                    </svg>
+                    <span>Checkout</span>
+                </a>
+            </li>
+            <li class="relative">
+                <a class="flex items-center text-sm py-4 px-6 h-12 overflow-hidden text-gray-700 text-ellipsis whitespace-nowrap rounded hover:text-red-600 hover:bg-red-50 transition duration-300 ease-in-out"
+                   href="#!" data-mdb-ripple="true" data-mdb-ripple-color="primary">
+                    <svg aria-hidden="true" focusable="false" data-prefix="fas" class="w-3 h-3 mr-3" role="img"
+                         xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                        <path fill="currentColor"
+                              d="M40 48C26.7 48 16 58.7 16 72v48c0 13.3 10.7 24 24 24H88c13.3 0 24-10.7 24-24V72c0-13.3-10.7-24-24-24H40zM192 64c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zm0 160c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zm0 160c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H192zM16 232v48c0 13.3 10.7 24 24 24H88c13.3 0 24-10.7 24-24V232c0-13.3-10.7-24-24-24H40c-13.3 0-24 10.7-24 24zM40 368c-13.3 0-24 10.7-24 24v48c0 13.3 10.7 24 24 24H88c13.3 0 24-10.7 24-24V392c0-13.3-10.7-24-24-24H40z"></path>
+                    </svg>
+                    <span>Server list</span>
+                </a>
+            </li>
+            <li class="relative">
+                <a class="flex items-center text-sm py-4 px-6 h-12 overflow-hidden text-gray-700 text-ellipsis whitespace-nowrap rounded hover:text-red-600 hover:bg-red-50 transition duration-300 ease-in-out"
+                   href="#!" data-mdb-ripple="true" data-mdb-ripple-color="primary">
+                    <svg aria-hidden="true" focusable="false" data-prefix="fas" class="w-3 h-3 mr-3" role="img"
+                         xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                        <path fill="currentColor"
+                              d="M160 96c17.7 0 32-14.3 32-32s-14.3-32-32-32H96C43 32 0 75 0 128V384c0 53 43 96 96 96h64c17.7 0 32-14.3 32-32s-14.3-32-32-32H96c-17.7 0-32-14.3-32-32l0-256c0-17.7 14.3-32 32-32h64zM504.5 273.4c4.8-4.5 7.5-10.8 7.5-17.4s-2.7-12.9-7.5-17.4l-144-136c-7-6.6-17.2-8.4-26-4.6s-14.5 12.5-14.5 22v72H192c-17.7 0-32 14.3-32 32l0 64c0 17.7 14.3 32 32 32H320v72c0 9.6 5.7 18.2 14.5 22s19 2 26-4.6l144-136z"/>
+                    </svg>
+                    <span>Log out</span>
+                </a>
+            </li>
+        </ul>
     </div>
-  </div>
+    <nav>
+        <div class="relative flex items-center justify-between h-16">
+            <div class="absolute inset-y-0 left-0 flex px-3 items-center sm:hidden" id="burger">
+                <!-- Mobile menu button-->
+                <button type="button"
+                        class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
+                    <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                         stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+            </div>
+            </div>
+            <!-- Mobile menu -->
+            <div class="sm:hidden bg-gray-50" id="menu">
+                <div class="px-2 pt-2 pb-3 space-y-1">
+                    <!-- Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" -->
+                    <a href="#" class="bg-gray-900 text-white block px-3 py-2 rounded-md text-base font-medium"
+                       aria-current="page">Home</a>
 
-  <!-- Mobile menu, show/hide based on menu state. -->
-  <div class="sm:hidden" id="menu">
-    <div class="px-2 pt-2 pb-3 space-y-1">
-      <!-- Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" -->
-      <a href="#" class="bg-gray-900 text-white block px-3 py-2 rounded-md text-base font-medium" aria-current="page">Home</a>
+                    <a href="#"
+                       class="text-gray-400 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Checkout</a>
 
-      <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Dashboard</a>
+                    <a href="#"
+                       class="text-gray-400 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Server
+                        list</a>
 
-      <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Pricing</a>
+                    <a href="#"
+                       class="text-gray-400 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Log
+                        out</a>
+                </div>
+            </div>
+    </nav>
+    <!--&lt;!&ndash; Jumbotron &ndash;&gt;-->
+    <!--<div class="p-12 text-center bg-gray-100 text-gray-700 ">-->
+    <!--  &lt;!&ndash; Breadcrumbs &ndash;&gt;-->
+    <!--  <nav class="bg-grey-light rounded-md w-full">-->
+    <!--    <ol class="list-reset flex">-->
+    <!--      <li><a href="#" class="text-blue-600 hover:text-blue-700">Home</a></li>-->
+    <!--      <li><span class="text-gray-500 mx-2"> > </span></li>-->
+    <!--      <li><a href="#" class="text-blue-600 hover:text-blue-700">Dashboard</a></li>-->
+    <!--      <li><span class="text-gray-500 mx-2"> > </span></li>-->
+    <!--      <li class="text-gray-500">Server list</li>-->
+    <!--    </ol>-->
+    <!--  </nav>-->
+    <!--</div>-->
 
-      <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Calendar</a>
+    <!--&lt;!&ndash; Table with servers &ndash;&gt;-->
+    <!--<div class="flex flex-col">-->
+    <!--  <div class="overflow-x-auto sm:-mx-6 lg:-mx-8">-->
+    <!--    <div class="pb-2 inline-block min-w-full sm:px-6 lg:px-8">-->
+    <!--      <div class="overflow-hidden">-->
+    <!--        <table class="min-w-full">-->
+    <!--          <thead class="border-b bg-gray-800">-->
+    <!--          <tr>-->
+    <!--            <th scope="col" class="text-sm font-medium text-white px-6 py-4 text-left">-->
+    <!--              #-->
+    <!--            </th>-->
+    <!--            <th scope="col" class="text-sm font-medium text-white px-6 py-4 text-left">-->
+    <!--              First-->
+    <!--            </th>-->
+    <!--            <th scope="col" class="text-sm font-medium text-white px-6 py-4 text-left">-->
+    <!--              Last-->
+    <!--            </th>-->
+    <!--            <th scope="col" class="text-sm font-medium text-white px-6 py-4 text-left">-->
+    <!--              Handle-->
+    <!--            </th>-->
+    <!--          </tr>-->
+    <!--          </thead>-->
+    <!--          <tbody>-->
+    <!--          <tr class="bg-white border-b transition duration-300 ease-in-out hover:bg-gray-100">-->
+    <!--            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">1</td>-->
+    <!--            <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">-->
+    <!--              Mark-->
+    <!--            </td>-->
+    <!--            <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">-->
+    <!--              Otto-->
+    <!--            </td>-->
+    <!--            <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">-->
+    <!--              @mdo-->
+    <!--            </td>-->
+    <!--          </tr>-->
+    <!--          <tr class="bg-white border-b transition duration-300 ease-in-out hover:bg-gray-100">-->
+    <!--            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">2</td>-->
+    <!--            <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">-->
+    <!--              Jacob-->
+    <!--            </td>-->
+    <!--            <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">-->
+    <!--              Thornton-->
+    <!--            </td>-->
+    <!--            <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">-->
+    <!--              @fat-->
+    <!--            </td>-->
+    <!--          </tr>-->
+    <!--          <tr class="bg-white border-b transition duration-300 ease-in-out hover:bg-gray-100">-->
+    <!--            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">3</td>-->
+    <!--            <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">-->
+    <!--              Larry-->
+    <!--            </td>-->
+    <!--            <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">-->
+    <!--              Wild-->
+    <!--            </td>-->
+    <!--            <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">-->
+    <!--              @twitter-->
+    <!--            </td>-->
+    <!--          </tr>-->
+    <!--          </tbody>-->
+    <!--        </table>-->
+    <!--      </div>-->
+    <!--    </div>-->
+    <!--  </div>-->
+    <!--</div>-->
     </div>
-  </div>
-</nav>
-
-<!-- Jumbotron -->
-<div class="p-12 text-center bg-gray-100 text-gray-700">
-  <!-- Breadcrumbs -->
-  <nav class="bg-grey-light rounded-md w-full">
-    <ol class="list-reset flex">
-      <li><a href="#" class="text-blue-600 hover:text-blue-700">Home</a></li>
-      <li><span class="text-gray-500 mx-2"> > </span></li>
-      <li><a href="#" class="text-blue-600 hover:text-blue-700">Dashboard</a></li>
-      <li><span class="text-gray-500 mx-2"> > </span></li>
-      <li class="text-gray-500">Server list</li>
-    </ol>
-  </nav>
-</div>
-
-
-
-<script src="index.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tw-elements/dist/js/index.min.js"></script>
+    <script src="index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tw-elements/dist/js/index.min.js"></script>
 </body>
 </html>
