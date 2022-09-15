@@ -56,9 +56,9 @@
 <!--    </div>-->
 <!--  </div>-->
 <!--</nav>-->
-<!--<div class="container static">-->
+<div class="grid grid-cols-5">
     <!--  Sidenav -->
-    <div class="w-60 h-full shadow-md bg-white absolute hidden sm:block" id="sidenavSecExample">
+    <div class="col-span-5 md:col-span-1 h-full shadow-md bg-white hidden md:block" id="sidenavSecExample">
         <div class="pt-4 pb-2 px-6">
             <a href="#!">
                 <div class="flex items-center">
@@ -109,9 +109,9 @@
             </li>
         </ul>
     </div>
-    <nav class="sm:hidden bg-white">
-        <div class="relative flex items-center justify-between h-16">
-            <div class="absolute inset-y-0 left-0 flex px-3 items-center sm:hidden" id="burger">
+    <nav class="col-span-5 md:hidden bg-white">
+        <div class=" flex items-center justify-between h-16">
+            <div class=" inset-y-0 left-0 flex px-3 items-center md:hidden" id="burger">
                 <!-- Mobile menu button-->
                 <button type="button"
                         class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
@@ -121,38 +121,38 @@
                     </svg>
                 </button>
             </div>
+        </div>
+        <!-- Mobile menu -->
+        <div class="col-span-5 md:hidden bg-white" id="menu">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <!-- Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" -->
+                <a href="#"
+                   class="text-gray-700 hover:text-gray-600 hover:bg-gray-100 block px-3 py-2 rounded-md text-base font-medium">Home</a>
+
+                <a href="#"
+                   class="text-gray-700 hover:text-gray-600 hover:bg-gray-100 block px-3 py-2 rounded-md text-base font-medium">Checkout</a>
+
+                <a href="#" class="bg-gray-400 text-white block px-3 py-2 rounded-md text-base font-medium"
+                   aria-current="page">Server list</a>
+
+                <a href="#"
+                   class="text-gray-700 hover:text-gray-600 hover:bg-gray-100 block px-3 py-2 rounded-md text-base font-medium">Log
+                    out</a>
             </div>
-            <!-- Mobile menu -->
-            <div class="sm:hidden bg-white" id="menu">
-                <div class="px-2 pt-2 pb-3 space-y-1">
-                    <!-- Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" -->
-                    <a href="#"
-                       class="text-gray-700 hover:text-gray-600 hover:bg-gray-100 block px-3 py-2 rounded-md text-base font-medium">Home</a>
-
-                    <a href="#"
-                       class="text-gray-700 hover:text-gray-600 hover:bg-gray-100 block px-3 py-2 rounded-md text-base font-medium">Checkout</a>
-
-                    <a href="#" class="bg-gray-400 text-white block px-3 py-2 rounded-md text-base font-medium"
-                       aria-current="page">Server list</a>
-
-                    <a href="#"
-                       class="text-gray-700 hover:text-gray-600 hover:bg-gray-100 block px-3 py-2 rounded-md text-base font-medium">Log
-                        out</a>
-                </div>
-            </div>
+        </div>
     </nav>
     <!-- Jumbotron -->
-    <div class="sm:ml-80 p-12 text-center bg-gray-100 text-gray-700">
-      <!-- Breadcrumbs -->
-      <nav class="bg-grey-light rounded-md w-full">
-        <ol class="list-reset flex">
-          <li><a href="#" class="text-red-600 hover:text-red-800">Home</a></li>
-          <li><span class="text-gray-500 mx-2"> > </span></li>
-          <li><a href="#" class="text-red-600 hover:text-red-800">Dashboard</a></li>
-          <li><span class="text-gray-500 mx-2"> > </span></li>
-          <li class="text-gray-500">Server list</li>
-        </ol>
-      </nav>
+    <div class="col-span-5 md:col-span-4 p-12 text-center bg-gray-100 text-gray-700">
+        <!-- Breadcrumbs -->
+        <nav class="bg-grey-light rounded-md w-full">
+            <ol class="list-reset flex">
+                <li><a href="#" class="text-red-600 hover:text-red-800">Home</a></li>
+                <li><span class="text-gray-500 mx-2"> > </span></li>
+                <li><a href="#" class="text-red-600 hover:text-red-800">Dashboard</a></li>
+                <li><span class="text-gray-500 mx-2"> > </span></li>
+                <li class="text-gray-500">Server list</li>
+            </ol>
+        </nav>
     </div>
 
     <!--&lt;!&ndash; Table with servers &ndash;&gt;-->
@@ -220,8 +220,8 @@
     <!--    </div>-->
     <!--  </div>-->
     <!--</div>-->
-<!--    </div>-->
-    <script src="index.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tw-elements/dist/js/index.min.js"></script>
+</div>
+<script src="index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tw-elements/dist/js/index.min.js"></script>
 </body>
 </html>
