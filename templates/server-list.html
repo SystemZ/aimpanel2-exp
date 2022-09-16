@@ -56,7 +56,7 @@
 <!--    </div>-->
 <!--  </div>-->
 <!--</nav>-->
-<div class="grid grid-cols-5">
+<div class="grid grid-cols-5 md:h-screen flex flex-col">
     <!--  Sidenav -->
     <div class="col-span-5 md:col-span-1 h-full shadow-md bg-white hidden md:block" id="sidenavSecExample">
         <div class="pt-4 pb-2 px-6">
@@ -142,7 +142,7 @@
         </div>
     </nav>
     <!-- Jumbotron -->
-    <div class="col-span-5 md:col-span-4 p-12 text-center bg-gray-100 text-gray-700">
+    <main class="col-span-5 md:col-span-4 p-12 text-center bg-gray-100 text-gray-700 flex-grow">
         <!-- Breadcrumbs -->
         <nav class="bg-grey-light rounded-md w-full pb-10">
             <ol class="list-reset flex">
@@ -218,10 +218,10 @@
                 </div>
             </div>
         </div>
-    </div>
+    </main>
     <!--    Footer -->
-    <footer class="col-span-5 p-5 bg-red-800">
-        <h1 class="text-center text-2xl text-white">Footer</h1>
+    <footer class="col-span-5 p-4 bg-red-800 md:fixed md:inset-x-0 md:bottom-0">
+        <h1 class="text-center text-xl text-gray-200">@2022 Exp panel</h1>
     </footer>
 </div>
 <script src="index.js"></script>
